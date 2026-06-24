@@ -721,21 +721,48 @@ const App = () => {
     showAppBorder
   });
 
-  // Apply Windows system accent color to CSS variables
+  // Apply Windows system accent color via <style> tag so pseudo-elements
+  // (::after, ::-webkit-slider-thumb) can inherit the variables.
+  // inline style (element.style.setProperty) does NOT propagate to
+  // pseudo-elements in WebView2 — only stylesheet rules do.
   useEffect(() => {
     if (!settingsLoaded) return;
-    invoke<string | null>("get_system_accent_color")
-      .then((color) => {
-        if (!color) return;
-        const hex = color.replace("#", "");
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
-        document.documentElement.style.setProperty("--accent-color", color);
-        document.documentElement.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
-      })
-      .catch(() => {});
+
+    const STYLE_ID = "tiez-system-accent";
+    let styleEl: HTMLStyleElement | null = null;
+
+    const applyAccent = (hex: string) => {
+      const raw = hex.replace("#", "");
+      const r = parseInt(raw.substring(0, 2), 16);
+      const g = parseInt(raw.substring(2, 4), 16);
+      const b = parseInt(raw.substring(4, 6), 16);
+      if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
+
+      if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = STYLE_ID;
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = `:root {
+        --accent-color: ${hex};
+        --accent-color-rgb: ${r}, ${g}, ${b};
+      }`;
+    };
+
+    const updateAccent = () => {
+      invoke<string | null>("get_system_accent_color")
+        .then((color) => {
+          if (color) applyAccent(color);
+        })
+        .catch(() => {});
+    };
+
+    updateAccent();
+    const interval = setInterval(updateAccent, 3000);
+    return () => {
+      clearInterval(interval);
+      if (styleEl) styleEl.remove();
+    };
   }, [settingsLoaded]);
 
   // Pre-warm compact preview window only where warmup is safe.
