@@ -901,6 +901,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     min-width: 0;
                     overflow: hidden;
+                    padding-right: 72px;
                 }
                 .tag-name {
                     font-size: 13px;
@@ -909,6 +910,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     overflow: hidden;
                     text-overflow: ellipsis;
                     min-width: 0;
+                    max-width: 100%;
+                    flex: 1;
                 }
 
                 /* Inline Edit Input */
@@ -928,17 +931,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Hover actions — absolute right, smart overlay with fade-in edge */
                 .tag-hover-actions {
                     position: absolute;
-                    right: 6px;
+                    right: 10px;
                     top: 50%;
                     transform: translateY(-50%);
                     display: none;
                     gap: 4px;
                     align-items: center;
-                    padding: 2px 2px 2px 12px;
-                    background: var(--bg-main);
-                    box-shadow: -8px 0 8px var(--bg-main);
-                    border-radius: 4px;
+                    padding: 4px 8px;
+                    background: var(--bg-panel);
+                    border: 1px solid var(--border);
+                    border-radius: 999px;
                     z-index: 2;
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+                    backdrop-filter: blur(10px);
                 }
                 .tag-item:hover .tag-hover-actions { display: flex; }
                 .tag-item.active .tag-hover-actions { display: none !important; }
@@ -946,9 +951,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .tag-hover-actions > span {
                     display: flex;
                     align-items: center;
+                    justify-content: center;
                     cursor: pointer;
-                    padding: 3px 6px;
-                    border-radius: 4px;
+                    width: 28px;
+                    height: 28px;
+                    padding: 0;
+                    border-radius: 8px;
                     color: var(--text-secondary);
                     transition: background 0.15s, color 0.15s;
                 }
@@ -971,7 +979,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-row {
                     display: flex;
                     align-items: center;
+                    justify-content: space-between;
                     gap: 12px;
+                    flex-wrap: wrap;
                 }
                 .toolbar-row-left {
                     display: flex;
@@ -980,15 +990,21 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-weight: 600;
                     font-size: 14px;
                     color: var(--text-primary);
-                    flex-shrink: 0;
+                    min-width: 0;
+                    flex: 1;
+                    flex-wrap: wrap;
                 }
                 .toolbar-row-right {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 8px;
                     margin-left: auto;
+                    min-width: 0;
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
+                }
+                .toolbar-row-right > * {
                     flex-shrink: 0;
-                    flex-wrap: nowrap;
                 }
                 .breadcrumb-marker { color: var(--accent-color); }
                 .item-count { font-weight: 400; color: var(--text-secondary); font-size: 13px; }
@@ -1064,32 +1080,31 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu button:hover { background: rgba(128,128,128,0.1); }
                 .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
 
-                /* Segmented Control — view toggle */
+                /* View toggle buttons */
                 .view-toggle {
                     display: inline-flex;
-                    overflow: hidden;
-                    border-radius: 6px;
-                    background: var(--bg-input);
-                    border: 1px solid var(--border);
+                    gap: 8px;
                     padding: 0;
+                    border: none;
+                    background: transparent;
                     flex-shrink: 0;
                 }
                 .toggle-btn {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 32px;
-                    height: 30px;
-                    padding: 0;
-                    border: none;
-                    border-radius: 0;
+                    min-width: 36px;
+                    height: 36px;
+                    padding: 0 10px;
+                    border: 1px solid transparent;
+                    border-radius: 10px;
                     background: transparent;
                     color: var(--text-secondary);
                     cursor: pointer;
                     transition: all 0.15s;
                 }
-                .toggle-btn:hover { background: rgba(128,128,128,0.08); color: var(--text-primary); }
-                .toggle-btn.active { background: var(--accent-color); color: #fff; }
+                .toggle-btn:hover { background: rgba(128,128,128,0.1); color: var(--text-primary); }
+                .toggle-btn.active { background: rgba(var(--accent-color-rgb), 0.16); color: var(--accent-color); border-color: rgba(var(--accent-color-rgb), 0.2); }
 
                 .items-area { 
                     flex: 1; 
@@ -1505,6 +1520,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--accent-color);
                 }
 
+                .theme-mica .tag-item.active .tag-hover-actions,
+                .theme-acrylic .tag-item.active .tag-hover-actions {
+                    display: none !important;
+                }
                 .theme-mica .tag-item.active .tag-hover-actions > span,
                 .theme-acrylic .tag-item.active .tag-hover-actions > span {
                     color: var(--text-primary);
@@ -1546,24 +1565,27 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
-                    overflow: hidden;
-                    border-radius: 8px;
-                    border: 1px solid rgba(var(--accent-color-rgb), 0.12);
-                    background: var(--bg-input);
+                    overflow: visible;
+                    border-radius: 0;
+                    border: none;
+                    background: transparent;
                     padding: 0;
                 }
 
                 .theme-mica .toggle-btn,
                 .theme-acrylic .toggle-btn {
-                    width: 34px;
-                    height: 32px;
-                    border-radius: 0;
+                    min-width: 36px;
+                    height: 36px;
+                    border-radius: 10px;
+                    border: 1px solid transparent;
+                    background: transparent;
                 }
 
                 .theme-mica .toggle-btn.active,
                 .theme-acrylic .toggle-btn.active {
-                    background: var(--accent-color);
-                    color: #ffffff;
+                    background: rgba(var(--accent-color-rgb), 0.16);
+                    color: var(--accent-color);
+                    border-color: rgba(var(--accent-color-rgb), 0.2);
                     box-shadow: none;
                 }
 
