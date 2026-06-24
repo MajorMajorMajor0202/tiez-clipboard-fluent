@@ -178,7 +178,7 @@ const AppHeader = ({
           <button className="btn-icon-ghost" onClick={async () => {
             invoke("hide_window_cmd").catch(console.error);
           }}>
-            <X size={16} />
+            <X size={20} />
           </button>
         </FluentTooltip>
       </div>
