@@ -134,14 +134,14 @@ header {
   opacity: 1;
 }
 
-/* Accent underline — fixed 32×4px, ratio 1:8, centered */
+/* Accent underline — fixed 24×4px, ratio 1:6, centered on text */
 .type-filter-btn.active::after {
   content: "";
   position: absolute;
   bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 32px;
+  width: 24px;
   height: 4px;
   background: var(--accent-color, AccentColor);
   border-radius: 2px;
