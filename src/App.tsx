@@ -722,21 +722,10 @@ const App = () => {
   });
 
   // Apply Windows system accent color.
-  // Single source: <style> tag on :root so both real elements and
-  // pseudo-elements (::after, ::-webkit-slider-thumb) can inherit.
-  // Inline style (setProperty) is NOT used because WebView2 pseudo-elements
-  // cannot inherit custom properties from ancestor inline styles.
+  // Inject directly onto body.style — priority higher than any CSS rule,
+  // and all descendants (including pseudo-elements) inherit normally.
   useEffect(() => {
     if (!settingsLoaded) return;
-
-    const STYLE_ID = "tiez-system-accent";
-
-    // Remove any leftover instance (e.g. from hot-reload)
-    document.getElementById(STYLE_ID)?.remove();
-
-    const styleEl = document.createElement("style");
-    styleEl.id = STYLE_ID;
-    document.head.appendChild(styleEl);
 
     const applyAccent = (hex: string) => {
       const raw = hex.replace("#", "");
@@ -745,10 +734,8 @@ const App = () => {
       const b = parseInt(raw.substring(4, 6), 16);
       if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
 
-      styleEl.textContent = `:root {
-        --accent-color: ${hex} !important;
-        --accent-color-rgb: ${r}, ${g}, ${b} !important;
-      }`;
+      document.body.style.setProperty("--accent-color", hex);
+      document.body.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
     };
 
     const updateAccent = () => {
@@ -761,10 +748,7 @@ const App = () => {
 
     updateAccent();
     const interval = setInterval(updateAccent, 3000);
-    return () => {
-      clearInterval(interval);
-      styleEl.remove();
-    };
+    return () => clearInterval(interval);
   }, [settingsLoaded]);
 
   // Pre-warm compact preview window only where warmup is safe.
