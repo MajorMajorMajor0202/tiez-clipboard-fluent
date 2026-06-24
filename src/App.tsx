@@ -721,11 +721,51 @@ const App = () => {
     showAppBorder
   });
 
-  // [EXPERIMENT] Dynamic accent injection disabled.
-  // Only mica.css static value (currently hotpink) is active.
-  // useEffect(() => {
-  //   ... disabled for experiment ...
-  // }, [settingsLoaded]);
+  // Apply Windows system accent color.
+  // Single source: <style> tag on :root so both real elements and
+  // pseudo-elements (::after, ::-webkit-slider-thumb) can inherit.
+  // Inline style (setProperty) is NOT used because WebView2 pseudo-elements
+  // cannot inherit custom properties from ancestor inline styles.
+  useEffect(() => {
+    if (!settingsLoaded) return;
+
+    const STYLE_ID = "tiez-system-accent";
+
+    // Remove any leftover instance (e.g. from hot-reload)
+    document.getElementById(STYLE_ID)?.remove();
+
+    const styleEl = document.createElement("style");
+    styleEl.id = STYLE_ID;
+    document.head.appendChild(styleEl);
+
+    const applyAccent = (hex: string) => {
+      const raw = hex.replace("#", "");
+      const r = parseInt(raw.substring(0, 2), 16);
+      const g = parseInt(raw.substring(2, 4), 16);
+      const b = parseInt(raw.substring(4, 6), 16);
+      if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
+
+      styleEl.textContent = `:root {
+        --accent-color: ${hex} !important;
+        --accent-color-rgb: ${r}, ${g}, ${b} !important;
+      }`;
+    };
+
+    const updateAccent = () => {
+      invoke<string | null>("get_system_accent_color")
+        .then((color) => {
+          if (color) applyAccent(color);
+        })
+        .catch(() => {});
+    };
+
+    updateAccent();
+    const interval = setInterval(updateAccent, 3000);
+    return () => {
+      clearInterval(interval);
+      styleEl.remove();
+    };
+  }, [settingsLoaded]);
 
   // Pre-warm compact preview window only where warmup is safe.
   // macOS keeps hover preview enabled but skips warmup to reduce UI stalls.
