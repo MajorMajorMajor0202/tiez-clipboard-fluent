@@ -41,6 +41,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [itemDeleteConfirmation, setItemDeleteConfirmation] = useState<{ show: boolean, id: number | null }>({ show: false, id: null });
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [sortBy, setSortBy] = useState<'time' | 'count'>('time');
+    const [showSortMenu, setShowSortMenu] = useState(false);
     const [isCreatingItem, setIsCreatingItem] = useState(false);
     const [editingItem, setEditingItem] = useState<{ id: number, content: string } | null>(null);
     const [newItemContent, setNewItemContent] = useState('');
@@ -303,10 +304,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 {!isCollapsed && (
                     <div className="tag-search-box">
-                        <Search size={16} className="search-icon-placeholder" />
-                        <input
-                            placeholder={t('find_or_create')}
-                            value={tagSearch}
+                        <div className="search-input-wrapper">
+                            <Search size={16} className="search-icon-placeholder" />
+                            <input
+                                placeholder={t('find_or_create')}
+                                value={tagSearch}
                             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
                             onFocus={() => invoke('activate_window_focus').catch(console.error)}
                             onChange={e => setTagSearch(e.target.value)}
@@ -322,21 +324,21 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 }
                             }}
                         />
-                        {tagSearch ? (
-                            <div className="action-icons">
-                                { /* If no exact match, show Plus to indicate creation */}
-                                {canCreateTag ? (
-                                    <span
-                                        title={t('create_new_tag_tooltip')}
-                                        className="action-icon create"
-                                        onClick={() => createTag(tagSearch)}
-                                    >
-                                        <Plus size={12} />
-                                    </span>
-                                ) : null}
-                                <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
-                            </div>
-                        ) : null}
+                            {tagSearch ? (
+                                <div className="action-icons">
+                                    {canCreateTag ? (
+                                        <span
+                                            title={t('create_new_tag_tooltip')}
+                                            className="action-icon create"
+                                            onClick={() => createTag(tagSearch)}
+                                        >
+                                            <Plus size={12} />
+                                        </span>
+                                    ) : null}
+                                    <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                 )}
 
@@ -344,7 +346,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {filteredTags.map(tag => (
                         <div
                             key={tag.name}
-                            className={`tag-item ${selectedTag === tag.name ? 'active' : ''}`}
+                            className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${(tag.name !== 'sensitive' && tag.name !== '密码') ? 'has-actions' : ''}`}
                             onClick={() => loadTagItems(tag.name)}
                             title={tag.name}
                         >
@@ -386,34 +388,27 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                     onClick={(e) => e.stopPropagation()}
                                 />
                             ) : (
-                                <>
+                                <div className="tag-name-area">
                                     <span className="tag-name">{tag.name}</span>
-                                    <div className="tag-hover-actions">
-                                        {(tag.name !== 'sensitive' && tag.name !== '密码') && (
+                                    {(tag.name !== 'sensitive' && tag.name !== '密码') && (
+                                        <div className="tag-hover-actions">
                                             <span title="重命名" onClick={(e) => {
                                                 e.stopPropagation();
                                                 setEditingTag(tag.name);
                                                 setNewTagName(tag.name);
-                                            }} style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                cursor: 'pointer'
                                             }}>
-                                                <Edit2 size={12} />
+                                                <Edit2 size={13} />
                                             </span>
-                                        )}
-                                        {(tag.name !== 'sensitive' && tag.name !== '密码') && (
                                             <span title="删除" onClick={(e) => {
                                                 e.stopPropagation();
                                                 e.preventDefault();
                                                 setDeleteConfirmation({ show: true, tagName: tag.name });
-                                            }} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                                                <Trash2 size={12} />
+                                            }}>
+                                                <Trash2 size={13} />
                                             </span>
-                                        )}
-                                    </div>
-                                    <span className="tag-badge">{tag.count}</span>
-                                </>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     ))}
@@ -446,104 +441,77 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {/* Right Main Area */}
             <div className="tag-content">
                 <div className="content-toolbar">
-                    <div className="toolbar-left">
-                        <div className="selected-tag-indicator">
+                    {/* Row 1: tag name + count (left), actions (right) */}
+                    <div className="toolbar-row">
+                        <div className="toolbar-row-left">
                             <span className="breadcrumb-marker">#</span>
                             <span className="breadcrumb-text">{selectedTag || t('tags')}</span>
+                            {selectedTag && <span className="item-count">({tagItems.length})</span>}
                         </div>
-                        <div className="toolbar-divider" />
-                        <div className="sort-group">
-                            <button
-                                className={`sort-btn ${sortBy === 'time' ? 'active' : ''}`}
-                                title={t('sort_time') || '按时间'}
-                                onClick={() => setSortBy('time')}
-                            >
-                                <Clock size={12} />
-                                <span>{t('sort_time') || '时间'}</span>
-                            </button>
-                            <button
-                                className={`sort-btn ${sortBy === 'count' ? 'active' : ''}`}
-                                title={t('sort_usage') || '按频率'}
-                                onClick={() => setSortBy('count')}
-                            >
-                                <MousePointer2 size={12} />
-                                <span>{t('sort_usage') || '频率'}</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="toolbar-right">
-                        {selectedTag && (
-                            <div className="toolbar-actions">
-                                {isManageMode ? (
-                                    <>
-                                        <button
-                                            className="sort-btn"
-                                            onClick={() => {
-                                                setIsManageMode(false);
-                                                setSelectedItemIds(new Set());
-                                            }}
-                                        >
-                                            {t('cancel') || '取消'}
-                                        </button>
-                                        <button
-                                            className="sort-btn danger"
-                                            disabled={selectedItemIds.size === 0}
-                                            onClick={() => setItemDeleteConfirmation({ show: true, id: -1 })}
-                                        >
-                                            <Trash2 size={14} />
-                                            <span>{t('delete_selected') || '删除选中'}</span>
-                                        </button>
-                                        <button
-                                            className="sort-btn active"
-                                            disabled={selectedItemIds.size === 0}
-                                            onClick={async () => {
+                        <div className="toolbar-row-right">
+                            {selectedTag && (
+                                <>
+                                    {isManageMode ? (
+                                        <>
+                                            <button className="toolbar-btn ghost" onClick={() => { setIsManageMode(false); setSelectedItemIds(new Set()); }}>
+                                                {t('cancel') || '取消'}
+                                            </button>
+                                            <button className="toolbar-btn danger" disabled={selectedItemIds.size === 0} onClick={() => setItemDeleteConfirmation({ show: true, id: -1 })}>
+                                                <Trash2 size={14} /> <span>{t('delete_selected') || '删除'}</span>
+                                            </button>
+                                            <button className="toolbar-btn accent" disabled={selectedItemIds.size === 0} onClick={async () => {
                                                 const selectedItems = tagItems.filter(item => selectedItemIds.has(item.id));
                                                 if (selectedItems.length > 0) {
-                                                    const combinedContent = selectedItems.map(item => item.content).join('\n');
-                                                    await invoke('copy_to_clipboard', {
-                                                        content: combinedContent,
-                                                        contentType: 'text',
-                                                        paste: true,
-                                                        id: -1,
-                                                        deleteAfterUse: false
-                                                    });
-                                                    setIsManageMode(false);
-                                                    setSelectedItemIds(new Set());
+                                                    await invoke('copy_to_clipboard', { content: selectedItems.map(i => i.content).join('\n'), contentType: 'text', paste: true, id: -1, deleteAfterUse: false });
+                                                    setIsManageMode(false); setSelectedItemIds(new Set());
                                                 }
-                                            }}
-                                        >
-                                            <Copy size={14} />
-                                            <span>{t('copy_selected') || '复制选中'}</span>
+                                            }}>
+                                                <Copy size={14} /> <span>{t('copy_selected') || '复制'}</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button className="toolbar-btn ghost" onClick={() => setIsManageMode(true)} title={t('manage_items') || '管理条目'}>
+                                            <CheckSquare size={14} /> <span>{t('manage') || '管理'}</span>
                                         </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button
-                                            className={`sort-btn manage-btn ${isManageMode ? 'active' : ''}`}
-                                            onClick={() => setIsManageMode(true)}
-                                            title={t('manage_items') || '管理条目'}
-                                        >
-                                            <CheckSquare size={14} />
-                                            <span>{t('manage') || '管理'}</span>
+                                    )}
+                                    {!isManageMode && (
+                                        <button className="toolbar-btn primary" onClick={() => setIsCreatingItem(true)} title={t('add_item') || '新建条目'}>
+                                            <Plus size={15} /> <span>{t('add_item') || '新建条目'}</span>
                                         </button>
-                                    </>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    {/* Row 2: sort dropdown + view toggle (right-aligned) */}
+                    <div className="toolbar-row">
+                        <div className="toolbar-row-right">
+                            <div className="sort-dropdown">
+                                <button className="toolbar-btn ghost" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
+                                    {sortBy === 'time' ? <Clock size={14} /> : <MousePointer2 size={14} />}
+                                    <span>{sortBy === 'time' ? (t('sort_time') || '时间') : (t('sort_usage') || '频率')}</span>
+                                    <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
+                                </button>
+                                {showSortMenu && (
+                                    <div className="sort-menu">
+                                        <button className={sortBy === 'time' ? 'active' : ''} onMouseDown={() => { setSortBy('time'); setShowSortMenu(false); }}>
+                                            <Clock size={12} /> <span>{t('sort_time') || '时间'}</span>
+                                        </button>
+                                        <button className={sortBy === 'count' ? 'active' : ''} onMouseDown={() => { setSortBy('count'); setShowSortMenu(false); }}>
+                                            <MousePointer2 size={12} /> <span>{t('sort_usage') || '频率'}</span>
+                                        </button>
+                                    </div>
                                 )}
                             </div>
-                        )}
-                    <div className="view-toggle">
-                        <button
-                            type="button"
-                            className={`toggle-btn btn-icon ${viewMode === 'list' ? 'active' : ''}`}
-                            title="列表视图"
-                            onClick={() => setViewMode('list')}
-                        ><List size={14} /></button>
-                        <button
-                            type="button"
-                            className={`toggle-btn btn-icon ${viewMode === 'grid' ? 'active' : ''}`}
-                            title="卡片视图"
-                            onClick={() => setViewMode('grid')}
-                        ><LayoutGrid size={14} /></button>
-                    </div>
+                            <div className="view-toggle">
+                                <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+                                    <List size={14} />
+                                </button>
+                                <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
+                                    <LayoutGrid size={14} />
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -635,18 +603,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         </div>
                     )}
                 </div>
-                {selectedTag && !isManageMode && (
-                    <button
-                        className="fab-add-btn"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsCreatingItem(true);
-                        }}
-                        title={t('add_item')}
-                    >
-                        <Plus size={24} />
-                    </button>
-                )}
             </div>
 
             {/* Modals for Create (Rename is handled inline now) */}
@@ -810,20 +766,20 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .header-actions { display: flex; align-items: center; gap: 8px; }
                 .action-btn { background: transparent; border: none; color: inherit; cursor: pointer; padding: 2px; opacity: 0.7; transition: opacity 0.2s; }
                 .action-btn:hover { opacity: 1; }
-                .collapse-toggle { 
-                    background: var(--bg-main); 
-                    border: none; 
-                    color: inherit; 
-                    cursor: pointer; 
-                    display: flex; 
+                .collapse-toggle {
+                    background: transparent;
+                    border: none;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    display: flex;
                     align-items: center;
                     justify-content: center;
                     width: 28px;
                     height: 28px;
-                    border-radius: var(--radius-sm);
-                    transition: all 0.2s;
+                    border-radius: 4px;
+                    transition: all 0.15s;
                 }
-                .collapse-toggle:hover { background: var(--border-light); color: var(--text-primary); }
+                .collapse-toggle:hover { background: rgba(128,128,128,0.12); color: var(--text-primary); }
 
                 /* Tag Search Box */
                 .tag-search-box {
@@ -833,20 +789,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-bottom: 1px solid var(--panel-divider-color);
                     margin: 0;
                     min-height: auto;
-                    position: relative;
                 }
-                .tag-search-box .search-icon-placeholder { opacity: 0.3; color: var(--text-primary); flex-shrink: 0; }
+                .tag-search-box .search-input-wrapper {
+                    flex: 1;
+                    position: relative;
+                    min-width: 0;
+                }
+                .tag-search-box .search-icon-placeholder {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    opacity: 0.4;
+                    color: var(--text-secondary);
+                    pointer-events: none;
+                }
                 .tag-search-box input {
                     width: 100%;
-                    background: var(--bg-main); 
-                    border: 1px solid var(--border); 
+                    background: var(--bg-main);
+                    border: 1px solid var(--border);
                     outline: none;
-                    font-size: 13px; 
-                    font-weight: 500; 
+                    font-size: 13px;
+                    font-weight: 500;
                     color: var(--text-primary);
-                    padding: 10px 12px 10px 36px;
-                    flex: 1;
-                    min-width: 0; 
+                    padding: 8px 12px 8px 32px;
                     border-radius: var(--radius-sm);
                     transition: all 0.2s;
                 }
@@ -876,7 +842,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-radius: var(--radius-sm);
                     transition: all 0.15s;
                     position: relative;
-                    overflow: hidden;
                     width: 100%;
                 }
                 .tag-item:hover { background: var(--bg-main); }
@@ -890,7 +855,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .sidebar-collapsed .tag-item { justify-content: center; padding: 10px 0; gap: 0; }
                 .sidebar-collapsed .tag-name,
-                .sidebar-collapsed .tag-badge,
+                .sidebar-collapsed .tag-name-area,
                 .sidebar-collapsed .tag-hover-actions { display: none; }
                 .sidebar-collapsed .tag-color-wrapper { width: 100%; justify-content: center; }
                 .tag-color-wrapper { display: flex; align-items: center; justify-content: center; }
@@ -904,93 +869,197 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     transition: transform 0.2s; 
                 }
                 .tag-color-dot:hover { transform: scale(1.2); }
-                .tag-name { 
-                    flex: 1; 
-                    font-size: 13px; 
-                    font-weight: 500; 
-                    white-space: nowrap; 
-                    overflow: hidden; 
-                    text-overflow: ellipsis; 
-                    min-width: 0; 
-                    margin-right: 4px;
+                /* Tag name area — relative container for overlay hover */
+                .tag-name-area {
+                    flex: 1;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    overflow: hidden;
                 }
-                
+                .tag-name {
+                    font-size: 13px;
+                    font-weight: 500;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                /* Only hide name when hovering tags that have actions */
+                .tag-item.has-actions:hover .tag-name { visibility: hidden; }
+                /* Active tag always shows name */
+                .tag-item.active .tag-name,
+                .tag-item.active:hover .tag-name { visibility: visible; }
+
                 /* Inline Edit Input */
                 .inline-tag-edit {
-                    flex: 1; 
-                    border: 1px solid var(--border); 
-                    background: var(--bg-main); 
-                    color: var(--text-primary); 
-                    font-size: 13px; 
+                    flex: 1;
+                    border: 1px solid var(--border);
+                    background: var(--bg-main);
+                    color: var(--text-primary);
+                    font-size: 13px;
                     font-weight: 500;
-                    padding: 6px 10px; 
+                    padding: 6px 10px;
                     border-radius: var(--radius-sm);
-                    min-width: 0; 
                     outline: none;
                     box-shadow: 0 0 0 3px var(--accent-light);
                 }
 
-                /* Actions group: Hidden by default, Flex on hover */
-                .tag-hover-actions { 
-                    display: none; 
-                    gap: 4px; 
-                    align-items: center; 
+                /* Hover actions overlay on tag name, right-aligned */
+                .tag-hover-actions {
+                    position: absolute;
+                    inset: 0;
+                    display: none;
+                    gap: 4px;
+                    align-items: center;
+                    justify-content: flex-end;
+                }
+                .tag-item:hover .tag-hover-actions { display: flex; }
+                .tag-item.active .tag-hover-actions { display: none !important; }
+
+                .tag-hover-actions > span {
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    padding: 3px 6px;
+                    border-radius: 4px;
+                    color: var(--text-secondary);
+                    transition: background 0.15s, color 0.15s;
+                }
+                .tag-hover-actions > span:hover {
+                    background: rgba(var(--accent-color-rgb), 0.12);
+                    color: var(--accent-color);
+                }
+
+                /* Content Area */
+                .tag-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+                .content-toolbar {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    border-bottom: 1px solid var(--panel-divider-color);
+                    background: var(--bg-panel);
+                    padding: 10px 16px;
+                }
+                .toolbar-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-height: 32px;
+                }
+                .toolbar-row-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-weight: 600;
+                    font-size: 14px;
+                    color: var(--text-primary);
+                    flex-shrink: 0;
+                }
+                .toolbar-row-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
                     margin-left: auto;
                     flex-shrink: 0;
                 }
-                .tag-item:hover .tag-hover-actions { display: flex; }
-                .tag-item:hover .tag-badge { display: none; }
-                
-                .tag-badge { 
-                    font-size: 11px; 
-                    font-weight: 600; 
-                    color: var(--text-secondary); 
-                    background: var(--bg-main); 
-                    padding: 2px 8px; 
-                    border-radius: 10px;
-                    min-width: auto;
-                    text-align: center;
-                }
-                .tag-item.active .tag-badge {
-                    background: var(--accent-color);
-                    color: white;
-                }
-                
-                .tag-hover-actions > *:hover { color: var(--accent-color); }
-                .tag-item.active .tag-hover-actions > * { opacity: 0.8; }
-                .tag-item.active .tag-hover-actions > *:hover { opacity: 1; color: var(--accent-color); }
-
-                /* Content Area */
-                .tag-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-                .content-toolbar {
-                    height: 48px; border-bottom: 1px solid var(--panel-divider-color);
-                    background: var(--bg-panel);
-                    display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-                }
-                .toolbar-left { display: flex; align-items: center; gap: 12px; }
-                .selected-tag-indicator { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; color: var(--text-primary); }
                 .breadcrumb-marker { color: var(--accent-color); }
+                .item-count { font-weight: 400; color: var(--text-secondary); font-size: 13px; }
 
-                .sort-group { display: flex; gap: 6px; padding-left: 12px; border-left: 1px solid var(--panel-divider-color); }
-                .sort-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: var(--radius-sm); transition: all 0.15s; }
-                .sort-btn:hover { background: var(--bg-main); color: var(--text-primary); }
-                .sort-btn.active { background: var(--accent-light); color: var(--accent-color); }
+                /* Toolbar buttons */
+                .toolbar-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.15s;
+                    white-space: nowrap;
+                }
+                .toolbar-btn.ghost {
+                    background: transparent;
+                    color: var(--text-secondary);
+                }
+                .toolbar-btn.ghost:hover { background: rgba(128,128,128,0.1); color: var(--text-primary); }
+                .toolbar-btn.primary {
+                    background: var(--accent-color);
+                    color: #fff;
+                }
+                .toolbar-btn.primary:hover { filter: brightness(1.1); }
+                .toolbar-btn.accent {
+                    background: rgba(var(--accent-color-rgb), 0.12);
+                    color: var(--accent-color);
+                }
+                .toolbar-btn.accent:hover { background: rgba(var(--accent-color-rgb), 0.2); }
+                .toolbar-btn.danger {
+                    background: transparent;
+                    color: #d32f2f;
+                }
+                .toolbar-btn.danger:hover { background: rgba(211,47,47,0.08); }
+                .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-                .view-toggle {
+                /* Sort dropdown */
+                .sort-dropdown { position: relative; }
+                .sort-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    margin-top: 4px;
+                    min-width: 120px;
+                    background: var(--bg-panel);
+                    border: var(--flyout-border);
+                    border-radius: var(--flyout-radius);
+                    box-shadow: var(--flyout-shadow);
+                    backdrop-filter: var(--flyout-backdrop-filter);
+                    -webkit-backdrop-filter: var(--flyout-backdrop-filter);
+                    padding: 4px;
+                    z-index: 100;
+                }
+                .sort-menu button {
                     display: flex;
                     align-items: center;
-                    gap: 4px;
+                    gap: 8px;
+                    width: 100%;
+                    padding: 6px 10px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    border: none;
+                    border-radius: 4px;
+                    background: transparent;
+                    color: var(--text-primary);
+                    cursor: pointer;
+                }
+                .sort-menu button:hover { background: rgba(128,128,128,0.1); }
+                .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
+
+                .view-toggle {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 1px;
                     padding: 2px;
                     border: 1px solid var(--panel-divider-color);
-                    border-radius: var(--radius-sm);
+                    border-radius: 8px;
                     background: var(--bg-main);
+                    flex-shrink: 0;
                 }
                 .toggle-btn {
-                    padding: 4px;
-                    border-radius: var(--radius-sm);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 30px;
+                    height: 28px;
+                    padding: 0;
+                    border: none;
+                    border-radius: 6px;
+                    background: transparent;
+                    color: var(--text-secondary);
+                    cursor: pointer;
                     transition: all 0.15s;
                 }
-                .toggle-btn:hover { background: var(--bg-input); }
+                .toggle-btn:hover { background: rgba(128,128,128,0.08); color: var(--text-primary); }
                 .toggle-btn.active { background: var(--accent-color); color: white; }
 
                 .items-area { 
@@ -1263,19 +1332,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .collapse-toggle,
                 .theme-acrylic .collapse-toggle {
-                    width: 40px;
-                    height: 40px;
-                    border: 1px solid rgba(var(--accent-color-rgb), 0.12);
-                    border-radius: 14px;
-                    background: var(--bg-input);
-                    color: var(--text-secondary);
-                    box-shadow: none;
+                    background: transparent;
+                    border: none;
+                    border-radius: 4px;
                 }
 
                 .theme-mica .collapse-toggle:hover,
                 .theme-acrylic .collapse-toggle:hover {
-                    background: rgba(var(--accent-color-rgb), 0.08);
-                    color: var(--text-primary);
+                    background: rgba(128,128,128,0.12);
                 }
 
                 .theme-mica .tag-search-box,
@@ -1292,15 +1356,23 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-search-box .search-icon-placeholder,
                 .theme-acrylic .tag-search-box .search-icon-placeholder {
-                    opacity: 0.78;
+                    opacity: 0.5;
                     color: var(--text-secondary);
                 }
 
                 .theme-mica .tag-search-box input,
                 .theme-acrylic .tag-search-box input {
-                    padding: 0;
-                    font-size: 15px;
-                    font-weight: 600;
+                    padding: 0 0 0 28px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    background: transparent;
+                    border: none;
+                    flex: 1;
+                }
+                .theme-mica .tag-search-box .search-input-wrapper,
+                .theme-acrylic .tag-search-box .search-input-wrapper {
+                    flex: 1;
+                    min-width: 0;
                 }
 
                 .theme-mica .tag-search-box input::placeholder,
@@ -1312,7 +1384,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .action-icons,
                 .theme-acrylic .action-icons {
-                    gap: 8px;
+                    gap: 6px;
+                    flex-shrink: 0;
                 }
 
                 .theme-mica .action-icon,
@@ -1320,18 +1393,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 999px;
-                    background: rgba(var(--accent-color-rgb), 0.08);
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 6px;
                     color: var(--text-secondary);
-                    opacity: 1;
+                    opacity: 0.7;
+                    background: transparent;
                 }
 
                 .theme-mica .action-icon:hover,
                 .theme-acrylic .action-icon:hover {
-                    background: rgba(var(--accent-color-rgb), 0.14);
+                    opacity: 1;
                     color: var(--accent-color);
+                    background: rgba(var(--accent-color-rgb), 0.1);
                     transform: none;
                 }
 
@@ -1380,7 +1454,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .tag-hover-actions,
                 .theme-acrylic .tag-hover-actions {
                     gap: 6px;
-                    color: var(--text-secondary);
                 }
 
                 .theme-mica .tag-hover-actions > span,
@@ -1388,9 +1461,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 24px;
-                    height: 24px;
-                    border-radius: 999px;
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 6px;
+                    color: var(--text-secondary);
                 }
 
                 .theme-mica .tag-hover-actions > span:hover,
@@ -1399,33 +1473,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--accent-color);
                 }
 
+                .theme-mica .tag-item.active .tag-hover-actions > span,
+                .theme-acrylic .tag-item.active .tag-hover-actions > span {
+                    color: var(--text-primary);
+                }
                 .theme-mica .tag-item.active .tag-hover-actions > span:hover,
                 .theme-acrylic .tag-item.active .tag-hover-actions > span:hover {
                     background: rgba(var(--accent-color-rgb), 0.14);
                     color: var(--accent-color);
-                }
-
-                .theme-mica .tag-badge,
-                .theme-acrylic .tag-badge {
-                    margin-left: auto;
-                    min-width: 34px;
-                    height: 30px;
-                    padding: 0 10px;
-                    border-radius: 999px;
-                    background: rgba(127, 140, 160, 0.1);
-                    color: var(--text-secondary);
-                    font-size: 14px;
-                    font-weight: 700;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 1;
-                }
-
-                .theme-mica .tag-item.active .tag-badge,
-                .theme-acrylic .tag-item.active .tag-badge {
-                    background: var(--accent-color);
-                    color: #ffffff;
                 }
 
                 .theme-mica .tag-content,
@@ -1439,151 +1494,42 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .content-toolbar,
                 .theme-acrylic .content-toolbar {
-                    min-height: 88px;
-                    padding: 20px 28px;
+                    padding: 14px 20px;
+                    gap: 10px;
                     border-bottom: 1px solid var(--panel-divider-color);
                     background: transparent;
                 }
 
-                .theme-mica .toolbar-left,
-                .theme-mica .toolbar-right,
-                .theme-acrylic .toolbar-left,
-                .theme-acrylic .toolbar-right {
-                    display: flex;
-                    align-items: center;
-                    gap: 14px;
-                }
-
-                .theme-mica .toolbar-right,
-                .theme-acrylic .toolbar-right {
-                    margin-left: auto;
-                }
-
-                .theme-mica .toolbar-divider,
-                .theme-acrylic .toolbar-divider {
-                    width: 1px;
-                    height: 28px;
-                    background: var(--panel-divider-color);
-                }
-
-                .theme-mica .selected-tag-indicator,
-                .theme-acrylic .selected-tag-indicator {
-                    padding: 8px 16px;
-                    border-radius: var(--radius-pill);
-                    background: rgba(var(--accent-color-rgb), 0.12);
-                    border: 1px solid rgba(var(--accent-color-rgb), 0.16);
-                    color: var(--accent-color);
-                    font-size: 14px;
-                    font-weight: 600;
-                    gap: 10px;
-                    opacity: 1;
-                }
-
-                .theme-mica .breadcrumb-text,
-                .theme-acrylic .breadcrumb-text {
-                    color: var(--text-primary);
-                }
-
-                .theme-mica .sort-group,
-                .theme-acrylic .sort-group {
-                    gap: 10px;
-                    padding-left: 0;
-                    border-left: none;
-                }
-
-                .theme-mica .sort-btn,
-                .theme-acrylic .sort-btn {
-                    min-height: 40px;
-                    padding: 0 16px;
-                    border: 1px solid rgba(var(--accent-color-rgb), 0.14);
-                    border-radius: 14px;
-                    background: transparent;
-                    color: var(--text-secondary);
-                    box-shadow: none;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                }
-
-                .theme-mica .sort-btn span,
-                .theme-acrylic .sort-btn span {
+                .theme-mica .toolbar-btn,
+                .theme-acrylic .toolbar-btn {
+                    padding: 7px 14px;
                     font-size: 13px;
-                    font-weight: 500;
+                    border-radius: 8px;
                 }
-
-                .theme-mica .sort-btn:hover,
-                .theme-acrylic .sort-btn:hover {
-                    background: rgba(var(--accent-color-rgb), 0.08);
-                    color: var(--text-primary);
-                }
-
-                .theme-mica .sort-btn.active,
-                .theme-acrylic .sort-btn.active {
-                    background: var(--accent-color);
-                    border-color: var(--accent-color);
-                    color: #ffffff;
-                    box-shadow: 0 12px 24px rgba(var(--accent-color-rgb), 0.24);
-                }
-
-                .theme-mica .add-item-btn,
-                .theme-acrylic .add-item-btn {
-                    width: auto !important;
-                    min-height: 40px;
-                    padding: 0 18px;
-                    border: none;
-                    border-radius: 14px;
-                    background: var(--accent-color);
-                    color: #ffffff;
-                    box-shadow: 0 12px 24px rgba(var(--accent-color-rgb), 0.26);
-                    gap: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                }
-
-                .theme-mica .add-item-btn span,
-                .theme-acrylic .add-item-btn span {
-                    display: inline-block;
-                }
-
-                .theme-mica .add-item-btn:hover,
-                .theme-acrylic .add-item-btn:hover {
-                    background: var(--accent-hover);
-                    color: #ffffff;
+                .theme-mica .toolbar-btn.primary,
+                .theme-acrylic .toolbar-btn.primary {
+                    box-shadow: 0 4px 12px rgba(var(--accent-color-rgb), 0.28);
                 }
 
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
-                    padding: 4px;
-                    gap: 4px;
+                    padding: 3px;
                     border: 1px solid rgba(var(--accent-color-rgb), 0.12);
-                    border-radius: 18px;
+                    border-radius: 10px;
                     background: var(--bg-input);
                 }
 
                 .theme-mica .toggle-btn,
                 .theme-acrylic .toggle-btn {
-                    width: 44px;
-                    height: 44px;
-                    padding: 0;
-                    border: none;
-                    border-radius: 14px;
-                    background: transparent;
-                    color: var(--text-secondary);
-                    box-shadow: none;
-                }
-
-                .theme-mica .toggle-btn:hover,
-                .theme-acrylic .toggle-btn:hover {
-                    background: rgba(var(--accent-color-rgb), 0.08);
-                    color: var(--text-primary);
+                    width: 32px;
+                    height: 30px;
                 }
 
                 .theme-mica .toggle-btn.active,
                 .theme-acrylic .toggle-btn.active {
                     background: var(--accent-color);
                     color: #ffffff;
-                    box-shadow: 0 10px 20px rgba(var(--accent-color-rgb), 0.2);
+                    box-shadow: 0 6px 14px rgba(var(--accent-color-rgb), 0.2);
                 }
 
                 .theme-mica .items-area,
@@ -1788,11 +1734,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-color: rgba(255, 255, 255, 0.08);
                 }
 
-                .dark-mode .theme-mica .tag-badge,
-                .dark-mode .theme-acrylic .tag-badge {
-                    background: rgba(255, 255, 255, 0.08);
-                }
-                
                 .custom-scrollbar::-webkit-scrollbar { width: var(--scrollbar-size-thin); }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb-color); border-radius: var(--scrollbar-radius); }
 
@@ -1849,30 +1790,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 8px;
                 }
 
-                .manage-btn {
-                    margin-left: 12px !important;
-                }
-                @media (max-width: 500px) {
-                    .manage-btn span {
-                        display: none;
-                    }
-                }
-
-
-                .sort-btn.danger {
-                    color: #ff4d4f !important;
-                }
-                .sort-btn.danger:hover:not(:disabled) {
-                    background: rgba(255, 77, 79, 0.1) !important;
-                }
-                .sort-btn:disabled {
-                    opacity: 0.4;
-                    cursor: not-allowed;
-                }
-                
-                .theme-mica .sort-btn.danger:hover:not(:disabled),
-                .theme-acrylic .sort-btn.danger:hover:not(:disabled) {
-                    background: rgba(255, 77, 79, 0.15);
+                .sort-dropdown .sort-menu button.sort-option-active {
+                    color: var(--accent-color);
+                    background: rgba(var(--accent-color-rgb), 0.08);
                 }
 
                 .selection-indicator {
@@ -1930,21 +1850,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     left: 14px !important;
                 }
 
-                /* Premium adjustments for modern themes */
-                .theme-mica .manage-btn, .theme-acrylic .manage-btn {
-                    min-height: 40px;
-                    border-radius: 14px;
-                    padding: 0 16px;
-                    background: var(--bg-input) !important;
-                    margin-left: 0;
-                }
-
-                .theme-mica .action-btn-primary, .theme-acrylic .action-btn-primary,
-                .theme-mica .action-btn-danger, .theme-acrylic .action-btn-danger,
-                .theme-mica .action-btn-secondary, .theme-acrylic .action-btn-secondary {
-                    min-height: 40px;
-                    border-radius: 14px;
-                }
 
                 .theme-mica .selection-indicator, .theme-acrylic .selection-indicator {
                     border-radius: 8px;
@@ -1957,46 +1862,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     box-shadow: 0 12px 28px rgba(var(--accent-color-rgb), 0.15);
                 }
 
-                .fab-add-btn {
-                    position: absolute;
-                    bottom: 20px;
-                    right: 20px;
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 50%;
-                    background: var(--accent-color);
-                    color: white;
-                    border: none;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    box-shadow: 0 4px 12px rgba(var(--accent-color-rgb), 0.3);
-                    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-                    z-index: 100;
-                    opacity: 0.85;
-                }
-                .fab-add-btn:hover {
-                    background: var(--accent-hover);
-                    transform: scale(1.08) translateY(-2px);
-                    box-shadow: 0 12px 24px rgba(var(--accent-color-rgb), 0.4);
-                    opacity: 1;
-                }
-                .fab-add-btn:active {
-                    transform: scale(0.95);
-                }
-                
-                .theme-mica .fab-add-btn, .theme-acrylic .fab-add-btn {
-                    width: 48px;
-                    height: 48px;
-                    background: var(--accent-color);
-                    box-shadow: 0 10px 24px rgba(var(--accent-color-rgb), 0.4);
-                    border: 1px solid rgba(255, 255, 255, 0.25);
-                }
-                
-                /* Ensure tag-content is the anchor for FAB */
-                .tag-content { 
-                    position: relative; 
+                /* Ensure tag-content is the anchor for positioning */
+                .tag-content {
+                    position: relative;
                 }
 
             `}</style>
