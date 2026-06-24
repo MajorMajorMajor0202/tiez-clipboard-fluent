@@ -1698,7 +1698,7 @@ const ClipboardItem = ({
                         )}
                         <FluentTooltip text={t('delete')}>
                             <button className="btn-icon-ghost" onClick={onDelete}>
-                                <X size={12} />
+                                <X size={16} />
                             </button>
                         </FluentTooltip>
                     </div>
