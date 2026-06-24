@@ -135,7 +135,7 @@ header {
   opacity: 1;
 }
 
-/* Accent underline for active tab — fixed width, centered, matches system accent */
+/* Accent underline for active tab — CSS system color reads OS accent directly */
 .type-filter-btn.active::after {
   content: "";
   position: absolute;
@@ -144,7 +144,7 @@ header {
   transform: translateX(-50%);
   width: 28px;
   height: 5px;
-  background: var(--accent-color);
+  background: AccentColor;
   border-radius: 3px;
 }
 
