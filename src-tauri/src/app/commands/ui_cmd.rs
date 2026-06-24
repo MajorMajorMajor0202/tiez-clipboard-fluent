@@ -201,3 +201,35 @@ pub fn set_theme(
     let _ = window.emit("theme-changed", theme);
     Ok(())
 }
+
+/// Read the Windows system accent color from the registry.
+/// Returns a hex string like "#0078d4" or null if unavailable.
+#[tauri::command]
+pub fn get_system_accent_color() -> Option<String> {
+    #[cfg(target_os = "windows")]
+    {
+        use winreg::enums::*;
+        use winreg::RegKey;
+
+        let hkcu = RegKey::predef(HKEY_CURRENT_USER)
+            .open_subkey_with_flags(
+                r"Software\Microsoft\Windows\DWM",
+                KEY_READ,
+            )
+            .ok()?;
+
+        // AccentColor is a DWORD formatted as 0xAABBGGRR
+        let raw: u32 = hkcu.get_value("AccentColor").ok()?;
+
+        let r = (raw & 0xFF) as u8;
+        let g = ((raw >> 8) & 0xFF) as u8;
+        let b = ((raw >> 16) & 0xFF) as u8;
+
+        Some(format!("#{:02x}{:02x}{:02x}", r, g, b))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        None
+    }
+}

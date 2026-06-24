@@ -721,6 +721,23 @@ const App = () => {
     showAppBorder
   });
 
+  // Apply Windows system accent color to CSS variables
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    invoke<string | null>("get_system_accent_color")
+      .then((color) => {
+        if (!color) return;
+        const hex = color.replace("#", "");
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
+        document.documentElement.style.setProperty("--accent-color", color);
+        document.documentElement.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
+      })
+      .catch(() => {});
+  }, [settingsLoaded]);
+
   // Pre-warm compact preview window only where warmup is safe.
   // macOS keeps hover preview enabled but skips warmup to reduce UI stalls.
   useEffect(() => {
