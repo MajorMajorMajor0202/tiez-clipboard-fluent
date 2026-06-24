@@ -1,0 +1,75 @@
+/* Fluent Design Tooltip */
+
+.fluent-tooltip-portal {
+  position: fixed;
+  z-index: 999999;
+  pointer-events: none;
+}
+
+.fluent-tooltip {
+  position: relative;
+  display: inline-block;
+  padding: 4px 10px;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #ffffff;
+  white-space: nowrap;
+  text-align: center;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Arrow pointing upward toward the trigger */
+.fluent-tooltip::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid rgba(30, 30, 30, 0.95);
+}
+
+/* Dark mode adjustment */
+:root.dark-mode .fluent-tooltip,
+body.dark-mode .fluent-tooltip {
+  background: rgba(245, 245, 245, 0.95);
+  color: #1a1a1a;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+:root.dark-mode .fluent-tooltip::after,
+body.dark-mode .fluent-tooltip::after {
+  border-bottom-color: rgba(245, 245, 245, 0.95);
+}
+
+/* Tooltip entrance animation */
+.fluent-tooltip-enter {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.fluent-tooltip-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.12s ease-out,
+    transform 0.12s ease-out;
+}
