@@ -109,7 +109,7 @@ header {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
-  color: #1a1a1a;
+  color: var(--text-primary);
   white-space: nowrap;
   flex-shrink: 0;
   background: transparent;
@@ -131,7 +131,6 @@ header {
 }
 
 .type-filter-btn.active {
-  color: #1a1a1a;
   opacity: 1;
 }
 
@@ -139,10 +138,10 @@ header {
 .type-filter-btn.active::after {
   content: "";
   position: absolute;
-  bottom: -10px;
+  bottom: -9px;
   left: 50%;
   transform: translateX(-50%);
-  width: 28px;
+  width: 14px;
   height: 5px;
   background: AccentColor;
   border-radius: 3px;
