@@ -734,8 +734,9 @@ const App = () => {
       const b = parseInt(raw.substring(4, 6), 16);
       if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
 
-      document.body.style.setProperty("--accent-color", hex);
-      document.body.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
+      const root = document.documentElement;
+      root.style.setProperty("--accent-color", hex);
+      root.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
     };
 
     const updateAccent = () => {
