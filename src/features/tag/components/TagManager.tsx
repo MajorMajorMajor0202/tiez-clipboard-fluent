@@ -981,7 +981,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     justify-content: space-between;
                     gap: 12px;
-                    flex-wrap: wrap;
+                    flex-wrap: nowrap;
                 }
                 .toolbar-row-left {
                     display: flex;
@@ -990,21 +990,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-weight: 600;
                     font-size: 14px;
                     color: var(--text-primary);
-                    min-width: 0;
-                    flex: 1;
-                    flex-wrap: wrap;
+                    flex-shrink: 0;
+                    flex-wrap: nowrap;
+                    overflow: hidden;
                 }
                 .toolbar-row-right {
                     display: flex;
                     align-items: center;
                     gap: 8px;
                     margin-left: auto;
-                    min-width: 0;
-                    flex-wrap: wrap;
-                    justify-content: flex-end;
-                }
-                .toolbar-row-right > * {
                     flex-shrink: 0;
+                    flex-wrap: nowrap;
                 }
                 .breadcrumb-marker { color: var(--accent-color); }
                 .item-count { font-weight: 400; color: var(--text-secondary); font-size: 13px; }
