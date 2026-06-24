@@ -278,18 +278,8 @@ const AppHeader = ({
                 {['text', 'image', 'file', 'url', 'code', 'video', 'rich_text'].map(t => (
                   <button
                     key={t}
-                    className={`btn-icon ${typeFilter === t ? 'active' : ''}`}
+                    className={`type-filter-btn ${typeFilter === t ? 'active' : ''}`}
                     onClick={() => setTypeFilter(typeFilter === t ? null : t)}
-                    style={{
-                      width: 'auto',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      borderRadius: '4px',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      opacity: typeFilter === t ? 1 : 0.7
-                    }}
-                    title={getTypeName(t)}
                   >
                     {getTypeName(t)}
                   </button>
