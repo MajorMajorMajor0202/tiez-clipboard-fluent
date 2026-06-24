@@ -14,8 +14,8 @@ body.theme-mica {
   --text-secondary: #607188;
   --text-muted: #8c97ab;
 
-  --accent-color: #4f7dff;
-  --accent-color-rgb: 79, 125, 255;
+  --accent-color: hotpink;
+  --accent-color-rgb: 255, 105, 180;
   --accent-hover: #3f6ce9;
 
   --line-soft: rgba(40, 56, 84, 0.12);
