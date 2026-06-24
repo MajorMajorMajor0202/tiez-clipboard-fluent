@@ -484,8 +484,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         </div>
                     </div>
                     {/* Row 2: sort dropdown + view toggle (right-aligned) */}
-                    <div className="toolbar-row">
-                        <div className="toolbar-row-right">
+                    <div className="toolbar-row" style={{ justifyContent: 'flex-end', marginTop: '4px' }}>
+                        <div className="toolbar-row-right" style={{ marginLeft: 0 }}>
                             <div className="sort-dropdown">
                                 <button className="toolbar-btn ghost" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
                                     {sortBy === 'time' ? <Clock size={14} /> : <MousePointer2 size={14} />}
@@ -777,9 +777,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     width: 28px;
                     height: 28px;
                     border-radius: 4px;
-                    transition: all 0.15s;
+                    opacity: 0.6;
+                    transition: opacity 0.15s, color 0.15s;
                 }
-                .collapse-toggle:hover { background: rgba(128,128,128,0.12); color: var(--text-primary); }
+                .collapse-toggle:hover { opacity: 1; color: var(--accent-color); }
 
                 /* Tag Search Box */
                 .tag-search-box {
@@ -803,6 +804,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     opacity: 0.4;
                     color: var(--text-secondary);
                     pointer-events: none;
+                    z-index: 0;
                 }
                 .tag-search-box input {
                     width: 100%;
@@ -812,9 +814,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-size: 13px;
                     font-weight: 500;
                     color: var(--text-primary);
-                    padding: 8px 12px 8px 32px;
+                    padding: 8px 46px 8px 32px;
                     border-radius: var(--radius-sm);
                     transition: all 0.2s;
+                    position: relative;
+                    z-index: 1;
                 }
                 .tag-search-box input:focus {
                     border-color: var(--accent-color);
@@ -822,12 +826,32 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     box-shadow: 0 0 0 3px var(--accent-light);
                 }
                 .tag-search-box input::placeholder { color: var(--text-muted); opacity: 0.7; font-style: normal; font-size: 13px; }
-                
-                .action-icons { display: flex; align-items: center; gap: 4px; }
-                .action-icon { cursor: pointer; opacity: 0.5; color: var(--text-primary); transition: all 0.15s; }
-                .action-icon:hover { opacity: 1; transform: scale(1.1); }
+
+                .action-icons {
+                    position: absolute;
+                    right: 6px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    z-index: 2;
+                }
+                .action-icon {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                    opacity: 0.5;
+                    color: var(--text-primary);
+                    border-radius: 4px;
+                    transition: all 0.15s;
+                }
+                .action-icon:hover { opacity: 1; background: rgba(128,128,128,0.12); transform: none; }
                 .action-icon.create { color: var(--accent-color); opacity: 0.8; }
-                .action-icon.create:hover { opacity: 1; }
+                .action-icon.create:hover { opacity: 1; background: rgba(var(--accent-color-rgb), 0.12); }
 
                 .tag-scroll { flex: 1; overflow-y: auto; padding: 8px; overflow-x: hidden; }
                 /* Tag Item Layout: [Color] [Name (Flex)] [Actions (Hover)] [Badge] */
@@ -875,6 +899,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                     display: flex;
                     align-items: center;
+                    min-width: 0;
                     overflow: hidden;
                 }
                 .tag-name {
@@ -883,12 +908,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    min-width: 0;
                 }
-                /* Only hide name when hovering tags that have actions */
-                .tag-item.has-actions:hover .tag-name { visibility: hidden; }
-                /* Active tag always shows name */
-                .tag-item.active .tag-name,
-                .tag-item.active:hover .tag-name { visibility: visible; }
 
                 /* Inline Edit Input */
                 .inline-tag-edit {
@@ -904,14 +925,20 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     box-shadow: 0 0 0 3px var(--accent-light);
                 }
 
-                /* Hover actions overlay on tag name, right-aligned */
+                /* Hover actions — absolute right, smart overlay with fade-in edge */
                 .tag-hover-actions {
                     position: absolute;
-                    inset: 0;
+                    right: 6px;
+                    top: 50%;
+                    transform: translateY(-50%);
                     display: none;
                     gap: 4px;
                     align-items: center;
-                    justify-content: flex-end;
+                    padding: 2px 2px 2px 12px;
+                    background: var(--bg-main);
+                    box-shadow: -8px 0 8px var(--bg-main);
+                    border-radius: 4px;
+                    z-index: 2;
                 }
                 .tag-item:hover .tag-hover-actions { display: flex; }
                 .tag-item.active .tag-hover-actions { display: none !important; }
@@ -935,16 +962,16 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .content-toolbar {
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
+                    gap: 8px;
                     border-bottom: 1px solid var(--panel-divider-color);
                     background: var(--bg-panel);
-                    padding: 10px 16px;
+                    padding: 12px 16px;
+                    flex-shrink: 0;
                 }
                 .toolbar-row {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    min-height: 32px;
                 }
                 .toolbar-row-left {
                     display: flex;
@@ -961,6 +988,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 6px;
                     margin-left: auto;
                     flex-shrink: 0;
+                    flex-wrap: nowrap;
                 }
                 .breadcrumb-marker { color: var(--accent-color); }
                 .item-count { font-weight: 400; color: var(--text-secondary); font-size: 13px; }
@@ -978,6 +1006,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     cursor: pointer;
                     transition: all 0.15s;
                     white-space: nowrap;
+                    flex-shrink: 0;
                 }
                 .toolbar-btn.ghost {
                     background: transparent;
@@ -1002,7 +1031,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
                 /* Sort dropdown */
-                .sort-dropdown { position: relative; }
+                .sort-dropdown { position: relative; flex-shrink: 0; }
                 .sort-menu {
                     position: absolute;
                     top: 100%;
@@ -1035,32 +1064,32 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu button:hover { background: rgba(128,128,128,0.1); }
                 .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
 
+                /* Segmented Control — view toggle */
                 .view-toggle {
                     display: inline-flex;
-                    align-items: center;
-                    gap: 1px;
-                    padding: 2px;
-                    border: 1px solid var(--panel-divider-color);
-                    border-radius: 8px;
-                    background: var(--bg-main);
+                    overflow: hidden;
+                    border-radius: 6px;
+                    background: var(--bg-input);
+                    border: 1px solid var(--border);
+                    padding: 0;
                     flex-shrink: 0;
                 }
                 .toggle-btn {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 30px;
-                    height: 28px;
+                    width: 32px;
+                    height: 30px;
                     padding: 0;
                     border: none;
-                    border-radius: 6px;
+                    border-radius: 0;
                     background: transparent;
                     color: var(--text-secondary);
                     cursor: pointer;
                     transition: all 0.15s;
                 }
                 .toggle-btn:hover { background: rgba(128,128,128,0.08); color: var(--text-primary); }
-                .toggle-btn.active { background: var(--accent-color); color: white; }
+                .toggle-btn.active { background: var(--accent-color); color: #fff; }
 
                 .items-area { 
                     flex: 1; 
@@ -1335,11 +1364,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: transparent;
                     border: none;
                     border-radius: 4px;
+                    opacity: 0.55;
                 }
 
                 .theme-mica .collapse-toggle:hover,
                 .theme-acrylic .collapse-toggle:hover {
-                    background: rgba(128,128,128,0.12);
+                    opacity: 1;
+                    color: var(--accent-color);
                 }
 
                 .theme-mica .tag-search-box,
@@ -1362,7 +1393,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-search-box input,
                 .theme-acrylic .tag-search-box input {
-                    padding: 0 0 0 28px;
+                    padding: 0 46px 0 28px;
                     font-size: 14px;
                     font-weight: 500;
                     background: transparent;
@@ -1373,6 +1404,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .tag-search-box .search-input-wrapper {
                     flex: 1;
                     min-width: 0;
+                    position: relative;
                 }
 
                 .theme-mica .tag-search-box input::placeholder,
@@ -1498,6 +1530,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 10px;
                     border-bottom: 1px solid var(--panel-divider-color);
                     background: transparent;
+                    flex-shrink: 0;
                 }
 
                 .theme-mica .toolbar-btn,
@@ -1513,23 +1546,25 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
-                    padding: 3px;
+                    overflow: hidden;
+                    border-radius: 8px;
                     border: 1px solid rgba(var(--accent-color-rgb), 0.12);
-                    border-radius: 10px;
                     background: var(--bg-input);
+                    padding: 0;
                 }
 
                 .theme-mica .toggle-btn,
                 .theme-acrylic .toggle-btn {
-                    width: 32px;
-                    height: 30px;
+                    width: 34px;
+                    height: 32px;
+                    border-radius: 0;
                 }
 
                 .theme-mica .toggle-btn.active,
                 .theme-acrylic .toggle-btn.active {
                     background: var(--accent-color);
                     color: #ffffff;
-                    box-shadow: 0 6px 14px rgba(var(--accent-color-rgb), 0.2);
+                    box-shadow: none;
                 }
 
                 .theme-mica .items-area,
