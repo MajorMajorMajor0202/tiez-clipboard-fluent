@@ -98,6 +98,17 @@ const AppHeader = ({
     }
   };
 
+  // Segoe Fluent Icons — official Microsoft icon codepoints
+  const FILTER_ICONS: Record<string, string> = {
+    text:      '',  // TextDocument
+    image:     '',  // Photo
+    file:      '',  // Document
+    url:       '',  // Link
+    code:      '',  // Code
+    video:     '',  // Video
+    rich_text: '',  // FontColor
+  };
+
   return (
   <header className="window-drag-region">
     <div className="header-top">
@@ -277,13 +288,14 @@ const AppHeader = ({
                 }}
               >
                 {['text', 'image', 'file', 'url', 'code', 'video', 'rich_text'].map(t => (
-                  <button
-                    key={t}
-                    className={`type-filter-btn ${typeFilter === t ? 'active' : ''}`}
-                    onClick={() => setTypeFilter(typeFilter === t ? null : t)}
-                  >
-                    {getTypeName(t)}
-                  </button>
+                  <FluentTooltip key={t} text={getTypeName(t)}>
+                    <button
+                      className={`type-filter-btn ${typeFilter === t ? 'active' : ''}`}
+                      onClick={() => setTypeFilter(typeFilter === t ? null : t)}
+                    >
+                      <span className="type-filter-icon">{FILTER_ICONS[t]}</span>
+                    </button>
+                  </FluentTooltip>
                 ))}
               </div>
 
