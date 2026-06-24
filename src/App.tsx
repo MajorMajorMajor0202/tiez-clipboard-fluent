@@ -722,15 +722,21 @@ const App = () => {
   });
 
   // Apply Windows system accent color.
-  // Strategy: setProperty on <html> (works for real elements like switches,
-  // highest priority via inline style) + <style> tag with !important
-  // (works for pseudo-elements like ::after and ::-webkit-slider-thumb
-  // which don't inherit from inline style in WebView2).
+  // Single source: <style> tag on :root so both real elements and
+  // pseudo-elements (::after, ::-webkit-slider-thumb) can inherit.
+  // Inline style (setProperty) is NOT used because WebView2 pseudo-elements
+  // cannot inherit custom properties from ancestor inline styles.
   useEffect(() => {
     if (!settingsLoaded) return;
 
     const STYLE_ID = "tiez-system-accent";
-    let styleEl: HTMLStyleElement | null = null;
+
+    // Remove any leftover instance (e.g. from hot-reload)
+    document.getElementById(STYLE_ID)?.remove();
+
+    const styleEl = document.createElement("style");
+    styleEl.id = STYLE_ID;
+    document.head.appendChild(styleEl);
 
     const applyAccent = (hex: string) => {
       const raw = hex.replace("#", "");
@@ -739,17 +745,6 @@ const App = () => {
       const b = parseInt(raw.substring(4, 6), 16);
       if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
 
-      // Route 1: inline style — real DOM elements (switches, buttons)
-      const root = document.documentElement;
-      root.style.setProperty("--accent-color", hex, "important");
-      root.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`, "important");
-
-      // Route 2: <style> tag — pseudo-elements (::after, ::-webkit-slider-thumb)
-      if (!styleEl) {
-        styleEl = document.createElement("style");
-        styleEl.id = STYLE_ID;
-        document.head.appendChild(styleEl);
-      }
       styleEl.textContent = `:root {
         --accent-color: ${hex} !important;
         --accent-color-rgb: ${r}, ${g}, ${b} !important;
@@ -768,7 +763,7 @@ const App = () => {
     const interval = setInterval(updateAccent, 3000);
     return () => {
       clearInterval(interval);
-      if (styleEl) styleEl.remove();
+      styleEl.remove();
     };
   }, [settingsLoaded]);
 
