@@ -264,8 +264,9 @@ const AppHeader = ({
                 style={{
                   display: 'flex',
                   gap: '6px',
-                  padding: '8px 0 0 0',
+                  padding: '8px 0 14px 0',
                   overflowX: 'auto',
+                  overflowY: 'clip',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none'
                 }}
