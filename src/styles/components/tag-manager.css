@@ -438,15 +438,13 @@
 
 .themed-tag-manager .toolbar-right,
 .themed-tag-manager .toolbar-row-right {
-  margin-left: 0 !important;
+  margin-left: auto !important;
   flex-shrink: 0 !important;
-  justify-self: end !important;
 }
 
 .themed-tag-manager .toolbar-row {
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
   gap: 12px !important;
   flex-wrap: nowrap !important;
 }
