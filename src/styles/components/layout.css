@@ -106,10 +106,10 @@ header {
   justify-content: center;
   padding: 4px 6px;
   font-family: var(--font-main);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.3;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   white-space: nowrap;
   flex-shrink: 0;
   background: transparent;
@@ -118,20 +118,21 @@ header {
   box-shadow: none;
   cursor: pointer;
   user-select: none;
-  transition: color 0.15s ease;
+  transition: opacity 0.15s ease;
+  opacity: 0.62;
 }
 
 .type-filter-btn:hover {
-  color: var(--text-primary);
+  opacity: 0.82;
 }
 
 .type-filter-btn:active {
-  color: var(--text-primary);
+  opacity: 1;
 }
 
 .type-filter-btn.active {
-  color: var(--accent-color);
   font-weight: 600;
+  opacity: 1;
 }
 
 /* Accent underline for active tab */
@@ -139,11 +140,11 @@ header {
   content: "";
   position: absolute;
   bottom: -1px;
-  left: 4px;
-  right: 4px;
-  height: 2px;
+  left: 6px;
+  right: 6px;
+  height: 3px;
   background: var(--accent-color);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 .search-container {
