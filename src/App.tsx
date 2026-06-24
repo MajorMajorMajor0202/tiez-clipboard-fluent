@@ -721,10 +721,11 @@ const App = () => {
     showAppBorder
   });
 
-  // Apply Windows system accent color via <style> tag so pseudo-elements
-  // (::after, ::-webkit-slider-thumb) can inherit the variables.
-  // inline style (element.style.setProperty) does NOT propagate to
-  // pseudo-elements in WebView2 — only stylesheet rules do.
+  // Apply Windows system accent color.
+  // Strategy: setProperty on <html> (works for real elements like switches,
+  // highest priority via inline style) + <style> tag with !important
+  // (works for pseudo-elements like ::after and ::-webkit-slider-thumb
+  // which don't inherit from inline style in WebView2).
   useEffect(() => {
     if (!settingsLoaded) return;
 
@@ -738,14 +739,20 @@ const App = () => {
       const b = parseInt(raw.substring(4, 6), 16);
       if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
 
+      // Route 1: inline style — real DOM elements (switches, buttons)
+      const root = document.documentElement;
+      root.style.setProperty("--accent-color", hex, "important");
+      root.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`, "important");
+
+      // Route 2: <style> tag — pseudo-elements (::after, ::-webkit-slider-thumb)
       if (!styleEl) {
         styleEl = document.createElement("style");
         styleEl.id = STYLE_ID;
         document.head.appendChild(styleEl);
       }
       styleEl.textContent = `:root {
-        --accent-color: ${hex};
-        --accent-color-rgb: ${r}, ${g}, ${b};
+        --accent-color: ${hex} !important;
+        --accent-color-rgb: ${r}, ${g}, ${b} !important;
       }`;
     };
 
