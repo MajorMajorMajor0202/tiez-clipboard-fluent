@@ -84,26 +84,23 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  border: var(--button-border) !important;
-  border-radius: var(--button-radius) !important;
-  background: var(--bg-button) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  background: transparent !important;
   color: var(--text-secondary) !important;
-  box-shadow: var(--button-shadow) !important;
+  box-shadow: none !important;
   cursor: pointer !important;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease,
-    color 0.18s ease !important;
+  opacity: 0.55 !important;
+  transition: opacity 0.15s ease, color 0.15s ease !important;
 }
 
 .themed-tag-manager .collapse-toggle:hover {
-  background: var(--bg-input) !important;
-  border-color: var(--button-hover-border-color) !important;
-  box-shadow: var(--button-hover-shadow) !important;
-  color: var(--text-primary) !important;
-  transform: var(--button-hover-transform) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--accent-color) !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .themed-tag-manager .tag-search-box {
@@ -303,7 +300,7 @@
   gap: 4px !important;
   position: absolute !important;
   top: 50% !important;
-  right: 40px !important;
+  right: 6px !important;
   transform: translateY(-50%) !important;
   color: var(--text-secondary) !important;
   opacity: 0 !important;
@@ -312,15 +309,10 @@
   z-index: 1 !important;
 }
 
-.themed-tag-manager .tag-item:hover .tag-hover-actions,
-.themed-tag-manager .tag-item.active .tag-hover-actions {
+/* Only show hover actions on hover — not on active/selected */
+.themed-tag-manager .tag-item:hover .tag-hover-actions {
   opacity: 1 !important;
   pointer-events: auto !important;
-}
-
-.themed-tag-manager .tag-item:hover .tag-name,
-.themed-tag-manager .tag-item.active .tag-name {
-  padding-right: 52px !important;
 }
 
 .themed-tag-manager .tag-hover-actions > span {
