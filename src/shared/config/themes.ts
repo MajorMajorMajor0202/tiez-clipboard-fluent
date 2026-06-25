@@ -14,55 +14,11 @@ export const isStoreTheme = (themeId: string): boolean =>
 
 export const THEMES: ThemeDefinition[] = [
   {
-    id: "retro",
-    labels: {
-      zh: "3D复古",
-      en: "Retro 3D",
-      tw: "3D復古"
-    }
-  },
-  {
-    id: "sticky-note",
-    labels: {
-      zh: "便利贴",
-      en: "Sticky Note",
-      tw: "便利貼"
-    }
-  },
-  {
     id: "mica",
     labels: {
       zh: "云母",
       en: "Mica",
       tw: "雲母"
-    },
-    supportsCustomBackground: true,
-    supportsSurfaceOpacity: true
-  },
-  {
-    id: "acrylic",
-    labels: {
-      zh: "毛玻璃",
-      en: "Acrylic",
-      tw: "毛玻璃"
-    },
-    supportsCustomBackground: true,
-    supportsSurfaceOpacity: true
-  },
-  {
-    id: "paper",
-    labels: {
-      zh: "纸质书感",
-      en: "Paper & Quill",
-      tw: "紙質書感"
-    }
-  },
-  {
-    id: "sakura",
-    labels: {
-      zh: "樱花",
-      en: "Sakura",
-      tw: "櫻花"
     },
     supportsCustomBackground: true,
     supportsSurfaceOpacity: true
