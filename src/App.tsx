@@ -256,7 +256,6 @@ const App = () => {
     setIsWindowPinned,
     showSearchBox,
     setShowSearchBox,
-    scrollTopButtonEnabled,
     setScrollTopButtonEnabled,
     arrowKeySelection,
     setArrowKeySelection,
@@ -361,7 +360,6 @@ const App = () => {
   const searchInputRef = useInputFocus<HTMLInputElement>();
   const tagColors = useTagColors();
   const virtualListRef = useRef<VirtualClipboardListHandle | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const [quickPasteHintsById, setQuickPasteHintsById] = useState<Record<number, QuickPasteHint>>(
     {}
   );
@@ -396,8 +394,6 @@ const App = () => {
     appSettings,
     searchInputRef
   });
-
-  const showScrollTopVisible = showScrollTop && scrollTopButtonEnabled;
 
   const getCurrentSourceView = useCallback((): FileTransferSourceView => {
     if (effectiveShowTagManager) return "tag_manager";
@@ -472,16 +468,7 @@ const App = () => {
 
   const handleListScroll = useCallback((offset: number) => {
     handleSearchScroll(offset);
-    setShowScrollTop(offset > 200);
   }, [handleSearchScroll]);
-
-  const handleScrollTop = useCallback(() => {
-    if (virtualListRef.current?.scrollToTop) {
-      virtualListRef.current.scrollToTop();
-      return;
-    }
-    virtualListRef.current?.scrollToItem(0);
-  }, []);
 
   const toggleGroup = (group: string) => {
     setCollapsedGroups(prev => ({
