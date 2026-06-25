@@ -493,7 +493,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
                             </button>
                             {showSortMenu && (
-                                <div className="sort-menu" style={{ top: sortBy === 'time' ? '0' : '-26px' }}>
+                                <div className="sort-menu" style={{ top: sortBy === 'time' ? '-4px' : '-32px' }}>
                                     <button className={sortBy === 'time' ? 'active' : ''} onMouseDown={() => { setSortBy('time'); setShowSortMenu(false); }}>
                                         <Clock size={14} /> <span>{t('sort_time') || '时间'}</span>
                                     </button>
@@ -1059,7 +1059,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     right: -4px;
                     background: var(--flyout-background, var(--bg-panel));
                     border: var(--flyout-border);
-                    border-radius: var(--flyout-radius);
+                    border-radius: 4px;
                     box-shadow: var(--flyout-shadow);
                     backdrop-filter: var(--flyout-backdrop-filter);
                     -webkit-backdrop-filter: var(--flyout-backdrop-filter);
@@ -1584,6 +1584,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 6px 12px;
                     font-size: 13px;
                     border-radius: 4px;
+                }
+                .theme-mica .sort-menu button,
+                .theme-acrylic .sort-menu button {
+                    padding: 6px 16px;
+                    font-size: 13px;
                 }
                 .theme-mica .toolbar-btn.primary,
                 .theme-acrylic .toolbar-btn.primary {
