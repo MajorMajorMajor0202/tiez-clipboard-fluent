@@ -1,6 +1,6 @@
 .themed-tag-manager {
   --tm-gap: 4px;
-  --tm-sidebar-width: clamp(186px, 25%, 218px);
+  --tm-sidebar-width: clamp(184px, 25%, 216px);
   --tm-sidebar-collapsed-width: 56px;
   display: flex !important;
   height: 100% !important;
@@ -160,7 +160,7 @@
   transform: translateY(-50%) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 2px !important;
+  gap: 4px !important;
 }
 
 .themed-tag-manager .action-icon {
@@ -298,7 +298,7 @@
   gap: 4px !important;
   position: absolute !important;
   top: 50% !important;
-  right: 6px !important;
+  right: 4px !important;
   transform: translateY(-50%) !important;
   color: var(--text-secondary) !important;
   opacity: 0 !important;
@@ -382,7 +382,7 @@
   position: absolute !important;
   left: 3px !important;
   top: 50% !important;
-  width: 3px !important;
+  width: 4px !important;
   height: 18px !important;
   border-radius: var(--radius-pill) !important;
   background: var(--accent-color) !important;
@@ -444,7 +444,7 @@
   display: inline-flex !important;
   flex: 0 1 auto !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
   min-width: 0 !important;
   max-width: min(100%, 220px) !important;
   padding: 6px 10px !important;
@@ -477,7 +477,7 @@
   align-items: center !important;
   min-width: 0 !important;
   flex-shrink: 1 !important;
-  gap: 6px !important;
+  gap: 4px !important;
   padding-left: 0 !important;
   border-left: none !important;
 }
@@ -498,7 +498,7 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
   border-radius: var(--button-radius) !important;
   font-size: 12px !important;
   font-weight: 600 !important;
@@ -570,7 +570,7 @@
   height: 34px !important;
   margin-left: 0 !important;
   padding: 0 12px !important;
-  gap: 6px !important;
+  gap: 4px !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   box-shadow: var(--button-shadow) !important;
@@ -647,7 +647,7 @@
 }
 
 .themed-tag-manager .items-list .themed-card {
-  min-height: 86px !important;
+  min-height: 84px !important;
 }
 
 .themed-tag-manager .card-top-row {
@@ -655,7 +655,7 @@
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 6px !important;
+  gap: 4px !important;
   margin-bottom: 6px !important;
   opacity: 1 !important;
 }
@@ -663,7 +663,7 @@
 .themed-tag-manager .card-actions-left {
   display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
 }
 
 .themed-tag-manager .card-action-btn,
@@ -745,7 +745,7 @@
 }
 
 .themed-tag-manager.stacked-layout .items-list {
-  gap: 6px !important;
+  gap: 4px !important;
 }
 
 .themed-tag-manager.stacked-layout .items-grid .themed-card {
@@ -802,14 +802,14 @@
 .themed-tag-manager.stacked-layout .items-list .card-footer {
   grid-area: meta !important;
   font-size: 10px !important;
-  gap: 6px !important;
+  gap: 4px !important;
   margin-top: 4px !important;
 }
 
 .themed-tag-manager.stacked-layout .items-list .card-action-btn,
 .themed-tag-manager.stacked-layout .items-list .del-btn {
-  width: 22px !important;
-  height: 22px !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .themed-tag-manager .card-divider {
@@ -940,7 +940,7 @@
   .themed-tag-manager .toolbar-right,
   .themed-tag-manager .toolbar-row-left,
   .themed-tag-manager .toolbar-row-right {
-    gap: 6px !important;
+    gap: 4px !important;
   }
 
   .themed-tag-manager .selected-tag-indicator {
@@ -973,7 +973,7 @@
   .themed-tag-manager {
     flex-direction: column !important;
     gap: 4px !important;
-    padding: 6px !important;
+    padding: 4px !important;
   }
 
   .themed-tag-manager .tag-sidebar {

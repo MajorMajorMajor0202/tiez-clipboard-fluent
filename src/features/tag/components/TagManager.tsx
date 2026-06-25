@@ -46,7 +46,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [isCreatingItem, setIsCreatingItem] = useState(false);
     const [editingItem, setEditingItem] = useState<{ id: number, content: string } | null>(null);
     const [newItemContent, setNewItemContent] = useState('');
-    const [sidebarWidth, setSidebarWidth] = useState(130);
+    const [sidebarWidth, setSidebarWidth] = useState(128);
     const [sidebarHeight, setSidebarHeight] = useState(180);
     const [isResizing, setIsResizing] = useState(false);
     const [isStacked, setIsStacked] = useState(false);
@@ -111,8 +111,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
             const dragPos = event.clientX - bounds.left;
             
-            // Auto collapse threshold: 110px
-            if (dragPos < 110) {
+            // Auto collapse threshold: 108px
+            if (dragPos < 108) {
                 if (!isCollapsed) setIsCollapsed(true);
                 setSidebarWidth(48);
             } else {
@@ -294,7 +294,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         onClick={() => {
                             const newCollapsed = !isCollapsed;
                             setIsCollapsed(newCollapsed);
-                            if (!newCollapsed && sidebarWidth < 110) {
+                            if (!newCollapsed && sidebarWidth < 108) {
                                 setSidebarWidth(160);
                             }
                         }}
@@ -493,7 +493,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
                             </button>
                             {showSortMenu && (
-                                <div className="sort-menu">
+                                <div className="sort-menu" style={{ top: sortBy === 'time' ? '0' : '-26px' }}>
                                     <button className={sortBy === 'time' ? 'active' : ''} onMouseDown={() => { setSortBy('time'); setShowSortMenu(false); }}>
                                         <Clock size={14} /> <span>{t('sort_time') || '时间'}</span>
                                     </button>
@@ -788,7 +788,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Tag Search Box */
                 .tag-search-box {
                     padding: 12px 16px;
-                    display: flex; align-items: center; gap: 6px;
+                    display: flex; align-items: center; gap: 4px;
                     background: transparent;
                     border-bottom: 1px solid var(--panel-divider-color);
                     margin: 0;
@@ -986,7 +986,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-row-left {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 4px;
                     font-weight: 600;
                     font-size: 14px;
                     color: var(--text-primary);
@@ -1009,7 +1009,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-btn {
                     display: inline-flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 4px;
                     padding: 5px 12px;
                     font-size: 12px;
                     font-weight: 500;
@@ -1082,7 +1082,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu button {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 4px;
                     width: 100%;
                     padding: 5px 12px;
                     font-size: 12px;
@@ -1161,7 +1161,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 .card-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-                .card-actions-left { display: flex; gap: 6px; }
+                .card-actions-left { display: flex; gap: 4px; }
                 .card-action-btn {
                     background: transparent;
                     border: none;
@@ -1450,7 +1450,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .action-icons,
                 .theme-acrylic .action-icons {
-                    gap: 6px;
+                    gap: 4px;
                     flex-shrink: 0;
                 }
 
@@ -1519,7 +1519,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-hover-actions,
                 .theme-acrylic .tag-hover-actions {
-                    gap: 6px;
+                    gap: 4px;
                 }
 
                 .theme-mica .tag-hover-actions > span,
@@ -1527,8 +1527,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 26px;
-                    height: 26px;
+                    width: 24px;
+                    height: 24px;
                     border-radius: 6px;
                     color: var(--text-secondary);
                 }
@@ -1670,7 +1670,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     right: 14px;
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 4px;
                     opacity: 0;
                     transition: opacity 0.18s ease;
                     z-index: 1;
@@ -1683,7 +1683,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .card-actions-left,
                 .theme-acrylic .card-actions-left {
-                    gap: 6px;
+                    gap: 4px;
                 }
 
                 .theme-mica .card-action-btn,
@@ -1888,7 +1888,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-color: var(--accent-color);
                 }
                 .inner-check {
-                    width: 7px;
+                    width: 8px;
                     height: 4px;
                     border-left: 2px solid white;
                     border-bottom: 2px solid white;
