@@ -803,10 +803,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .tag-search-box .search-icon-placeholder {
                     position: absolute;
-                    left: 10px;
+                    left: 4px;
                     top: 50%;
                     transform: translateY(-50%);
-                    opacity: 0.4;
+                    opacity: 0.45;
                     color: var(--text-secondary);
                     pointer-events: none;
                     z-index: 0;
@@ -819,7 +819,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-size: 13px;
                     font-weight: 500;
                     color: var(--text-primary);
-                    padding: 8px 46px 8px 32px;
+                    padding: 8px 8px 8px 20px;
                     border-radius: var(--radius-sm);
                     transition: all 0.2s;
                     position: relative;
@@ -914,8 +914,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    min-width: 0;
-                    max-width: 100%;
                     flex: 1;
                 }
 
@@ -1412,7 +1410,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-search-box input,
                 .theme-acrylic .tag-search-box input {
-                    padding: 0 38px 0 24px;
+                    padding: 0 8px 0 20px;
                     font-size: 14px;
                     font-weight: 500;
                     background: transparent;
