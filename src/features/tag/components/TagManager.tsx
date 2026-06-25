@@ -6,6 +6,7 @@ import {
     Clock, MousePointer2, ChevronLeft, Plus, Search, ExternalLink, CheckSquare, Copy
 } from 'lucide-react';
 import { getTagColor } from "../../../shared/lib/utils";
+import FluentTooltip from "../../../shared/components/FluentTooltip";
 import type { ClipboardEntry } from "../../../shared/types";
 
 interface TagManagerProps {
@@ -504,12 +505,16 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 )}
                             </div>
                             <div className="view-toggle">
-                                <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
-                                    <List size={14} />
-                                </button>
-                                <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
-                                    <LayoutGrid size={14} />
-                                </button>
+                                <FluentTooltip text={t('list_view') || '列表视图'}>
+                                    <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+                                        <List size={14} />
+                                    </button>
+                                </FluentTooltip>
+                                <FluentTooltip text={t('grid_view') || '卡片视图'}>
+                                    <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
+                                        <LayoutGrid size={14} />
+                                    </button>
+                                </FluentTooltip>
                             </div>
                         </div>
                     </div>
@@ -1077,30 +1082,33 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
 
                 /* View toggle buttons */
+                /* Segmented Control — view toggle (List / Grid) */
                 .view-toggle {
                     display: inline-flex;
-                    gap: 8px;
+                    gap: 0;
                     padding: 0;
-                    border: none;
-                    background: transparent;
+                    border: 1px solid var(--border);
+                    border-radius: 6px;
+                    background: var(--bg-input);
                     flex-shrink: 0;
+                    overflow: hidden;
                 }
                 .toggle-btn {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    min-width: 36px;
-                    height: 36px;
-                    padding: 0 10px;
-                    border: 1px solid transparent;
-                    border-radius: 10px;
+                    width: 30px;
+                    height: 30px;
+                    padding: 0;
+                    border: none;
+                    border-radius: 0;
                     background: transparent;
                     color: var(--text-secondary);
                     cursor: pointer;
                     transition: all 0.15s;
                 }
                 .toggle-btn:hover { background: rgba(128,128,128,0.1); color: var(--text-primary); }
-                .toggle-btn.active { background: rgba(var(--accent-color-rgb), 0.16); color: var(--accent-color); border-color: rgba(var(--accent-color-rgb), 0.2); }
+                .toggle-btn.active { background: var(--accent-color); color: #fff; }
 
                 .items-area { 
                     flex: 1; 
@@ -1561,27 +1569,27 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
-                    overflow: visible;
-                    border-radius: 0;
-                    border: none;
-                    background: transparent;
+                    border: 1px solid rgba(var(--accent-color-rgb), 0.12);
+                    border-radius: 8px;
+                    background: var(--bg-input);
+                    overflow: hidden;
                     padding: 0;
                 }
 
                 .theme-mica .toggle-btn,
                 .theme-acrylic .toggle-btn {
-                    min-width: 36px;
-                    height: 36px;
-                    border-radius: 10px;
-                    border: 1px solid transparent;
+                    width: 32px;
+                    height: 30px;
+                    border-radius: 0;
+                    border: none;
                     background: transparent;
                 }
 
                 .theme-mica .toggle-btn.active,
                 .theme-acrylic .toggle-btn.active {
-                    background: rgba(var(--accent-color-rgb), 0.16);
-                    color: var(--accent-color);
-                    border-color: rgba(var(--accent-color-rgb), 0.2);
+                    background: var(--accent-color);
+                    color: #fff;
+                }
                     box-shadow: none;
                 }
 
