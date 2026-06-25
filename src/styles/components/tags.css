@@ -16,11 +16,12 @@
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
-    margin-top: 4px;
+    margin-top: 0;
     padding: 10px 10px 12px;
     background: var(--flyout-background) !important;
     border: var(--flyout-border);
-    border-radius: var(--flyout-radius);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
     box-shadow: var(--flyout-shadow);
     backdrop-filter: var(--flyout-backdrop-filter);
     -webkit-backdrop-filter: var(--flyout-backdrop-filter);
@@ -183,8 +184,9 @@
 /* --- Modern Styles (Mica / Acrylic) --- */
 .theme-mica .search-input.dropdown-open,
 .theme-acrylic .search-input.dropdown-open {
-    border-radius: var(--fluent-corner-overlay) !important;
+    border-radius: 4px 4px 0 0 !important;
     border: 1px solid rgba(128, 128, 128, 0.2) !important;
+    border-bottom: 2px solid var(--accent-color) !important;
     box-shadow: none !important;
     background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: none !important;

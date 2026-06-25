@@ -210,7 +210,7 @@ body.dark-mode.theme-mica {
   --shell-background: rgba(24, 24, 24, calc(0.82 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
   --shell-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  --toolbar-border: 1px solid rgba(255, 255, 255, 0.08);
+  --toolbar-border: none;
   --panel-border: 1px solid rgba(255, 255, 255, 0.08);
   --menu-border: 1px solid rgba(255, 255, 255, 0.08);
 
