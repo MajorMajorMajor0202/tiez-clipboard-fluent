@@ -533,15 +533,14 @@
   align-items: center !important;
   gap: 0 !important;
   padding: 0 !important;
-  border: var(--button-border) !important;
-  border-radius: calc(var(--button-radius) + 2px) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
   background: var(--bg-input) !important;
-  box-shadow: var(--shadow-inset) !important;
   overflow: hidden !important;
 }
 
 .themed-tag-manager .toggle-btn {
-  width: 30px !important;
+  width: 34px !important;
   height: 30px !important;
   padding: 0 !important;
   display: inline-flex !important;
@@ -549,12 +548,14 @@
   justify-content: center !important;
   border-radius: 0 !important;
   cursor: pointer !important;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease,
-    color 0.18s ease !important;
+  transition: background 0.15s ease !important;
+}
+.themed-tag-manager .toggle-btn:hover {
+  background: rgba(128,128,128,0.08) !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  color: var(--text-primary) !important;
 }
 
 .themed-tag-manager .add-item-btn {

@@ -484,38 +484,36 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             )}
                         </div>
                     </div>
-                    {/* Row 2: sort dropdown + view toggle (right-aligned) */}
-                    <div className="toolbar-row" style={{ justifyContent: 'flex-end', marginTop: '4px' }}>
-                        <div className="toolbar-row-right" style={{ marginLeft: 0 }}>
-                            <div className="sort-dropdown">
-                                <button className="toolbar-btn ghost" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
-                                    {sortBy === 'time' ? <Clock size={14} /> : <MousePointer2 size={14} />}
-                                    <span>{sortBy === 'time' ? (t('sort_time') || '时间') : (t('sort_usage') || '频率')}</span>
-                                    <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
+                    {/* Row 2: sort (left) + view toggle (right) */}
+                    <div className="toolbar-row" style={{ marginTop: '4px' }}>
+                        <div className="sort-dropdown">
+                            <button className="toolbar-btn ghost" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
+                                {sortBy === 'time' ? <Clock size={14} /> : <MousePointer2 size={14} />}
+                                <span>{sortBy === 'time' ? (t('sort_time') || '时间') : (t('sort_usage') || '频率')}</span>
+                                <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
+                            </button>
+                            {showSortMenu && (
+                                <div className="sort-menu">
+                                    <button className={sortBy === 'time' ? 'active' : ''} onMouseDown={() => { setSortBy('time'); setShowSortMenu(false); }}>
+                                        <Clock size={14} /> <span>{t('sort_time') || '时间'}</span>
+                                    </button>
+                                    <button className={sortBy === 'count' ? 'active' : ''} onMouseDown={() => { setSortBy('count'); setShowSortMenu(false); }}>
+                                        <MousePointer2 size={14} /> <span>{t('sort_usage') || '频率'}</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        <div className="view-toggle">
+                            <FluentTooltip text={t('list_view') || '列表视图'}>
+                                <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+                                    <List size={14} />
                                 </button>
-                                {showSortMenu && (
-                                    <div className="sort-menu">
-                                        <button className={sortBy === 'time' ? 'active' : ''} onMouseDown={() => { setSortBy('time'); setShowSortMenu(false); }}>
-                                            <Clock size={12} /> <span>{t('sort_time') || '时间'}</span>
-                                        </button>
-                                        <button className={sortBy === 'count' ? 'active' : ''} onMouseDown={() => { setSortBy('count'); setShowSortMenu(false); }}>
-                                            <MousePointer2 size={12} /> <span>{t('sort_usage') || '频率'}</span>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="view-toggle">
-                                <FluentTooltip text={t('list_view') || '列表视图'}>
-                                    <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
-                                        <List size={14} />
-                                    </button>
-                                </FluentTooltip>
-                                <FluentTooltip text={t('grid_view') || '卡片视图'}>
-                                    <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
-                                        <LayoutGrid size={14} />
-                                    </button>
-                                </FluentTooltip>
-                            </div>
+                            </FluentTooltip>
+                            <FluentTooltip text={t('grid_view') || '卡片视图'}>
+                                <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
+                                    <LayoutGrid size={14} />
+                                </button>
+                            </FluentTooltip>
                         </div>
                     </div>
                 </div>
@@ -1012,13 +1010,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
-                    padding: 6px 12px;
+                    padding: 5px 12px;
                     font-size: 12px;
                     font-weight: 500;
                     border: none;
-                    border-radius: 6px;
+                    border-radius: 5px;
                     cursor: pointer;
-                    transition: all 0.15s;
+                    transition: background 0.15s ease, color 0.15s ease;
                     white-space: nowrap;
                     flex-shrink: 0;
                 }
@@ -1078,7 +1076,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu button:hover { background: rgba(128,128,128,0.1); }
                 .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
 
-                /* View toggle buttons */
                 /* Segmented Control — view toggle (List / Grid) */
                 .view-toggle {
                     display: inline-flex;
@@ -1094,7 +1091,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 30px;
+                    width: 34px;
                     height: 30px;
                     padding: 0;
                     border: none;
@@ -1102,10 +1099,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: transparent;
                     color: var(--text-secondary);
                     cursor: pointer;
-                    transition: all 0.15s;
+                    transition: background 0.15s ease;
                 }
-                .toggle-btn:hover { background: rgba(128,128,128,0.1); color: var(--text-primary); }
+                .toggle-btn:hover { background: rgba(128,128,128,0.08); }
                 .toggle-btn.active { background: var(--accent-color); color: #fff; }
+                .toggle-btn.active:hover { background: var(--accent-color); }
 
                 .items-area { 
                     flex: 1; 
@@ -1555,9 +1553,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .toolbar-btn,
                 .theme-acrylic .toolbar-btn {
-                    padding: 7px 14px;
+                    padding: 6px 12px;
                     font-size: 13px;
-                    border-radius: 8px;
+                    border-radius: 6px;
                 }
                 .theme-mica .toolbar-btn.primary,
                 .theme-acrylic .toolbar-btn.primary {
@@ -1567,7 +1565,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
                     border: 1px solid rgba(var(--accent-color-rgb), 0.12);
-                    border-radius: 8px;
+                    border-radius: 6px;
                     background: var(--bg-input);
                     overflow: hidden;
                     padding: 0;
@@ -1575,7 +1573,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .toggle-btn,
                 .theme-acrylic .toggle-btn {
-                    width: 32px;
+                    width: 36px;
                     height: 30px;
                     border-radius: 0;
                     border: none;
