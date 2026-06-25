@@ -1055,7 +1055,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu {
                     position: absolute;
                     top: -4px;
-                    left: -4px;
+                    left: 0;
                     right: -4px;
                     background: var(--flyout-background, var(--bg-panel));
                     border: var(--flyout-border);
