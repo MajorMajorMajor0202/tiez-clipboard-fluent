@@ -88,8 +88,6 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
       ref={triggerRef}
       onMouseEnter={show}
       onMouseLeave={hide}
-      onFocus={show}
-      onBlur={hide}
       style={{ display: "inline-flex" }}
     >
       {children}
