@@ -1412,7 +1412,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-search-box input,
                 .theme-acrylic .tag-search-box input {
-                    padding: 0 46px 0 28px;
+                    padding: 0 38px 0 24px;
                     font-size: 14px;
                     font-weight: 500;
                     background: transparent;

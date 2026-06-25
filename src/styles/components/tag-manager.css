@@ -126,18 +126,18 @@
 
 .themed-tag-manager .tag-search-box .search-icon-placeholder {
   position: absolute !important;
-  left: 12px !important;
+  left: 8px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
   color: var(--text-secondary) !important;
-  opacity: 1 !important;
+  opacity: 0.5 !important;
   pointer-events: none !important;
 }
 
 .themed-tag-manager .tag-search-box input {
   width: 100% !important;
   height: 36px !important;
-  padding: 0 54px 0 28px !important;
+  padding: 0 38px 0 24px !important;
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -158,12 +158,12 @@
 
 .themed-tag-manager .action-icons {
   position: absolute !important;
-  right: 8px !important;
+  right: 4px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 2px !important;
 }
 
 .themed-tag-manager .action-icon {
@@ -172,25 +172,26 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  border-radius: var(--radius-pill) !important;
+  border-radius: 4px !important;
   color: var(--text-secondary) !important;
   cursor: pointer !important;
-  opacity: 1 !important;
+  opacity: 0.55 !important;
+  background: transparent !important;
   transition:
-    background 0.16s ease,
-    color 0.16s ease,
-    transform 0.16s ease !important;
+    opacity 0.15s ease,
+    color 0.15s ease !important;
 }
 
 .themed-tag-manager .action-icon:hover {
-  background: rgba(var(--accent-color-rgb), 0.1) !important;
-  color: var(--text-primary) !important;
-  transform: scale(1.04) !important;
+  opacity: 1 !important;
+  color: var(--accent-color) !important;
+  background: transparent !important;
+  transform: none !important;
 }
 
 .themed-tag-manager .action-icon.create {
-  background: rgba(var(--accent-color-rgb), 0.12) !important;
   color: var(--accent-color) !important;
+  opacity: 0.7 !important;
 }
 
 .themed-tag-manager .tag-scroll {
