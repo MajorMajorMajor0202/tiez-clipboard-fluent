@@ -1,6 +1,21 @@
 /* Base Theme Variables + Global Resets */
 
 :root {
+  /* ── Fluent Design Tokens ── */
+  /* Font */
+  --fluent-font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif;
+  /* Corner radius */
+  --fluent-corner-none: 0;
+  --fluent-corner-small: 2px;
+  --fluent-corner-control: 4px;      /* buttons, inputs, switches */
+  --fluent-corner-overlay: 8px;       /* cards, panels, flyouts, dialogs */
+  --fluent-corner-pill: 9999px;
+  /* Shadow / elevation */
+  --fluent-elevation-card:  0 4px 8px rgba(0, 0, 0, 0.04), 0 0 2px rgba(0, 0, 0, 0.06);
+  --fluent-elevation-flyout: 0 8px 16px rgba(0, 0, 0, 0.08), 0 0 2px rgba(0, 0, 0, 0.06);
+  --fluent-elevation-dialog: 0 16px 32px rgba(0, 0, 0, 0.12), 0 0 4px rgba(0, 0, 0, 0.06);
+
+  /* ── Color ── */
   --bg-body: #edf2f8;
   --bg-window: rgba(246, 249, 252, 0.94);
   --bg-content: linear-gradient(180deg, #f5f8fc 0%, #edf2f8 100%);
@@ -24,22 +39,23 @@
   --line-soft: rgba(24, 34, 53, 0.12);
   --line-strong: rgba(24, 34, 53, 0.22);
   --shadow-xs: 0 4px 10px rgba(15, 23, 42, 0.08);
-  --shadow-sm: 0 10px 24px rgba(15, 23, 42, 0.1);
-  --shadow-md: 0 18px 38px rgba(15, 23, 42, 0.12);
-  --shadow-lg: 0 26px 64px rgba(15, 23, 42, 0.16);
+  --shadow-sm: var(--fluent-elevation-card);
+  --shadow-md: var(--fluent-elevation-flyout);
+  --shadow-lg: var(--fluent-elevation-dialog);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   --accent-soft: rgba(var(--accent-color-rgb), 0.12);
 
+  /* ── Corner radius, mapped to Fluent tokens ── */
   --radius-window: 22px;
-  --radius-panel: 16px;
-  --radius-card: 18px;
-  --radius-control: 14px;
-  --radius-pill: 9999px;
+  --radius-panel: var(--fluent-corner-overlay);
+  --radius-card: var(--fluent-corner-overlay);
+  --radius-control: var(--fluent-corner-control);
+  --radius-pill: var(--fluent-corner-pill);
   --spacing-md: 16px;
   --spacing-sm: 8px;
   --surface-opacity-scale: 1;
 
-  --font-main: "Segoe UI", "Inter", "Microsoft YaHei", sans-serif;
+  --font-main: var(--fluent-font-family);
   --font-mono: "Cascadia Code", "Consolas", monospace;
   --font-size-xs: 11px;
   --font-size-sm: 12px;
@@ -78,13 +94,13 @@
   --input-font-weight: 500;
 
   --button-border: 1px solid var(--line-soft);
-  --button-radius: 12px;
+  --button-radius: var(--fluent-corner-control);
   --button-shadow: var(--shadow-xs);
   --button-hover-border-color: var(--line-strong);
   --button-hover-shadow: var(--shadow-sm);
-  --button-hover-transform: translateY(-1px);
+  --button-hover-transform: none;
   --button-active-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
-  --button-active-transform: translateY(0);
+  --button-active-transform: none;
   --button-active-filled-background: var(--accent-color);
   --button-active-filled-color: #ffffff;
   --button-active-filled-border-color: var(--accent-color);
@@ -98,9 +114,9 @@
   --card-shadow: var(--shadow-sm);
   --card-hover-border-color: var(--line-strong);
   --card-hover-shadow: var(--shadow-md);
-  --card-hover-transform: translateY(-2px);
+  --card-hover-transform: none;
   --card-active-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
-  --card-active-transform: translateY(0);
+  --card-active-transform: none;
   --card-selected-background: rgba(var(--accent-color-rgb), 0.08);
   --card-selected-border-color: rgba(var(--accent-color-rgb), 0.5);
   --card-selected-shadow: 0 16px 32px rgba(var(--accent-color-rgb), 0.18);
