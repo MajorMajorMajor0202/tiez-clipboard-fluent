@@ -49,7 +49,7 @@ body.theme-mica {
   --card-hover-shadow: var(--shadow-sm);
   --card-selected-background: rgba(79, 125, 255, 0.1);
   --card-selected-border-color: rgba(79, 125, 255, 0.34);
-  --card-selected-shadow: 0 12px 28px rgba(79, 125, 255, 0.16);
+  --card-selected-shadow: none;
 
   --panel-border: 1px solid rgba(255, 255, 255, 0.3);
   --panel-radius: 8px;
