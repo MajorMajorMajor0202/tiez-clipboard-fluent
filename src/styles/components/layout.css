@@ -229,8 +229,6 @@ select.search-input option {
   flex: 1;
   position: relative;
   margin-right: 0;
-  padding-right: 4px;
-  box-sizing: border-box;
 }
 
 .history-list-container {
@@ -263,7 +261,7 @@ select.search-input option {
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.18s ease;
-  margin: 0 4px 2px 16px;
+  margin: 0 8px 2px 16px;
   height: 100%;
   overflow: visible;
   display: flex;
