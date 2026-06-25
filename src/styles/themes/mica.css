@@ -62,15 +62,15 @@ body.theme-mica {
   --menu-border: 1px solid rgba(128, 128, 128, 0.16);
   --menu-shadow: var(--shadow-md);
 
-  --scrollbar-size: 8px;
+  --scrollbar-size: 4px;
   --scrollbar-size-thin: 4px;
   --scrollbar-radius: 999px;
   --scrollbar-track-background: transparent;
   --scrollbar-track-border-start: none;
-  --scrollbar-thumb-color: rgba(96, 113, 136, 0.55);
-  --scrollbar-thumb-hover-color: rgba(79, 125, 255, 0.7);
-  --scrollbar-thumb-border: 2px solid transparent;
-  --scrollbar-chat-thumb-border: 2px solid transparent;
+  --scrollbar-thumb-color: rgba(128, 128, 128, 0.4);
+  --scrollbar-thumb-hover-color: rgba(96, 96, 96, 0.7);
+  --scrollbar-thumb-border: 1px solid transparent;
+  --scrollbar-chat-thumb-border: 1px solid transparent;
 
   --queue-border: 1px solid rgba(255, 255, 255, 0.38);
   --queue-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);

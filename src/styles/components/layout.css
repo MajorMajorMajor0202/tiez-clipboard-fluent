@@ -106,7 +106,6 @@ header {
   justify-content: center;
   padding: 4px 8px;
   font-family: var(--font-main);
-  font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
   color: var(--text-primary);
@@ -134,15 +133,15 @@ header {
   opacity: 1;
 }
 
-/* Accent underline — fixed 24×4px, ratio 1:6, centered on text */
+/* Accent underline — fixed 12×3px, centered */
 .type-filter-btn.active::after {
   content: "";
   position: absolute;
-  bottom: -6px;
+  bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
-  height: 4px;
+  width: 12px;
+  height: 3px;
   background: var(--accent-color, AccentColor);
   border-radius: 2px;
 }
@@ -253,11 +252,11 @@ select.search-input option {
 }
 
 .virtual-list-wrapper .virtuoso-scroller {
-  width: calc(100% + var(--scrollbar-overlay-width, 10px));
-  margin-right: calc(var(--scrollbar-overlay-width, 10px) * -1);
+  width: 100%;
   padding: 0 8px;
   box-sizing: border-box;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .history-item {

@@ -274,8 +274,8 @@ const AppHeader = ({
                 className="hide-scrollbar"
                 style={{
                   display: 'flex',
-                  gap: '6px',
-                  padding: '8px 0 10px 0',
+                  gap: '8px',
+                  padding: '8px 0 16px 0',
                   overflowX: 'auto',
                   overflowY: 'clip',
                   scrollbarWidth: 'none',
