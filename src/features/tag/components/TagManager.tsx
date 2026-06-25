@@ -906,7 +906,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     min-width: 0;
                     overflow: hidden;
-                    padding-right: 72px;
                 }
                 .tag-name {
                     font-size: 13px;
