@@ -286,22 +286,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {/* Sidebar with CRUD support */}
             {/* Sidebar with Unified Search & Create */}
             <div className="tag-sidebar">
-                <div className="sidebar-header">
-                    {!isCollapsed && <span className="header-label">{t('tags')}</span>}
-                    <button
-                        className="collapse-toggle"
-                        title={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}
-                        onClick={() => {
-                            const newCollapsed = !isCollapsed;
-                            setIsCollapsed(newCollapsed);
-                            if (!newCollapsed && sidebarWidth < 108) {
-                                setSidebarWidth(160);
-                            }
-                        }}
-                    >
-                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-                    </button>
-                </div>
 
                 {!isCollapsed && (
                     <div className="tag-search-box">
@@ -424,6 +408,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             <Plus size={10} />
                         </div>
                     )}
+                </div>
+
+                <div className="sidebar-header">
+                    <button
+                        className="collapse-toggle"
+                        title={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}
+                        onClick={() => {
+                            const newCollapsed = !isCollapsed;
+                            setIsCollapsed(newCollapsed);
+                            if (!newCollapsed && sidebarWidth < 108) {
+                                setSidebarWidth(160);
+                            }
+                        }}
+                    >
+                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                    </button>
                 </div>
             </div>
 
@@ -753,18 +753,15 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sidebar-collapsed .tag-sidebar { width: 48px; }
                 
                 .sidebar-header {
-                    padding: 16px 20px;
-                    border-bottom: 1px solid var(--panel-divider-color);
+                    padding: 0 10px;
+                    border-top: 1px solid var(--panel-divider-color);
                     display: flex;
-                    justify-content: space-between;
+                    justify-content: flex-end;
                     align-items: center;
-                    min-height: auto;
+                    height: 36px;
+                    min-height: 36px;
                     background: transparent;
                     color: var(--text-secondary);
-                    font-size: 13px;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
                 }
                 .header-actions { display: flex; align-items: center; gap: 8px; }
                 .action-btn { background: transparent; border: none; color: inherit; cursor: pointer; padding: 2px; opacity: 0.7; transition: opacity 0.2s; }
@@ -1385,20 +1382,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic.sidebar-collapsed .tag-sidebar {
                     width: 64px;
                 }
-
                 .theme-mica .sidebar-header,
                 .theme-acrylic .sidebar-header {
-                    min-height: 88px;
-                    padding: 24px 24px 18px;
+                    min-height: 36px;
+                    height: 36px;
+                    padding: 0 10px;
                     background: transparent;
-                    border-bottom: 1px solid var(--panel-divider-color);
-                }
-
-                .theme-mica .header-label,
-                .theme-acrylic .header-label {
-                    font-size: 18px;
-                    font-weight: 700;
-                    letter-spacing: 0;
+                    border-top: 1px solid var(--panel-divider-color);
+                    border-bottom: none;
                 }
 
                 .theme-mica .collapse-toggle,

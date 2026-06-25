@@ -54,27 +54,21 @@
 }
 
 .themed-tag-manager .sidebar-header {
-  min-height: 48px !important;
-  padding: 12px 14px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
-  border-bottom: 1px solid var(--panel-divider-color) !important;
+  justify-content: flex-end !important;
+  border-top: 1px solid var(--panel-divider-color) !important;
+  border-bottom: none !important;
   background: var(--panel-header-background) !important;
   color: var(--text-secondary) !important;
 }
 
-.themed-tag-manager .header-label {
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-}
-
 .themed-tag-manager.sidebar-collapsed .sidebar-header {
   justify-content: center !important;
-  padding-inline: 8px !important;
+  padding-inline: 0 !important;
 }
 
 .themed-tag-manager .collapse-toggle {
