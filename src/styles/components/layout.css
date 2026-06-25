@@ -264,7 +264,7 @@ select.search-input option {
   padding: 0 8px;
   box-sizing: border-box;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 .history-item {
@@ -281,7 +281,7 @@ select.search-input option {
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.18s ease;
-  margin: 0 16px 2px 16px;
+  margin: 0 16px 2px 20px;
   height: 100%;
   overflow: visible;
   display: flex;
