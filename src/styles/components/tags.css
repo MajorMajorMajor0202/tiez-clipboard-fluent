@@ -196,7 +196,10 @@
 :root.dark-mode .theme-mica .search-input.dropdown-open,
 :root.dark-mode .theme-acrylic .search-input.dropdown-open {
     background: rgba(255, 255, 255, 0.18) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+    border-left-color: rgba(255, 255, 255, 0.1) !important;
+    border-right-color: rgba(255, 255, 255, 0.1) !important;
+    /* border-bottom-color keeps accent */
 }
 
 /* --- Global Fix for Search Input Accessibility in Dark Mode --- */
