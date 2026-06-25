@@ -956,7 +956,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     width: 28px;
                     height: 28px;
                     padding: 0;
-                    border-radius: 8px;
+                    border-radius: 4px;
                     color: var(--text-secondary);
                     transition: background 0.15s, color 0.15s;
                 }
@@ -1044,7 +1044,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-btn.danger:hover { background: rgba(211,47,47,0.08); }
                 .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-                /* Sort dropdown — in-place overlay, covers trigger */
+                /* Sort dropdown — in-place overlay, equal overhang on both sides */
                 .sort-dropdown { position: relative; flex-shrink: 0; }
                 .sort-dropdown > .toolbar-btn {
                     border-color: var(--line-soft);
@@ -1054,9 +1054,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .sort-menu {
                     position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
+                    top: -4px;
+                    left: -4px;
+                    right: -4px;
                     background: var(--flyout-background, var(--bg-panel));
                     border: var(--flyout-border);
                     border-radius: var(--flyout-radius);
@@ -1066,7 +1066,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 4px;
                     z-index: 100;
                     animation: sortMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-                    transform-origin: center center;
                 }
                 @keyframes sortMenuIn {
                     from { opacity: 0; transform: scale(1, 0.85); }
@@ -1078,30 +1077,32 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     gap: 4px;
                     width: 100%;
-                    padding: 5px 12px 5px 16px;
+                    padding: 5px 16px;
                     font-size: 12px;
                     font-weight: 500;
                     border: none;
-                    border-radius: 3px;
+                    border-radius: 4px;
                     background: transparent;
                     color: var(--text-primary);
                     cursor: pointer;
                 }
                 .sort-menu button:hover { background: rgba(128,128,128,0.08); }
-                .sort-menu button.active { color: var(--accent-color); }
-                /* Accent indicator pill on selected item */
+                .sort-menu button.active {
+                    color: var(--accent-color);
+                    background: rgba(128,128,128,0.06);
+                }
+                /* Accent indicator pill on selected item — inside the gray rect */
                 .sort-menu button.active::before {
                     content: "";
                     position: absolute;
                     left: 4px;
                     top: 50%;
                     transform: translateY(-50%);
-                    width: 2px;
-                    height: 16px;
+                    width: 3px;
+                    height: 12px;
                     border-radius: 2px;
                     background: var(--accent-color);
                 }
-                .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
 
                 /* Segmented Control — view toggle (List / Grid) */
                 .view-toggle {
@@ -1109,7 +1110,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 0;
                     padding: 0;
                     border: 1px solid var(--line-strong);
-                    border-radius: 5px;
+                    border-radius: 4px;
                     background: var(--bg-input);
                     flex-shrink: 0;
                     overflow: hidden;
@@ -1270,7 +1271,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(255, 255, 255, 0.8) !important;
                     backdrop-filter: blur(20px);
                     padding: 24px !important;
-                    border-radius: 16px !important;
+                    border-radius: 4px !important;
                     box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
                     border: 1px solid rgba(255,255,255,0.4) !important;
                     animation: modal-pop-modern 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
@@ -1293,7 +1294,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .confirm-dialog-button,
                 .theme-acrylic .confirm-dialog-button {
-                    border-radius: 10px !important;
+                    border-radius: 4px !important;
                     border: none !important;
                     box-shadow: none !important;
                     font-weight: 600 !important;
@@ -1374,7 +1375,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .tag-sidebar {
                     width: clamp(196px, 24%, 248px);
                     border: var(--panel-border);
-                    border-radius: 24px;
+                    border-radius: 4px;
                     background: var(--bg-panel);
                     box-shadow: var(--panel-shadow);
                     overflow: hidden;
@@ -1421,7 +1422,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 0 16px;
                     gap: 12px;
                     border: var(--input-border);
-                    border-radius: 16px;
+                    border-radius: 4px;
                     background: var(--bg-input);
                     box-shadow: var(--input-shadow);
                 }
@@ -1468,7 +1469,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     justify-content: center;
                     width: 24px;
                     height: 24px;
-                    border-radius: 6px;
+                    border-radius: 4px;
                     color: var(--text-secondary);
                     opacity: 0.7;
                     background: transparent;
@@ -1493,7 +1494,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 14px 16px;
                     margin-bottom: 6px;
                     border: 1px solid transparent;
-                    border-radius: 16px;
+                    border-radius: 4px;
                     background: transparent;
                 }
 
@@ -1536,7 +1537,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     justify-content: center;
                     width: 24px;
                     height: 24px;
-                    border-radius: 6px;
+                    border-radius: 4px;
                     color: var(--text-secondary);
                 }
 
@@ -1564,7 +1565,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .tag-content {
                     min-width: 0;
                     border: var(--panel-border);
-                    border-radius: 28px;
+                    border-radius: 4px;
                     background: var(--bg-panel);
                     box-shadow: var(--panel-shadow);
                 }
@@ -1582,7 +1583,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .toolbar-btn {
                     padding: 6px 12px;
                     font-size: 13px;
-                    border-radius: 5px;
+                    border-radius: 4px;
                 }
                 .theme-mica .toolbar-btn.primary,
                 .theme-acrylic .toolbar-btn.primary {
@@ -1593,7 +1594,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
                     border: 1px solid var(--line-strong);
-                    border-radius: 5px;
+                    border-radius: 4px;
                     background: var(--bg-input);
                     padding: 0;
                     overflow: hidden;
@@ -1789,7 +1790,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .modal-input-field textarea {
                     background: var(--bg-input) !important;
                     border: var(--input-border) !important;
-                    border-radius: 16px !important;
+                    border-radius: 4px !important;
                     box-shadow: var(--input-shadow) !important;
                     color: var(--text-primary) !important;
                 }
@@ -1883,7 +1884,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     width: 20px;
                     height: 20px;
                     border: 2px solid var(--border);
-                    border-radius: 6px;
+                    border-radius: 2px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -1936,7 +1937,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
 
                 .theme-mica .selection-indicator, .theme-acrylic .selection-indicator {
-                    border-radius: 8px;
+                    border-radius: 2px;
                     border-color: rgba(var(--accent-color-rgb), 0.2);
                 }
                 
