@@ -1881,8 +1881,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 .selection-indicator {
-                    width: 20px;
-                    height: 20px;
+                    width: 12px;
+                    height: 12px;
                     border: 2px solid var(--border);
                     border-radius: 2px;
                     display: flex;
@@ -1896,14 +1896,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-color: var(--accent-color);
                 }
                 .inner-check {
-                    width: 8px;
-                    height: 4px;
+                    width: 6px;
+                    height: 3px;
                     border-left: 2px solid white;
                     border-bottom: 2px solid white;
                     transform: rotate(-45deg);
                     opacity: 0;
                     transition: opacity 0.2s;
-                    margin-top: -2px;
+                    margin-top: -1px;
                 }
                 .selection-indicator.checked .inner-check {
                     opacity: 1;
