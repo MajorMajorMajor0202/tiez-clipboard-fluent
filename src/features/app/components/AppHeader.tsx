@@ -353,7 +353,7 @@ const AppHeader = ({
                       opacity: { duration: 0.2, ease: 'easeOut' },
                       scaleX: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
                     }}
-                    style={{ position: 'absolute', bottom: 0 }}
+                    style={{ position: 'absolute', bottom: 8 }}
                   />
                 )}
               </div>

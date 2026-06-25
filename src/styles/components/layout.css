@@ -136,7 +136,7 @@ header {
 /* Accent underline indicator — 16×3px, shared element animated with framer-motion */
 .type-filter-indicator {
   position: absolute;
-  bottom: -8px;
+  bottom: 8px;
   width: 16px;
   height: 3px;
   background: var(--accent-color, AccentColor);
