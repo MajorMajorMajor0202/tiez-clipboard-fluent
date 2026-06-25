@@ -1044,7 +1044,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-btn.danger:hover { background: rgba(211,47,47,0.08); }
                 .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-                /* Sort dropdown — Fluent flyout, expands from trigger */
+                /* Sort dropdown — in-place overlay, covers trigger */
                 .sort-dropdown { position: relative; flex-shrink: 0; }
                 .sort-dropdown > .toolbar-btn {
                     border-color: var(--line-soft);
@@ -1054,10 +1054,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .sort-menu {
                     position: absolute;
-                    top: 100%;
+                    top: 0;
                     left: 0;
                     right: 0;
-                    margin-top: 4px;
                     background: var(--flyout-background, var(--bg-panel));
                     border: var(--flyout-border);
                     border-radius: var(--flyout-radius);
@@ -1067,24 +1066,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 4px;
                     z-index: 100;
                     animation: sortMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-                    transform-origin: top center;
+                    transform-origin: center center;
                 }
                 @keyframes sortMenuIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-2px) scale(1, 0.6);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0) scale(1, 1);
-                    }
+                    from { opacity: 0; transform: scale(1, 0.85); }
+                    to   { opacity: 1; transform: scale(1, 1); }
                 }
                 .sort-menu button {
+                    position: relative;
                     display: flex;
                     align-items: center;
                     gap: 4px;
                     width: 100%;
-                    padding: 5px 12px;
+                    padding: 5px 12px 5px 16px;
                     font-size: 12px;
                     font-weight: 500;
                     border: none;
@@ -1093,7 +1087,20 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--text-primary);
                     cursor: pointer;
                 }
-                .sort-menu button:hover { background: rgba(128,128,128,0.1); }
+                .sort-menu button:hover { background: rgba(128,128,128,0.08); }
+                .sort-menu button.active { color: var(--accent-color); }
+                /* Accent indicator pill on selected item */
+                .sort-menu button.active::before {
+                    content: "";
+                    position: absolute;
+                    left: 4px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 2px;
+                    height: 16px;
+                    border-radius: 2px;
+                    background: var(--accent-color);
+                }
                 .sort-menu button.active { color: var(--accent-color); background: rgba(var(--accent-color-rgb), 0.08); }
 
                 /* Segmented Control — view toggle (List / Grid) */
