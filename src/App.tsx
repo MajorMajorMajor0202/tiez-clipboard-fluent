@@ -393,7 +393,8 @@ const App = () => {
     search,
     showSettings,
     showTagManager: effectiveShowTagManager,
-    appSettings
+    appSettings,
+    searchInputRef
   });
 
   const showScrollTopVisible = showScrollTop && scrollTopButtonEnabled;
@@ -1146,8 +1147,6 @@ const App = () => {
           handleListScroll={handleListScroll}
           hasMore={effectiveHasMore}
           isLoadingMore={isLoadingMore}
-          showScrollTop={showScrollTopVisible}
-          onScrollTop={handleScrollTop}
         />
       </main>
 

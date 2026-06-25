@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentProps, RefObject, ReactNode } from "react";
 import { motion, Reorder, useDragControls } from "framer-motion";
 import type { DragControls } from "framer-motion";
-import { ArrowUp, Clipboard } from "lucide-react";
+import { Clipboard } from "lucide-react";
 import FileTransferChatView from "../../file-transfer/components/FileTransferChatView";
 import SettingsPanel from "../../settings/components/SettingsPanel";
 import TagManager from "../../tag/components/TagManager";
@@ -49,8 +49,6 @@ interface AppMainContentProps {
   handleListScroll: (offset: number) => void;
   hasMore: boolean;
   isLoadingMore: boolean;
-  showScrollTop: boolean;
-  onScrollTop: () => void;
 }
 
 const SortableItem = ({
@@ -121,9 +119,7 @@ const AppMainContent = ({
   loadMoreHistory,
   handleListScroll,
   hasMore,
-  isLoadingMore,
-  showScrollTop,
-  onScrollTop
+  isLoadingMore
 }: AppMainContentProps) => {
   const [pinnedOrderIds, setPinnedOrderIds] = useState<number[]>(
     () => pinnedItems.map((item) => item.id)
@@ -328,17 +324,6 @@ const AppMainContent = ({
             hasMore={hasMore}
             isLoading={isLoadingMore}
           />
-          {showScrollTop && (
-            <button
-              type="button"
-              className="btn-icon scroll-top-button"
-              onClick={onScrollTop}
-              aria-label={t("scroll_to_top")}
-              title={t("scroll_to_top")}
-            >
-              <ArrowUp size={16} />
-            </button>
-          )}
         </div>
       )}
     </>

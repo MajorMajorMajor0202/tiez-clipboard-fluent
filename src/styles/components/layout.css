@@ -250,15 +250,6 @@ select.search-input option {
   flex: 1;
 }
 
-.scroll-top-button {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  z-index: 5;
-  border-radius: var(--radius-pill);
-  padding: 8px;
-}
-
 .virtual-list-wrapper .virtuoso-scroller,
 .virtual-list-wrapper [data-virtuoso-scroller] {
   width: 100%;

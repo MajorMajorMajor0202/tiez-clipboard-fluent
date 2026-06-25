@@ -8,6 +8,7 @@ type UseSearchScrollOptions = {
   showSettings: boolean;
   showTagManager: boolean;
   appSettings: Record<string, string>;
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
 };
 
 export const useSearchScroll = ({
@@ -16,7 +17,8 @@ export const useSearchScroll = ({
   search,
   showSettings,
   showTagManager,
-  appSettings
+  appSettings,
+  searchInputRef
 }: UseSearchScrollOptions) => {
   const scrollTriggerRef = useRef(0);
   const listScrollTopRef = useRef(0);
@@ -58,7 +60,8 @@ export const useSearchScroll = ({
         search.trim() === "" &&
         appSettings["app.show_search_box"] !== "true"
       ) {
-        // See App.tsx note: do not persist setting when hiding temporary search.
+        // Blur input to close any open dropdowns before collapsing
+        searchInputRef?.current?.blur();
         setShowSearchBox(false);
       }
     },
@@ -68,7 +71,8 @@ export const useSearchScroll = ({
       showSearchBox,
       search,
       appSettings,
-      setShowSearchBox
+      setShowSearchBox,
+      searchInputRef
     ]
   );
 
