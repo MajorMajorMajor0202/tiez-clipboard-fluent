@@ -1013,8 +1013,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 5px 12px;
                     font-size: 12px;
                     font-weight: 500;
-                    border: none;
-                    border-radius: 5px;
+                    border: 1px solid transparent;
+                    border-radius: 4px;
                     cursor: pointer;
                     transition: background 0.15s ease, color 0.15s ease;
                     white-space: nowrap;
@@ -1022,12 +1022,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .toolbar-btn.ghost {
                     background: transparent;
+                    border-color: transparent;
                     color: var(--text-secondary);
                 }
                 .toolbar-btn.ghost:hover { background: rgba(128,128,128,0.1); color: var(--text-primary); }
                 .toolbar-btn.primary {
                     background: var(--accent-color);
                     color: #fff;
+                    border-color: var(--border);
                 }
                 .toolbar-btn.primary:hover { filter: brightness(1.1); }
                 .toolbar-btn.accent {
@@ -1042,15 +1044,15 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-btn.danger:hover { background: rgba(211,47,47,0.08); }
                 .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-                /* Sort dropdown */
+                /* Sort dropdown — matches trigger button exactly */
                 .sort-dropdown { position: relative; flex-shrink: 0; }
                 .sort-menu {
                     position: absolute;
                     top: 100%;
+                    left: 0;
                     right: 0;
                     margin-top: 4px;
-                    min-width: 120px;
-                    background: var(--bg-panel);
+                    background: var(--flyout-background, var(--bg-panel));
                     border: var(--flyout-border);
                     border-radius: var(--flyout-radius);
                     box-shadow: var(--flyout-shadow);
@@ -1058,17 +1060,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     -webkit-backdrop-filter: var(--flyout-backdrop-filter);
                     padding: 4px;
                     z-index: 100;
+                    animation: sortMenuIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                @keyframes sortMenuIn {
+                    from { opacity: 0; transform: translateY(-6px) scaleY(0.92); transform-origin: top center; }
+                    to   { opacity: 1; transform: translateY(0) scaleY(1); }
                 }
                 .sort-menu button {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 6px;
                     width: 100%;
-                    padding: 6px 10px;
+                    padding: 5px 12px;
                     font-size: 12px;
                     font-weight: 500;
                     border: none;
-                    border-radius: 4px;
+                    border-radius: 3px;
                     background: transparent;
                     color: var(--text-primary);
                     cursor: pointer;
@@ -1082,10 +1089,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 0;
                     padding: 0;
                     border: 1px solid var(--border);
-                    border-radius: 6px;
+                    border-radius: 5px;
                     background: var(--bg-input);
                     flex-shrink: 0;
-                    overflow: hidden;
                 }
                 .toggle-btn {
                     display: flex;
@@ -1101,9 +1107,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     cursor: pointer;
                     transition: background 0.15s ease;
                 }
+                .toggle-btn:first-child { border-radius: 4px 0 0 4px; }
+                .toggle-btn:last-child  { border-radius: 0 4px 4px 0; }
                 .toggle-btn:hover { background: rgba(128,128,128,0.08); }
                 .toggle-btn.active { background: var(--accent-color); color: #fff; }
-                .toggle-btn.active:hover { background: var(--accent-color); }
+                .toggle-btn.active:hover { background: linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)), var(--accent-color); }
 
                 .items-area { 
                     flex: 1; 
@@ -1555,19 +1563,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .toolbar-btn {
                     padding: 6px 12px;
                     font-size: 13px;
-                    border-radius: 6px;
+                    border-radius: 5px;
                 }
                 .theme-mica .toolbar-btn.primary,
                 .theme-acrylic .toolbar-btn.primary {
                     box-shadow: 0 4px 12px rgba(var(--accent-color-rgb), 0.28);
+                    border-color: rgba(var(--accent-color-rgb), 0.18);
                 }
 
                 .theme-mica .view-toggle,
                 .theme-acrylic .view-toggle {
                     border: 1px solid rgba(var(--accent-color-rgb), 0.12);
-                    border-radius: 6px;
+                    border-radius: 5px;
                     background: var(--bg-input);
-                    overflow: hidden;
                     padding: 0;
                 }
 
@@ -1579,6 +1587,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border: none;
                     background: transparent;
                 }
+                .theme-mica .toggle-btn:first-child,
+                .theme-acrylic .toggle-btn:first-child { border-radius: 4px 0 0 4px; }
+                .theme-mica .toggle-btn:last-child,
+                .theme-acrylic .toggle-btn:last-child { border-radius: 0 4px 4px 0; }
 
                 .theme-mica .toggle-btn.active,
                 .theme-acrylic .toggle-btn.active {
