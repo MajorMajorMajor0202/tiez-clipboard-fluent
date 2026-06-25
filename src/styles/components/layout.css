@@ -253,7 +253,7 @@ select.search-input option {
 .virtual-list-wrapper .virtuoso-scroller,
 .virtual-list-wrapper [data-virtuoso-scroller] {
   width: 100%;
-  padding: 0 16px;
+  padding: 0 24px 0 16px;
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: scroll;
