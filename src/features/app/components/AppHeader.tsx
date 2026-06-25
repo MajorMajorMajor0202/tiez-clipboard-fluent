@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -97,6 +97,39 @@ const AppHeader = ({
       default: return t('type_text') || 'Text';
     }
   };
+
+  // Shared indicator for type filter — slides between active buttons
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const [indicatorRect, setIndicatorRect] = useState<{ left: number; width: number } | null>(null);
+  const prevFilter = useRef<string | null>(null);
+
+  const updateIndicator = useCallback(() => {
+    if (!filterBarRef.current || !typeFilter) {
+      setIndicatorRect(null);
+      return;
+    }
+    const activeBtn = filterBarRef.current.querySelector('.type-filter-btn.active') as HTMLElement | null;
+    if (!activeBtn) {
+      setIndicatorRect(null);
+      return;
+    }
+    const barRect = filterBarRef.current.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    setIndicatorRect({
+      left: btnRect.left - barRect.left + (btnRect.width - 16) / 2,
+      width: 16,
+    });
+  }, [typeFilter]);
+
+  useEffect(() => {
+    updateIndicator();
+  }, [updateIndicator]);
+
+  // Re-measure on resize
+  useEffect(() => {
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [updateIndicator]);
 
   // Segoe Fluent Icons — official Microsoft icon codepoints
   const FILTER_ICONS: Record<string, string> = {
@@ -271,8 +304,10 @@ const AppHeader = ({
                 )}
               </div>
               <div
+                ref={filterBarRef}
                 className="hide-scrollbar"
                 style={{
+                  position: 'relative',
                   display: 'flex',
                   gap: '8px',
                   padding: '8px 0 16px 0',
@@ -291,12 +326,36 @@ const AppHeader = ({
                   <FluentTooltip key={t} text={getTypeName(t)}>
                     <button
                       className={`type-filter-btn ${typeFilter === t ? 'active' : ''}`}
-                      onClick={() => setTypeFilter(typeFilter === t ? null : t)}
+                      onClick={() => {
+                        prevFilter.current = typeFilter;
+                        setTypeFilter(typeFilter === t ? null : t);
+                      }}
                     >
                       <span className="type-filter-icon">{FILTER_ICONS[t]}</span>
                     </button>
                   </FluentTooltip>
                 ))}
+                {indicatorRect && (
+                  <motion.div
+                    className="type-filter-indicator"
+                    initial={{
+                      left: indicatorRect.left,
+                      opacity: prevFilter.current === null ? 0 : 1,
+                      scaleX: prevFilter.current === null ? 0.6 : 1,
+                    }}
+                    animate={{
+                      left: indicatorRect.left,
+                      opacity: 1,
+                      scaleX: 1,
+                    }}
+                    transition={{
+                      left: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+                      opacity: { duration: 0.2, ease: 'easeOut' },
+                      scaleX: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+                    }}
+                    style={{ position: 'absolute', bottom: 0 }}
+                  />
+                )}
               </div>
 
             </div>

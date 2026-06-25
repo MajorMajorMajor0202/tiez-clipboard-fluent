@@ -133,26 +133,14 @@ header {
   opacity: 1;
 }
 
-/* Accent underline — 18×3px, centered, fluent slide animation */
-.type-filter-btn.active::after {
-  content: "";
+/* Accent underline indicator — 16×3px, shared element animated with framer-motion */
+.type-filter-indicator {
   position: absolute;
   bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 16px;
   height: 3px;
   background: var(--accent-color, AccentColor);
   border-radius: 2px;
-  transition:
-    left 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.15s ease;
-  animation: indicatorSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes indicatorSlideIn {
-  from { opacity: 0; transform: translateX(-50%) scaleX(0.6); }
-  to   { opacity: 1; transform: translateX(-50%) scaleX(1); }
 }
 
 /* Segoe Fluent Icons */
