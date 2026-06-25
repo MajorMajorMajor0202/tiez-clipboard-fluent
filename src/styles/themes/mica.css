@@ -32,7 +32,7 @@ body.theme-mica {
   --toolbar-border: none;
 
   --input-border: 1px solid rgba(128, 128, 128, 0.18);
-  --input-radius: 12px;
+  --input-radius: 4px;
   --input-shadow: none;
   --input-focus-shadow: 0 0 0 3px rgba(79, 125, 255, 0.14);
 
@@ -44,7 +44,7 @@ body.theme-mica {
   --button-active-filled-shadow: 0 12px 24px rgba(79, 125, 255, 0.26);
 
   --card-border: 1px solid rgba(128, 128, 128, 0.16);
-  --card-radius: 8px;
+  --card-radius: 4px;
   --card-shadow: none;
   --card-hover-shadow: var(--shadow-sm);
   --card-selected-background: rgba(79, 125, 255, 0.1);

@@ -168,17 +168,16 @@ header {
   background: var(--bg-input);
   border: var(--input-border);
   border-radius: var(--input-radius);
-  padding: 10px 12px 10px 36px;
+  padding: 6px 12px 6px 32px;
   color: var(--text-primary);
   font-family: inherit;
   font-weight: var(--input-font-weight);
   font-size: 14px;
   outline: none;
-  box-shadow: var(--input-shadow);
+  box-shadow: none;
   transition:
     background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    border-color 0.18s ease;
 }
 
 select.search-input,
@@ -199,8 +198,8 @@ select.search-input option {
 
 .search-input:focus {
   background: var(--bg-input);
-  border-color: var(--input-focus-border-color);
-  box-shadow: var(--input-focus-shadow);
+  border-color: var(--line-strong);
+  box-shadow: none;
 }
 
 .search-icon {
