@@ -86,15 +86,15 @@ body.theme-mica {
   --flyout-label-opacity: 0.7;
 }
 
-/* Scrollbar — constant 8px layout width (border trick for visual 4px→8px hover, no reflow) */
+/* Scrollbar — constant 6px layout width (border trick for visual 2px→6px hover, no reflow) */
 body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar-track {
   background: transparent;
 }
 body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar-thumb {
-  border-radius: 4px;
+  border-radius: 3px;
   background: rgba(128, 128, 128, 0.4);
   border: 2px solid transparent;
   background-clip: padding-box;

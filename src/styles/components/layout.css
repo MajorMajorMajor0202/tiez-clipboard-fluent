@@ -140,7 +140,7 @@ header {
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 18px;
+  width: 16px;
   height: 3px;
   background: var(--accent-color, AccentColor);
   border-radius: 2px;
@@ -273,7 +273,7 @@ select.search-input option {
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.18s ease;
-  margin: 0 8px 2px 16px;
+  margin: 0 10px 2px 16px;
   height: 100%;
   overflow: visible;
   display: flex;
