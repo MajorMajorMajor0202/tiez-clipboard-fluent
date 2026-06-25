@@ -90,7 +90,7 @@ body.theme-mica {
 body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar {
   width: 4px;
 }
-body.theme-mica [data-virtuoso-scroller]:hover::-webkit-scrollbar {
+body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar:hover {
   width: 8px;
 }
 body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar-track {
