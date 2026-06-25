@@ -332,6 +332,14 @@
   flex-direction: row;
   align-items: center;
   gap: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.history-item:hover .item-actions {
+  opacity: 1;
+  visibility: visible;
 }
 
 .item-actions .btn-icon {
