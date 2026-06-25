@@ -314,7 +314,7 @@ select.search-input option {
   display: flex !important;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 4px;
   transition: all 0.2s;
   color: var(--text-secondary);
 }

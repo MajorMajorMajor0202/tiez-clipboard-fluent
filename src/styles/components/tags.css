@@ -113,7 +113,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 3px;
-    border-radius: 8px;
+    border-radius: var(--fluent-corner-overlay);
     background: var(--bg-element);
     border: var(--tags-border);
     box-shadow: var(--tags-shadow);
@@ -128,7 +128,7 @@
     margin: 0;
     padding: 2px 4px;
     border: none;
-    border-radius: 5px;
+    border-radius: var(--fluent-corner-control);
     background: transparent;
     color: var(--text-primary);
     font-size: 10px;
@@ -183,7 +183,7 @@
 /* --- Modern Styles (Mica / Acrylic) --- */
 .theme-mica .search-input.dropdown-open,
 .theme-acrylic .search-input.dropdown-open {
-    border-radius: 10px !important;
+    border-radius: var(--fluent-corner-overlay) !important;
     border: 1px solid rgba(128, 128, 128, 0.2) !important;
     box-shadow: none !important;
     background: rgba(255, 255, 255, 0.75) !important;
