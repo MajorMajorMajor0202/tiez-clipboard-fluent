@@ -13,17 +13,16 @@
   right: 0;
   bottom: 0;
   width: 8px;
-  display: flex;
-  flex-direction: column;
   pointer-events: auto;
   z-index: 100;
 }
 
-/* ── Arrow buttons (top & bottom) ── */
+/* ── Arrow buttons — absolutely inside the track at top & bottom ── */
 .fluent-scrollbar__arrow {
-  width: 8px;
+  position: absolute;
+  left: 0;
+  width: 100%;
   height: 20px;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,41 +30,45 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  border-radius: 2px;
+  /* Hidden (transparent) in rest state */
   color: transparent;
   transition:
     color 0.18s ease,
-    background 0.18s ease,
-    width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  /* Arrows are hidden in rest state */
+    background 0.18s ease;
   pointer-events: none;
+  z-index: 2;
 }
+
+.fluent-scrollbar__arrow--up   { top: 0; }
+.fluent-scrollbar__arrow--down { bottom: 0; }
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow {
   color: var(--text-secondary, rgba(96, 96, 96, 0.7));
   pointer-events: auto;
-  width: 12px;
 }
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow:hover {
-  background: rgba(128, 128, 128, 0.12);
+  background: rgba(128, 128, 128, 0.14);
   color: var(--text-primary, rgba(32, 32, 32, 0.85));
 }
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow:active {
-  background: rgba(128, 128, 128, 0.2);
+  background: rgba(128, 128, 128, 0.22);
 }
 
-/* ── Track ── */
+/* ── Track — fills the full height of the scrollbar host ── */
 .fluent-scrollbar__track {
-  flex: 1;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
   transition: background 0.2s ease;
-  overflow: hidden;
+  /* Allow thumb drag outside track bounds to propagate up */
+  overflow: visible;
 }
 
 .fluent-scrollbar--active .fluent-scrollbar__track {

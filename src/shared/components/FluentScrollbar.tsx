@@ -118,41 +118,47 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button
-        className="fluent-scrollbar__arrow"
-        onClick={handleArrowUp}
-        aria-label="Scroll up"
-        tabIndex={-1}
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" aria-hidden="true">
-          <path d="M1 4L4 1L7 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-
+      {/* Track fills all vertical space; arrows sit inside it */}
       <div
         ref={trackRef}
         className="fluent-scrollbar__track"
         onClick={handleTrackClick}
       >
+        {/* Up arrow — absolutely positioned at top of track */}
+        <button
+          className="fluent-scrollbar__arrow fluent-scrollbar__arrow--up"
+          onClick={(e) => { e.stopPropagation(); handleArrowUp(); }}
+          aria-label="Scroll up"
+          tabIndex={-1}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {/* Solid filled upward triangle */}
+          <svg width="6" height="4" viewBox="0 0 6 4" aria-hidden="true">
+            <polygon points="3,0 6,4 0,4" fill="currentColor" />
+          </svg>
+        </button>
+
+        {/* Thumb */}
         <div
           className="fluent-scrollbar__thumb"
-          style={{ top: thumbTop, height: thumbHeight }}
+          style={{ top: thumbTop + ARROW_H, height: thumbHeight }}
           onMouseDown={handleThumbMouseDown}
         />
-      </div>
 
-      <button
-        className="fluent-scrollbar__arrow"
-        onClick={handleArrowDown}
-        aria-label="Scroll down"
-        tabIndex={-1}
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" aria-hidden="true">
-          <path d="M1 1L4 4L7 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
+        {/* Down arrow — absolutely positioned at bottom of track */}
+        <button
+          className="fluent-scrollbar__arrow fluent-scrollbar__arrow--down"
+          onClick={(e) => { e.stopPropagation(); handleArrowDown(); }}
+          aria-label="Scroll down"
+          tabIndex={-1}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {/* Solid filled downward triangle */}
+          <svg width="6" height="4" viewBox="0 0 6 4" aria-hidden="true">
+            <polygon points="3,4 0,0 6,0" fill="currentColor" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };
