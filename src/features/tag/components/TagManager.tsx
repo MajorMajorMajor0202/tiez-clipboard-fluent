@@ -473,10 +473,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             <button className="toolbar-btn ghost" onClick={() => { setIsManageMode(false); setSelectedItemIds(new Set()); }}>
                                                 {t('cancel') || '取消'}
                                             </button>
-                                            <button className="toolbar-btn neutral" disabled={selectedItemIds.size === 0} onClick={() => setItemDeleteConfirmation({ show: true, id: -1 })}>
+                                            <button className="toolbar-btn neutral manage-btn" disabled={selectedItemIds.size === 0} onClick={() => setItemDeleteConfirmation({ show: true, id: -1 })}>
                                                 <Trash2 size={14} /> <span>{t('delete') || '删除'}</span>
                                             </button>
-                                            <button className="toolbar-btn neutral" disabled={selectedItemIds.size === 0} onClick={async () => {
+                                            <button className="toolbar-btn neutral manage-btn" disabled={selectedItemIds.size === 0} onClick={async () => {
                                                 const selectedItems = tagItems.filter(item => selectedItemIds.has(item.id));
                                                 if (selectedItems.length > 0) {
                                                     await invoke('copy_to_clipboard', { content: selectedItems.map(i => i.content).join('\n'), contentType: 'text', paste: true, id: -1, deleteAfterUse: false });
@@ -1144,9 +1144,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(0, 0, 0, 0.04);
                     border: 1px solid var(--line-soft);
                     color: var(--text-primary);
-                    width: 72px;
-                    justify-content: center;
                     gap: 6px;
+                }
+                .toolbar-btn.neutral.manage-btn {
+                    width: 72px !important;
+                    justify-content: center !important;
                 }
                 .dark-mode .toolbar-btn.neutral {
                     background: rgba(255, 255, 255, 0.05);
