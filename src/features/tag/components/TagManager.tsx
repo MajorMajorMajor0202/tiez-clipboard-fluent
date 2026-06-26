@@ -761,7 +761,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-family: var(--font-main, ui-monospace, monospace);
                     color: var(--text-primary);
                     gap: 12px;
-                    padding: 12px;
+                    padding: 8px 12px 12px;
                 }
 
                 /* Sidebar */
@@ -1558,7 +1558,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica.themed-tag-manager,
                 .theme-acrylic.themed-tag-manager {
                     gap: 12px;
-                    padding: 12px;
+                    padding: 8px 12px 12px;
                     background: transparent !important;
                     overflow: hidden;
                 }

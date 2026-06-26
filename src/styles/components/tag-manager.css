@@ -6,7 +6,7 @@
   height: 100% !important;
   min-height: 0 !important;
   gap: var(--tm-gap) !important;
-  padding: 12px !important;
+  padding: 8px 12px 12px !important;
   background: var(--bg-content) !important;
   color: var(--text-primary) !important;
   font-family: var(--font-main) !important;
@@ -1037,7 +1037,7 @@
   .themed-tag-manager {
     flex-direction: column !important;
     gap: 4px !important;
-    padding: 4px !important;
+    padding: 8px 4px 4px !important;
   }
 
   .themed-tag-manager .tag-sidebar {
