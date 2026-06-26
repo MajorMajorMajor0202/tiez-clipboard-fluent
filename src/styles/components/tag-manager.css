@@ -304,7 +304,7 @@
   transition: padding-right 0.15s ease !important;
 }
 
-.themed-tag-manager .tag-item:hover .tag-name-area {
+.themed-tag-manager .tag-item.has-actions:hover .tag-name-area {
   padding-right: 52px !important;
 }
 

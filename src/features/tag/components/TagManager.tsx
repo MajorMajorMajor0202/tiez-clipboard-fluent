@@ -911,7 +911,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     overflow: hidden;
                     transition: padding-right 0.15s ease;
                 }
-                .tag-item:hover .tag-name-area {
+                .tag-item.has-actions:hover .tag-name-area {
                     padding-right: 52px;
                 }
                 .tag-name {
