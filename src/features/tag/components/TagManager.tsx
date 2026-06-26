@@ -293,42 +293,44 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
         >
             <div className="tag-sidebar">
-                <div className="tag-search-box">
-                    <div className="search-input-wrapper">
-                        <Search size={12} className="search-icon-placeholder" />
-                        <input
-                            placeholder={t('find_or_create')}
-                            value={tagSearch}
-                            onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
-                            onFocus={() => invoke('activate_window_focus').catch(console.error)}
-                            onChange={e => setTagSearch(e.target.value)}
-                            onKeyDown={async (e) => {
-                                if (e.key === 'Enter' && tagSearch.trim()) {
-                                    const exactMatch = tags.find(t => t.name.toLowerCase() === normalizedTagSearch);
-                                    if (exactMatch) {
-                                        loadTagItems(exactMatch.name);
-                                    } else {
-                                        await createTag(tagSearch);
+                {!isCollapsed && (
+                    <div className="tag-search-box">
+                        <div className="search-input-wrapper">
+                            <Search size={12} className="search-icon-placeholder" />
+                            <input
+                                placeholder={t('find_or_create')}
+                                value={tagSearch}
+                                onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                                onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                onChange={e => setTagSearch(e.target.value)}
+                                onKeyDown={async (e) => {
+                                    if (e.key === 'Enter' && tagSearch.trim()) {
+                                        const exactMatch = tags.find(t => t.name.toLowerCase() === normalizedTagSearch);
+                                        if (exactMatch) {
+                                            loadTagItems(exactMatch.name);
+                                        } else {
+                                            await createTag(tagSearch);
+                                        }
                                     }
-                                }
-                            }}
-                        />
-                        {tagSearch ? (
-                            <div className="action-icons">
-                                {canCreateTag ? (
-                                    <span
-                                        title={t('create_new_tag_tooltip')}
-                                        className="action-icon create"
-                                        onClick={() => createTag(tagSearch)}
-                                    >
-                                        <Plus size={12} />
-                                    </span>
-                                ) : null}
-                                <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
-                            </div>
-                        ) : null}
+                                }}
+                            />
+                            {tagSearch ? (
+                                <div className="action-icons">
+                                    {canCreateTag ? (
+                                        <span
+                                            title={t('create_new_tag_tooltip')}
+                                            className="action-icon create"
+                                            onClick={() => createTag(tagSearch)}
+                                        >
+                                            <Plus size={12} />
+                                        </span>
+                                    ) : null}
+                                    <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="tag-scroll custom-scrollbar">
                     {selectedIndex !== -1 && (
@@ -336,7 +338,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             className="tag-selection-indicator"
                             style={{
                                 transform: isStacked && isCollapsed
-                                    ? `translateX(${selectedIndex * 40}px)`
+                                    ? `translateX(${selectedIndex * 36}px)`
                                     : `translateY(${16 + selectedIndex * 36}px)`,
                             }}
                         >

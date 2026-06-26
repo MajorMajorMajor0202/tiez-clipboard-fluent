@@ -1074,7 +1074,7 @@
     padding: 4px 8px 8px !important;
     height: 44px !important;
     max-height: 44px !important;
-    gap: 8px !important;
+    gap: 4px !important;
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item {
