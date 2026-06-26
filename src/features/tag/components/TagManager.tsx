@@ -1268,7 +1268,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.015), inset 0 -1px 0 rgba(0, 0, 0, 0.05) !important;
                 }
                 .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:hover {
-                    background: #f9f9f9 !important;
+                    background: #fafafa !important;
                     border-color: var(--line-strong) !important;
                 }
                 .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:active {
@@ -1299,7 +1299,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
-                    background: #f8f8f8;
+                    background: #fafafa;
                     border: var(--flyout-border);
                     border-radius: 4px;
                     box-shadow: var(--flyout-shadow);
@@ -1440,7 +1440,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     margin-top: 4px;
                     width: 120px;
                     height: 64px;
-                    background: #f8f8f8;
+                    background: #fafafa;
                     border: 1px solid var(--line-soft);
                     border-radius: 4px;
                     padding: 8px 12px;
@@ -1484,7 +1484,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--text-secondary);
                 }
                 .view-menu button:hover {
-                    background: #f8f8f8;
+                    background: #fafafa;
                 }
                 .dark-mode .view-menu button:hover {
                     background: rgba(255, 255, 255, 0.12);
@@ -1498,7 +1498,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--text-secondary);
                 }
                 .view-menu button.active:hover {
-                    background: #f8f8f8;
+                    background: #fafafa;
                 }
                 .dark-mode .view-menu button.active:hover {
                     background: rgba(255, 255, 255, 0.12);
@@ -1599,7 +1599,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .confirm-dialog-lower {
                     padding: 16px 24px !important;
-                    background: #f3f3f3 !important;
+                    background: #f5f5f5 !important;
                     border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
                     border-bottom-left-radius: 8px !important;
                     border-bottom-right-radius: 8px !important;
@@ -1744,7 +1744,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .confirm-dialog-lower,
                 .theme-acrylic .confirm-dialog-lower {
-                    background: #f3f3f3 !important;
+                    background: #f5f5f5 !important;
                     border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
                     border-bottom-left-radius: 8px !important;
                     border-bottom-right-radius: 8px !important;
