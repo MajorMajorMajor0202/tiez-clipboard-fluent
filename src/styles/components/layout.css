@@ -204,6 +204,30 @@ select.search-input option {
   box-shadow: none;
 }
 
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0 0 var(--input-radius) var(--input-radius);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.search-input-wrapper:focus-within::after {
+  transform: scaleX(1);
+}
+
 .search-icon {
   position: absolute;
   left: 12px;

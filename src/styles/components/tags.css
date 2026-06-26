@@ -8,8 +8,8 @@
     display: flex !important;
     flex-direction: column !important;
     gap: 8px;
-    visibility: visible !important;
-    opacity: 1 !important;
+    visibility: visible;
+    opacity: 1;
     pointer-events: auto !important;
     min-height: 50px !important;
     max-height: min(280px, 50vh);

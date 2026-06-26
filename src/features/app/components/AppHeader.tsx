@@ -241,7 +241,7 @@ const AppHeader = ({
             style={{ flexShrink: 0 }}
           >
             <div className="search-container window-no-drag">
-              <div style={{ position: 'relative' }}>
+              <div className="search-input-wrapper">
                 <Search size={14} className="search-icon" />
                 <input
                   ref={searchInputRef}
@@ -274,31 +274,40 @@ const AppHeader = ({
                     }, 200);
                   }}
                 />
-                {showTagFilter && searchIsFocused && allTags.length > 0 && (
-                  <div className="tags-dropdown">
-                    <div className="tags-label">{t('tags') || "Tags"}</div>
-                    <div className="tags-list">
-                      {allTags.map(tag => {
-                        const tagBackground = getTagColor(tag, theme);
-                        return (
-                          <span
-                            className="tag-chip"
-                            key={tag}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              setSearch("tag:" + tag);
-                              setShowTagFilter(false);
-                            }}
-                            data-tag={tag}
-                            style={{ background: tagBackground, color: getTagTextColor(tagBackground) }}
-                          >
-                            {tag}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {showTagFilter && searchIsFocused && allTags.length > 0 && (
+                    <motion.div
+                      className="tags-dropdown"
+                      initial={{ opacity: 0, y: -8, scaleY: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                      exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
+                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ transformOrigin: 'top center' }}
+                    >
+                      <div className="tags-label">{t('tags') || "Tags"}</div>
+                      <div className="tags-list">
+                        {allTags.map(tag => {
+                          const tagBackground = getTagColor(tag, theme);
+                          return (
+                            <span
+                              className="tag-chip"
+                              key={tag}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setSearch("tag:" + tag);
+                                setShowTagFilter(false);
+                              }}
+                              data-tag={tag}
+                              style={{ background: tagBackground, color: getTagTextColor(tagBackground) }}
+                            >
+                              {tag}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <div
                 ref={filterBarRef}
