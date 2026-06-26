@@ -278,7 +278,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             ref={containerRef}
             className={`themed-tag-manager theme-${theme} ${isCollapsed ? 'sidebar-collapsed' : ''} ${isStacked ? 'stacked-layout' : ''}`}
             style={{ 
-                ["--tm-sidebar-width" as any]: isCollapsed ? '48px' : `${sidebarWidth}px`,
+                ["--tm-sidebar-width" as any]: isCollapsed ? '50px' : `${sidebarWidth}px`,
                 ["--tm-sidebar-height" as any]: `${sidebarHeight}px`
             } as any}
             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
@@ -335,11 +335,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             onClick={() => loadTagItems(tag.name)}
                             title={tag.name}
                         >
-                            <div className="tag-color-wrapper" onClick={(e) => e.stopPropagation()}>
+                            <div className="tag-color-wrapper">
                                 <div
                                     className="tag-color-dot"
                                     style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
-                                    onClick={() => document.getElementById(`color-picker-${tag.name}`)?.click()}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        document.getElementById(`color-picker-${tag.name}`)?.click();
+                                    }}
                                 />
                                 <input
                                     type="color"
@@ -354,46 +357,48 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                     }}
                                 />
                             </div>
-                            {editingTag === tag.name ? (
-                                <input
-                                    className="inline-tag-edit"
-                                    value={newTagName}
-                                    onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
-                                    onFocus={() => invoke('activate_window_focus').catch(console.error)}
-                                    onChange={(e) => setNewTagName(e.target.value)}
-                                    autoFocus
-                                    onKeyDown={async (e) => {
-                                        if (e.key === 'Enter') {
-                                            await handleRenameTag(tag.name);
-                                        } else if (e.key === 'Escape') {
-                                            setEditingTag(null);
-                                        }
-                                    }}
-                                    onBlur={() => setEditingTag(null)}
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-                            ) : (
-                                <div className="tag-name-area">
-                                    <span className="tag-name">{tag.name}</span>
-                                    {(tag.name !== 'sensitive' && tag.name !== '密码') && (
-                                        <div className="tag-hover-actions">
-                                            <span title="重命名" onClick={(e) => {
-                                                e.stopPropagation();
-                                                setEditingTag(tag.name);
-                                                setNewTagName(tag.name);
-                                            }}>
-                                                <Edit2 size={13} />
-                                            </span>
-                                            <span title="删除" onClick={(e) => {
-                                                e.stopPropagation();
-                                                e.preventDefault();
-                                                setDeleteConfirmation({ show: true, tagName: tag.name });
-                                            }}>
-                                                <Trash2 size={13} />
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
+                            {!isCollapsed && (
+                                editingTag === tag.name ? (
+                                    <input
+                                        className="inline-tag-edit"
+                                        value={newTagName}
+                                        onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                                        onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                        onChange={(e) => setNewTagName(e.target.value)}
+                                        autoFocus
+                                        onKeyDown={async (e) => {
+                                            if (e.key === 'Enter') {
+                                                await handleRenameTag(tag.name);
+                                            } else if (e.key === 'Escape') {
+                                                setEditingTag(null);
+                                            }
+                                        }}
+                                        onBlur={() => setEditingTag(null)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                ) : (
+                                    <div className="tag-name-area">
+                                        <span className="tag-name">{tag.name}</span>
+                                        {(tag.name !== 'sensitive' && tag.name !== '密码') && (
+                                            <div className="tag-hover-actions">
+                                                <span title="重命名" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setEditingTag(tag.name);
+                                                    setNewTagName(tag.name);
+                                                }}>
+                                                    <Edit2 size={13} />
+                                                </span>
+                                                <span title="删除" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    setDeleteConfirmation({ show: true, tagName: tag.name });
+                                                }}>
+                                                    <Trash2 size={13} />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
                             )}
                         </div>
                     ))}
@@ -750,7 +755,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     overflow: hidden;
                     border: var(--panel-border);
                 }
-                .sidebar-collapsed .tag-sidebar { width: 48px; }
+                .sidebar-collapsed .tag-sidebar { width: 50px; }
                 
                 .sidebar-header {
                     padding: 0 10px;
@@ -900,11 +905,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .tag-item.create-hint { border: 1px dashed var(--border); opacity: 0.8; }
                 .tag-item.create-hint:hover { background: var(--bg-main); border-style: solid; }
 
-                .sidebar-collapsed .tag-item { justify-content: center; padding: 0 6px; gap: 0; height: 32px; min-height: 32px; }
+                .sidebar-collapsed .tag-item { justify-content: center; align-items: center; height: 32px; min-height: 32px; width: 32px; padding: 0; margin-left: auto; margin-right: auto; gap: 0; }
                 .sidebar-collapsed .tag-name,
                 .sidebar-collapsed .tag-name-area,
-                .sidebar-collapsed .tag-hover-actions { display: none; }
-                .sidebar-collapsed .tag-color-wrapper { width: 100%; justify-content: center; }
+                .sidebar-collapsed .tag-hover-actions { display: none !important; }
+                .sidebar-collapsed .tag-color-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; margin: 0; }
                 .tag-color-wrapper { display: flex; align-items: center; justify-content: center; }
                 .tag-color-dot { 
                     width: 10px; 
@@ -1407,7 +1412,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica.sidebar-collapsed .tag-sidebar,
                 .theme-acrylic.sidebar-collapsed .tag-sidebar {
-                    width: 64px;
+                    width: 50px;
                 }
                 .theme-mica .sidebar-header,
                 .theme-acrylic .sidebar-header {
