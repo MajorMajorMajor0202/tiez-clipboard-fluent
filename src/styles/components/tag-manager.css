@@ -11,6 +11,7 @@
   color: var(--text-primary) !important;
   font-family: var(--font-main) !important;
   box-sizing: border-box;
+  overflow: hidden !important;
 }
 
 .theme-mica.themed-tag-manager,
@@ -466,7 +467,7 @@
 
 .themed-tag-manager .tag-content {
   flex: 1 !important;
-  min-width: 0 !important;
+  min-width: 320px !important;
   min-height: 0 !important;
   display: flex !important;
   flex-direction: column !important;

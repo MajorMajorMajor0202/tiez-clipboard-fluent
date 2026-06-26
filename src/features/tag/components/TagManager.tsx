@@ -1044,7 +1044,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 /* Content Area */
-                .tag-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+                .tag-content { flex: 1; min-width: 320px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
                 .content-toolbar {
                     display: flex;
                     flex-direction: column;
@@ -1759,7 +1759,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-content,
                 .theme-acrylic .tag-content {
-                    min-width: 0;
+                    min-width: 320px;
                     border: var(--panel-border);
                     border-radius: 4px;
                     background: var(--bg-panel);
