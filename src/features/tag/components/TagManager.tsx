@@ -346,80 +346,100 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             <div key={selectedTag} className="tag-selection-indicator-inner" />
                         </div>
                     )}
-                    {filteredTags.map(tag => (
-                        <div
-                            key={tag.name}
-                            className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${(tag.name !== 'sensitive' && tag.name !== '密码') ? 'has-actions' : ''}`}
-                            onClick={() => loadTagItems(tag.name)}
-                            title={tag.name}
-                        >
-                            <div className="tag-color-wrapper">
-                                <div
-                                    className="tag-color-dot"
-                                    style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        document.getElementById(`color-picker-${tag.name}`)?.click();
-                                    }}
-                                />
-                                <input
-                                    type="color"
-                                    id={`color-picker-${tag.name}`}
-                                    style={{ display: 'none' }}
-                                    value={tagColors[tag.name] || '#888888'}
-                                    onChange={async (e) => {
-                                        const newColor = e.target.value;
-                                        setTagColors(prev => ({ ...prev, [tag.name]: newColor }));
-                                        await invoke('set_tag_color', { name: tag.name, color: newColor });
-                                        await emit('tag-colors-updated');
-                                    }}
-                                />
-                            </div>
-                            {!isCollapsed && (
-                                editingTag === tag.name ? (
-                                    <input
-                                        className="inline-tag-edit"
-                                        value={newTagName}
-                                        onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
-                                        onFocus={() => invoke('activate_window_focus').catch(console.error)}
-                                        onChange={(e) => setNewTagName(e.target.value)}
-                                        autoFocus
-                                        onKeyDown={async (e) => {
-                                            if (e.key === 'Enter') {
-                                                await handleRenameTag(tag.name);
-                                            } else if (e.key === 'Escape') {
-                                                setEditingTag(null);
-                                            }
+                    {filteredTags.map(tag => {
+                        const tagItemContent = (
+                            <div
+                                className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${(tag.name !== 'sensitive' && tag.name !== '密码') ? 'has-actions' : ''}`}
+                                onClick={() => loadTagItems(tag.name)}
+                            >
+                                <div className="tag-color-wrapper">
+                                    <div
+                                        className="tag-color-dot"
+                                        style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            document.getElementById(`color-picker-${tag.name}`)?.click();
                                         }}
-                                        onBlur={() => setEditingTag(null)}
-                                        onClick={(e) => e.stopPropagation()}
                                     />
-                                ) : (
-                                    <div className="tag-name-area">
-                                        <span className="tag-name">{tag.name}</span>
-                                        {(tag.name !== 'sensitive' && tag.name !== '密码') && (
-                                            <div className="tag-hover-actions">
-                                                <span title="重命名" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setEditingTag(tag.name);
-                                                    setNewTagName(tag.name);
-                                                }}>
-                                                    <Edit2 size={13} />
-                                                </span>
-                                                <span title="删除" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    e.preventDefault();
-                                                    setDeleteConfirmation({ show: true, tagName: tag.name });
-                                                }}>
-                                                    <Trash2 size={13} />
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            )}
-                        </div>
-                    ))}
+                                    <input
+                                        type="color"
+                                        id={`color-picker-${tag.name}`}
+                                        style={{ display: 'none' }}
+                                        value={tagColors[tag.name] || '#888888'}
+                                        onChange={async (e) => {
+                                            const newColor = e.target.value;
+                                            setTagColors(prev => ({ ...prev, [tag.name]: newColor }));
+                                            await invoke('set_tag_color', { name: tag.name, color: newColor });
+                                            await emit('tag-colors-updated');
+                                        }}
+                                    />
+                                </div>
+                                {!isCollapsed && (
+                                    editingTag === tag.name ? (
+                                        <input
+                                            className="inline-tag-edit"
+                                            value={newTagName}
+                                            onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                                            onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                            onChange={(e) => setNewTagName(e.target.value)}
+                                            autoFocus
+                                            onKeyDown={async (e) => {
+                                                if (e.key === 'Enter') {
+                                                    await handleRenameTag(tag.name);
+                                                } else if (e.key === 'Escape') {
+                                                    setEditingTag(null);
+                                                }
+                                            }}
+                                            onBlur={() => setEditingTag(null)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        <div className="tag-name-area">
+                                            <span className="tag-name">{tag.name}</span>
+                                            {(tag.name !== 'sensitive' && tag.name !== '密码') && (
+                                                <div className="tag-hover-actions">
+                                                    <FluentTooltip text={t('rename') || '重命名'}>
+                                                        <span
+                                                            style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setEditingTag(tag.name);
+                                                                setNewTagName(tag.name);
+                                                            }}
+                                                        >
+                                                            <Edit2 size={13} />
+                                                        </span>
+                                                    </FluentTooltip>
+                                                    <FluentTooltip text={t('delete') || '删除'}>
+                                                        <span
+                                                            style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                setDeleteConfirmation({ show: true, tagName: tag.name });
+                                                            }}
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </span>
+                                                    </FluentTooltip>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        );
+
+                        return isCollapsed ? (
+                            <FluentTooltip key={tag.name} text={tag.name}>
+                                {tagItemContent}
+                            </FluentTooltip>
+                        ) : (
+                            <span key={tag.name} style={{ display: 'contents' }}>
+                                {tagItemContent}
+                            </span>
+                        );
+                    })}
                     {filteredTags.length === 0 && !tagSearch.trim() && (
                         <div className="sidebar-status">{t('no_tags')}</div>
                     )}
@@ -433,23 +453,24 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 </div>
 
                 <div className="sidebar-header">
-                    <button
-                        className="collapse-toggle"
-                        title={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}
-                        onClick={() => {
-                            const newCollapsed = !isCollapsed;
-                            setIsCollapsed(newCollapsed);
-                            if (!newCollapsed && sidebarWidth < 108) {
-                                setSidebarWidth(160);
-                            }
-                        }}
-                    >
-                        {isStacked ? (
-                            isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
-                        ) : (
-                            isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
-                        )}
-                    </button>
+                    <FluentTooltip text={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}>
+                        <button
+                            className="collapse-toggle"
+                            onClick={() => {
+                                const newCollapsed = !isCollapsed;
+                                setIsCollapsed(newCollapsed);
+                                if (!newCollapsed && sidebarWidth < 108) {
+                                    setSidebarWidth(160);
+                                }
+                            }}
+                        >
+                            {isStacked ? (
+                                isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
+                            ) : (
+                                isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
+                            )}
+                        </button>
+                    </FluentTooltip>
                 </div>
             </div>
 
@@ -496,12 +517,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             </button>
                                         </>
                                     ) : (
-                                        <button className="toolbar-btn ghost" onClick={() => setIsManageMode(true)} title={t('manage_items') || '管理条目'}>
+                                        <button className="toolbar-btn ghost" onClick={() => setIsManageMode(true)}>
                                             <CheckSquare size={14} /> <span>{t('manage') || '管理'}</span>
                                         </button>
                                     )}
                                     {!isManageMode && (
-                                        <button className="toolbar-btn primary" onClick={() => setIsCreatingItem(true)} title={t('add_item') || '新建条目'}>
+                                        <button className="toolbar-btn primary" onClick={() => setIsCreatingItem(true)}>
                                             <Plus size={15} /> <span>{t('add_item') || '新建条目'}</span>
                                         </button>
                                     )}
@@ -584,37 +605,42 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             ) : (
                                                 <>
                                                     {(item.content_type === 'text' || item.content_type === 'code') && (
-                                                        <button className="card-action-btn" title="编辑" onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setEditingItem({ id: item.id, content: item.content });
-                                                        }}>
-                                                            <Edit2 size={10} />
-                                                        </button>
+                                                        <FluentTooltip text={t('edit') || '编辑'}>
+                                                            <button className="card-action-btn" onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setEditingItem({ id: item.id, content: item.content });
+                                                            }}>
+                                                                <Edit2 size={10} />
+                                                            </button>
+                                                        </FluentTooltip>
                                                     )}
-                                                    <button
-                                                        className="card-action-btn"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            invoke('open_content', {
-                                                                id: item.id,
-                                                                content: item.content,
-                                                                contentType: item.content_type
-                                                            });
-                                                        }}
-                                                        title={t('open')}
-                                                    >
-                                                        <ExternalLink size={10} />
-                                                    </button>
+                                                    <FluentTooltip text={t('open') || '打开'}>
+                                                        <button
+                                                            className="card-action-btn"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                invoke('open_content', {
+                                                                    id: item.id,
+                                                                    content: item.content,
+                                                                    contentType: item.content_type
+                                                                });
+                                                            }}
+                                                        >
+                                                            <ExternalLink size={10} />
+                                                        </button>
+                                                    </FluentTooltip>
                                                 </>
                                             )}
                                         </div>
                                         {!isManageMode && (
-                                            <button className="del-btn" title="删除" onClick={(e) => {
-                                                e.stopPropagation();
-                                                setItemDeleteConfirmation({ show: true, id: item.id });
-                                            }}>
-                                                <X size={10} />
-                                            </button>
+                                            <FluentTooltip text={t('delete') || '删除'}>
+                                                <button className="del-btn" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setItemDeleteConfirmation({ show: true, id: item.id });
+                                                }}>
+                                                    <X size={10} />
+                                                </button>
+                                            </FluentTooltip>
                                         )}
                                     </div>
 
