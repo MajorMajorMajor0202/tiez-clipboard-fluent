@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { listen, emit } from '@tauri-apps/api/event';
 import {
@@ -646,7 +647,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {/* Kept minimal if needed for future extensions, but currently inline handles rename */}
 
             {/* Tag Delete Confirmation Modal */}
-            {deleteConfirmation.show && (
+            {deleteConfirmation.show && createPortal(
                 <div className="modal-overlay" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
@@ -675,11 +676,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Item Delete Confirmation Modal */}
-            {itemDeleteConfirmation.show && (
+            {itemDeleteConfirmation.show && createPortal(
                 <div className="modal-overlay" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
@@ -715,11 +717,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Create Item Modal */}
-            {isCreatingItem && (
+            {isCreatingItem && createPortal(
                 <div className="modal-overlay" onClick={() => setIsCreatingItem(false)}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
@@ -745,11 +748,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Edit Item Modal */}
-            {editingItem && (
+            {editingItem && createPortal(
                 <div className="modal-overlay" onClick={() => setEditingItem(null)}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
@@ -774,7 +778,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
             <style>{`
                 .themed-tag-manager {

@@ -912,7 +912,7 @@
   gap: 4px !important;
 }
 
-.themed-tag-manager .tag-manager-dialog {
+.tag-manager-dialog {
   width: 280px !important;
   max-width: 90% !important;
   padding: 0 !important;
@@ -924,7 +924,7 @@
   color: var(--text-primary) !important;
 }
 
-.themed-tag-manager .confirm-dialog-upper {
+.tag-manager-dialog .confirm-dialog-upper {
   padding: 24px 24px 20px !important;
   text-align: left !important;
   background: #ffffff !important;
@@ -932,7 +932,7 @@
   border-top-right-radius: 8px !important;
 }
 
-.themed-tag-manager .confirm-dialog-lower {
+.tag-manager-dialog .confirm-dialog-lower {
   padding: 16px 24px !important;
   background: #f3f3f3 !important;
   border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -940,7 +940,7 @@
   border-bottom-right-radius: 8px !important;
 }
 
-.themed-tag-manager .tag-manager-dialog h3 {
+.tag-manager-dialog h3 {
   margin: 0 0 12px !important;
   padding: 0 !important;
   background: transparent !important;
@@ -951,21 +951,21 @@
   letter-spacing: normal !important;
 }
 
-.themed-tag-manager .tag-manager-dialog p {
+.tag-manager-dialog p {
   margin: 12px 0 0 !important;
   color: var(--text-secondary) !important;
   font-size: 13px !important;
   line-height: 1.5 !important;
 }
 
-.themed-tag-manager .confirm-dialog-buttons {
+.tag-manager-dialog .confirm-dialog-buttons {
   display: flex !important;
   justify-content: center !important;
   gap: 8px !important;
   width: 100% !important;
 }
 
-.themed-tag-manager .confirm-dialog-button {
+.tag-manager-dialog .confirm-dialog-button {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -988,75 +988,75 @@
     transform 0.15s ease !important;
 }
 
-.dark-mode .themed-tag-manager .confirm-dialog-button {
+.dark-mode .tag-manager-dialog .confirm-dialog-button {
   background: rgba(255, 255, 255, 0.06) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button:hover {
+.tag-manager-dialog .confirm-dialog-button:hover {
   background: rgba(0, 0, 0, 0.04) !important;
   border-color: var(--line-strong) !important;
 }
 
-.dark-mode .themed-tag-manager .confirm-dialog-button:hover {
+.dark-mode .tag-manager-dialog .confirm-dialog-button:hover {
   background: rgba(255, 255, 255, 0.09) !important;
   border-color: var(--line-strong) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button:active {
+.tag-manager-dialog .confirm-dialog-button:active {
   transform: scale(0.985) !important;
   box-shadow: none !important;
   background: rgba(0, 0, 0, 0.08) !important;
 }
 
-.dark-mode .themed-tag-manager .confirm-dialog-button:active {
+.dark-mode .tag-manager-dialog .confirm-dialog-button:active {
   background: rgba(255, 255, 255, 0.15) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button.primary {
+.tag-manager-dialog .confirm-dialog-button.primary {
   background: var(--accent-color) !important;
   color: #ffffff !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button.primary:hover {
+.tag-manager-dialog .confirm-dialog-button.primary:hover {
   background: var(--accent-hover, rgba(var(--accent-color-rgb), 0.9)) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button.primary:active {
+.tag-manager-dialog .confirm-dialog-button.primary:active {
   transform: scale(0.985) !important;
   box-shadow: none !important;
 }
 
-.themed-tag-manager .confirm-dialog-button.primary.danger {
+.tag-manager-dialog .confirm-dialog-button.primary.danger {
   background: #c42b1c !important;
   color: #ffffff !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button.primary.danger:hover {
+.tag-manager-dialog .confirm-dialog-button.primary.danger:hover {
   background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
-.themed-tag-manager .confirm-dialog-button.primary.danger:active {
+.tag-manager-dialog .confirm-dialog-button.primary.danger:active {
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
   transform: scale(0.985) !important;
   box-shadow: none !important;
 }
 
-.dark-mode .themed-tag-manager .confirm-dialog-button.primary.danger {
+.dark-mode .tag-manager-dialog .confirm-dialog-button.primary.danger {
   background: #c42b1c !important;
   border-color: rgba(255, 255, 255, 0.09) !important;
 }
 
-.dark-mode .themed-tag-manager .confirm-dialog-button.primary.danger:hover {
+.dark-mode .tag-manager-dialog .confirm-dialog-button.primary.danger:hover {
   background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
 }
 
-.dark-mode .themed-tag-manager .confirm-dialog-button.primary.danger:active {
+.dark-mode .tag-manager-dialog .confirm-dialog-button.primary.danger:active {
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
 }
 
