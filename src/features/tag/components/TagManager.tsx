@@ -462,7 +462,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {/* Row 1: tag name + count (left), actions (right) */}
                     <div className="toolbar-row">
                         <div className="toolbar-row-left">
-                            <span className="breadcrumb-marker">#</span>
                             <span className="breadcrumb-text">{selectedTag || t('tags')}</span>
                             {selectedTag && <span className="item-count">({tagItems.length})</span>}
                         </div>
@@ -504,7 +503,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {/* Row 2: sort (left) + view toggle (right) */}
                     <div className="toolbar-row" style={{ marginTop: '4px' }}>
                         <div className="sort-dropdown">
-                            <button className="toolbar-btn ghost" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
+                            <button className="toolbar-btn neutral" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
                                 {sortBy === 'time' ? <Clock size={14} /> : <MousePointer2 size={14} />}
                                 <span>{sortBy === 'time' ? (t('sort_time') || '时间') : (t('sort_usage') || '频率')}</span>
                                 <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
@@ -1085,28 +1084,52 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
-                    padding: 5px 12px;
+                    height: 32px !important;
+                    min-height: 32px !important;
+                    box-sizing: border-box !important;
+                    padding: 0 12px !important;
                     font-size: 12px;
                     font-weight: 500;
                     border: 1px solid transparent;
                     border-radius: 4px;
                     cursor: pointer;
-                    transition: background 0.15s ease, color 0.15s ease;
+                    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
                     white-space: nowrap;
                     flex-shrink: 0;
                 }
                 .toolbar-btn.ghost {
                     background: transparent;
                     border-color: transparent;
-                    color: var(--text-secondary);
+                    color: var(--text-primary);
+                    opacity: 0.85;
                 }
-                .toolbar-btn.ghost:hover { background: rgba(128,128,128,0.1); color: var(--text-primary); }
+                .toolbar-btn.ghost:hover {
+                    background: rgba(0, 0, 0, 0.05);
+                    color: var(--text-primary);
+                    opacity: 1;
+                }
+                .dark-mode .toolbar-btn.ghost:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                }
+                .toolbar-btn.ghost:active {
+                    background: rgba(0, 0, 0, 0.09);
+                }
+                .dark-mode .toolbar-btn.ghost:active {
+                    background: rgba(255, 255, 255, 0.12);
+                }
                 .toolbar-btn.primary {
                     background: var(--accent-color);
-                    color: #fff;
-                    border-color: var(--line-strong);
+                    color: #ffffff;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
                 }
-                .toolbar-btn.primary:hover { filter: brightness(1.1); }
+                .toolbar-btn.primary:hover:not(:disabled) {
+                    background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)), var(--accent-color);
+                }
+                .toolbar-btn.primary:active:not(:disabled) {
+                    background: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08)), var(--accent-color);
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+                }
                 .toolbar-btn.accent {
                     background: rgba(var(--accent-color-rgb), 0.12);
                     color: var(--accent-color);
@@ -1206,31 +1229,52 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Segmented Control — view toggle (List / Grid) */
                 .view-toggle {
                     display: inline-flex;
-                    gap: 0;
-                    padding: 0;
-                    border: 1px solid var(--line-strong);
+                    gap: 2px;
+                    padding: 2px;
+                    border: 1px solid var(--line-soft);
                     border-radius: 4px;
-                    background: var(--bg-input);
+                    background: rgba(0, 0, 0, 0.03);
                     flex-shrink: 0;
-                    overflow: hidden;
+                }
+                .dark-mode .view-toggle {
+                    background: rgba(255, 255, 255, 0.04);
                 }
                 .toggle-btn {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 34px;
-                    height: 30px;
+                    width: 28px;
+                    height: 24px;
                     padding: 0;
                     border: none;
-                    border-radius: 0;
+                    border-radius: 3px;
                     background: transparent;
                     color: var(--text-secondary);
                     cursor: pointer;
-                    transition: background 0.15s ease;
+                    transition: background 0.15s ease, color 0.15s ease;
                 }
-                .toggle-btn:hover { background: rgba(128,128,128,0.08); }
-                .toggle-btn.active { background: var(--accent-color); color: #fff; }
-                .toggle-btn.active:hover { background: linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)), var(--accent-color); }
+                .toggle-btn:hover {
+                    background: rgba(0, 0, 0, 0.04);
+                    color: var(--text-primary);
+                }
+                .dark-mode .toggle-btn:hover {
+                    background: rgba(255, 255, 255, 0.06);
+                }
+                .toggle-btn.active {
+                    background: #ffffff !important;
+                    color: var(--text-primary) !important;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+                }
+                .dark-mode .toggle-btn.active {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28) !important;
+                }
+                .toggle-btn.active:hover {
+                    background: #ffffff !important;
+                }
+                .dark-mode .toggle-btn.active:hover {
+                    background: rgba(255, 255, 255, 0.1) !important;
+                }
 
                 .items-area { 
                     flex: 1; 
@@ -1699,31 +1743,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-color: rgba(var(--accent-color-rgb), 0.18);
                 }
 
-                .theme-mica .view-toggle,
-                .theme-acrylic .view-toggle {
-                    border: 1px solid var(--line-strong);
-                    border-radius: 4px;
-                    background: var(--bg-input);
-                    padding: 0;
-                    overflow: hidden;
-                }
-
-                .theme-mica .toggle-btn,
-                .theme-acrylic .toggle-btn {
-                    width: 36px;
-                    height: 30px;
-                    border-radius: 0;
-                    border: none;
-                    background: transparent;
-                }
-
-                .theme-mica .toggle-btn.active,
-                .theme-acrylic .toggle-btn.active {
-                    background: var(--accent-color);
-                    color: #fff;
-                }
-                    box-shadow: none;
-                }
+                /* Removed theme overrides for view-toggle to let the standard style apply */
 
                 .theme-mica .items-area,
                 .theme-acrylic .items-area {
