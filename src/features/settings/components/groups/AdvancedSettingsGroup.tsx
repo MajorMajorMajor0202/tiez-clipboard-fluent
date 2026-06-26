@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, Search, X } from "lucide-react";
 import type { InstalledAppOption } from "../../../app/types";
 import type { AppCleanupPolicy } from "../../types";
-
-
+import { getTagColor } from "../../../../shared/lib/utils";
 
 interface AdvancedSettingsGroupProps {
     t: (key: string) => string;
@@ -14,6 +13,7 @@ interface AdvancedSettingsGroupProps {
     appCleanupPolicies: AppCleanupPolicy[];
     setAppCleanupPolicies: (val: AppCleanupPolicy[]) => void;
     installedApps: InstalledAppOption[];
+    theme: string;
 }
 
 interface EditableRule {
@@ -92,7 +92,8 @@ const AdvancedSettingsGroup = ({
     setCleanupRules,
     appCleanupPolicies,
     setAppCleanupPolicies,
-    installedApps
+    installedApps,
+    theme
 }: AdvancedSettingsGroupProps) => {
     const [searchText, setSearchText] = useState("");
     const [selectedSourceId, setSelectedSourceId] = useState("global");
@@ -368,13 +369,21 @@ const AdvancedSettingsGroup = ({
             >
                 <aside className="advanced-sidebar">
                     <div className="advanced-sidebar-search">
-                        <input
-                            className="search-input advanced-search-input"
-                            placeholder={t("search_apps_placeholder")}
-                            value={searchText}
-                            onFocus={focusEditorWindow}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
+                        <div className="search-input-wrapper">
+                            <Search size={12} className="search-icon-placeholder" />
+                            <input
+                                className="search-input advanced-search-input"
+                                placeholder={t("search_apps_placeholder")}
+                                value={searchText}
+                                onFocus={focusEditorWindow}
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            {searchText ? (
+                                <div className="action-icons">
+                                    <X size={12} className="action-icon clear" onClick={() => setSearchText("")} />
+                                </div>
+                            ) : null}
+                        </div>
                         {searchResults.length > 0 && (
                             <div className="advanced-search-results">
                                 {searchResults.map((app) => (
@@ -404,27 +413,31 @@ const AdvancedSettingsGroup = ({
                                 className={`advanced-target-item ${selectedTarget?.id === target.id ? "active" : ""}`}
                                 onClick={() => setSelectedSourceId(target.id)}
                             >
-                                <span className="advanced-target-meta">
-                                    <span className="advanced-target-name">{target.label}</span>
-                                    <span className="advanced-target-sub">
-                                        {target.kind === "app" && appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath)?.action === "ignore"
-                                            ? t("app_cleanup_policy_ignore")
-                                            : target.ruleCount > 0
-                                                ? `${target.ruleCount} ${t("advanced_rule_count_suffix")}`
-                                                : t("advanced_no_rules")}
-                                    </span>
-                                </span>
-
-                                {target.kind !== "global" && (
-                                    <button
-                                        type="button"
-                                        className="advanced-target-delete"
-                                        onClick={(e) => handleDeleteTarget(e, target)}
-                                        title={t("delete")}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
+                                <div className="target-color-wrapper">
+                                    <div
+                                        className="target-color-dot"
+                                        style={{ background: getTagColor(target.label, theme) }}
+                                    />
+                                </div>
+                                <div className="target-name-area">
+                                    <span className="target-name">{target.label}</span>
+                                    {target.kind === "app" && appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath)?.action === "ignore" ? (
+                                        <span className="target-badge ignore">{t("app_cleanup_policy_ignore")}</span>
+                                    ) : target.ruleCount > 0 ? (
+                                        <span className="target-badge">{target.ruleCount}</span>
+                                    ) : null}
+                                    {target.kind !== "global" && (
+                                        <div className="target-hover-actions">
+                                            <span
+                                                className="action-icon"
+                                                onClick={(e) => handleDeleteTarget(e, target)}
+                                                title={t("delete")}
+                                            >
+                                                <Trash2 size={13} />
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </button>
                         ))}
                     </div>
