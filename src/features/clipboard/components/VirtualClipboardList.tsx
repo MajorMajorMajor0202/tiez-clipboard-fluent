@@ -1,8 +1,9 @@
-import React, { useRef, useImperativeHandle, useCallback, useMemo } from 'react';
+import React, { useRef, useImperativeHandle, useCallback, useMemo, useState } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import type { ListRange } from 'react-virtuoso';
 import type { ClipboardEntry } from "../../../shared/types";
 import type { VirtualClipboardListHandle, VirtualClipboardListProps } from "../types";
+import FluentScrollbar from '../../../shared/components/FluentScrollbar';
 
 type VirtuosoListContext = {
     header?: React.ReactNode;
@@ -50,6 +51,14 @@ const VirtualClipboardList = React.forwardRef<VirtualClipboardListHandle, Virtua
 
         const virtuosoRef = useRef<VirtuosoHandle>(null);
         const visibleRangeRef = useRef<ListRange | null>(null);
+        // Custom scroll parent — the outer div that we hide the native scrollbar on
+        const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
+
+        // Use a callback ref so scrollEl is set synchronously on first mount
+        const scrollParentRef = useCallback((el: HTMLDivElement | null) => {
+            setScrollEl(el);
+        }, []);
+
         useImperativeHandle(ref, () => ({
             scrollToItem: (index: number) => {
                 virtuosoRef.current?.scrollIntoView({
@@ -142,18 +151,34 @@ const VirtualClipboardList = React.forwardRef<VirtualClipboardListHandle, Virtua
 
         return (
             <div className="virtual-list-wrapper" style={{ height: '100%', width: '100%' }}>
-                <Virtuoso
-                    ref={virtuosoRef}
-                    data={items}
-                    itemContent={itemContent}
-                    components={components}
-                    context={context}
-                    style={{ height: '100%' }}
-                    onScroll={(e) => handleScroll((e.currentTarget as HTMLElement).scrollTop)}
-                    endReached={handleEndReached}
-                    rangeChanged={handleRangeChanged}
-                    overscan={200} // Pre-render 200px of content for smoother scrolling
-                />
+                {/* Custom scroll parent: hides native scrollbar, provides scroll events */}
+                <div
+                    ref={scrollParentRef}
+                    style={{
+                        height: '100%',
+                        overflow: 'auto',
+                        // Hide native scrollbar while keeping scroll functionality
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
+                    }}
+                    className="fluent-scrollbar-host"
+                >
+                    <Virtuoso
+                        ref={virtuosoRef}
+                        customScrollParent={scrollEl ?? undefined}
+                        data={items}
+                        itemContent={itemContent}
+                        components={components}
+                        context={context}
+                        style={{ height: '100%' }}
+                        onScroll={(e) => handleScroll((e.currentTarget as HTMLElement).scrollTop)}
+                        endReached={handleEndReached}
+                        rangeChanged={handleRangeChanged}
+                        overscan={200} // Pre-render 200px of content for smoother scrolling
+                    />
+                </div>
+                {/* Fluent Design custom scrollbar overlay */}
+                <FluentScrollbar scrollContainer={scrollEl} />
             </div>
         );
     }
@@ -163,5 +188,3 @@ VirtualClipboardList.displayName = 'VirtualClipboardList';
 
 export { VirtualClipboardList };
 export default VirtualClipboardList;
-
-
