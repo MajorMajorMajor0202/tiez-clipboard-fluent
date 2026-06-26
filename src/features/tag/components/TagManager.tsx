@@ -45,6 +45,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [sortBy, setSortBy] = useState<'time' | 'count'>('time');
     const [showSortMenu, setShowSortMenu] = useState(false);
+    const [showViewMenu, setShowViewMenu] = useState(false);
     const [isCreatingItem, setIsCreatingItem] = useState(false);
     const [editingItem, setEditingItem] = useState<{ id: number, content: string } | null>(null);
     const [newItemContent, setNewItemContent] = useState('');
@@ -559,17 +560,37 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="view-toggle">
-                            <FluentTooltip text={t('list_view') || '列表视图'}>
-                                <button className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
-                                    <List size={14} />
+                        <div className="view-split-dropdown">
+                            <div className="view-split-button">
+                                <div className="view-split-left" title={viewMode === 'list' ? (t('list_view') || '列表视图') : (t('grid_view') || '卡片视图')}>
+                                    {viewMode === 'list' ? <List size={14} /> : <LayoutGrid size={14} />}
+                                </div>
+                                <button 
+                                    className={`view-split-right ${showViewMenu ? 'active' : ''}`}
+                                    onClick={() => setShowViewMenu(prev => !prev)}
+                                    onBlur={() => setTimeout(() => setShowViewMenu(false), 150)}
+                                >
+                                    <ChevronDown size={12} className="chevron-icon" />
                                 </button>
-                            </FluentTooltip>
-                            <FluentTooltip text={t('grid_view') || '卡片视图'}>
-                                <button className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
-                                    <LayoutGrid size={14} />
-                                </button>
-                            </FluentTooltip>
+                            </div>
+                            {showViewMenu && (
+                                <div className="view-menu" style={{ transformOrigin: 'top right' }}>
+                                    <button 
+                                        className={viewMode === 'list' ? 'active' : ''} 
+                                        onMouseDown={() => { setViewMode('list'); setShowViewMenu(false); }}
+                                        title={t('list_view') || '列表视图'}
+                                    >
+                                        <List size={14} />
+                                    </button>
+                                    <button 
+                                        className={viewMode === 'grid' ? 'active' : ''} 
+                                        onMouseDown={() => { setViewMode('grid'); setShowViewMenu(false); }}
+                                        title={t('grid_view') || '卡片视图'}
+                                    >
+                                        <LayoutGrid size={14} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1334,54 +1355,125 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: var(--accent-color);
                 }
 
-                /* Segmented Control — view toggle (List / Grid) */
-                .view-toggle {
-                    display: inline-flex;
-                    gap: 2px;
-                    padding: 2px;
-                    border: 1px solid var(--line-soft);
-                    border-radius: 4px;
-                    background: rgba(0, 0, 0, 0.03);
+                /* View Split Dropdown Control */
+                .view-split-dropdown {
+                    position: relative;
                     flex-shrink: 0;
                 }
-                .dark-mode .view-toggle {
-                    background: rgba(255, 255, 255, 0.04);
+                .view-split-button {
+                    display: flex;
+                    align-items: center;
+                    height: 32px;
+                    border: 1px solid var(--line-soft);
+                    border-radius: 4px;
+                    background: #ffffff;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -2px 0 rgba(0, 0, 0, 0.12) !important;
                 }
-                .toggle-btn {
+                .dark-mode .view-split-button {
+                    background: #2d2d2d;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 -2px 0 rgba(255, 255, 255, 0.06) !important;
+                }
+                .view-split-left {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 28px;
-                    height: 24px;
-                    padding: 0;
-                    border: none;
-                    border-radius: 3px;
-                    background: transparent;
+                    height: 100%;
+                    padding: 0 12px;
+                    border-right: 1px solid var(--line-soft);
+                    border-top-left-radius: 3px;
+                    border-bottom-left-radius: 3px;
                     color: var(--text-secondary);
-                    cursor: pointer;
                     transition: background 0.15s ease, color 0.15s ease;
                 }
-                .toggle-btn:hover {
+                .view-split-left:hover {
                     background: rgba(0, 0, 0, 0.04);
                     color: var(--text-primary);
                 }
-                .dark-mode .toggle-btn:hover {
+                .dark-mode .view-split-left:hover {
                     background: rgba(255, 255, 255, 0.06);
                 }
-                .toggle-btn.active {
-                    background: #ffffff !important;
+                .view-split-right {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                    padding: 0 8px;
+                    border: none;
+                    background: transparent;
+                    border-top-right-radius: 3px;
+                    border-bottom-right-radius: 3px;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    outline: none !important;
+                    transition: background 0.15s ease, color 0.15s ease;
+                }
+                .view-split-right:hover {
+                    background: rgba(0, 0, 0, 0.04);
+                    color: var(--text-primary);
+                }
+                .dark-mode .view-split-right:hover {
+                    background: rgba(255, 255, 255, 0.06);
+                }
+                .view-split-right.active {
+                    background: rgba(0, 0, 0, 0.06) !important;
                     color: var(--text-primary) !important;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.12) !important;
                 }
-                .dark-mode .toggle-btn.active {
+                .dark-mode .view-split-right.active {
                     background: rgba(255, 255, 255, 0.08) !important;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
                 }
-                .toggle-btn.active:hover {
-                    background: #ffffff !important;
+                
+                /* Popover view menu */
+                .view-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    margin-top: 4px;
+                    background: #ffffff;
+                    border: 1px solid var(--line-soft);
+                    border-radius: 4px;
+                    padding: 4px;
+                    display: flex;
+                    flex-direction: row;
+                    gap: 4px;
+                    z-index: 100;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                    animation: view-menu-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
                 }
-                .dark-mode .toggle-btn.active:hover {
-                    background: rgba(255, 255, 255, 0.1) !important;
+                @keyframes view-menu-pop {
+                    0% { transform: scale(0.95) translateY(-4px); opacity: 0; }
+                    100% { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                .dark-mode .view-menu {
+                    background: #2d2d2d;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                }
+                .view-menu button {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    border: none;
+                    background: transparent;
+                    border-radius: 4px;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    outline: none !important;
+                    transition: background 0.15s ease, color 0.15s ease;
+                }
+                .view-menu button:hover {
+                    background: rgba(0, 0, 0, 0.06);
+                    color: var(--text-primary);
+                }
+                .dark-mode .view-menu button:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                }
+                .view-menu button.active {
+                    background: rgba(0, 0, 0, 0.04);
+                    color: var(--accent-color);
+                }
+                .dark-mode .view-menu button.active {
+                    background: rgba(255, 255, 255, 0.05);
                 }
 
                 .items-area { 
