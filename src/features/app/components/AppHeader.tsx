@@ -332,9 +332,22 @@ const AppHeader = ({
                   <FluentTooltip key={t} text={getTypeName(t)}>
                     <button
                       className={`type-filter-btn ${typeFilter === t ? 'active' : ''}`}
-                      onClick={() => {
+                      onClick={(e) => {
+                        const target = e.currentTarget;
                         prevFilter.current = typeFilter;
-                        setTypeFilter(typeFilter === t ? null : t);
+                        const nextFilter = typeFilter === t ? null : t;
+                        setTypeFilter(nextFilter);
+                        
+                        if (nextFilter && filterBarRef.current) {
+                          const barRect = filterBarRef.current.getBoundingClientRect();
+                          const btnRect = target.getBoundingClientRect();
+                          setIndicatorRect({
+                            left: btnRect.left - barRect.left + (btnRect.width - 16) / 2,
+                            width: 16,
+                          });
+                        } else {
+                          setIndicatorRect(null);
+                        }
                       }}
                     >
                       <span className="type-filter-icon">{FILTER_ICONS[t]}</span>
@@ -344,7 +357,7 @@ const AppHeader = ({
                 {indicatorRect && (
                   <div
                     className="type-filter-indicator"
-                    style={{ left: indicatorRect.left }}
+                    style={{ transform: `translateX(${indicatorRect.left}px)` }}
                   >
                     <div key={typeFilter || 'none'} className="type-filter-indicator-inner" />
                   </div>
