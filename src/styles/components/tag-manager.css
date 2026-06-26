@@ -1036,7 +1036,7 @@
 @media (max-width: 480px) {
   .themed-tag-manager {
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 0px !important;
     padding: 8px 12px 12px !important;
   }
 
@@ -1044,6 +1044,7 @@
     width: 100% !important;
     height: var(--tm-sidebar-height, 180px) !important;
     max-height: none !important;
+    margin-bottom: 6px !important;
   }
 
   .themed-tag-manager.sidebar-collapsed .tag-sidebar {
@@ -1058,15 +1059,19 @@
   .themed-tag-manager .tag-divider {
     display: flex !important;
     width: 100% !important;
-    height: 4px !important;
+    height: 12px !important;
+    margin: -6px 0 !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: row-resize !important;
+    background: transparent !important;
+    z-index: 10 !important;
   }
 
   .themed-tag-manager .tag-content {
     flex: 1 !important;
     min-height: 0 !important;
+    margin-top: 6px !important;
   }
 
   .themed-tag-manager .tag-divider-handle {

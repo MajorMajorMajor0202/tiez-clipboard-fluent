@@ -446,7 +446,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
             {!isCollapsed && (
                 <div 
-                    className={`tag-divider ${isResizing ? 'active' : ''} ${isStacked ? 'stacked' : ''}`}
+                    className={`tag-divider ${isResizing ? 'active' : ''} ${isStacked ? 'stacked-divider' : ''}`}
                     onMouseDown={(e) => {
                         e.preventDefault();
                         setIsResizing(true);
@@ -1759,7 +1759,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-content,
                 .theme-acrylic .tag-content {
-                    min-width: 320px;
+                    min-width: 180px;
                     border: var(--panel-border);
                     border-radius: 4px;
                     background: var(--bg-panel);
@@ -2000,20 +2000,21 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .custom-scrollbar::-webkit-scrollbar { width: var(--scrollbar-size-thin); }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb-color); border-radius: var(--scrollbar-radius); }
 
-                @media (max-width: 320px) {
+                @media (max-width: 480px) {
                     .themed-tag-manager {
                         flex-direction: column;
-                        padding: 8px;
-                        gap: 12px;
-                        overflow-y: auto;
+                        padding: 8px 12px 12px;
+                        gap: 0px;
                     }
                     .tag-sidebar {
                         width: 100% !important;
-                        height: 240px;
+                        height: var(--tm-sidebar-height, 180px);
                         flex-shrink: 0;
+                        margin-bottom: 6px;
                     }
                     .tag-content {
-                        min-height: 300px;
+                        min-height: 200px;
+                        margin-top: 6px;
                     }
                 }
 
@@ -2030,6 +2031,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     justify-content: center;
                 }
+                @media (max-width: 480px) {
+                    .tag-divider {
+                        width: 100% !important;
+                        height: 12px !important;
+                        cursor: row-resize !important;
+                        margin: -6px 0 !important;
+                    }
+                }
                 .tag-divider:hover, .tag-divider.active {
                     background: rgba(var(--accent-color-rgb), 0.1);
                 }
@@ -2039,11 +2048,25 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: var(--accent-color);
                     opacity: 0.22;
                     border-radius: 2px;
-                    transition: opacity 0.2s, height 0.2s;
+                    transition: opacity 0.2s, height 0.2s, width 0.2s;
+                }
+                @media (max-width: 480px) {
+                    .tag-divider-handle {
+                        width: 32px !important;
+                        height: 1px !important;
+                    }
                 }
                 .tag-divider:hover .tag-divider-handle, .tag-divider.active .tag-divider-handle {
                     opacity: 0.6;
+                }
+                .tag-divider:not(.stacked-divider):hover .tag-divider-handle, 
+                .tag-divider:not(.stacked-divider).active .tag-divider-handle {
                     height: 48px;
+                }
+                @media (max-width: 480px) {
+                    .tag-divider:hover .tag-divider-handle, .tag-divider.active .tag-divider-handle {
+                        width: 48px !important;
+                    }
                 }
 
                 /* Multi-selection Management Styles */
