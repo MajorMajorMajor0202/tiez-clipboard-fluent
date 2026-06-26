@@ -290,7 +290,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 {!isCollapsed && (
                     <div className="tag-search-box">
                         <div className="search-input-wrapper">
-                            <Search size={16} className="search-icon-placeholder" />
+                            <Search size={12} className="search-icon-placeholder" />
                             <input
                                 placeholder={t('find_or_create')}
                                 value={tagSearch}
@@ -799,7 +799,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .tag-search-box .search-icon-placeholder {
                     position: absolute;
-                    left: 4px;
+                    left: 0;
                     top: 50%;
                     transform: translateY(-50%);
                     opacity: 0.45;
@@ -815,7 +815,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-size: 13px;
                     font-weight: 500;
                     color: var(--text-primary);
-                    padding: 0 8px 0 20px;
+                    padding: 0 8px 0 12px;
                     height: 30px;
                     border-radius: 4px;
                     transition: all 0.2s;
@@ -1432,9 +1432,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--text-secondary);
                 }
 
-                .theme-mica .tag-search-box input,
+                 .theme-mica .tag-search-box input,
                 .theme-acrylic .tag-search-box input {
-                    padding: 0 8px 0 20px;
+                    padding: 0 8px 0 12px;
                     font-size: 14px;
                     font-weight: 500;
                     background: transparent;
