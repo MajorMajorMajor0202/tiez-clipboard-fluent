@@ -3,7 +3,8 @@ import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { listen, emit } from '@tauri-apps/api/event';
 import {
     Edit2, Trash2, X, ChevronRight, LayoutGrid, List,
-    Clock, MousePointer2, ChevronLeft, Plus, Search, ExternalLink, CheckSquare, Copy
+    Clock, MousePointer2, ChevronLeft, Plus, Search, ExternalLink, CheckSquare, Copy,
+    ChevronDown, ChevronUp
 } from 'lucide-react';
 import { getTagColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
@@ -334,7 +335,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         <div
                             className="tag-selection-indicator"
                             style={{
-                                transform: `translateY(${16 + selectedIndex * 36}px)`,
+                                transform: isStacked && isCollapsed
+                                    ? `translateX(${selectedIndex * 72}px)`
+                                    : `translateY(${16 + selectedIndex * 36}px)`,
                             }}
                         >
                             <div key={selectedTag} className="tag-selection-indicator-inner" />

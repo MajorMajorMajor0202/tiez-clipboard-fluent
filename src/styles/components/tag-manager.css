@@ -1112,7 +1112,7 @@
   /* Horizontal indicator at the bottom inside the gray square container */
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-selection-indicator {
     position: absolute !important;
-    left: 0 !important;
+    left: 8px !important;
     bottom: 0 !important;
     top: auto !important;
     width: 64px !important;
