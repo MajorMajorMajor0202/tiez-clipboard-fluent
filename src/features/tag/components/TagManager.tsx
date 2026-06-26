@@ -908,8 +908,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     height: 2px;
                     background: var(--accent-color);
                     transform: scaleX(0);
-                    transition: transform 0.15s ease;
-                    border-radius: 0 0 4px 4px;
+                    transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+                    border-radius: 0 0 2px 2px;
                     z-index: 2;
                 }
                 .tag-search-box:focus-within::after {

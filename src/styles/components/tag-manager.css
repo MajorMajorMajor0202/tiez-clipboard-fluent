@@ -121,8 +121,8 @@
   height: 2px !important;
   background: var(--accent-color) !important;
   transform: scaleX(0) !important;
-  transition: transform 0.15s ease !important;
-  border-radius: 0 0 4px 4px !important;
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  border-radius: 0 0 2px 2px !important;
   z-index: 2 !important;
 }
 

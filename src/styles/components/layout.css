@@ -204,12 +204,12 @@ select.search-input option {
   box-shadow: none;
 }
 
-.search-input-wrapper {
+.home-search-wrapper {
   position: relative;
   width: 100%;
 }
 
-.search-input-wrapper::after {
+.home-search-wrapper::after {
   content: "";
   position: absolute;
   bottom: 0;
@@ -218,13 +218,13 @@ select.search-input option {
   height: 2px;
   background: var(--accent-color);
   transform: scaleX(0);
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 0 0 var(--input-radius) var(--input-radius);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 2px 2px;
   z-index: 2;
   pointer-events: none;
 }
 
-.search-input-wrapper:focus-within::after {
+.home-search-wrapper:focus-within::after {
   transform: scaleX(1);
 }
 

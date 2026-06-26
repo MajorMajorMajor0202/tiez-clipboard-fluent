@@ -241,7 +241,7 @@ const AppHeader = ({
             style={{ flexShrink: 0 }}
           >
             <div className="search-container window-no-drag">
-              <div className="search-input-wrapper">
+              <div className="home-search-wrapper">
                 <Search size={14} className="search-icon" />
                 <input
                   ref={searchInputRef}
@@ -281,7 +281,7 @@ const AppHeader = ({
                       initial={{ opacity: 0, y: -8, scaleY: 0.95 }}
                       animate={{ opacity: 1, y: 0, scaleY: 1 }}
                       exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
-                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{ duration: 0.25, ease: [0.1, 0.9, 0.2, 1] }}
                       style={{ transformOrigin: 'top center' }}
                     >
                       <div className="tags-label">{t('tags') || "Tags"}</div>
