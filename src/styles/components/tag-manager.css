@@ -1094,22 +1094,22 @@
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item:hover {
     background: rgba(0, 0, 0, 0.04) !important;
-    border-color: rgba(0, 0, 0, 0.15) !important;
+    border-color: transparent !important;
   }
 
   .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item:hover {
     background: rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: transparent !important;
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item.active {
     background: rgba(0, 0, 0, 0.06) !important;
-    border-color: rgba(0, 0, 0, 0.25) !important;
+    border-color: transparent !important;
   }
 
   .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item.active {
     background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
+    border-color: transparent !important;
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item .tag-color-wrapper {
@@ -1128,7 +1128,7 @@
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-selection-indicator {
     position: absolute !important;
     left: 8px !important;
-    top: 31px !important;
+    top: 33px !important;
     bottom: auto !important;
     width: 32px !important;
     height: 3px !important;
