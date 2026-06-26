@@ -1205,6 +1205,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border: 1px solid var(--line-soft);
                     color: var(--text-primary);
                     gap: 6px;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
                 }
                 .toolbar-btn.neutral.manage-btn {
                     width: 72px !important;
@@ -1212,6 +1213,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .dark-mode .toolbar-btn.neutral {
                     background: rgba(255, 255, 255, 0.05);
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(255, 255, 255, 0.08);
                 }
                 .toolbar-btn.neutral:hover:not(:disabled) {
                     background: rgba(0, 0, 0, 0.08);
@@ -1238,6 +1240,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center !important;
                     gap: 4px !important;
                     width: auto !important;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
                 }
                 .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:hover {
                     background: #f9f9f9 !important;
@@ -1249,6 +1252,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .dark-mode .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn {
                     background: #2d2d2d !important;
                     border-color: var(--line-soft) !important;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(255, 255, 255, 0.08) !important;
                 }
                 .dark-mode .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:hover {
                     background: #323232 !important;
@@ -1367,11 +1371,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toggle-btn.active {
                     background: #ffffff !important;
                     color: var(--text-primary) !important;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.12) !important;
                 }
                 .dark-mode .toggle-btn.active {
                     background: rgba(255, 255, 255, 0.08) !important;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28) !important;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28), inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
                 }
                 .toggle-btn.active:hover {
                     background: #ffffff !important;
@@ -1520,7 +1524,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-weight: 600 !important;
                     cursor: pointer !important;
                     background: #ffffff !important;
-                    border: 1px solid var(--border) !important;
+                    border: 1px solid var(--line-soft) !important;
                     color: var(--text-primary) !important;
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
                     transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease !important;
@@ -1532,6 +1536,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .dark-mode .modal-overlay .confirm-dialog-button {
                     background: rgba(255, 255, 255, 0.06) !important;
+                    border-color: var(--line-soft) !important;
                 }
                 .dark-mode .modal-overlay .confirm-dialog-button:hover {
                     background: rgba(255, 255, 255, 0.09) !important;
@@ -1545,11 +1550,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .dark-mode .modal-overlay .confirm-dialog-button:active {
                     background: rgba(255, 255, 255, 0.15) !important;
                 }
-
+ 
                 .modal-overlay .confirm-dialog-button.primary {
                     background: var(--accent-color) !important;
                     color: #fff !important;
-                    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    border: 1px solid var(--line-soft) !important;
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
                 }
                 .modal-overlay .confirm-dialog-button.primary:hover {
@@ -1560,17 +1565,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     transform: scale(0.985) !important;
                     box-shadow: none !important;
                 }
-
+ 
                 /* Primary Danger Button */
                 .modal-overlay .confirm-dialog-button.primary.danger {
                     background: #c42b1c !important;
                     color: #fff !important;
-                    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    border: 1px solid var(--line-soft) !important;
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
                 }
                 .modal-overlay .confirm-dialog-button.primary.danger:hover {
                     background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
-                    border-color: rgba(0, 0, 0, 0.08) !important;
+                    border-color: var(--line-soft) !important;
                 }
                 .modal-overlay .confirm-dialog-button.primary.danger:active {
                     background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
@@ -1579,7 +1584,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .dark-mode .modal-overlay .confirm-dialog-button.primary.danger {
                     background: #c42b1c !important;
-                    border-color: rgba(255, 255, 255, 0.09) !important;
+                    border-color: var(--line-soft) !important;
                 }
                 .dark-mode .modal-overlay .confirm-dialog-button.primary.danger:hover {
                     background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
