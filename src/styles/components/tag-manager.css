@@ -205,11 +205,31 @@
 }
 
 .themed-tag-manager .tag-scroll {
+  position: relative !important;
   flex: 1 !important;
   min-height: 0 !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   padding: 8px 8px 12px !important;
+}
+
+.themed-tag-manager .tag-selection-indicator {
+  position: absolute !important;
+  left: 8px !important;
+  top: 0 !important;
+  width: 3px !important;
+  height: 16px !important;
+  border-radius: 1.5px !important;
+  background: var(--accent-color) !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  transform-origin: center !important;
+  transition: transform 0.22s cubic-bezier(0.85, 0, 0.15, 1) !important;
+}
+
+.themed-tag-manager .theme-mica:not(.sidebar-collapsed) .tag-selection-indicator,
+.themed-tag-manager .theme-acrylic:not(.sidebar-collapsed) .tag-selection-indicator {
+  left: 12px !important;
 }
 
 .themed-tag-manager .tag-item {

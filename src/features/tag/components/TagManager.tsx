@@ -256,6 +256,29 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         return tags.filter(t => t.name.toLowerCase().includes(tagSearch.toLowerCase()));
     }, [tags, tagSearch]);
 
+    const selectedIndex = filteredTags.findIndex(tag => tag.name === selectedTag);
+
+    const [prevIndex, setPrevIndex] = useState<number>(-1);
+    const [isSliding, setIsSliding] = useState<boolean>(false);
+    const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
+
+    useEffect(() => {
+        if (selectedIndex !== prevIndex) {
+            if (selectedIndex !== -1 && prevIndex !== -1) {
+                setSlideDirection(selectedIndex > prevIndex ? 'down' : 'up');
+                setIsSliding(true);
+                const timer = setTimeout(() => {
+                    setIsSliding(false);
+                    setSlideDirection(null);
+                }, 250);
+                setPrevIndex(selectedIndex);
+                return () => clearTimeout(timer);
+            } else {
+                setPrevIndex(selectedIndex);
+            }
+        }
+    }, [selectedIndex, prevIndex]);
+
     const normalizedTagSearch = tagSearch.trim().toLowerCase();
     const canCreateTag = normalizedTagSearch.length > 0
         && !tags.some(tag => tag.name.toLowerCase() === normalizedTagSearch);
@@ -328,6 +351,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 )}
 
                 <div className="tag-scroll custom-scrollbar">
+                    {selectedIndex !== -1 && (
+                        <div
+                            className="tag-selection-indicator"
+                            style={{
+                                transform: `translateY(${16 + selectedIndex * 36}px) ${isSliding ? 'scaleY(1.3)' : 'scaleY(1)'}`,
+                            }}
+                        />
+                    )}
                     {filteredTags.map(tag => (
                         <div
                             key={tag.name}
@@ -875,7 +906,24 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .action-icon.create { color: var(--accent-color); opacity: 0.8; }
                 .action-icon.create:hover { opacity: 1; background: rgba(var(--accent-color-rgb), 0.12); }
 
-                .tag-scroll { flex: 1; overflow-y: auto; padding: 8px; overflow-x: hidden; }
+                .tag-scroll { flex: 1; overflow-y: auto; padding: 8px; overflow-x: hidden; position: relative; }
+                .tag-selection-indicator {
+                    position: absolute;
+                    left: 8px;
+                    top: 0;
+                    width: 3px;
+                    height: 16px;
+                    border-radius: 1.5px;
+                    background: var(--accent-color);
+                    z-index: 10;
+                    pointer-events: none;
+                    transform-origin: center;
+                    transition: transform 0.22s cubic-bezier(0.85, 0, 0.15, 1);
+                }
+                .theme-mica:not(.sidebar-collapsed) .tag-selection-indicator,
+                .theme-acrylic:not(.sidebar-collapsed) .tag-selection-indicator {
+                    left: 12px;
+                }
                 /* Tag Item Layout: [Color] [Name (Flex)] [Actions (Hover)] [Badge] */
                 .tag-item {
                     display: flex; 
