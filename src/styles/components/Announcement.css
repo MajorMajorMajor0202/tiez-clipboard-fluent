@@ -247,7 +247,7 @@
 
 .theme-mica .ticker-tag,
 .theme-acrylic .ticker-tag {
-    border-radius: 6px;
+    border-radius: 4px;
     font-weight: 600;
     box-shadow: none;
 }
@@ -373,7 +373,7 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: var(--accent-color);
     color: #fff;
     flex-shrink: 0;

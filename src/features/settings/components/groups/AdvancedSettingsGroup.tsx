@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import type { InstalledAppOption } from "../../../app/types";
 import type { AppCleanupPolicy } from "../../types";
 
@@ -509,7 +509,7 @@ const AdvancedSettingsGroup = ({
                                                 <span className="advanced-rule-title">
                                                     {rule.label?.trim() || `${t("advanced_rule_label")} ${index + 1}`}
                                                 </span>
-                                                {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                                {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                             </button>
 
                                             {expanded && (

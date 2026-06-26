@@ -1,6 +1,6 @@
 import { open, ask, message } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DataSettingsGroupProps {
     t: (key: string) => string;
@@ -13,7 +13,7 @@ const DataSettingsGroup = ({ t, collapsed, onToggle, dataPath }: DataSettingsGro
     <div className={`settings-group ${collapsed ? 'collapsed' : ''}`}>
         <div className="group-header" onClick={onToggle}>
             <h3 style={{ margin: 0 }}>{t('data_management')}</h3>
-            {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+            {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
         </div>
         {!collapsed && (
             <div className="group-content">

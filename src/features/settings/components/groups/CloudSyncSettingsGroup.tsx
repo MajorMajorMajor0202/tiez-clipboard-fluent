@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import type { CloudSyncContentPrefs } from "../../../app/types";
 
@@ -135,7 +135,7 @@ const CloudSyncSettingsGroup = ({
                         />
                     )}
                 </div>
-                {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
             </div>
             {!collapsed && (
                 <div className="group-content">

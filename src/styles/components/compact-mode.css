@@ -231,7 +231,7 @@
     width: 20px !important;
     height: 20px !important;
     padding: 3px !important;
-    border-radius: 6px;
+    border-radius: 4px;
     background: rgba(255, 255, 255, 0.7);
     /* Semi-transparent for glass effect */
     color: #444;
@@ -260,7 +260,7 @@ html.theme-acrylic .history-item.compact .item-actions .btn-icon {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
     backdrop-filter: blur(12px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-    border-radius: 8px !important;
+    border-radius: 4px !important;
 }
 
 body.dark-mode.theme-mica .history-item.compact .item-actions .btn-icon,
@@ -391,7 +391,7 @@ body.theme-acrylic .history-item.compact .ai-options-dropdown {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
     backdrop-filter: blur(12px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
-    border-radius: 8px !important;
+    border-radius: 4px !important;
 }
 
 body.dark-mode.theme-mica .history-item.compact .ai-options-dropdown,
@@ -407,7 +407,7 @@ body.theme-acrylic .history-item.compact .ai-options-dropdown button {
     background: rgba(255, 255, 255, 0.5) !important;
     border: 1px solid rgba(128, 128, 128, 0.2) !important;
     box-shadow: none !important;
-    border-radius: 6px !important;
+    border-radius: 4px !important;
 }
 
 body.dark-mode.theme-mica .history-item.compact .ai-options-dropdown button,

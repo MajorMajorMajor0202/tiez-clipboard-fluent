@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ChevronDown, ChevronRight, Edit2, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit2, RotateCcw, Trash2 } from "lucide-react";
 import type { AiProfile, AiProfileStatusMap, EditableAiProfile } from "../../types";
 
 interface AiSettingsGroupProps {
@@ -56,7 +56,7 @@ const AiSettingsGroup = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h3 style={{ margin: 0 }}>{t('ai_settings')}</h3>
             </div>
-            {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+            {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
         </div>
         {!collapsed && (
             <div className="group-content">

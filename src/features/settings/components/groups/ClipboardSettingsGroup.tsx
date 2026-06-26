@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ComponentType, ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { getHotkeyDisplayTokens } from "../../../../shared/lib/hotkeyDisplay";
 import { isMacPlatform } from "../../../../shared/lib/platform";
 import type { QuickPasteModifier } from "../../../app/types";
@@ -132,7 +132,7 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
         <div className={`settings-group ${props.collapsed ? 'collapsed' : ''}`}>
             <div className="group-header" onClick={props.onToggle}>
                 <h3 style={{ margin: 0 }}>{props.t('clipboard_settings')}</h3>
-                {props.collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                {props.collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
             </div>
             {!props.collapsed && (
                 <div className="group-content">

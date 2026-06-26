@@ -42,7 +42,7 @@
 .settings-group {
   border: var(--panel-border);
   background: var(--bg-panel);
-  margin: 3px 0;
+  margin: 4px 0;
   box-shadow: var(--panel-shadow);
   border-radius: var(--panel-radius);
   overflow: visible !important;
@@ -58,6 +58,7 @@
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
   border-radius: inherit; /* Inherit rounded corners from .settings-group */
+  color: var(--text-primary);
 }
 
 .settings-group.collapsed {
@@ -108,7 +109,7 @@
 .settings-group:not(.collapsed) .group-content {
   border-top: none;
   position: relative;
-  padding: 10px 12px 12px;
+  padding: 12px;
   background: transparent;
   animation: settings-group-reveal 0.18s ease-out;
   border-bottom-left-radius: inherit;
@@ -119,7 +120,7 @@
   content: "";
   display: block;
   height: 1px;
-  margin: 0 2px 10px;
+  margin: 0 0 12px;
   background:
     linear-gradient(
       90deg,
@@ -157,16 +158,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--panel-divider-color);
-  min-height: 34px;
+  min-height: 36px;
 }
 
 .setting-item.column {
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
-  padding: 6px 0;
+  gap: 8px;
+  padding: 8px 0;
 }
 
 .setting-item .hint {
@@ -174,13 +175,13 @@
   color: var(--text-secondary);
   font-weight: normal;
   display: block;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .hint-icon-btn {
-  width: 18px;
-  height: 18px;
-  padding: 2px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
   background: transparent;
   border: none;
   box-shadow: none !important;
@@ -244,8 +245,8 @@
 .settings-view .file-transfer-panel {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin: 2px 0 0;
+  gap: 16px;
+  margin: 4px 0 0;
   padding: 12px;
   background: var(--bg-element);
   border: 1px solid var(--line-soft);
@@ -260,16 +261,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 96px;
   color: var(--text-secondary);
 }
 
 .settings-view .qr-container canvas {
   display: block;
-  width: 90px !important;
-  height: 90px !important;
-  padding: 5px;
+  width: 88px !important;
+  height: 88px !important;
+  padding: 4px;
   background: #ffffff;
   border-radius: var(--fluent-corner-overlay);
   box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
@@ -303,7 +304,7 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.2;
@@ -334,9 +335,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
-  padding: 0 10px;
-  margin-top: 2px;
+  min-height: 28px;
+  padding: 0 12px;
+  margin-top: 4px;
   border: 1px solid rgba(var(--accent-color-rgb), 0.2);
   border-radius: var(--fluent-corner-overlay);
   background: rgba(var(--accent-color-rgb), 0.1);
@@ -361,8 +362,8 @@
 @media (max-width: 360px) {
   .settings-view .file-transfer-panel {
     align-items: flex-start;
-    gap: 10px;
-    padding: 10px;
+    gap: 12px;
+    padding: 12px;
   }
 
   .settings-view .qr-container {
@@ -434,6 +435,8 @@
   border: none;
   box-shadow: none !important;
   border-radius: inherit; /* Inherit from .settings-group */
+  color: var(--text-primary);
+  background: transparent;
 }
 
 .advanced-settings-page {
@@ -470,7 +473,7 @@
 
 .advanced-sidebar-search {
   position: relative;
-  padding: 10px;
+  padding: 12px;
 }
 
 .advanced-search-input {
@@ -481,12 +484,12 @@
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .advanced-search-result-item {
   width: 100%;
-  padding: 9px 10px;
+  padding: 8px 12px;
   border-radius: var(--fluent-corner-control);
   border: 1px solid rgba(var(--accent-color-rgb), 0.1);
   background: var(--bg-element);
@@ -494,7 +497,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
@@ -561,15 +564,15 @@
 .advanced-target-item {
   position: relative;
   width: 100%;
-  min-height: 38px;
-  padding: 8px 10px;
+  min-height: 40px;
+  padding: 8px 12px;
   border-radius: var(--data-panel-radius);
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-align: left;
   flex-shrink: 0;
   cursor: pointer;
@@ -596,7 +599,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   transition: padding-right 0.16s ease;
 }
 
@@ -616,7 +619,7 @@
 
 .advanced-target-delete {
   position: absolute;
-  right: 10px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   width: 24px;
@@ -649,7 +652,7 @@
 
 .advanced-target-item:hover .advanced-target-meta,
 .advanced-target-item.active .advanced-target-meta {
-  padding-right: 34px;
+  padding-right: 36px;
 }
 
 .advanced-target-delete:hover {
@@ -684,7 +687,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 3px;
+  width: 4px;
   height: 36px;
   transform: translate(-50%, -50%);
   border-radius: 999px;
@@ -707,7 +710,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 24px 12px;
+  padding: 16px 24px 12px;
   border-bottom: 1px solid var(--panel-divider-color);
 }
 
@@ -768,7 +771,7 @@
 }
 
 .advanced-empty-text {
-  margin-top: 6px;
+  margin-top: 8px;
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.5;
@@ -814,7 +817,7 @@
   padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .advanced-rule-field {
@@ -835,7 +838,7 @@
   width: 100%;
   background: rgba(0, 0, 0, 0.2) !important;
   border: 1px solid rgba(var(--accent-color-rgb), 0.08) !important;
-  border-radius: 10px !important;
+  border-radius: 4px !important;
   padding: 12px 16px !important;
   font-size: 14px;
   transition: all 0.2s ease;
@@ -857,7 +860,7 @@
 .advanced-rule-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
 .advanced-delete-btn,
@@ -866,8 +869,8 @@
 }
 
 .advanced-rule-actions .advanced-delete-btn {
-  min-height: 34px;
-  height: 34px;
+  min-height: 36px;
+  height: 36px;
   padding: 0 12px !important;
   font-size: 12px;
   font-weight: 600;
@@ -978,7 +981,7 @@
 .settings-choice-grid {
   width: 100%;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .theme-choice-grid {
@@ -989,7 +992,7 @@
 .theme-choice-btn {
   min-height: 40px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 8px 12px;
   align-items: center;
   justify-content: center;
   text-align: left;
@@ -1012,7 +1015,7 @@ body.theme-acrylic .settings-view input.search-input {
   border: var(--input-border) !important;
   border-radius: var(--input-radius) !important;
   box-shadow: var(--input-shadow) !important;
-  min-height: 34px;
+  min-height: 36px;
   backdrop-filter: saturate(135%);
 }
 
@@ -1173,7 +1176,7 @@ body.theme-acrylic .settings-view select.search-input option {
 
 .key-group {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
@@ -1190,7 +1193,7 @@ body.theme-acrylic .settings-view select.search-input option {
   min-width: 4.15em;
   height: 2.5em;
   padding: 0 0.5em;
-  margin: 0 3px;
+  margin: 0 4px;
   background-color: var(--bg-element);
   color: var(--text-primary);
   border: var(--keycap-border);
@@ -1223,9 +1226,9 @@ body.theme-acrylic .settings-view select.search-input option {
   display: flex;
   background: var(--bg-element);
   border: var(--segmented-border);
-  padding: 2px;
+  padding: 4px;
   border-radius: var(--segmented-radius);
-  gap: 2px;
+  gap: 4px;
   box-shadow: var(--segmented-shadow);
 }
 
@@ -1234,7 +1237,7 @@ body.theme-acrylic .settings-view select.search-input option {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 12px;
   font-weight: var(--segment-font-weight);
   text-transform: var(--segment-text-transform);

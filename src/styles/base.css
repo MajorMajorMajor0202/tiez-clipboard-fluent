@@ -8,7 +8,7 @@
   --fluent-corner-none: 0;
   --fluent-corner-small: 2px;
   --fluent-corner-control: 4px;      /* buttons, inputs, switches */
-  --fluent-corner-overlay: 8px;       /* cards, panels, flyouts, dialogs */
+  --fluent-corner-overlay: 4px;       /* cards, panels, flyouts, dialogs */
   --fluent-corner-pill: 9999px;
   /* Shadow / elevation */
   --fluent-elevation-card:  0 4px 8px rgba(0, 0, 0, 0.04), 0 0 2px rgba(0, 0, 0, 0.06);
@@ -133,7 +133,7 @@
   --panel-divider-color: rgba(24, 34, 53, 0.08);
 
   --data-panel-border: 1px solid var(--line-soft);
-  --data-panel-radius: 12px;
+  --data-panel-radius: 4px;
   --data-panel-shadow: var(--shadow-inset);
   --data-panel-hover-background: rgba(255, 255, 255, 0.98);
 
@@ -160,15 +160,15 @@
   --switch-thumb-translate: 22px;
 
   --keycap-border: 1px solid var(--line-soft);
-  --keycap-radius: 12px;
+  --keycap-radius: 4px;
   --keycap-shadow: var(--shadow-xs);
   --keycap-active-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
   --keycap-active-transform: translateY(1px);
 
   --segmented-border: 1px solid var(--line-soft);
-  --segmented-radius: 14px;
+  --segmented-radius: 4px;
   --segmented-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
-  --segment-radius: 10px;
+  --segment-radius: 4px;
   --segment-font-weight: 600;
   --segment-text-transform: none;
   --segment-active-background: rgba(255, 255, 255, 0.92);
@@ -176,7 +176,7 @@
   --segment-active-shadow: var(--shadow-xs);
 
   --modal-border: 1px solid var(--line-soft);
-  --modal-radius: 20px;
+  --modal-radius: 4px;
   --modal-shadow: var(--shadow-lg);
   --modal-title-background: transparent;
   --modal-title-color: var(--text-primary);
@@ -187,7 +187,7 @@
   --modal-title-letter-spacing: 0;
   --modal-title-font-weight: 700;
   --dialog-button-border: 1px solid var(--line-soft);
-  --dialog-button-radius: 12px;
+  --dialog-button-radius: 4px;
   --dialog-button-shadow: var(--shadow-xs);
   --dialog-button-hover-shadow: var(--shadow-sm);
   --dialog-button-hover-transform: translateY(-1px);
@@ -195,10 +195,10 @@
   --dialog-button-active-transform: translateY(0);
 
   --tags-border: 1px solid var(--line-soft);
-  --tags-radius: 16px;
+  --tags-radius: 4px;
   --tags-shadow: var(--shadow-sm);
   --tag-chip-border: 1px solid rgba(24, 34, 53, 0.08);
-  --tag-chip-radius: var(--radius-pill);
+  --tag-chip-radius: 4px;
   --tag-chip-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
   --tag-chip-hover-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
   --tag-chip-hover-transform: translateY(-1px);
@@ -208,14 +208,14 @@
   /* Fluent Design ― Flyout (dropdown / popover) surface */
   --flyout-background: rgba(255, 255, 255, 0.94);
   --flyout-border: 1px solid rgba(0, 0, 0, 0.06);
-  --flyout-radius: 8px;
+  --flyout-radius: 4px;
   --flyout-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   --flyout-backdrop-filter: blur(30px);
   --flyout-label-color: var(--text-secondary);
   --flyout-label-opacity: 0.7;
 
   --menu-border: 1px solid var(--line-soft);
-  --menu-radius: 14px;
+  --menu-radius: 4px;
   --menu-shadow: var(--shadow-md);
   --menu-item-hover-background: var(--accent-color);
   --menu-item-hover-color: #ffffff;
@@ -238,7 +238,7 @@
   --empty-state-text-transform: none;
 
   --queue-border: 1px solid var(--line-soft);
-  --queue-radius: 18px;
+  --queue-radius: 4px;
   --queue-shadow: var(--shadow-lg);
   --queue-count-border: 1px solid rgba(24, 34, 53, 0.08);
   --queue-count-shadow: var(--shadow-xs);
@@ -248,7 +248,7 @@
   --queue-button-text-transform: none;
 
   --reset-button-border: 1px solid rgba(255, 99, 99, 0.14);
-  --reset-button-radius: 14px;
+  --reset-button-radius: 4px;
   --reset-button-shadow: var(--shadow-xs);
   --reset-button-text-transform: none;
 }

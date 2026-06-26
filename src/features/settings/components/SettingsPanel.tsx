@@ -323,7 +323,7 @@ const SettingsPanel = (props: SettingsPanelProps) => {
 
     const LabelWithHint = ({ label, hint, hintKey }: { label: string; hint?: string | React.ReactNode; hintKey: string }) => (
         <div className="item-label-group">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span className="item-label">{label}</span>
                 {hint && (
                     <button
