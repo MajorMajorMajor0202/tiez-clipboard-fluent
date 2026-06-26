@@ -1079,6 +1079,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     flex-shrink: 0;
                     flex-wrap: nowrap;
                     overflow: hidden;
+                    margin-left: 4px;
                 }
                 .toolbar-row-right {
                     display: flex;
