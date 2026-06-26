@@ -2018,10 +2018,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 .tag-divider {
-                    width: 4px;
+                    width: 12px;
                     height: 100%;
                     cursor: col-resize;
-                    margin: 0;
+                    margin: 0 -12px;
                     background: transparent;
                     transition: background 0.2s;
                     position: relative;

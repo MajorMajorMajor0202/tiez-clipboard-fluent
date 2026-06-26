@@ -11,6 +11,11 @@ header {
   cursor: default;
 }
 
+header.subpage-header {
+  padding-top: 12px;
+  padding-bottom: 4px;
+}
+
 .window-drag-region {
   -webkit-app-region: drag;
   app-region: drag;

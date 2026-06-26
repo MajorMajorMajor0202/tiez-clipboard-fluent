@@ -143,7 +143,7 @@ const AppHeader = ({
   };
 
   return (
-  <header className="window-drag-region">
+  <header className={`window-drag-region ${(showSettings || showTagManager || showEmojiPanel) ? 'subpage-header' : ''}`}>
     <div className="header-top">
       <div className="header-leading">
         {(showSettings || showTagManager || showEmojiPanel) && (
