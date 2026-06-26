@@ -296,7 +296,7 @@ export const translations = {
         empty_desc: "复制一点内容，记录就会出现在这里",
 
         // Item Actions
-        copy: "拷贝",
+        copy: "复制",
         open: "打开",
         pin: "固定",
         unpin: "取消固定",

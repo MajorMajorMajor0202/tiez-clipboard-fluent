@@ -474,17 +474,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             <button className="toolbar-btn ghost" onClick={() => { setIsManageMode(false); setSelectedItemIds(new Set()); }}>
                                                 {t('cancel') || '取消'}
                                             </button>
-                                            <button className="toolbar-btn danger" disabled={selectedItemIds.size === 0} onClick={() => setItemDeleteConfirmation({ show: true, id: -1 })}>
-                                                <Trash2 size={14} /> <span>{t('delete_selected') || '删除'}</span>
+                                            <button className="toolbar-btn neutral" disabled={selectedItemIds.size === 0} onClick={() => setItemDeleteConfirmation({ show: true, id: -1 })}>
+                                                <Trash2 size={14} /> <span>{t('delete') || '删除'}</span>
                                             </button>
-                                            <button className="toolbar-btn accent" disabled={selectedItemIds.size === 0} onClick={async () => {
+                                            <button className="toolbar-btn neutral" disabled={selectedItemIds.size === 0} onClick={async () => {
                                                 const selectedItems = tagItems.filter(item => selectedItemIds.has(item.id));
                                                 if (selectedItems.length > 0) {
                                                     await invoke('copy_to_clipboard', { content: selectedItems.map(i => i.content).join('\n'), contentType: 'text', paste: true, id: -1, deleteAfterUse: false });
                                                     setIsManageMode(false); setSelectedItemIds(new Set());
                                                 }
                                             }}>
-                                                <Copy size={14} /> <span>{t('copy_selected') || '复制'}</span>
+                                                <Copy size={14} /> <span>{t('copy') || '复制'}</span>
                                             </button>
                                         </>
                                     ) : (
@@ -1117,6 +1117,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: #d32f2f;
                 }
                 .toolbar-btn.danger:hover { background: rgba(211,47,47,0.08); }
+                .toolbar-btn.neutral {
+                    background: rgba(0, 0, 0, 0.04);
+                    border: 1px solid var(--line-soft);
+                    color: var(--text-primary);
+                    width: 72px;
+                    justify-content: center;
+                    gap: 6px;
+                }
+                .dark-mode .toolbar-btn.neutral {
+                    background: rgba(255, 255, 255, 0.05);
+                }
+                .toolbar-btn.neutral:hover:not(:disabled) {
+                    background: rgba(0, 0, 0, 0.08);
+                    border-color: var(--line-strong);
+                }
+                .dark-mode .toolbar-btn.neutral:hover:not(:disabled) {
+                    background: rgba(255, 255, 255, 0.08);
+                }
+                .toolbar-btn.neutral:active:not(:disabled) {
+                    background: rgba(0, 0, 0, 0.12);
+                }
+                .dark-mode .toolbar-btn.neutral:active:not(:disabled) {
+                    background: rgba(255, 255, 255, 0.12);
+                }
                 .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
                 /* Sort dropdown — in-place overlay, equal overhang on both sides */
