@@ -479,7 +479,6 @@ const SettingsPanel = (props: SettingsPanelProps) => {
                         appCleanupPolicies={appCleanupPolicies}
                         setAppCleanupPolicies={setAppCleanupPolicies}
                         installedApps={installedApps}
-                        theme={theme}
                     />
 
                     <AiProfileModal
