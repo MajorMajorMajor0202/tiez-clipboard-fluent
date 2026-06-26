@@ -1033,11 +1033,11 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 480px) {
   .themed-tag-manager {
     flex-direction: column !important;
     gap: 12px !important;
-    padding: 8px 4px 4px !important;
+    padding: 8px 12px 12px !important;
   }
 
   .themed-tag-manager .tag-sidebar {
