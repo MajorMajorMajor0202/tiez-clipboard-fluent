@@ -22,6 +22,7 @@ function getPortalRoot(): HTMLDivElement {
 const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const [placement, setPlacement] = useState<'top' | 'bottom'>('bottom');
   const triggerRef = useRef<HTMLSpanElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -31,8 +32,19 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
-      const top = rect.bottom + 6;
+      
+      const expectedHeight = 32;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      let nextPlacement: 'top' | 'bottom' = 'bottom';
+      if (spaceBelow < expectedHeight + 8 && spaceAbove > spaceBelow) {
+        nextPlacement = 'top';
+      }
+      
+      const top = nextPlacement === 'top' ? rect.top - 6 : rect.bottom + 6;
       setPos({ left: cx, top });
+      setPlacement(nextPlacement);
       setVisible(true);
     }, SHOW_DELAY);
   }, []);
@@ -52,17 +64,35 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
     };
   }, []);
 
+  // Measure exact width based on Chinese/English character sizes
+  const getTextWidth = (str: string): number => {
+    let len = 0;
+    for (let i = 0; i < str.length; i++) {
+      if (str.charCodeAt(i) > 255) {
+        len += 12; // Chinese/full-width character
+      } else {
+        len += 7; // English/half-width character
+      }
+    }
+    return Math.min(len + 20, 240); // Clamp to max-width
+  };
+
+  const estW = getTextWidth(text);
+
   // Clamp horizontal position within viewport
   const adjustedPos =
     pos
       ? (() => {
-          const estW = Math.min(text.length * 8 + 20, 240);
           let left = pos.left - estW / 2;
           const vw = window.innerWidth;
           const margin = 8;
           if (left < margin) left = margin;
           if (left + estW > vw - margin) left = vw - estW - margin;
-          return { left, top: pos.top };
+          
+          // Calculate arrow offset relative to the tooltip left edge
+          const arrowLeft = Math.max(12, Math.min(pos.left - left, estW - 12));
+          
+          return { left, top: pos.top, arrowLeft };
         })()
       : null;
 
@@ -70,11 +100,12 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
     visible && adjustedPos
       ? createPortal(
           <div
-            className={`fluent-tooltip ${visible ? "fluent-tooltip-visible" : "fluent-tooltip-enter"}`}
+            className={`fluent-tooltip placement-${placement} ${visible ? "fluent-tooltip-visible" : "fluent-tooltip-enter"}`}
             style={{
               position: "absolute",
               left: adjustedPos.left,
               top: adjustedPos.top,
+              ["--arrow-left" as any]: `${adjustedPos.arrowLeft}px`,
             }}
           >
             {text}
