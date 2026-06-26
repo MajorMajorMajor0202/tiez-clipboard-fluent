@@ -510,7 +510,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
                             </button>
                             {showSortMenu && (
-                                <div className="sort-menu" style={{ top: sortBy === 'time' ? '-4px' : '-32px' }}>
+                                <div
+                                    className="sort-menu"
+                                    style={{
+                                        top: sortBy === 'time' ? '-4px' : '-32px',
+                                        transformOrigin: sortBy === 'time' ? 'top center' : 'bottom center'
+                                    }}
+                                >
                                     <button className={sortBy === 'time' ? 'active' : ''} onMouseDown={() => { setSortBy('time'); setShowSortMenu(false); }}>
                                         <Clock size={14} /> <span>{t('sort_time') || '时间'}</span>
                                     </button>
