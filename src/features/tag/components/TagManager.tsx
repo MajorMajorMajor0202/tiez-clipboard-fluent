@@ -784,12 +784,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 /* Tag Search Box */
                 .tag-search-box {
-                    padding: 12px 16px;
+                    padding: 0 10px;
                     display: flex; align-items: center; gap: 4px;
                     background: transparent;
                     border-bottom: 1px solid var(--panel-divider-color);
-                    margin: 0;
-                    min-height: auto;
+                    margin: 8px 8px 0;
+                    height: 32px;
+                    min-height: 32px;
                 }
                 .tag-search-box .search-input-wrapper {
                     flex: 1;
@@ -814,8 +815,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     font-size: 13px;
                     font-weight: 500;
                     color: var(--text-primary);
-                    padding: 8px 8px 8px 20px;
-                    border-radius: var(--radius-sm);
+                    padding: 0 8px 0 20px;
+                    height: 30px;
+                    border-radius: 4px;
                     transition: all 0.2s;
                     position: relative;
                     z-index: 1;
@@ -859,25 +861,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex; 
                     align-items: center; 
                     gap: 10px;
-                    padding: 10px 12px; 
+                    height: 32px;
+                    min-height: 32px;
+                    padding: 0 10px; 
                     cursor: pointer;
-                    margin-bottom: 2px; 
+                    margin-bottom: 4px; 
                     border: 1px solid transparent;
-                    border-radius: var(--radius-sm);
+                    border-radius: 4px;
                     transition: all 0.15s;
                     position: relative;
                     width: 100%;
                 }
                 .tag-item:hover { background: var(--bg-main); }
                 .tag-item.active { 
-                    background: var(--accent-light); 
+                    background: rgba(0, 0, 0, 0.06); 
                     border-color: transparent;
                     box-shadow: none;
+                }
+                .dark-mode .tag-item.active {
+                    background: rgba(255, 255, 255, 0.08);
                 }
                 .tag-item.create-hint { border: 1px dashed var(--border); opacity: 0.8; }
                 .tag-item.create-hint:hover { background: var(--bg-main); border-style: solid; }
 
-                .sidebar-collapsed .tag-item { justify-content: center; padding: 10px 0; gap: 0; }
+                .sidebar-collapsed .tag-item { justify-content: center; padding: 0 6px; gap: 0; height: 32px; min-height: 32px; }
                 .sidebar-collapsed .tag-name,
                 .sidebar-collapsed .tag-name-area,
                 .sidebar-collapsed .tag-hover-actions { display: none; }
@@ -1408,9 +1415,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-search-box,
                 .theme-acrylic .tag-search-box {
-                    margin: 18px 16px;
-                    min-height: 56px;
-                    padding: 0 16px;
+                    margin: 8px 8px 0;
+                    height: 32px;
+                    min-height: 32px;
+                    padding: 0 10px;
                     gap: 12px;
                     border: var(--input-border);
                     border-radius: 4px;
@@ -1432,6 +1440,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: transparent;
                     border: none;
                     flex: 1;
+                    height: 30px;
                 }
                 .theme-mica .tag-search-box .search-input-wrapper,
                 .theme-acrylic .tag-search-box .search-input-wrapper {
@@ -1497,17 +1506,21 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-item.active,
                 .theme-acrylic .tag-item.active {
-                    background: rgba(var(--accent-color-rgb), 0.12);
-                    border-color: rgba(var(--accent-color-rgb), 0.16);
+                    background: rgba(0, 0, 0, 0.06);
+                    border-color: transparent;
                     box-shadow: none;
+                }
+                .dark-mode .theme-mica .tag-item.active,
+                .dark-mode .theme-acrylic .tag-item.active {
+                    background: rgba(255, 255, 255, 0.08);
                 }
 
                 .theme-mica .tag-color-dot,
                 .theme-acrylic .tag-color-dot {
-                    width: 14px;
-                    height: 14px;
+                    width: 10px;
+                    height: 10px;
                     border: none;
-                    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+                    box-shadow: none;
                 }
 
                 .theme-mica .tag-name,
