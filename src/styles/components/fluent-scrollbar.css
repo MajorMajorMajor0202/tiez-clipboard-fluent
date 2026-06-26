@@ -10,7 +10,7 @@
 .fluent-scrollbar {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 2px;
   bottom: 0;
   width: 12px;
   pointer-events: auto;
@@ -35,14 +35,13 @@
   background: rgba(128, 128, 128, 0.09);
 }
 
-/* ── Arrow buttons — inside the track, 4px inset from each end ── */
+/* ── Arrow buttons — inside the track ── */
 .fluent-scrollbar__arrow {
   position: absolute;
   left: 0;
   width: 100%;
   height: 20px;
   display: flex;
-  align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
@@ -58,9 +57,18 @@
   border-radius: 4px;
 }
 
-/* 4px inset from the rounded corners of the track */
-.fluent-scrollbar__arrow--up   { top: 4px; }
-.fluent-scrollbar__arrow--down { bottom: 4px; }
+/* 4px inset from the rounded corners of the track to the tip of the triangle */
+.fluent-scrollbar__arrow--up {
+  top: 0;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.fluent-scrollbar__arrow--down {
+  bottom: 0;
+  align-items: flex-end;
+  padding-bottom: 4px;
+}
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow {
   color: var(--text-secondary, rgba(96, 96, 96, 0.65));
@@ -79,17 +87,16 @@
 /* ── Thumb ── */
 .fluent-scrollbar__thumb {
   position: absolute;
-  /* Horizontally centered in the 12px host */
-  left: 50%;
-  transform: translateX(-50%);
-  /* rest: 2px wide centered pill */
+  /* Hug the rightmost edge in the rest state */
+  right: 0;
   width: 2px;
   border-radius: 999px;
   background: rgba(128, 128, 128, 0.42);
   cursor: grab;
-  /* Smooth expand animation — width centered from middle */
+  /* Smooth expand animation — expand to the left and center */
   transition:
     width 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    right 0.18s cubic-bezier(0.4, 0, 0.2, 1),
     background 0.18s ease;
   pointer-events: auto;
 }
@@ -104,8 +111,9 @@
   background: rgba(64, 64, 64, 0.75);
 }
 
-/* On hover, expand the thumb (centered, grows both sides equally) */
+/* On hover, expand the thumb to 6px and center it in the 12px track (right: 3px) */
 .fluent-scrollbar--active .fluent-scrollbar__thumb {
+  right: 3px;
   width: 6px;
   background: rgba(96, 96, 96, 0.62);
 }
