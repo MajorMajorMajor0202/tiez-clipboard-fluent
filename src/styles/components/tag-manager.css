@@ -476,10 +476,10 @@
 
 .themed-tag-manager .content-toolbar {
   min-height: 48px !important;
-  padding: 10px 14px !important;
+  padding: 8px 8px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
+  gap: 8px !important;
   border-bottom: 1px solid var(--panel-divider-color) !important;
   background: var(--panel-header-background) !important;
   flex-shrink: 0 !important;
@@ -492,7 +492,7 @@
 .themed-tag-manager .toolbar-row-right {
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 8px !important;
   min-width: 0 !important;
   flex-wrap: nowrap !important;
 }
@@ -659,7 +659,8 @@
   flex: 1 !important;
   min-height: 0 !important;
   overflow-y: auto !important;
-  padding: 12px !important;
+  padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px !important;
+  scrollbar-gutter: stable !important;
   background: transparent !important;
 }
 
@@ -673,7 +674,7 @@
 .themed-tag-manager .items-grid {
   display: grid !important;
   grid-template-columns: 1fr !important;
-  gap: 10px !important;
+  gap: 8px !important;
   align-content: flex-start !important;
 }
 
@@ -809,7 +810,8 @@
 }
 
 .themed-tag-manager.stacked-layout .items-area {
-  padding: 8px !important;
+  padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px !important;
+  scrollbar-gutter: stable !important;
 }
 
 .themed-tag-manager.stacked-layout .items-grid {
@@ -1004,18 +1006,6 @@
 }
 
 @container (max-width: 470px) {
-  .themed-tag-manager .content-toolbar {
-    padding: 8px 10px !important;
-    gap: 8px !important;
-  }
-
-  .themed-tag-manager .toolbar-left,
-  .themed-tag-manager .toolbar-right,
-  .themed-tag-manager .toolbar-row-left,
-  .themed-tag-manager .toolbar-row-right {
-    gap: 4px !important;
-  }
-
   .themed-tag-manager .selected-tag-indicator {
     max-width: 108px !important;
     padding: 6px 8px !important;

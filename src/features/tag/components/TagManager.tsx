@@ -503,16 +503,20 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {/* Row 2: sort (left) + view toggle (right) */}
                     <div className="toolbar-row" style={{ marginTop: '4px' }}>
                         <div className="sort-dropdown">
-                            <button className="toolbar-btn neutral" onClick={() => setShowSortMenu(prev => !prev)} onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}>
+                            <button
+                                className="toolbar-btn neutral sort-trigger-btn"
+                                onClick={() => setShowSortMenu(prev => !prev)}
+                                onBlur={() => setTimeout(() => setShowSortMenu(false), 150)}
+                            >
                                 {sortBy === 'time' ? <Clock size={14} /> : <MousePointer2 size={14} />}
                                 <span>{sortBy === 'time' ? (t('sort_time') || '时间') : (t('sort_usage') || '频率')}</span>
-                                <ChevronRight size={12} style={{ transform: 'rotate(90deg)' }} />
+                                <ChevronRight size={12} className="chevron-icon" />
                             </button>
                             {showSortMenu && (
                                 <div
                                     className="sort-menu"
                                     style={{
-                                        top: sortBy === 'time' ? '-4px' : '-32px',
+                                        top: sortBy === 'time' ? '-4px' : '-40px',
                                         transformOrigin: sortBy === 'time' ? 'top center' : 'bottom center'
                                     }}
                                 >
@@ -1047,7 +1051,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 8px;
                     border-bottom: 1px solid var(--panel-divider-color);
                     background: var(--bg-panel);
-                    padding: 12px 16px;
+                    padding: 8px 8px;
                     flex-shrink: 0;
                 }
                 .toolbar-row {
@@ -1121,14 +1125,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: var(--accent-color);
                     color: #ffffff;
                     border: 1px solid rgba(0, 0, 0, 0.08);
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
                 }
                 .toolbar-btn.primary:hover:not(:disabled) {
                     background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)), var(--accent-color);
                 }
                 .toolbar-btn.primary:active:not(:disabled) {
                     background: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08)), var(--accent-color);
-                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+                    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
                 }
                 .toolbar-btn.accent {
                     background: rgba(var(--accent-color-rgb), 0.12);
@@ -1170,26 +1174,58 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 /* Sort dropdown — in-place overlay, equal overhang on both sides */
                 .sort-dropdown { position: relative; flex-shrink: 0; }
-                .sort-dropdown > .toolbar-btn {
-                    border-color: var(--line-soft);
+                .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn {
+                    background: #ffffff !important;
+                    border-color: var(--line-soft) !important;
+                    padding: 0 12px !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 4px !important;
+                    width: auto !important;
                 }
-                .sort-dropdown > .toolbar-btn:hover {
-                    border-color: var(--line-strong);
+                .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:hover {
+                    background: #f9f9f9 !important;
+                    border-color: var(--line-strong) !important;
+                }
+                .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:active {
+                    background: #f0f0f0 !important;
+                }
+                .dark-mode .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn {
+                    background: #2d2d2d !important;
+                    border-color: var(--line-soft) !important;
+                }
+                .dark-mode .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:hover {
+                    background: #323232 !important;
+                    border-color: var(--line-strong) !important;
+                }
+                .dark-mode .sort-dropdown > .toolbar-btn.neutral.sort-trigger-btn:active {
+                    background: #202020 !important;
+                }
+                .sort-trigger-btn .chevron-icon {
+                    margin-left: 12px !important;
+                    transform: rotate(90deg);
+                    flex-shrink: 0;
                 }
                 .sort-menu {
                     position: absolute;
                     top: -4px;
                     left: 0;
                     right: -4px;
-                    background: var(--flyout-background, var(--bg-panel));
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    background: #f8f8f8;
                     border: var(--flyout-border);
                     border-radius: 4px;
                     box-shadow: var(--flyout-shadow);
-                    backdrop-filter: var(--flyout-backdrop-filter);
-                    -webkit-backdrop-filter: var(--flyout-backdrop-filter);
+                    backdrop-filter: none;
+                    -webkit-backdrop-filter: none;
                     padding: 4px;
                     z-index: 100;
                     animation: sortMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .dark-mode .sort-menu {
+                    background: #2d2d2d;
                 }
                 @keyframes sortMenuIn {
                     from { opacity: 0; transform: scale(1, 0.85); }
@@ -1201,7 +1237,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     gap: 4px;
                     width: 100%;
-                    padding: 5px 16px;
+                    height: 32px;
+                    box-sizing: border-box;
+                    padding: 0 12px;
                     font-size: 12px;
                     font-weight: 500;
                     border: none;
@@ -1209,22 +1247,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: transparent;
                     color: var(--text-primary);
                     cursor: pointer;
+                    transition: background 0.15s ease, color 0.15s ease;
                 }
-                .sort-menu button:hover { background: rgba(128,128,128,0.08); }
+                .sort-menu button:hover {
+                    background: #f4f4f4;
+                }
+                .dark-mode .sort-menu button:hover {
+                    background: rgba(255, 255, 255, 0.04);
+                }
                 .sort-menu button.active {
-                    color: var(--accent-color);
-                    background: rgba(128,128,128,0.06);
+                    color: var(--text-primary);
+                    background: #f0f0f0;
                 }
-                /* Accent indicator pill on selected item — inside the gray rect */
+                .dark-mode .sort-menu button.active {
+                    background: rgba(255, 255, 255, 0.08);
+                }
                 .sort-menu button.active::before {
                     content: "";
                     position: absolute;
-                    left: 4px;
+                    left: 0;
                     top: 50%;
                     transform: translateY(-50%);
                     width: 3px;
-                    height: 12px;
-                    border-radius: 2px;
+                    height: 16px;
+                    border-radius: 0 1.5px 1.5px 0;
                     background: var(--accent-color);
                 }
 
@@ -1281,7 +1327,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .items-area { 
                     flex: 1; 
                     overflow-y: auto; 
-                    padding: 16px 16px 80px 16px; 
+                    padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px; 
+                    scrollbar-gutter: stable;
                     background: var(--bg-content); 
                     position: relative;
                 }
@@ -1721,8 +1768,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .content-toolbar,
                 .theme-acrylic .content-toolbar {
-                    padding: 14px 20px;
-                    gap: 10px;
+                    padding: 8px 8px;
+                    gap: 8px;
                     border-bottom: 1px solid var(--panel-divider-color);
                     background: transparent;
                     flex-shrink: 0;
@@ -1736,20 +1783,21 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .theme-mica .sort-menu button,
                 .theme-acrylic .sort-menu button {
-                    padding: 6px 16px;
+                    padding: 0 12px;
                     font-size: 13px;
                 }
                 .theme-mica .toolbar-btn.primary,
                 .theme-acrylic .toolbar-btn.primary {
-                    box-shadow: 0 4px 12px rgba(var(--accent-color-rgb), 0.28);
-                    border-color: rgba(var(--accent-color-rgb), 0.18);
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+                    border-color: rgba(0, 0, 0, 0.08);
                 }
 
                 /* Removed theme overrides for view-toggle to let the standard style apply */
 
                 .theme-mica .items-area,
                 .theme-acrylic .items-area {
-                    padding: 28px;
+                    padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px;
+                    scrollbar-gutter: stable;
                     background: transparent;
                 }
 
@@ -1763,15 +1811,15 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .items-grid,
                 .theme-acrylic .items-grid {
-                    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-                    gap: 22px;
+                    grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
+                    gap: 8px;
                 }
 
                 .theme-mica .items-list,
                 .theme-acrylic .items-list {
                     display: grid;
                     grid-template-columns: 1fr;
-                    gap: 18px;
+                    gap: 8px;
                 }
 
                 .theme-mica .themed-card,
@@ -2005,10 +2053,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 8px;
                 }
 
-                .sort-dropdown .sort-menu button.sort-option-active {
-                    color: var(--accent-color);
-                    background: rgba(var(--accent-color-rgb), 0.08);
-                }
+
 
                 .selection-indicator {
                     width: 12px;
