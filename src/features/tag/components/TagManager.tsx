@@ -1501,7 +1501,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .tag-item:hover,
                 .theme-acrylic .tag-item:hover {
                     background: rgba(var(--accent-color-rgb), 0.06);
-                    border-color: rgba(var(--accent-color-rgb), 0.12);
+                    border-color: transparent;
                 }
 
                 .theme-mica .tag-item.active,

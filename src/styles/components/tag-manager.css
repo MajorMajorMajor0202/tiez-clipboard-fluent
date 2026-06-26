@@ -216,7 +216,7 @@
 
 .themed-tag-manager .tag-item:hover {
   background: var(--bg-element) !important;
-  border-color: rgba(var(--accent-color-rgb), 0.12) !important;
+  border-color: transparent !important;
 }
 
 .themed-tag-manager .tag-item.active {
