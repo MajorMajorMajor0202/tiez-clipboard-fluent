@@ -94,7 +94,7 @@ body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar-track {
   background: transparent;
 }
 body.theme-mica [data-virtuoso-scroller]::-webkit-scrollbar-thumb {
-  border-radius: 3px;
+  border-radius: var(--scrollbar-radius);
   background: rgba(128, 128, 128, 0.4);
   border: 0;
   border-left: 6px solid transparent;
