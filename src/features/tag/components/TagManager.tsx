@@ -562,9 +562,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         </div>
                         <div className="view-split-dropdown">
                             <div className="view-split-button">
-                                <div className="view-split-left" title={viewMode === 'list' ? (t('list_view') || '列表视图') : (t('grid_view') || '卡片视图')}>
-                                    {viewMode === 'list' ? <List size={14} /> : <LayoutGrid size={14} />}
-                                </div>
+                                <FluentTooltip text={viewMode === 'list' ? (t('list_view') || '列表视图') : (t('grid_view') || '卡片视图')}>
+                                    <div className="view-split-left">
+                                        {viewMode === 'list' ? <List size={14} /> : <LayoutGrid size={14} />}
+                                    </div>
+                                </FluentTooltip>
                                 <button 
                                     className={`view-split-right ${showViewMenu ? 'active' : ''}`}
                                     onClick={() => setShowViewMenu(prev => !prev)}
@@ -575,20 +577,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </div>
                             {showViewMenu && (
                                 <div className="view-menu" style={{ transformOrigin: 'top right' }}>
-                                    <button 
-                                        className={viewMode === 'list' ? 'active' : ''} 
-                                        onMouseDown={() => { setViewMode('list'); setShowViewMenu(false); }}
-                                        title={t('list_view') || '列表视图'}
-                                    >
-                                        <List size={14} />
-                                    </button>
-                                    <button 
-                                        className={viewMode === 'grid' ? 'active' : ''} 
-                                        onMouseDown={() => { setViewMode('grid'); setShowViewMenu(false); }}
-                                        title={t('grid_view') || '卡片视图'}
-                                    >
-                                        <LayoutGrid size={14} />
-                                    </button>
+                                    <FluentTooltip text={t('list_view') || '列表视图'}>
+                                        <button 
+                                            className={viewMode === 'list' ? 'active' : ''} 
+                                            onMouseDown={() => { setViewMode('list'); setShowViewMenu(false); }}
+                                        >
+                                            <List size={14} />
+                                        </button>
+                                    </FluentTooltip>
+                                    <FluentTooltip text={t('grid_view') || '卡片视图'}>
+                                        <button 
+                                            className={viewMode === 'grid' ? 'active' : ''} 
+                                            onMouseDown={() => { setViewMode('grid'); setShowViewMenu(false); }}
+                                        >
+                                            <LayoutGrid size={14} />
+                                        </button>
+                                    </FluentTooltip>
                                 </div>
                             )}
                         </div>
@@ -1331,7 +1335,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     transition: background 0.15s ease, color 0.15s ease;
                 }
                 .sort-menu button:hover {
-                    background: #f4f4f4;
+                    background: #f0f0f0;
                 }
                 .dark-mode .sort-menu button:hover {
                     background: rgba(255, 255, 255, 0.04);
@@ -1362,16 +1366,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .view-split-button {
                     display: flex;
-                    align-items: center;
+                    align-items: stretch;
                     height: 32px;
                     border: 1px solid var(--line-soft);
                     border-radius: 4px;
                     background: #ffffff;
-                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -2px 0 rgba(0, 0, 0, 0.12) !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
+                }
+                /* FluentTooltip injects a <span> — make it stretch full height */
+                .view-split-button > span {
+                    display: flex !important;
+                    align-items: stretch;
+                    height: 100%;
                 }
                 .dark-mode .view-split-button {
                     background: #2d2d2d;
-                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 -2px 0 rgba(255, 255, 255, 0.06) !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
                 }
                 .view-split-left {
                     display: flex;
@@ -1428,15 +1438,20 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     top: 100%;
                     right: 0;
                     margin-top: 4px;
-                    background: #ffffff;
+                    width: 120px;
+                    height: 64px;
+                    background: #f8f8f8;
                     border: 1px solid var(--line-soft);
                     border-radius: 4px;
-                    padding: 4px;
+                    padding: 8px 12px;
                     display: flex;
                     flex-direction: row;
-                    gap: 4px;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
                     z-index: 100;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    box-sizing: border-box;
                     animation: view-menu-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 @keyframes view-menu-pop {
@@ -1444,36 +1459,49 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     100% { transform: scale(1) translateY(0); opacity: 1; }
                 }
                 .dark-mode .view-menu {
-                    background: #2d2d2d;
+                    background: #333333;
+                    border-color: rgba(255,255,255,0.1);
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 }
                 .view-menu button {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 32px;
-                    height: 32px;
-                    border: none;
-                    background: transparent;
+                    width: 36px;
+                    height: 36px;
+                    border: 1px solid rgba(0, 0, 0, 0.12);
+                    background: #ffffff;
                     border-radius: 4px;
                     color: var(--text-secondary);
                     cursor: pointer;
                     outline: none !important;
-                    transition: background 0.15s ease, color 0.15s ease;
+                    transition: background 0.15s ease;
+                    flex-shrink: 0;
+                }
+                .dark-mode .view-menu button {
+                    background: #444444;
+                    border-color: rgba(255, 255, 255, 0.1);
+                    color: var(--text-secondary);
                 }
                 .view-menu button:hover {
-                    background: rgba(0, 0, 0, 0.06);
-                    color: var(--text-primary);
+                    background: #f8f8f8;
                 }
                 .dark-mode .view-menu button:hover {
-                    background: rgba(255, 255, 255, 0.08);
+                    background: rgba(255, 255, 255, 0.12);
                 }
                 .view-menu button.active {
-                    background: rgba(0, 0, 0, 0.04);
-                    color: var(--accent-color);
+                    background: #ffffff;
+                    color: var(--text-secondary);
                 }
                 .dark-mode .view-menu button.active {
-                    background: rgba(255, 255, 255, 0.05);
+                    background: #444444;
+                    color: var(--text-secondary);
+                }
+                .view-menu button.active:hover {
+                    background: #f8f8f8;
+                }
+                .dark-mode .view-menu button.active:hover {
+                    background: rgba(255, 255, 255, 0.12);
                 }
 
                 .items-area { 
