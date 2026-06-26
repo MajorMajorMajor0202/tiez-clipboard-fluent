@@ -1,13 +1,29 @@
 /* Settings Panel */
 .settings-view {
   background: transparent;
-  padding: 12px 8px;
+  padding: 12px 16px;
   max-width: 420px;
   margin: 0 auto;
   width: 100%;
   overflow-y: auto;
   min-height: 0;
   max-height: 100%;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.settings-view::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Hide scrollbar on the main-content container when settings are visible */
+.main-content:has(.settings-view) {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.main-content:has(.settings-view)::-webkit-scrollbar {
+  display: none !important;
 }
 
 .settings-view:has(.advanced-workbench),
