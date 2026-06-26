@@ -1235,6 +1235,28 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .toolbar-btn.neutral.manage-btn {
                     width: 72px !important;
                     justify-content: center !important;
+                    background: #ffffff !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
+                }
+                .toolbar-btn.neutral.manage-btn:hover:not(:disabled) {
+                    background: #fafafa !important;
+                    border-color: var(--line-strong) !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -1px 0 rgba(0, 0, 0, 0.08) !important;
+                }
+                .toolbar-btn.neutral.manage-btn:active:not(:disabled) {
+                    background: #f0f0f0 !important;
+                    box-shadow: none !important;
+                }
+                .dark-mode .toolbar-btn.neutral.manage-btn {
+                    background: #2d2d2d !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+                }
+                .dark-mode .toolbar-btn.neutral.manage-btn:hover:not(:disabled) {
+                    background: #323232 !important;
+                    border-color: var(--line-strong) !important;
+                }
+                .dark-mode .toolbar-btn.neutral.manage-btn:active:not(:disabled) {
+                    background: #202020 !important;
                 }
                 .dark-mode .toolbar-btn.neutral {
                     background: rgba(255, 255, 255, 0.05);
@@ -1576,7 +1598,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: #ffffff !important;
                     padding: 0 !important;
                     overflow: hidden !important;
-                    border: 1px solid var(--line-soft) !important;
+                    border: 1px solid var(--line-strong) !important;
                     box-shadow: 0 32px 64px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.16) !important;
                     border-radius: 8px !important;
                     width: 280px !important;
@@ -1600,7 +1622,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .confirm-dialog-lower {
                     padding: 16px 24px !important;
                     background: #f5f5f5 !important;
-                    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    border-top: 1px solid var(--line-soft) !important;
                     border-bottom-left-radius: 8px !important;
                     border-bottom-right-radius: 8px !important;
                 }
@@ -1726,7 +1748,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 0 !important;
                     border-radius: 8px !important;
                     box-shadow: 0 32px 64px rgba(0,0,0,0.24), 0 2px 4px rgba(0,0,0,0.16) !important;
-                    border: 1px solid rgba(0,0,0,0.12) !important;
+                    border: 1px solid var(--line-strong) !important;
                     animation: modal-pop-modern 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
                 }
                 
@@ -1745,7 +1767,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .confirm-dialog-lower,
                 .theme-acrylic .confirm-dialog-lower {
                     background: #f5f5f5 !important;
-                    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    border-top: 1px solid var(--line-soft) !important;
                     border-bottom-left-radius: 8px !important;
                     border-bottom-right-radius: 8px !important;
                 }
