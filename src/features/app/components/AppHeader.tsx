@@ -342,25 +342,12 @@ const AppHeader = ({
                   </FluentTooltip>
                 ))}
                 {indicatorRect && (
-                  <motion.div
+                  <div
                     className="type-filter-indicator"
-                    initial={{
-                      left: indicatorRect.left,
-                      opacity: prevFilter.current === null ? 0 : 1,
-                      scaleX: prevFilter.current === null ? 0.6 : 1,
-                    }}
-                    animate={{
-                      left: indicatorRect.left,
-                      opacity: 1,
-                      scaleX: 1,
-                    }}
-                    transition={{
-                      left: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
-                      opacity: { duration: 0.2, ease: 'easeOut' },
-                      scaleX: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
-                    }}
-                    style={{ position: 'absolute', bottom: 8 }}
-                  />
+                    style={{ left: indicatorRect.left }}
+                  >
+                    <div key={typeFilter || 'none'} className="type-filter-indicator-inner" />
+                  </div>
                 )}
               </div>
 
