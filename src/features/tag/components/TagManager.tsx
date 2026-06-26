@@ -100,9 +100,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         if (!isResizing) return;
 
         const handleMouseMove = (event: MouseEvent) => {
-            const bounds = containerRef.current?.getBoundingClientRect();
-            if (!bounds) return;
-            if (isStacked) {
+            const container = containerRef.current;
+            if (!container) return;
+            const bounds = container.getBoundingClientRect();
+            const computedStyle = window.getComputedStyle(container);
+            const isVertical = computedStyle.flexDirection === 'column';
+
+            if (isVertical) {
                 const maxHeight = Math.max(140, bounds.height - 180);
                 const nextHeight = Math.min(Math.max(event.clientY - bounds.top, 120), maxHeight);
                 setSidebarHeight(nextHeight);
@@ -128,7 +132,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             document.body.style.userSelect = "";
         };
 
-        document.body.style.cursor = isStacked ? "row-resize" : "col-resize";
+        const container = containerRef.current;
+        const isVertical = container && window.getComputedStyle(container).flexDirection === 'column';
+        document.body.style.cursor = isVertical ? "row-resize" : "col-resize";
         document.body.style.userSelect = "none";
         window.addEventListener("mousemove", handleMouseMove);
         window.addEventListener("mouseup", handleMouseUp);
@@ -139,7 +145,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             document.body.style.cursor = "";
             document.body.style.userSelect = "";
         };
-    }, [isResizing, isStacked]);
+    }, [isResizing, isCollapsed]);
 
     const fetchTags = async () => {
         try {
@@ -2037,6 +2043,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         height: 12px !important;
                         cursor: row-resize !important;
                         margin: -6px 0 !important;
+                        background: rgba(0, 0, 0, 0) !important;
+                        z-index: 1000 !important;
+                        position: relative !important;
+                        pointer-events: auto !important;
                     }
                 }
                 .tag-divider:hover, .tag-divider.active {

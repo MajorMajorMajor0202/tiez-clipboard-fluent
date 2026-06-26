@@ -1064,8 +1064,10 @@
     align-items: center !important;
     justify-content: center !important;
     cursor: row-resize !important;
-    background: transparent !important;
-    z-index: 10 !important;
+    background: rgba(0, 0, 0, 0) !important;
+    z-index: 1000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
   }
 
   .themed-tag-manager .tag-content {
