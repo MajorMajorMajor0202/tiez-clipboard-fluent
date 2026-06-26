@@ -273,6 +273,7 @@ const AdvancedSettingsWindow = () => {
                 appCleanupPolicies={appCleanupPolicies}
                 setAppCleanupPolicies={setAppCleanupPolicies}
                 installedApps={installedApps}
+                theme={theme}
             />
         </div>
     );

@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, Search, X } from "lucide-react";
 import type { InstalledAppOption } from "../../../app/types";
 import type { AppCleanupPolicy } from "../../types";
-
-
+import { getTagColor } from "../../../../shared/lib/utils";
 
 interface AdvancedSettingsGroupProps {
     t: (key: string) => string;
@@ -14,6 +13,7 @@ interface AdvancedSettingsGroupProps {
     appCleanupPolicies: AppCleanupPolicy[];
     setAppCleanupPolicies: (val: AppCleanupPolicy[]) => void;
     installedApps: InstalledAppOption[];
+    theme: string;
 }
 
 interface EditableRule {
@@ -92,7 +92,8 @@ const AdvancedSettingsGroup = ({
     setCleanupRules,
     appCleanupPolicies,
     setAppCleanupPolicies,
-    installedApps
+    installedApps,
+    theme
 }: AdvancedSettingsGroupProps) => {
     const [searchText, setSearchText] = useState("");
     const [selectedSourceId, setSelectedSourceId] = useState("global");
@@ -166,6 +167,11 @@ const AdvancedSettingsGroup = ({
     const selectedTarget = useMemo(
         () => sourceTargets.find((target) => target.id === selectedSourceId) ?? sourceTargets[0],
         [selectedSourceId, sourceTargets]
+    );
+
+    const selectedIndex = useMemo(
+        () => filteredTargets.findIndex((t) => t.id === selectedTarget?.id),
+        [filteredTargets, selectedTarget]
     );
 
     useEffect(() => {
@@ -360,14 +366,15 @@ const AdvancedSettingsGroup = ({
 
             <section
                 ref={workbenchRef}
-                className={`advanced-workbench ${isStacked ? "stacked-layout" : ""}`}
+                className={`advanced-workbench themed-tag-manager theme-${theme} ${isStacked ? "stacked-layout" : ""}`}
                 style={{
-                    ["--advanced-sidebar-width" as string]: `${sidebarWidth}px`,
-                    ["--advanced-sidebar-height" as string]: `${sidebarHeight}px`
+                    ["--tm-sidebar-width" as string]: `${sidebarWidth}px`,
+                    ["--tm-sidebar-height" as string]: `${sidebarHeight}px`
                 }}
             >
-                <aside className="advanced-sidebar">
-                    <div className="advanced-sidebar-search">
+                <aside className="tag-sidebar">
+                    <div className="tag-search-box">
+                        <Search size={12} className="search-icon-placeholder" />
                         <input
                             className="search-input advanced-search-input"
                             placeholder={t("search_apps_placeholder")}
@@ -375,69 +382,87 @@ const AdvancedSettingsGroup = ({
                             onFocus={focusEditorWindow}
                             onChange={(e) => setSearchText(e.target.value)}
                         />
-                        {searchResults.length > 0 && (
-                            <div className="advanced-search-results">
-                                {searchResults.map((app) => (
-                                    <button
-                                        key={app.value}
-                                        type="button"
-                                        className="advanced-search-result-item"
-                                        onClick={() => handleAddApp(app)}
-                                    >
-                                        <span className="advanced-search-result-main">
-                                            <span className="advanced-search-result-name">{app.label}</span>
-                                        </span>
-                                        <span className="advanced-search-result-action">
-                                            {app.added ? t("advanced_open_added_app") : t("advanced_add_app")}
-                                        </span>
-                                    </button>
-                                ))}
+                        {searchText ? (
+                            <div className="action-icons">
+                                <X size={12} className="action-icon clear" onClick={() => setSearchText("")} />
                             </div>
-                        )}
+                        ) : null}
                     </div>
 
-                    <div className="advanced-target-list">
+                    {searchResults.length > 0 && (
+                        <div className="advanced-search-results" style={{ margin: '8px 8px 0', zIndex: 20 }}>
+                            {searchResults.map((app) => (
+                                <button
+                                    key={app.value}
+                                    type="button"
+                                    className="advanced-search-result-item"
+                                    onClick={() => handleAddApp(app)}
+                                >
+                                    <span className="advanced-search-result-main">
+                                        <span className="advanced-search-result-name">{app.label}</span>
+                                    </span>
+                                    <span className="advanced-search-result-action">
+                                        {app.added ? t("advanced_open_added_app") : t("advanced_add_app")}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="tag-scroll custom-scrollbar">
+                        {selectedIndex !== -1 && (
+                            <div
+                                className="tag-selection-indicator"
+                                style={{
+                                    transform: `translateY(${16 + selectedIndex * 36}px)`,
+                                }}
+                            >
+                                <div key={selectedTarget?.id} className="tag-selection-indicator-inner" />
+                            </div>
+                        )}
                         {filteredTargets.map((target) => (
-                            <button
+                            <div
                                 key={target.id}
-                                type="button"
-                                className={`advanced-target-item ${selectedTarget?.id === target.id ? "active" : ""}`}
+                                className={`tag-item ${selectedTarget?.id === target.id ? "active" : ""}`}
                                 onClick={() => setSelectedSourceId(target.id)}
                             >
-                                <span className="advanced-target-meta">
-                                    <span className="advanced-target-name">{target.label}</span>
-                                    <span className="advanced-target-sub">
-                                        {target.kind === "app" && appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath)?.action === "ignore"
-                                            ? t("app_cleanup_policy_ignore")
-                                            : target.ruleCount > 0
-                                                ? `${target.ruleCount} ${t("advanced_rule_count_suffix")}`
-                                                : t("advanced_no_rules")}
-                                    </span>
-                                </span>
-
-                                {target.kind !== "global" && (
-                                    <button
-                                        type="button"
-                                        className="advanced-target-delete"
-                                        onClick={(e) => handleDeleteTarget(e, target)}
-                                        title={t("delete")}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
-                            </button>
+                                <div className="tag-color-wrapper">
+                                    <div
+                                        className="tag-color-dot"
+                                        style={{ background: getTagColor(target.label, theme) }}
+                                    />
+                                </div>
+                                <div className="tag-name-area">
+                                    <span className="tag-name">{target.label}</span>
+                                    {target.kind === "app" && appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath)?.action === "ignore" ? (
+                                        <span className="tag-badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>{t("app_cleanup_policy_ignore")}</span>
+                                    ) : target.ruleCount > 0 ? (
+                                        <span className="tag-badge">{target.ruleCount}</span>
+                                    ) : null}
+                                    {target.kind !== "global" && (
+                                        <div className="tag-hover-actions">
+                                            <span
+                                                onClick={(e) => handleDeleteTarget(e, target)}
+                                                title={t("delete")}
+                                            >
+                                                <Trash2 size={13} />
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </aside>
 
                 <div
-                    className={`advanced-divider ${isResizing ? "active" : ""} ${isStacked ? "stacked" : ""}`}
+                    className={`tag-divider ${isResizing ? "active" : ""} ${isStacked ? "stacked-divider" : ""}`}
                     onMouseDown={() => setIsResizing(true)}
                 >
-                    <span className="advanced-divider-handle" />
+                    <div className="tag-divider-handle" />
                 </div>
 
-                <div className="advanced-editor">
+                <div className="advanced-editor tag-content">
                     <div className="advanced-editor-toolbar">
                         {selectedTarget?.kind === "global" || (appCleanupPolicies.find(p => p.id === selectedTarget.policyId || p.appPath === selectedTarget.appPath)?.action !== "ignore") ? (
                             <button type="button" className="btn-icon advanced-add-rule-btn" onClick={addRule}>
