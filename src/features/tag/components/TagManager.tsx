@@ -872,7 +872,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                     width: 100%;
                 }
-                .tag-item:hover { background: var(--bg-main); }
+                .tag-item:hover { background: rgba(0, 0, 0, 0.06); }
+                .dark-mode .tag-item:hover { background: rgba(255, 255, 255, 0.08); }
                 .tag-item.active { 
                     background: rgba(0, 0, 0, 0.06); 
                     border-color: transparent;
@@ -1500,8 +1501,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-item:hover,
                 .theme-acrylic .tag-item:hover {
-                    background: rgba(var(--accent-color-rgb), 0.06);
+                    background: rgba(0, 0, 0, 0.06);
                     border-color: transparent;
+                }
+                .dark-mode .theme-mica .tag-item:hover,
+                .dark-mode .theme-acrylic .tag-item:hover {
+                    background: rgba(255, 255, 255, 0.08);
                 }
 
                 .theme-mica .tag-item.active,

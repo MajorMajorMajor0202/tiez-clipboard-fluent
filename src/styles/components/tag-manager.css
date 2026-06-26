@@ -215,8 +215,12 @@
 }
 
 .themed-tag-manager .tag-item:hover {
-  background: var(--bg-element) !important;
+  background: rgba(0, 0, 0, 0.06) !important;
   border-color: transparent !important;
+}
+
+.dark-mode .themed-tag-manager .tag-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 .themed-tag-manager .tag-item.active {
