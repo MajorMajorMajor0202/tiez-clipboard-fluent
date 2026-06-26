@@ -291,23 +291,18 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             } as any}
             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
         >
-            {/* Sidebar with CRUD support */}
-            {/* Sidebar with Unified Search & Create */}
             <div className="tag-sidebar">
-
-                {!isCollapsed && (
-                    <div className="tag-search-box">
-                        <div className="search-input-wrapper">
-                            <Search size={12} className="search-icon-placeholder" />
-                            <input
-                                placeholder={t('find_or_create')}
-                                value={tagSearch}
+                <div className="tag-search-box">
+                    <div className="search-input-wrapper">
+                        <Search size={12} className="search-icon-placeholder" />
+                        <input
+                            placeholder={t('find_or_create')}
+                            value={tagSearch}
                             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
                             onFocus={() => invoke('activate_window_focus').catch(console.error)}
                             onChange={e => setTagSearch(e.target.value)}
                             onKeyDown={async (e) => {
                                 if (e.key === 'Enter' && tagSearch.trim()) {
-                                    // If exact match exists, select it. If not, create new.
                                     const exactMatch = tags.find(t => t.name.toLowerCase() === normalizedTagSearch);
                                     if (exactMatch) {
                                         loadTagItems(exactMatch.name);
@@ -317,23 +312,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 }
                             }}
                         />
-                            {tagSearch ? (
-                                <div className="action-icons">
-                                    {canCreateTag ? (
-                                        <span
-                                            title={t('create_new_tag_tooltip')}
-                                            className="action-icon create"
-                                            onClick={() => createTag(tagSearch)}
-                                        >
-                                            <Plus size={12} />
-                                        </span>
-                                    ) : null}
-                                    <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
-                                </div>
-                            ) : null}
-                        </div>
+                        {tagSearch ? (
+                            <div className="action-icons">
+                                {canCreateTag ? (
+                                    <span
+                                        title={t('create_new_tag_tooltip')}
+                                        className="action-icon create"
+                                        onClick={() => createTag(tagSearch)}
+                                    >
+                                        <Plus size={12} />
+                                    </span>
+                                ) : null}
+                                <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
+                            </div>
+                        ) : null}
                     </div>
-                )}
+                </div>
 
                 <div className="tag-scroll custom-scrollbar">
                     {selectedIndex !== -1 && (
@@ -366,7 +360,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                     type="color"
                                     id={`color-picker-${tag.name}`}
                                     style={{ display: 'none' }}
-                                    value={tagColors[tag.name] || '#888888'} // Approximation if not set, or maybe convert HSL to Hex?
+                                    value={tagColors[tag.name] || '#888888'}
                                     onChange={async (e) => {
                                         const newColor = e.target.value;
                                         setTagColors(prev => ({ ...prev, [tag.name]: newColor }));
@@ -423,7 +417,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {filteredTags.length === 0 && !tagSearch.trim() && (
                         <div className="sidebar-status">{t('no_tags')}</div>
                     )}
-                    {/* Visual cue for creating new tag when filtering shows no results */}
                     {!isCollapsed && canCreateTag && filteredTags.length === 0 && (
                         <div className="tag-item create-hint" onClick={() => createTag(tagSearch)}>
                             <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
@@ -445,7 +438,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             }
                         }}
                     >
-                        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                        {isStacked ? (
+                            isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
+                        ) : (
+                            isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
+                        )}
                     </button>
                 </div>
             </div>
