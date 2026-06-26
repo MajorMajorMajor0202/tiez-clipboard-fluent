@@ -1072,8 +1072,8 @@
     display: flex !important;
     flex-direction: row !important;
     padding: 4px 8px 8px !important;
-    height: 48px !important;
-    max-height: 48px !important;
+    height: 44px !important;
+    max-height: 44px !important;
     gap: 8px !important;
   }
 
@@ -1081,9 +1081,9 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 64px !important;
-    height: 36px !important;
-    min-height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
     padding: 0 4px !important;
     margin: 0 !important;
     background: transparent !important;
@@ -1094,22 +1094,22 @@
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item:hover {
     background: rgba(0, 0, 0, 0.04) !important;
-    border-color: rgba(0, 0, 0, 0.02) !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
   }
 
   .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item:hover {
     background: rgba(255, 255, 255, 0.04) !important;
-    border-color: transparent !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item.active {
     background: rgba(0, 0, 0, 0.06) !important;
-    border-color: var(--border) !important;
+    border-color: rgba(0, 0, 0, 0.25) !important;
   }
 
   .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item.active {
     background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item .tag-color-wrapper {
@@ -1128,9 +1128,9 @@
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-selection-indicator {
     position: absolute !important;
     left: 8px !important;
-    top: 35px !important;
+    top: 31px !important;
     bottom: auto !important;
-    width: 64px !important;
+    width: 32px !important;
     height: 3px !important;
     background: transparent !important;
     z-index: 10 !important;

@@ -336,7 +336,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             className="tag-selection-indicator"
                             style={{
                                 transform: isStacked && isCollapsed
-                                    ? `translateX(${selectedIndex * 72}px)`
+                                    ? `translateX(${selectedIndex * 40}px)`
                                     : `translateY(${16 + selectedIndex * 36}px)`,
                             }}
                         >
