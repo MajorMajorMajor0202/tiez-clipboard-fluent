@@ -294,19 +294,38 @@
   box-shadow: var(--input-focus-shadow) !important;
 }
 
+.themed-tag-manager .tag-name-area {
+  flex: 1 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  transition: padding-right 0.15s ease !important;
+}
+
+.themed-tag-manager .tag-item:hover .tag-name-area {
+  padding-right: 52px !important;
+}
+
 .themed-tag-manager .tag-hover-actions {
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
   position: absolute !important;
   top: 50% !important;
-  right: 4px !important;
+  right: 0 !important;
   transform: translateY(-50%) !important;
   color: var(--text-secondary) !important;
   opacity: 0 !important;
   pointer-events: none !important;
   transition: opacity 0.16s ease !important;
   z-index: 1 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
 }
 
 /* Only show hover actions on hover — not on active/selected */

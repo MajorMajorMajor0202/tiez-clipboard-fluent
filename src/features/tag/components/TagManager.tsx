@@ -909,6 +909,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     align-items: center;
                     min-width: 0;
                     overflow: hidden;
+                    transition: padding-right 0.15s ease;
+                }
+                .tag-item:hover .tag-name-area {
+                    padding-right: 52px;
                 }
                 .tag-name {
                     font-size: 13px;
@@ -936,19 +940,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Hover actions — absolute right, smart overlay with fade-in edge */
                 .tag-hover-actions {
                     position: absolute;
-                    right: 10px;
+                    right: 0;
                     top: 50%;
                     transform: translateY(-50%);
                     display: none;
                     gap: 4px;
                     align-items: center;
-                    padding: 4px 8px;
-                    background: var(--bg-panel);
-                    border: 1px solid var(--border);
-                    border-radius: 999px;
+                    padding: 0;
+                    background: transparent;
+                    border: none;
+                    border-radius: 0;
                     z-index: 2;
-                    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-                    backdrop-filter: blur(10px);
+                    box-shadow: none;
+                    backdrop-filter: none;
                 }
                 .tag-item:hover .tag-hover-actions { display: flex; }
                 .tag-item.active .tag-hover-actions { display: none !important; }
