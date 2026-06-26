@@ -24,15 +24,19 @@ const ConfirmDialog = ({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className={`confirm-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
-        <div className="confirm-dialog-title">{title}</div>
-        <div className="confirm-dialog-message">{message}</div>
-        <div className="confirm-dialog-buttons">
-          <button className="confirm-dialog-button" onClick={onClose}>
-            {cancelLabel}
-          </button>
-          <button className="confirm-dialog-button primary" onClick={onConfirm}>
-            {confirmLabel}
-          </button>
+        <div className="confirm-dialog-upper">
+          <div className="confirm-dialog-title">{title}</div>
+          <div className="confirm-dialog-message">{message}</div>
+        </div>
+        <div className="confirm-dialog-lower">
+          <div className="confirm-dialog-buttons">
+            <button className="confirm-dialog-button" onClick={onClose}>
+              {cancelLabel}
+            </button>
+            <button className="confirm-dialog-button primary" onClick={onConfirm}>
+              {confirmLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>

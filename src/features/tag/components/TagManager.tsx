@@ -649,26 +649,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {deleteConfirmation.show && (
                 <div className="modal-overlay" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
-                        <h3>{t('confirm_delete')}</h3>
-                        <p>
-                            {t('confirm_delete_tag')}
-                            <br />
-                            <span className="tag-highlight" style={{ marginTop: '8px', display: 'inline-block' }}>
-                                {deleteConfirmation.tagName}
-                            </span>
-                        </p>
-                        <div className="confirm-dialog-buttons">
-                            <button className="confirm-dialog-button" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
-                                {t('cancel')}
-                            </button>
-                            <button className="confirm-dialog-button primary" onClick={() => {
-                                if (deleteConfirmation.tagName) {
-                                    handleDeleteTag(deleteConfirmation.tagName);
-                                }
-                                setDeleteConfirmation({ show: false, tagName: null });
-                            }}>
-                                {t('delete')}
-                            </button>
+                        <div className="confirm-dialog-upper">
+                            <h3>{t('delete_tag') || '删除标签'}</h3>
+                            <p>
+                                {t('confirm_delete_tag').replace(/^确定要删除标签吗？|^Are you sure\?\s*|^確定要刪除標籤嗎？/, '')}
+                                <br />
+                                <span className="tag-highlight" style={{ marginTop: '8px', display: 'inline-block' }}>
+                                    {deleteConfirmation.tagName}
+                                </span>
+                            </p>
+                        </div>
+                        <div className="confirm-dialog-lower">
+                            <div className="confirm-dialog-buttons">
+                                <button className="confirm-dialog-button" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
+                                    {t('cancel')}
+                                </button>
+                                <button className="confirm-dialog-button primary" onClick={() => {
+                                    if (deleteConfirmation.tagName) {
+                                        handleDeleteTag(deleteConfirmation.tagName);
+                                    }
+                                    setDeleteConfirmation({ show: false, tagName: null });
+                                }}>
+                                    {t('delete')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -678,33 +682,37 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {itemDeleteConfirmation.show && (
                 <div className="modal-overlay" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
-                        <h3>{t('confirm_delete')}</h3>
-                        <p>{t('confirm_delete_desc') || "确定要删除这条记录吗？"}</p>
-                        <div className="confirm-dialog-buttons">
-                            <button className="confirm-dialog-button" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
-                                {t('cancel')}
-                            </button>
-                            <button className="confirm-dialog-button primary" onClick={async () => {
-                                if (itemDeleteConfirmation.id === -1) {
-                                    // Bulk delete
-                                    try {
-                                        for (const id of Array.from(selectedItemIds)) {
-                                            await invoke('delete_clipboard_entry', { id });
-                                        }
-                                        setIsManageMode(false);
-                                        setSelectedItemIds(new Set());
-                                        if (selectedTag) await loadTagItems(selectedTag);
+                        <div className="confirm-dialog-upper">
+                            <h3>{t('delete') || '删除'}</h3>
+                            <p>{t('confirm_delete_desc') || "确定要删除这条记录吗？该操作不可撤销。"}</p>
+                        </div>
+                        <div className="confirm-dialog-lower">
+                            <div className="confirm-dialog-buttons">
+                                <button className="confirm-dialog-button" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
+                                    {t('cancel')}
+                                </button>
+                                <button className="confirm-dialog-button primary" onClick={async () => {
+                                    if (itemDeleteConfirmation.id === -1) {
+                                        // Bulk delete
+                                        try {
+                                            for (const id of Array.from(selectedItemIds)) {
+                                                await invoke('delete_clipboard_entry', { id });
+                                            }
+                                            setIsManageMode(false);
+                                            setSelectedItemIds(new Set());
+                                            if (selectedTag) await loadTagItems(selectedTag);
+                                            emit('clipboard-changed');
+                                        } catch (err) { console.error(err); }
+                                    } else if (itemDeleteConfirmation.id) {
+                                        await invoke('delete_clipboard_entry', { id: itemDeleteConfirmation.id });
+                                        loadTagItems(selectedTag!);
                                         emit('clipboard-changed');
-                                    } catch (err) { console.error(err); }
-                                } else if (itemDeleteConfirmation.id) {
-                                    await invoke('delete_clipboard_entry', { id: itemDeleteConfirmation.id });
-                                    loadTagItems(selectedTag!);
-                                    emit('clipboard-changed');
-                                }
-                                setItemDeleteConfirmation({ show: false, id: null });
-                            }}>
-                                {t('delete')}
-                            </button>
+                                    }
+                                    setItemDeleteConfirmation({ show: false, id: null });
+                                }}>
+                                    {t('delete')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -714,23 +722,27 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {isCreatingItem && (
                 <div className="modal-overlay" onClick={() => setIsCreatingItem(false)}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
-                        <h3>{t('add_item')}</h3>
-                        <div className="modal-input-field">
-                            <textarea
-                                className="tag-manager-textarea"
-                                value={newItemContent}
-                                onChange={e => setNewItemContent(e.target.value)}
-                                placeholder={t('input_content_placeholder')}
-                                autoFocus
-                            />
+                        <div className="confirm-dialog-upper">
+                            <h3>{t('add_item')}</h3>
+                            <div className="modal-input-field" style={{ marginTop: '12px' }}>
+                                <textarea
+                                    className="tag-manager-textarea"
+                                    value={newItemContent}
+                                    onChange={e => setNewItemContent(e.target.value)}
+                                    placeholder={t('input_content_placeholder')}
+                                    autoFocus
+                                />
+                            </div>
                         </div>
-                        <div className="confirm-dialog-buttons">
-                            <button className="confirm-dialog-button" onClick={() => setIsCreatingItem(false)}>
-                                {t('cancel')}
-                            </button>
-                            <button className="confirm-dialog-button primary" onClick={handleAddManualItem}>
-                                {t('confirm')}
-                            </button>
+                        <div className="confirm-dialog-lower">
+                            <div className="confirm-dialog-buttons">
+                                <button className="confirm-dialog-button" onClick={() => setIsCreatingItem(false)}>
+                                    {t('cancel')}
+                                </button>
+                                <button className="confirm-dialog-button primary" onClick={handleAddManualItem}>
+                                    {t('confirm')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -740,22 +752,26 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {editingItem && (
                 <div className="modal-overlay" onClick={() => setEditingItem(null)}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
-                        <h3>{t('edit_item')}</h3>
-                        <div className="modal-input-field">
-                            <textarea
-                                className="tag-manager-textarea"
-                                value={editingItem.content}
-                                onChange={e => setEditingItem({ ...editingItem, content: e.target.value })}
-                                autoFocus
-                            />
+                        <div className="confirm-dialog-upper">
+                            <h3>{t('edit_item')}</h3>
+                            <div className="modal-input-field" style={{ marginTop: '12px' }}>
+                                <textarea
+                                    className="tag-manager-textarea"
+                                    value={editingItem.content}
+                                    onChange={e => setEditingItem({ ...editingItem, content: e.target.value })}
+                                    autoFocus
+                                />
+                            </div>
                         </div>
-                        <div className="confirm-dialog-buttons">
-                            <button className="confirm-dialog-button" onClick={() => setEditingItem(null)}>
-                                {t('cancel')}
-                            </button>
-                            <button className="confirm-dialog-button primary" onClick={handleUpdateItemContent}>
-                                {t('save')}
-                            </button>
+                        <div className="confirm-dialog-lower">
+                            <div className="confirm-dialog-buttons">
+                                <button className="confirm-dialog-button" onClick={() => setEditingItem(null)}>
+                                    {t('cancel')}
+                                </button>
+                                <button className="confirm-dialog-button primary" onClick={handleUpdateItemContent}>
+                                    {t('save')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1388,23 +1404,27 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Overlay */
                 .modal-overlay {
                     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
-                    backdrop-filter: blur(4px);
+                    background: rgba(0, 0, 0, 0.4) !important;
+                    backdrop-filter: none !important;
+                    -webkit-backdrop-filter: none !important;
                     display: flex; align-items: center; justify-content: center;
                     z-index: 2000;
                 }
-
+                .dark-mode .modal-overlay {
+                    background: rgba(0, 0, 0, 0.5) !important;
+                }
 
                 /* Confirm Dialog - Modern Style */
                 .modal-overlay .confirm-dialog {
-                    background: var(--bg-panel) !important;
-                    padding: 24px;
+                    background: #ffffff !important;
+                    padding: 0 !important;
+                    overflow: hidden !important;
                     border: 1px solid var(--border) !important;
                     box-shadow: 0 32px 64px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.16) !important;
                     border-radius: 8px !important;
-                    width: 400px;
-                    max-width: 90%;
-                    animation: modal-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    width: 320px !important;
+                    max-width: 90% !important;
+                    animation: modal-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
                 }
 
                 @keyframes modal-pop {
@@ -1412,47 +1432,61 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     100% { transform: scale(1); opacity: 1; }
                 }
 
+                .confirm-dialog-upper {
+                    padding: 24px 24px 20px !important;
+                    text-align: left !important;
+                    background: #ffffff !important;
+                }
+
+                .confirm-dialog-lower {
+                    padding: 16px 24px !important;
+                    background: #f3f3f3 !important;
+                    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+                }
+
                 .modal-overlay .confirm-dialog h3 {
-                    margin: 0 0 16px 0;
-                    font-size: 17px;
-                    font-weight: 600;
+                    margin: 0 0 12px 0 !important;
+                    font-size: 16px !important;
+                    font-weight: 600 !important;
                     background: transparent !important;
                     color: var(--text-primary) !important;
-                    padding: 0;
-                    display: block;
-                    text-transform: none;
+                    padding: 0 !important;
+                    display: block !important;
+                    text-transform: none !important;
                 }
 
                 .modal-overlay .confirm-dialog p {
-                    margin: 12px 0 24px 0;
-                    font-size: 14px;
-                    font-weight: 400;
-                    line-height: 1.5;
-                    color: var(--text-secondary);
+                    margin: 12px 0 0 0 !important;
+                    font-size: 13px !important;
+                    font-weight: 400 !important;
+                    line-height: 1.5 !important;
+                    color: var(--text-secondary) !important;
                 }
 
                 .modal-overlay .confirm-dialog-buttons {
-                    display: flex;
-                    justify-content: flex-end;
-                    gap: 8px;
+                    display: flex !important;
+                    justify-content: center !important;
+                    gap: 8px !important;
+                    width: 100% !important;
                 }
 
                 .modal-overlay .confirm-dialog-button {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                     height: 32px !important;
                     min-height: 32px !important;
+                    min-width: 96px !important;
                     box-sizing: border-box !important;
                     padding: 0 16px !important;
-                    font-size: 12px;
-                    font-weight: 600;
-                    cursor: pointer;
+                    font-size: 12px !important;
+                    font-weight: 600 !important;
+                    cursor: pointer !important;
                     background: #ffffff !important;
                     border: 1px solid var(--border) !important;
                     color: var(--text-primary) !important;
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
-                    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+                    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease !important;
                     border-radius: 4px !important;
                 }
                 .modal-overlay .confirm-dialog-button:hover {
@@ -1493,9 +1527,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Modern Theme Polishes for Confirm Dialog */
                 .theme-mica .confirm-dialog,
                 .theme-acrylic .confirm-dialog {
-                    background: rgba(255, 255, 255, 0.8) !important;
-                    backdrop-filter: blur(20px);
-                    padding: 24px !important;
+                    background: transparent !important;
+                    backdrop-filter: blur(20px) !important;
+                    padding: 0 !important;
                     border-radius: 8px !important;
                     box-shadow: 0 32px 64px rgba(0,0,0,0.24), 0 2px 4px rgba(0,0,0,0.16) !important;
                     border: 1px solid rgba(255,255,255,0.4) !important;
@@ -1507,11 +1541,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     100% { transform: scale(1); opacity: 1; }
                 }
 
+                .theme-mica .confirm-dialog-upper,
+                .theme-acrylic .confirm-dialog-upper {
+                    background: rgba(255, 255, 255, 0.85) !important;
+                }
+
+                .theme-mica .confirm-dialog-lower,
+                .theme-acrylic .confirm-dialog-lower {
+                    background: rgba(243, 243, 243, 0.85) !important;
+                    border-top-color: rgba(0, 0, 0, 0.05) !important;
+                }
+
                 .theme-mica .confirm-dialog h3,
                 .theme-acrylic .confirm-dialog h3 {
                     background: transparent !important;
                     color: var(--text-primary) !important;
-                    font-size: 18px !important;
+                    font-size: 16px !important;
                     font-weight: 700 !important;
                     text-transform: none !important;
                     padding: 0 !important;
@@ -1529,8 +1574,15 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 /* Dark Mode Adaptation */
                 .dark-mode .modal-overlay .confirm-dialog {
-                    background: #1f1f1f !important;
+                    background: #2c2c2c !important;
                     border-color: #000 !important;
+                }
+                .dark-mode .confirm-dialog-upper {
+                    background: #2c2c2c !important;
+                }
+                .dark-mode .confirm-dialog-lower {
+                    background: #202020 !important;
+                    border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
                 }
                 .dark-mode .modal-overlay .confirm-dialog h3 {
                     color: #fff !important;
@@ -1540,8 +1592,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .dark-mode .theme-mica .confirm-dialog,
                 .dark-mode .theme-acrylic .confirm-dialog {
-                    background: rgba(30,30,30,0.8) !important;
+                    background: transparent !important;
                     border-color: rgba(255,255,255,0.1) !important;
+                }
+                .dark-mode.theme-mica .confirm-dialog-upper,
+                .dark-mode.theme-acrylic .confirm-dialog-upper {
+                    background: rgba(44, 44, 44, 0.85) !important;
+                }
+                .dark-mode.theme-mica .confirm-dialog-lower,
+                .dark-mode.theme-acrylic .confirm-dialog-lower {
+                    background: rgba(32, 32, 32, 0.85) !important;
+                    border-top-color: rgba(255, 255, 255, 0.06) !important;
                 }
 
                 .modal-input-field input {
