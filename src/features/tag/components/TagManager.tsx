@@ -85,7 +85,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     useEffect(() => { fetchTags(); }, []);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia("(max-width: 340px)");
+        const mediaQuery = window.matchMedia("(max-width: 520px)");
         const updateLayoutMode = () => {
             setIsStacked(mediaQuery.matches);
         };

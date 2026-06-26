@@ -1033,10 +1033,10 @@
   }
 }
 
-@media (max-width: 340px) {
+@media (max-width: 520px) {
   .themed-tag-manager {
     flex-direction: column !important;
-    gap: 4px !important;
+    gap: 12px !important;
     padding: 8px 4px 4px !important;
   }
 
