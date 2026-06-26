@@ -650,9 +650,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 <div className="modal-overlay" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
-                            <h3>{t('delete_tag') || '删除标签'}</h3>
+                            <h3>要删除标签吗？</h3>
                             <p>
-                                {t('confirm_delete_tag').replace(/^确定要删除标签吗？|^Are you sure\?\s*|^確定要刪除標籤嗎？/, '')}
+                                此操作将永久删除该标签及其下的所有条目。
                                 <br />
                                 <span className="tag-highlight" style={{ marginTop: '8px', display: 'inline-block' }}>
                                     {deleteConfirmation.tagName}
@@ -664,7 +664,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 <button className="confirm-dialog-button" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
                                     {t('cancel')}
                                 </button>
-                                <button className="confirm-dialog-button primary" onClick={() => {
+                                <button className="confirm-dialog-button primary danger" onClick={() => {
                                     if (deleteConfirmation.tagName) {
                                         handleDeleteTag(deleteConfirmation.tagName);
                                     }
@@ -683,15 +683,15 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 <div className="modal-overlay" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
-                            <h3>{t('delete') || '删除'}</h3>
-                            <p>{t('confirm_delete_desc') || "确定要删除这条记录吗？该操作不可撤销。"}</p>
+                            <h3>要删除记录吗？</h3>
+                            <p>此操作无法撤回。</p>
                         </div>
                         <div className="confirm-dialog-lower">
                             <div className="confirm-dialog-buttons">
                                 <button className="confirm-dialog-button" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
                                     {t('cancel')}
                                 </button>
-                                <button className="confirm-dialog-button primary" onClick={async () => {
+                                <button className="confirm-dialog-button primary danger" onClick={async () => {
                                     if (itemDeleteConfirmation.id === -1) {
                                         // Bulk delete
                                         try {
@@ -1408,7 +1408,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     backdrop-filter: none !important;
                     -webkit-backdrop-filter: none !important;
                     display: flex; align-items: center; justify-content: center;
-                    z-index: 2000;
+                    grid-column: 1 / -1 !important;
+                    grid-row: 1 / -1 !important;
+                    z-index: 9999 !important;
                 }
                 .dark-mode .modal-overlay {
                     background: rgba(0, 0, 0, 0.5) !important;
@@ -1422,7 +1424,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border: 1px solid var(--border) !important;
                     box-shadow: 0 32px 64px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.16) !important;
                     border-radius: 8px !important;
-                    width: 320px !important;
+                    width: 280px !important;
                     max-width: 90% !important;
                     animation: modal-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
                 }
@@ -1436,12 +1438,16 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     padding: 24px 24px 20px !important;
                     text-align: left !important;
                     background: #ffffff !important;
+                    border-top-left-radius: 8px !important;
+                    border-top-right-radius: 8px !important;
                 }
 
                 .confirm-dialog-lower {
                     padding: 16px 24px !important;
                     background: #f3f3f3 !important;
                     border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    border-bottom-left-radius: 8px !important;
+                    border-bottom-right-radius: 8px !important;
                 }
 
                 .modal-overlay .confirm-dialog h3 {
@@ -1524,15 +1530,43 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     box-shadow: none !important;
                 }
 
+                /* Primary Danger Button */
+                .modal-overlay .confirm-dialog-button.primary.danger {
+                    background: #c42b1c !important;
+                    color: #fff !important;
+                    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+                }
+                .modal-overlay .confirm-dialog-button.primary.danger:hover {
+                    background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
+                    border-color: rgba(0, 0, 0, 0.08) !important;
+                }
+                .modal-overlay .confirm-dialog-button.primary.danger:active {
+                    background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
+                    transform: scale(0.985) !important;
+                    box-shadow: none !important;
+                }
+                .dark-mode .modal-overlay .confirm-dialog-button.primary.danger {
+                    background: #c42b1c !important;
+                    border-color: rgba(255, 255, 255, 0.09) !important;
+                }
+                .dark-mode .modal-overlay .confirm-dialog-button.primary.danger:hover {
+                    background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
+                }
+                .dark-mode .modal-overlay .confirm-dialog-button.primary.danger:active {
+                    background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
+                }
+
                 /* Modern Theme Polishes for Confirm Dialog */
                 .theme-mica .confirm-dialog,
                 .theme-acrylic .confirm-dialog {
-                    background: transparent !important;
-                    backdrop-filter: blur(20px) !important;
+                    background: #ffffff !important;
+                    backdrop-filter: none !important;
+                    -webkit-backdrop-filter: none !important;
                     padding: 0 !important;
                     border-radius: 8px !important;
                     box-shadow: 0 32px 64px rgba(0,0,0,0.24), 0 2px 4px rgba(0,0,0,0.16) !important;
-                    border: 1px solid rgba(255,255,255,0.4) !important;
+                    border: 1px solid rgba(0,0,0,0.12) !important;
                     animation: modal-pop-modern 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
                 }
                 
@@ -1543,13 +1577,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .confirm-dialog-upper,
                 .theme-acrylic .confirm-dialog-upper {
-                    background: rgba(255, 255, 255, 0.85) !important;
+                    background: #ffffff !important;
+                    border-top-left-radius: 8px !important;
+                    border-top-right-radius: 8px !important;
                 }
 
                 .theme-mica .confirm-dialog-lower,
                 .theme-acrylic .confirm-dialog-lower {
-                    background: rgba(243, 243, 243, 0.85) !important;
-                    border-top-color: rgba(0, 0, 0, 0.05) !important;
+                    background: #f3f3f3 !important;
+                    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    border-bottom-left-radius: 8px !important;
+                    border-bottom-right-radius: 8px !important;
                 }
 
                 .theme-mica .confirm-dialog h3,
@@ -1579,10 +1617,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .dark-mode .confirm-dialog-upper {
                     background: #2c2c2c !important;
+                    border-top-left-radius: 8px !important;
+                    border-top-right-radius: 8px !important;
                 }
                 .dark-mode .confirm-dialog-lower {
                     background: #202020 !important;
                     border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
+                    border-bottom-left-radius: 8px !important;
+                    border-bottom-right-radius: 8px !important;
                 }
                 .dark-mode .modal-overlay .confirm-dialog h3 {
                     color: #fff !important;
@@ -1592,17 +1634,23 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .dark-mode .theme-mica .confirm-dialog,
                 .dark-mode .theme-acrylic .confirm-dialog {
-                    background: transparent !important;
+                    background: #2c2c2c !important;
+                    backdrop-filter: none !important;
+                    -webkit-backdrop-filter: none !important;
                     border-color: rgba(255,255,255,0.1) !important;
                 }
                 .dark-mode.theme-mica .confirm-dialog-upper,
                 .dark-mode.theme-acrylic .confirm-dialog-upper {
-                    background: rgba(44, 44, 44, 0.85) !important;
+                    background: #2c2c2c !important;
+                    border-top-left-radius: 8px !important;
+                    border-top-right-radius: 8px !important;
                 }
                 .dark-mode.theme-mica .confirm-dialog-lower,
                 .dark-mode.theme-acrylic .confirm-dialog-lower {
-                    background: rgba(32, 32, 32, 0.85) !important;
-                    border-top-color: rgba(255, 255, 255, 0.06) !important;
+                    background: #202020 !important;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+                    border-bottom-left-radius: 8px !important;
+                    border-bottom-right-radius: 8px !important;
                 }
 
                 .modal-input-field input {

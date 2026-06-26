@@ -21,6 +21,8 @@ const ConfirmDialog = ({
 }: ConfirmDialogProps) => {
   if (!open) return null;
 
+  const isDanger = confirmLabel === '删除' || confirmLabel === 'Delete' || confirmLabel === '確定' || confirmLabel === '确定' || confirmLabel === '確定刪除' || confirmLabel === '确定删除';
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className={`confirm-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
@@ -33,7 +35,7 @@ const ConfirmDialog = ({
             <button className="confirm-dialog-button" onClick={onClose}>
               {cancelLabel}
             </button>
-            <button className="confirm-dialog-button primary" onClick={onConfirm}>
+            <button className={`confirm-dialog-button primary ${isDanger ? 'danger' : ''}`} onClick={onConfirm}>
               {confirmLabel}
             </button>
           </div>
