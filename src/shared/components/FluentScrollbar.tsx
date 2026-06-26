@@ -20,7 +20,8 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
   const dragStartScrollTop = useRef(0);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const ARROW_H = 20;
+  // ARROW_H = arrow button height (20) + top/bottom inset (4) = 24
+  const ARROW_H = 24;
 
   const update = useCallback(() => {
     const el = scrollContainer;
@@ -124,7 +125,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
         className="fluent-scrollbar__track"
         onClick={handleTrackClick}
       >
-        {/* Up arrow — absolutely positioned at top of track */}
+        {/* Up arrow — 4px inset from track top rounded corner */}
         <button
           className="fluent-scrollbar__arrow fluent-scrollbar__arrow--up"
           onClick={(e) => { e.stopPropagation(); handleArrowUp(); }}
@@ -132,9 +133,16 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
           tabIndex={-1}
           onMouseDown={(e) => e.preventDefault()}
         >
-          {/* Solid filled upward triangle */}
-          <svg width="6" height="4" viewBox="0 0 6 4" aria-hidden="true">
-            <polygon points="3,0 6,4 0,4" fill="currentColor" />
+          {/* Solid filled triangle with rounded corners via stroke linejoin */}
+          <svg width="8" height="6" viewBox="0 0 8 6" aria-hidden="true">
+            <polygon
+              points="4,0.8 7.2,5.5 0.8,5.5"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
 
@@ -145,7 +153,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
           onMouseDown={handleThumbMouseDown}
         />
 
-        {/* Down arrow — absolutely positioned at bottom of track */}
+        {/* Down arrow — 4px inset from track bottom rounded corner */}
         <button
           className="fluent-scrollbar__arrow fluent-scrollbar__arrow--down"
           onClick={(e) => { e.stopPropagation(); handleArrowDown(); }}
@@ -153,9 +161,16 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
           tabIndex={-1}
           onMouseDown={(e) => e.preventDefault()}
         >
-          {/* Solid filled downward triangle */}
-          <svg width="6" height="4" viewBox="0 0 6 4" aria-hidden="true">
-            <polygon points="3,4 0,0 6,0" fill="currentColor" />
+          {/* Solid filled triangle with rounded corners via stroke linejoin */}
+          <svg width="8" height="6" viewBox="0 0 8 6" aria-hidden="true">
+            <polygon
+              points="4,5.2 0.8,0.5 7.2,0.5"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>

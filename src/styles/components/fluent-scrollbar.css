@@ -1,23 +1,41 @@
 /* ============================================================
  * Fluent Scrollbar — Windows 11 style custom overlay scrollbar
  * ============================================================
- * Layout: 8px wide column, absolutely positioned on the right.
- * Rest:   Track transparent, thumb is a 2px pill at right edge.
- * Hover:  Thumb expands LEFT to 6px. Track fades in. Arrows appear.
+ * Layout: 12px wide column, absolutely positioned on the right.
+ * Rest:   Track transparent, thumb is a 2px centered pill.
+ * Hover:  Thumb expands to 6px. Track fades in. Arrows appear.
  * ============================================================ */
 
-/* ── Scrollbar host: 8px wide column on the right of the list ── */
+/* ── Scrollbar host: 12px wide column on the right of the list ── */
 .fluent-scrollbar {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 8px;
+  width: 12px;
   pointer-events: auto;
   z-index: 100;
 }
 
-/* ── Arrow buttons — absolutely inside the track at top & bottom ── */
+/* ── Track — fills the full height of the scrollbar host ── */
+.fluent-scrollbar__track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  overflow: visible;
+}
+
+.fluent-scrollbar--active .fluent-scrollbar__track {
+  background: rgba(128, 128, 128, 0.09);
+}
+
+/* ── Arrow buttons — inside the track, 4px inset from each end ── */
 .fluent-scrollbar__arrow {
   position: absolute;
   left: 0;
@@ -37,58 +55,42 @@
     background 0.18s ease;
   pointer-events: none;
   z-index: 2;
+  border-radius: 4px;
 }
 
-.fluent-scrollbar__arrow--up   { top: 0; }
-.fluent-scrollbar__arrow--down { bottom: 0; }
+/* 4px inset from the rounded corners of the track */
+.fluent-scrollbar__arrow--up   { top: 4px; }
+.fluent-scrollbar__arrow--down { bottom: 4px; }
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow {
-  color: var(--text-secondary, rgba(96, 96, 96, 0.7));
+  color: var(--text-secondary, rgba(96, 96, 96, 0.65));
   pointer-events: auto;
 }
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow:hover {
   background: rgba(128, 128, 128, 0.14);
-  color: var(--text-primary, rgba(32, 32, 32, 0.85));
+  color: var(--text-primary, rgba(32, 32, 32, 0.9));
 }
 
 .fluent-scrollbar--active .fluent-scrollbar__arrow:active {
   background: rgba(128, 128, 128, 0.22);
 }
 
-/* ── Track — fills the full height of the scrollbar host ── */
-.fluent-scrollbar__track {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 6px;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  /* Allow thumb drag outside track bounds to propagate up */
-  overflow: visible;
-}
-
-.fluent-scrollbar--active .fluent-scrollbar__track {
-  background: rgba(128, 128, 128, 0.08);
-}
-
 /* ── Thumb ── */
 .fluent-scrollbar__thumb {
   position: absolute;
-  right: 0;
-  /* rest: 2px wide, right-aligned in the 8px column */
+  /* Horizontally centered in the 12px host */
+  left: 50%;
+  transform: translateX(-50%);
+  /* rest: 2px wide centered pill */
   width: 2px;
   border-radius: 999px;
   background: rgba(128, 128, 128, 0.42);
   cursor: grab;
-  /* Smooth expand-to-left animation */
+  /* Smooth expand animation — width centered from middle */
   transition:
     width 0.18s cubic-bezier(0.4, 0, 0.2, 1),
     background 0.18s ease;
-  /* Never allow click to pass through */
   pointer-events: auto;
 }
 
@@ -102,7 +104,7 @@
   background: rgba(64, 64, 64, 0.75);
 }
 
-/* On hover/drag, expand the thumb LEFT (right edge stays fixed) */
+/* On hover, expand the thumb (centered, grows both sides equally) */
 .fluent-scrollbar--active .fluent-scrollbar__thumb {
   width: 6px;
   background: rgba(96, 96, 96, 0.62);
