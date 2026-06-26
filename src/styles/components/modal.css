@@ -57,14 +57,14 @@ body:has(.modal-overlay) #root {
   background: #ffffff !important;
   padding: 0 !important;
   overflow: hidden !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid var(--line-soft) !important;
   border-radius: 8px !important;
   box-shadow: 0 32px 64px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.16) !important;
   width: 280px !important;
   max-width: 90% !important;
   color: var(--text-primary);
 }
-
+ 
 .confirm-dialog-upper {
   padding: 24px 24px 20px !important;
   text-align: left !important;
@@ -72,7 +72,7 @@ body:has(.modal-overlay) #root {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
 }
-
+ 
 .confirm-dialog-lower {
   padding: 16px 24px !important;
   background: #f3f3f3 !important;
@@ -80,7 +80,7 @@ body:has(.modal-overlay) #root {
   border-bottom-left-radius: 8px !important;
   border-bottom-right-radius: 8px !important;
 }
-
+ 
 .confirm-dialog-title {
   font-size: 16px !important;
   font-weight: 600 !important;
@@ -89,7 +89,7 @@ body:has(.modal-overlay) #root {
   text-transform: none !important;
   letter-spacing: normal !important;
 }
-
+ 
 .confirm-dialog-message {
   font-size: 13px !important;
   margin-bottom: 0 !important;
@@ -97,14 +97,14 @@ body:has(.modal-overlay) #root {
   color: var(--text-secondary) !important;
   opacity: 1 !important;
 }
-
+ 
 .confirm-dialog-buttons {
   display: flex !important;
   justify-content: center !important;
   gap: 8px !important;
   width: 100% !important;
 }
-
+ 
 .confirm-dialog-button {
   display: inline-flex !important;
   align-items: center !important;
@@ -117,37 +117,39 @@ body:has(.modal-overlay) #root {
   font-size: 12px !important;
   font-weight: 600 !important;
   cursor: pointer;
-  border: 1px solid var(--border) !important;
+  border: 1px solid var(--line-soft) !important;
   border-radius: 4px !important;
   background: #ffffff !important;
+  background-clip: padding-box !important;
   color: var(--text-primary);
   transition: all 0.15s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
   text-transform: none;
 }
-
+ 
 .dark-mode .confirm-dialog {
   background: #2c2c2c !important;
   border-color: #000 !important;
 }
-
+ 
 .dark-mode .confirm-dialog-upper {
   background: #2c2c2c !important;
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
 }
-
+ 
 .dark-mode .confirm-dialog-lower {
   background: #202020 !important;
   border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
   border-bottom-left-radius: 8px !important;
   border-bottom-right-radius: 8px !important;
 }
-
+ 
 .dark-mode .confirm-dialog-button {
   background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--line-soft) !important;
 }
-
+ 
 .confirm-dialog-button:hover {
   background: rgba(0, 0, 0, 0.04) !important;
   border-color: var(--line-strong) !important;
@@ -187,31 +189,32 @@ body:has(.modal-overlay) #root {
 
 .confirm-dialog-button.primary.danger {
   background: #c42b1c !important;
+  background-clip: padding-box !important;
   color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid var(--line-soft) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
 }
-
+ 
 .confirm-dialog-button.primary.danger:hover {
   background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: var(--line-soft) !important;
 }
-
+ 
 .confirm-dialog-button.primary.danger:active {
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
   transform: scale(0.985) !important;
   box-shadow: none !important;
 }
-
+ 
 .dark-mode .confirm-dialog-button.primary.danger {
   background: #c42b1c !important;
-  border-color: rgba(255, 255, 255, 0.09) !important;
+  border-color: var(--line-soft) !important;
 }
-
+ 
 .dark-mode .confirm-dialog-button.primary.danger:hover {
   background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
 }
-
+ 
 .dark-mode .confirm-dialog-button.primary.danger:active {
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
 }

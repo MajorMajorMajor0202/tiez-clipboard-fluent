@@ -558,8 +558,7 @@
   border-left: none !important;
 }
 
-.themed-tag-manager .sort-btn,
-.themed-tag-manager .toggle-btn {
+.themed-tag-manager .sort-btn {
   border: var(--button-border) !important;
   background: var(--bg-button) !important;
   color: var(--text-secondary) !important;
@@ -587,8 +586,7 @@
     color 0.18s ease !important;
 }
 
-.themed-tag-manager .sort-btn:hover,
-.themed-tag-manager .toggle-btn:hover {
+.themed-tag-manager .sort-btn:hover {
   background: var(--bg-input) !important;
   border-color: var(--button-hover-border-color) !important;
   box-shadow: var(--button-hover-shadow) !important;
@@ -596,50 +594,7 @@
   transform: var(--button-hover-transform) !important;
 }
 
-.themed-tag-manager .sort-btn.active,
-.themed-tag-manager .toggle-btn.active {
-  background: var(--accent-color) !important;
-  border-color: var(--accent-color) !important;
-  color: #ffffff !important;
-  box-shadow: var(--button-active-filled-shadow) !important;
-}
-
-.themed-tag-manager .toggle-btn.active:hover {
-  background: linear-gradient(rgba(255,255,255,0.18), rgba(255,255,255,0.18)), var(--accent-color) !important;
-  transform: none !important;
-  box-shadow: none !important;
-  border-color: var(--accent-color) !important;
-}
-
-.themed-tag-manager .view-toggle {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0 !important;
-  padding: 0 !important;
-  border: 1px solid var(--line-strong) !important;
-  border-radius: 4px !important;
-  background: var(--bg-input) !important;
-  overflow: hidden !important;
-}
-
-.themed-tag-manager .toggle-btn {
-  width: 34px !important;
-  height: 30px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 0 !important;
-  cursor: pointer !important;
-  transition: background 0.15s ease !important;
-}
-.themed-tag-manager .toggle-btn:hover {
-  background: rgba(128,128,128,0.08) !important;
-  border: none !important;
-  box-shadow: none !important;
-  transform: none !important;
-  color: var(--text-primary) !important;
-}
+/* Removed legacy overrides to let local styles in TagManager.tsx apply */
 
 .themed-tag-manager .add-item-btn {
   min-height: 34px !important;
@@ -974,9 +929,10 @@
   min-width: 96px !important;
   box-sizing: border-box !important;
   padding: 0 16px !important;
-  border: 1px solid var(--border) !important;
+  border: 1px solid var(--line-soft) !important;
   border-radius: 4px !important;
   background: #ffffff !important;
+  background-clip: padding-box !important;
   color: var(--text-primary) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
   font-size: 12px !important;
@@ -990,6 +946,7 @@
 
 .dark-mode .tag-manager-dialog .confirm-dialog-button {
   background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--line-soft) !important;
 }
 
 .tag-manager-dialog .confirm-dialog-button:hover {
@@ -1015,13 +972,13 @@
 .tag-manager-dialog .confirm-dialog-button.primary {
   background: var(--accent-color) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid var(--line-soft) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
 }
 
 .tag-manager-dialog .confirm-dialog-button.primary:hover {
   background: var(--accent-hover, rgba(var(--accent-color-rgb), 0.9)) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
 }
 
 .tag-manager-dialog .confirm-dialog-button.primary:active {
@@ -1031,14 +988,15 @@
 
 .tag-manager-dialog .confirm-dialog-button.primary.danger {
   background: #c42b1c !important;
+  background-clip: padding-box !important;
   color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid var(--line-soft) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
 }
 
 .tag-manager-dialog .confirm-dialog-button.primary.danger:hover {
   background: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)), #c42b1c !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: var(--line-soft) !important;
 }
 
 .tag-manager-dialog .confirm-dialog-button.primary.danger:active {
@@ -1049,7 +1007,7 @@
 
 .dark-mode .tag-manager-dialog .confirm-dialog-button.primary.danger {
   background: #c42b1c !important;
-  border-color: rgba(255, 255, 255, 0.09) !important;
+  border-color: var(--line-soft) !important;
 }
 
 .dark-mode .tag-manager-dialog .confirm-dialog-button.primary.danger:hover {
