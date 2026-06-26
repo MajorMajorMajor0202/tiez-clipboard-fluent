@@ -1083,7 +1083,6 @@ const App = () => {
         setSearchIsFocused={setSearchIsFocused}
         setEditingTagsId={setEditingTagsId}
         theme={theme}
-        colorMode={colorMode}
         settingsTitle={showSettings && settingsSubpage === "advanced" ? t("advanced_settings") : t("settings")}
         typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}

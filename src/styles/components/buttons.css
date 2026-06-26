@@ -56,11 +56,11 @@
 
 .btn-icon-ghost:hover {
   color: var(--text-primary);
-  background: rgba(128, 128, 128, 0.12);
+  background: var(--bg-subtle-hover);
 }
 
 .btn-icon-ghost:active {
-  background: rgba(128, 128, 128, 0.18);
+  background: var(--bg-subtle-active);
 }
 
 .btn-icon-ghost.active {
