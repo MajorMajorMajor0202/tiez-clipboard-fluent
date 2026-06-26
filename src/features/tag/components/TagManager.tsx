@@ -1400,8 +1400,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: var(--bg-panel) !important;
                     padding: 24px;
                     border: 1px solid var(--border) !important;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
-                    border-radius: var(--radius-lg) !important;
+                    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.24), 0 2px 4px rgba(0, 0, 0, 0.16) !important;
+                    border-radius: 8px !important;
                     width: 400px;
                     max-width: 90%;
                     animation: modal-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1438,32 +1438,56 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 .modal-overlay .confirm-dialog-button {
-                    padding: 8px 16px;
-                    font-size: 13px;
-                    font-weight: 500;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 32px !important;
+                    min-height: 32px !important;
+                    box-sizing: border-box !important;
+                    padding: 0 16px !important;
+                    font-size: 12px;
+                    font-weight: 600;
                     cursor: pointer;
-                    background: var(--bg-main) !important;
+                    background: #ffffff !important;
                     border: 1px solid var(--border) !important;
                     color: var(--text-primary) !important;
-                    box-shadow: none !important;
-                    transition: all 0.15s;
-                    border-radius: var(--radius-sm);
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
+                    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+                    border-radius: 4px !important;
                 }
                 .modal-overlay .confirm-dialog-button:hover {
-                    background: var(--border-light) !important;
+                    background: rgba(0, 0, 0, 0.04) !important;
+                    border-color: var(--line-strong) !important;
+                }
+                .dark-mode .modal-overlay .confirm-dialog-button {
+                    background: rgba(255, 255, 255, 0.06) !important;
+                }
+                .dark-mode .modal-overlay .confirm-dialog-button:hover {
+                    background: rgba(255, 255, 255, 0.09) !important;
+                    border-color: var(--line-strong) !important;
                 }
                 .modal-overlay .confirm-dialog-button:active {
-                    transform: scale(0.98);
+                    transform: scale(0.985) !important;
                     box-shadow: none !important;
+                    background: rgba(0, 0, 0, 0.08) !important;
+                }
+                .dark-mode .modal-overlay .confirm-dialog-button:active {
+                    background: rgba(255, 255, 255, 0.15) !important;
                 }
 
                 .modal-overlay .confirm-dialog-button.primary {
                     background: var(--accent-color) !important;
                     color: #fff !important;
-                    border: none !important;
+                    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
                 }
                 .modal-overlay .confirm-dialog-button.primary:hover {
-                    background: var(--accent-color-dark) !important;
+                    background: var(--accent-hover, rgba(var(--accent-color-rgb), 0.9)) !important;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+                }
+                .modal-overlay .confirm-dialog-button.primary:active {
+                    transform: scale(0.985) !important;
+                    box-shadow: none !important;
                 }
 
                 /* Modern Theme Polishes for Confirm Dialog */
@@ -1472,8 +1496,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(255, 255, 255, 0.8) !important;
                     backdrop-filter: blur(20px);
                     padding: 24px !important;
-                    border-radius: 4px !important;
-                    box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+                    border-radius: 8px !important;
+                    box-shadow: 0 32px 64px rgba(0,0,0,0.24), 0 2px 4px rgba(0,0,0,0.16) !important;
                     border: 1px solid rgba(255,255,255,0.4) !important;
                     animation: modal-pop-modern 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
                 }
@@ -1496,19 +1520,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .confirm-dialog-button,
                 .theme-acrylic .confirm-dialog-button {
                     border-radius: 4px !important;
-                    border: none !important;
-                    box-shadow: none !important;
                     font-weight: 600 !important;
-                    background: rgba(0,0,0,0.05) !important;
                 }
                 .theme-mica .confirm-dialog-button:active,
                 .theme-acrylic .confirm-dialog-button:active {
-                    transform: scale(0.95);
-                }
-
-                .theme-mica .confirm-dialog-button.primary,
-                .theme-acrylic .confirm-dialog-button.primary {
-                    background: var(--accent-color) !important;
+                    transform: scale(0.985) !important;
                 }
 
                 /* Dark Mode Adaptation */
