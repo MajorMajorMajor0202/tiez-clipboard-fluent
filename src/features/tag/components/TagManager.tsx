@@ -1290,10 +1290,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sort-menu {
                     position: absolute;
                     top: -4px;
-                    left: auto;
-                    right: 0;
-                    width: 150%;
-                    height: 64px;
+                    left: 0;
+                    right: -4px;
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
@@ -1338,18 +1336,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .dark-mode .sort-menu button:hover {
                     background: rgba(255, 255, 255, 0.04);
                 }
-                                                .sort-menu button.active {
-                    background: transparent; /* no background so hover can apply */
+                .sort-menu button.active {
                     color: var(--text-primary);
+                    background: #f0f0f0;
                 }
-                                                .sort-menu button.active:hover {
-                    background: #f4f4f4; /* same gray as normal hover */
-                    color: var(--text-primary);
-                } 
-                .dark-mode .sort-menu button.active:hover {
-                    background: rgba(255, 255, 255, 0.04); /* dark mode hover */
+                .dark-mode .sort-menu button.active {
+                    background: rgba(255, 255, 255, 0.08);
                 }
-                                                /* removed dark-mode active rule to allow hover */
                 .sort-menu button.active::before {
                     content: "";
                     position: absolute;
@@ -1374,8 +1367,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border: 1px solid var(--line-soft);
                     border-radius: 4px;
                     background: #ffffff;
-                    /* Reduced bottom inner shadow thickness for a subtle line */
-                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -1px 0 rgba(0, 0, 0, 0.12) !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02), inset 0 -2px 0 rgba(0, 0, 0, 0.12) !important;
                 }
                 .dark-mode .view-split-button {
                     background: #2d2d2d;
@@ -1431,23 +1423,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 
                 /* Popover view menu */
-                                .view-menu {
+                .view-menu {
                     position: absolute;
                     top: 100%;
                     right: 0;
                     margin-top: 4px;
-                    /* Slightly gray background for subtle contrast */
-                    background: #f9f9f9;
+                    background: #ffffff;
                     border: 1px solid var(--line-soft);
                     border-radius: 4px;
-                    padding: 8px; /* increase padding for larger menu */
+                    padding: 4px;
                     display: flex;
                     flex-direction: row;
-                    gap: 8px;
+                    gap: 4px;
                     z-index: 100;
-                    /* Size: width ~1.5× button, height ~2× button (button height is 32px) */
-                    width: 180px; /* assumes button width ~120px */
-                    height: 64px; /* exact 2× button height */
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
                     animation: view-menu-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
                 }
@@ -1459,32 +1447,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: #2d2d2d;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 }
-                                                .view-menu button {
-                    background: #ffffff; /* white block slightly lighter than menu */
-                    border: 1px solid var(--line-soft);
-                    border-radius: 4px;
-                    width: 32px;
-                    height: 32px;
+                .view-menu button {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    border: none;
+                    background: transparent;
+                    border-radius: 4px;
                     color: var(--text-secondary);
                     cursor: pointer;
-                    padding: 0;
                     outline: none !important;
                     transition: background 0.15s ease, color 0.15s ease;
                 }
-                                .view-menu button:hover {
-                    background: #e0e0e0; /* gray background on hover */
-                    color: var(--text-secondary); /* normal gray icon */
+                .view-menu button:hover {
+                    background: rgba(0, 0, 0, 0.06);
+                    color: var(--text-primary);
                 }
                 .dark-mode .view-menu button:hover {
-                    background: #555555; /* gray background in dark mode */
-                    color: var(--text-secondary);
+                    background: rgba(255, 255, 255, 0.08);
                 }
-                                                .view-menu button.active {
-                    background: #ffffff; /* keep white background when selected */
-                    color: var(--text-secondary); /* normal gray icon */
+                .view-menu button.active {
+                    background: rgba(0, 0, 0, 0.04);
+                    color: var(--accent-color);
                 }
                 .dark-mode .view-menu button.active {
                     background: rgba(255, 255, 255, 0.05);
