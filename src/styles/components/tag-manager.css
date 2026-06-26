@@ -1,5 +1,5 @@
 .themed-tag-manager {
-  --tm-gap: 4px;
+  --tm-gap: 12px;
   --tm-sidebar-width: clamp(184px, 25%, 216px);
   --tm-sidebar-collapsed-width: 50px;
   display: flex !important;
@@ -27,7 +27,7 @@
 .themed-tag-manager .tag-sidebar,
 .themed-tag-manager .tag-content {
   border: var(--panel-border) !important;
-  border-radius: var(--panel-radius) !important;
+  border-radius: 4px !important;
   background: var(--bg-panel) !important;
   box-shadow: var(--panel-shadow) !important;
 }

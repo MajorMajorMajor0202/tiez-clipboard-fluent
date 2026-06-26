@@ -760,8 +760,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: var(--bg-content);
                     font-family: var(--font-main, ui-monospace, monospace);
                     color: var(--text-primary);
-                    gap: 0;
-                    padding: 0;
+                    gap: 12px;
+                    padding: 12px;
                 }
 
                 /* Sidebar */
@@ -771,7 +771,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     flex-direction: column;
                     background: var(--bg-panel);
-                    border-radius: 0;
+                    border-radius: 4px;
                     box-shadow: none;
                     overflow: hidden;
                     border: var(--panel-border);
@@ -1557,8 +1557,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Modern Theme Polishes */
                 .theme-mica.themed-tag-manager,
                 .theme-acrylic.themed-tag-manager {
-                    gap: 14px;
-                    padding: 14px;
+                    gap: 12px;
+                    padding: 12px;
                     background: transparent !important;
                     overflow: hidden;
                 }
