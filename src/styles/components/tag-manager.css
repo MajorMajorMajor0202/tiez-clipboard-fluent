@@ -102,7 +102,7 @@
   height: 32px !important;
   min-height: 32px !important;
   margin: 8px 8px 0 !important;
-  padding: 0 10px !important;
+  padding: 0 8px !important;
   display: flex !important;
   align-items: center !important;
   border: var(--input-border) !important;
@@ -118,7 +118,7 @@
 
 .themed-tag-manager .tag-search-box .search-icon-placeholder {
   position: absolute !important;
-  left: 0 !important;
+  left: 4px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
   color: var(--text-secondary) !important;
@@ -129,7 +129,7 @@
 .themed-tag-manager .tag-search-box input {
   width: 100% !important;
   height: 30px !important;
-  padding: 0 8px 0 12px !important;
+  padding: 0 8px 0 28px !important;
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
