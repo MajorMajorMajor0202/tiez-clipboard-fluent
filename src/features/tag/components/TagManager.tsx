@@ -955,7 +955,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     backdrop-filter: none;
                 }
                 .tag-item:hover .tag-hover-actions { display: flex; }
-                .tag-item.active .tag-hover-actions { display: none !important; }
+                .tag-item.active:not(:hover) .tag-hover-actions { display: none !important; }
 
                 .tag-hover-actions > span {
                     display: flex;
@@ -1560,8 +1560,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--accent-color);
                 }
 
-                .theme-mica .tag-item.active .tag-hover-actions,
-                .theme-acrylic .tag-item.active .tag-hover-actions {
+                .theme-mica .tag-item.active:not(:hover) .tag-hover-actions,
+                .theme-acrylic .tag-item.active:not(:hover) .tag-hover-actions {
                     display: none !important;
                 }
                 .theme-mica .tag-item.active .tag-hover-actions > span,
