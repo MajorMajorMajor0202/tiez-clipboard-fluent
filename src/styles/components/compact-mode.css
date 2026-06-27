@@ -661,3 +661,8 @@ html.theme-acrylic .history-item.compact {
     padding-bottom: 1px !important;
     border-radius: 10px !important;
 }
+
+/* Ensure content-preview-shell does not have top margin in compact mode */
+.history-item.compact .content-preview-shell {
+    margin-top: 0 !important;
+}
