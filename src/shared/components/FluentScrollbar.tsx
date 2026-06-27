@@ -19,7 +19,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
   const dragStartY = useRef(0);
   const dragStartScrollTop = useRef(0);
   const trackRef = useRef<HTMLDivElement>(null);
-  const ARROW_H = 24;
+  const ARROW_H = 12;
 
   const update = useCallback(() => {
     const el = scrollContainer;
