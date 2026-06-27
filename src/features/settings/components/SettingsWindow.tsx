@@ -395,6 +395,65 @@ const SettingsWindow = () => {
     theme
   });
 
+  // Accent color loader and active tab indicator vertical slider
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [indicatorRect, setIndicatorRect] = useState<{ top: number; height: number } | null>(null);
+
+  const updateIndicator = useCallback(() => {
+    if (!sidebarRef.current || !activeTab) {
+      setIndicatorRect(null);
+      return;
+    }
+    const activeBtn = sidebarRef.current.querySelector('.fluent-sidebar-item.active') as HTMLElement | null;
+    if (!activeBtn) {
+      setIndicatorRect(null);
+      return;
+    }
+    const sidebarRect = sidebarRef.current.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    setIndicatorRect({
+      top: btnRect.top - sidebarRect.top + (btnRect.height - 20) / 2,
+      height: 20,
+    });
+  }, [activeTab]);
+
+  useEffect(() => {
+    updateIndicator();
+  }, [updateIndicator]);
+
+  useEffect(() => {
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [updateIndicator]);
+
+  useEffect(() => {
+    if (!settingsLoaded) return;
+
+    const applyAccent = (hex: string) => {
+      const raw = hex.replace("#", "");
+      const r = parseInt(raw.substring(0, 2), 16);
+      const g = parseInt(raw.substring(2, 4), 16);
+      const b = parseInt(raw.substring(4, 6), 16);
+      if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return;
+
+      const root = document.documentElement;
+      root.style.setProperty("--accent-color", hex);
+      root.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
+    };
+
+    const updateAccent = () => {
+      invoke<string | null>("get_system_accent_color")
+        .then((color) => {
+          if (color) applyAccent(color);
+        })
+        .catch(() => {});
+    };
+
+    updateAccent();
+    const interval = setInterval(updateAccent, 3000);
+    return () => clearInterval(interval);
+  }, [settingsLoaded]);
+
   const saveAppSetting = useCallback(async (type: string, path: string) => {
     const key = `app.${type}`;
     setAppSettings(prev => ({ ...prev, [key]: path }));
@@ -636,7 +695,7 @@ const SettingsWindow = () => {
   return (
     <div className="fluent-settings-layout">
       {/* Sidebar Navigation */}
-      <div className="fluent-sidebar">
+      <div ref={sidebarRef} className="fluent-sidebar">
         <div style={{ padding: "8px 12px 16px", fontSize: "16px", fontWeight: 700 }}>设置</div>
         {menuItems.map(item => (
           <button
@@ -651,6 +710,14 @@ const SettingsWindow = () => {
             <span>{item.label}</span>
           </button>
         ))}
+        {indicatorRect && (
+          <div
+            className="fluent-sidebar-indicator"
+            style={{ transform: `translateY(${indicatorRect.top}px)` }}
+          >
+            <div key={activeTab} className="fluent-sidebar-indicator-inner" />
+          </div>
+        )}
         <div style={{ marginTop: "auto", padding: "8px 12px", fontSize: "11px", color: "var(--text-secondary)" }}>
           TieZ v{appVersion}
         </div>

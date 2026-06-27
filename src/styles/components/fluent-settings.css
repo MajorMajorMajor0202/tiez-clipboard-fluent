@@ -14,14 +14,15 @@
 /* Sidebar navigation */
 .fluent-sidebar {
   width: 200px;
-  background-color: var(--bg-window);
-  border-right: 1px solid var(--line-soft);
+  background-color: transparent;
+  border-right: none;
   padding: 16px 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex-shrink: 0;
   box-sizing: border-box;
+  position: relative;
 }
 
 .fluent-sidebar-item {
@@ -56,16 +57,32 @@
   font-weight: 600;
 }
 
-/* Active indicator bar */
-.fluent-sidebar-item.active::before {
-  content: "";
+/* Active indicator bar - vertical sliding wrapper */
+.fluent-sidebar-indicator {
   position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
+  left: 8px; /* matching the padding of sidebar */
+  top: 0;
   width: 3px;
-  border-radius: 4px;
+  height: 20px;
+  z-index: 10;
+  pointer-events: none;
+  background: transparent;
+  transition: transform 0.22s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+.fluent-sidebar-indicator-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
   background-color: var(--accent-color);
+  transform-origin: center;
+  animation: fluent-stretch-vertical 0.22s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+@keyframes fluent-stretch-vertical {
+  0% { transform: scaleY(1); }
+  45% { transform: scaleY(1.35); }
+  100% { transform: scaleY(1); }
 }
 
 /* Content area */
