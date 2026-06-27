@@ -413,3 +413,129 @@
   text-transform: none;
   white-space: nowrap;
 }
+
+/* Tag edit toggle active state */
+.btn-icon-ghost.tag-editing-active {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.14)) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.6;
+}
+
+/* Fluent Tag Edit Flyout container */
+.tag-edit-flyout {
+  width: 192px; /* multiple of 4 */
+  background: var(--flyout-background, var(--bg-element));
+  border: var(--flyout-border, 1px solid rgba(128, 128, 128, 0.2));
+  border-radius: 4px; /* 4px rounded corner */
+  box-shadow: var(--flyout-shadow, 0 8px 16px rgba(0, 0, 0, 0.14));
+  backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
+  padding: 8px; /* multiple of 4 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* multiple of 4 */
+  box-sizing: border-box;
+}
+
+/* Mimics homepage search wrapper */
+.tag-flyout-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.tag-flyout-search-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+  transform-origin: center;
+}
+
+.tag-flyout-search-wrapper:focus-within::after {
+  transform: scaleX(1);
+}
+
+.tag-flyout-search-icon {
+  position: absolute;
+  left: 8px; /* multiple of 4 */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.tag-flyout-search-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: var(--input-border, 1px solid rgba(128, 128, 128, 0.15));
+  border-radius: 4px; /* 4px rounded corner */
+  padding: 6px 8px 6px 28px; /* multiple of 4 */
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.tag-flyout-search-input:focus {
+  background: var(--bg-input);
+  border-color: var(--line-strong, rgba(128, 128, 128, 0.4));
+}
+
+/* Suggestion list below input */
+.tag-flyout-suggestions {
+  max-height: 140px; /* multiple of 4 */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* multiple of 4 */
+  box-sizing: border-box;
+  padding: 2px 0;
+}
+
+/* The items in suggestion list: circular color dot + name */
+.tag-flyout-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* multiple of 4 */
+  width: 100%;
+  padding: 6px 8px; /* multiple of 4 */
+  background: transparent;
+  border: none;
+  border-radius: 4px; /* 4px rounded corner */
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  transition: background 0.15s ease;
+}
+
+.tag-flyout-suggest-item:hover,
+.tag-flyout-suggest-item.active {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.14));
+}
+
+/* Circular color dot */
+.tag-flyout-color-dot {
+  width: 8px; /* multiple of 4 */
+  height: 8px; /* multiple of 4 */
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Text with truncation */
+.tag-flyout-text {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

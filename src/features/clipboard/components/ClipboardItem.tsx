@@ -1,4 +1,5 @@
 import { useRef, useEffect, useLayoutEffect, useState, useMemo, memo } from "react";
+import { createPortal } from "react-dom";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { currentMonitor, getCurrentWindow, PhysicalPosition, PhysicalSize } from "@tauri-apps/api/window";
@@ -27,7 +28,8 @@ import {
     Files,
     ImageOff,
     FileQuestion,
-    GripVertical
+    GripVertical,
+    Search
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClipboardItemProps } from "../types";
@@ -721,6 +723,8 @@ const ClipboardItem = ({
 }: ClipboardItemProps & { compactMode?: boolean, className?: string }) => {
     const itemRef = useRef<HTMLDivElement | null>(null);
     const tagInputRef = useRef<HTMLInputElement>(null);
+    const tagButtonRef = useRef<HTMLButtonElement>(null);
+    const [flyoutPosition, setFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
     const [localTagInput, setLocalTagInput] = useState(tagInput);
     const [localAiOptionsOpen, setLocalAiOptionsOpen] = useState(!!aiOptionsOpen);
     const [snapshotFailed, setSnapshotFailed] = useState(false);
@@ -786,36 +790,55 @@ const ClipboardItem = ({
         row?.scrollIntoView({ block: "nearest" });
     }, [tagSuggestIndex, pickableTagSuggestions]);
 
+    useLayoutEffect(() => {
+        if (isEditingTags && tagButtonRef.current) {
+            const rect = tagButtonRef.current.getBoundingClientRect();
+            const flyoutHeight = 180;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const isAbove = spaceBelow < flyoutHeight;
+            
+            const flyoutWidth = 192;
+            let left = rect.left + rect.width / 2 - flyoutWidth / 2;
+            
+            if (left + flyoutWidth > window.innerWidth - 12) {
+                left = window.innerWidth - flyoutWidth - 12;
+            }
+            if (left < 12) left = 12;
+
+            if (isAbove) {
+                setFlyoutPosition({
+                    bottom: window.innerHeight - rect.top + 4,
+                    left,
+                    isAbove: true
+                });
+            } else {
+                setFlyoutPosition({
+                    top: rect.bottom + 4,
+                    left,
+                    isAbove: false
+                });
+            }
+        } else {
+            setFlyoutPosition(null);
+        }
+    }, [isEditingTags]);
+
     useEffect(() => {
         if (!isEditingTags || !onTagEditCancel) return;
 
-        const onDocMouseDown = (e: MouseEvent) => {
+        const handleOutsideClick = (e: MouseEvent) => {
             if (e.button !== 0) return;
-            const root = itemRef.current;
-            if (!root) return;
-            const t = e.target as HTMLElement;
-
-            if (root.contains(t)) {
-                if (t.closest(".tag-edit-anchor")) return;
-                if (t.closest(".item-tags-container .tag-chip")) return;
-                if (
-                    t.closest("button") ||
-                    t.closest("input") ||
-                    t.closest("textarea") ||
-                    t.closest('[role="button"]') ||
-                    t.closest(".drag-handle")
-                ) {
-                    return;
-                }
-            }
-
+            const target = e.target as HTMLElement;
+            if (target.closest(".tag-edit-flyout")) return;
+            if (tagButtonRef.current && tagButtonRef.current.contains(target)) return;
+            
             onTagEditCancel();
             e.preventDefault();
             e.stopPropagation();
         };
 
-        document.addEventListener("mousedown", onDocMouseDown, true);
-        return () => document.removeEventListener("mousedown", onDocMouseDown, true);
+        document.addEventListener("mousedown", handleOutsideClick, true);
+        return () => document.removeEventListener("mousedown", handleOutsideClick, true);
     }, [isEditingTags, onTagEditCancel]);
 
     const sensitivePreview = useMemo(
@@ -1385,159 +1408,7 @@ const ClipboardItem = ({
                 );
             })}
 
-            {isEditingTags && (
-                <div className="tag-edit-anchor">
-                    <div className="tag-edit-input-row">
-                        <input
-                            ref={tagInputRef}
-                            type="text"
-                            value={localTagInput}
-                            onCompositionStart={() => {
-                                isComposing.current = true;
-                            }}
-                            onCompositionEnd={(e) => {
-                                isComposing.current = false;
-                                const val = (e.target as HTMLInputElement).value;
-                                setLocalTagInput(val);
-                                onTagInput(val);
-                            }}
-                            onMouseDown={() => {
-                                invoke('activate_window_focus').catch(console.error);
-                            }}
-                            onFocus={() => {
-                                invoke('activate_window_focus').catch(console.error);
-                            }}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setLocalTagInput(val);
-                                if (!isComposing.current) {
-                                    onTagInput(val);
-                                }
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Escape') {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    onTagEditCancel?.();
-                                    return;
-                                }
-                                const suggestionCount = pickableTagSuggestions.length;
-                                if (e.key === 'ArrowDown' && suggestionCount > 0 && onTagPick) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setTagSuggestIndex((prev) =>
-                                        prev < 0 ? 0 : Math.min(prev + 1, suggestionCount - 1)
-                                    );
-                                    return;
-                                }
-                                if (e.key === 'ArrowUp' && suggestionCount > 0 && onTagPick) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setTagSuggestIndex((prev) => (prev <= 0 ? -1 : prev - 1));
-                                    return;
-                                }
-                                if (e.key === 'Enter' && !isComposing.current) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (
-                                        onTagPick &&
-                                        tagSuggestIndex >= 0 &&
-                                        tagSuggestIndex < suggestionCount
-                                    ) {
-                                        const picked = pickableTagSuggestions[tagSuggestIndex];
-                                        onTagPick(picked);
-                                        setLocalTagInput('');
-                                        setTagSuggestIndex(-1);
-                                    } else {
-                                        onTagAdd();
-                                    }
-                                }
-                            }}
-                            className="tag-input"
-                            aria-autocomplete="list"
-                            aria-controls={
-                                pickableTagSuggestions.length > 0 && onTagPick
-                                    ? `tag-suggest-list-${item.id}`
-                                    : undefined
-                            }
-                            aria-activedescendant={
-                                tagSuggestIndex >= 0 && pickableTagSuggestions.length > 0 && onTagPick
-                                    ? `tag-suggest-opt-${item.id}-${tagSuggestIndex}`
-                                    : undefined
-                            }
-                            placeholder={t('enter_tag_name')}
-                            style={{
-                                background: 'var(--bg-input)',
-                                border: 'none',
-                                borderRadius: '0',
-                                padding: '2px 6px',
-                                fontSize: '10px',
-                                color: 'var(--text-primary)',
-                                outline: 'none'
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onTagAdd();
-                            }}
-                            className="btn-icon"
-                            style={{ padding: '2px', height: '16px', width: '16px' }}
-                        >
-                            <Plus size={10} />
-                        </button>
-                    </div>
-                    {pickableTagSuggestions.length > 0 && onTagPick && (
-                        <div
-                            ref={tagSuggestListRef}
-                            id={`tag-suggest-list-${item.id}`}
-                            className="tag-edit-suggestions-popover hide-scrollbar"
-                            role="listbox"
-                            aria-label={t('find_tags')}
-                            onMouseDown={(e) => e.stopPropagation()}
-                        >
-                            {pickableTagSuggestions.map((sTag, sIdx) => {
-                                const dbKey = sTag === t("tag_builtin_sensitive")
-                                    ? "sensitive"
-                                    : sTag === t("tag_builtin_password")
-                                    ? "password"
-                                    : sTag;
-                                const bg = tagColors?.[dbKey] || getTagColor(dbKey, theme);
-                                const fg = getTagTextColor(bg);
-                                return (
-                                    <button
-                                        key={sTag}
-                                        type="button"
-                                        role="option"
-                                        id={`tag-suggest-opt-${item.id}-${sIdx}`}
-                                        aria-selected={tagSuggestIndex === sIdx}
-                                        className={`tag-suggest-item${tagSuggestIndex === sIdx ? ' tag-suggest-item--active' : ''}`}
-                                        onMouseEnter={() => setTagSuggestIndex(sIdx)}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onTagPick(sTag);
-                                            setLocalTagInput('');
-                                            setTagSuggestIndex(-1);
-                                        }}
-                                    >
-                                        <span
-                                            className="tag-suggest-pill"
-                                            style={{
-                                                background: bg,
-                                                color: fg
-                                            }}
-                                        >
-                                            {sTag}
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            )}
+
         </div>
     );
 
@@ -1723,7 +1594,8 @@ const ClipboardItem = ({
                         </FluentTooltip>
                         <FluentTooltip text="Tags">
                             <button
-                                className={`btn-icon-ghost ${item.tags && item.tags.length > 0 ? "active" : ""}`}
+                                ref={tagButtonRef}
+                                className={`btn-icon-ghost ${isEditingTags ? "tag-editing-active" : (item.tags && item.tags.length > 0 ? "active" : "")}`}
                                 onClick={onToggleTagEditor}
                             >
                                 <Tag size={12} />
@@ -2034,6 +1906,135 @@ const ClipboardItem = ({
             </AnimatePresence>
 
             {!overlayTagsInPreview && hasTagsSection && renderTagsContainer()}
+
+            {isEditingTags && flyoutPosition && createPortal(
+                <div
+                    className="tag-edit-flyout"
+                    style={{
+                        position: 'fixed',
+                        left: `${flyoutPosition.left}px`,
+                        ...(flyoutPosition.top !== undefined ? { top: `${flyoutPosition.top}px` } : { bottom: `${flyoutPosition.bottom}px` }),
+                        zIndex: 99999,
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="tag-flyout-search-wrapper">
+                        <Search size={12} className="tag-flyout-search-icon" />
+                        <input
+                            ref={tagInputRef}
+                            type="text"
+                            className="tag-flyout-search-input"
+                            placeholder={t('enter_tag_name') || 'Enter tag name...'}
+                            value={localTagInput}
+                            autoFocus
+                            onCompositionStart={() => {
+                                isComposing.current = true;
+                            }}
+                            onCompositionEnd={(e) => {
+                                isComposing.current = false;
+                                const val = (e.target as HTMLInputElement).value;
+                                setLocalTagInput(val);
+                                onTagInput(val);
+                            }}
+                            onMouseDown={() => {
+                                invoke('activate_window_focus').catch(console.error);
+                            }}
+                            onFocus={() => {
+                                invoke('activate_window_focus').catch(console.error);
+                            }}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setLocalTagInput(val);
+                                if (!isComposing.current) {
+                                    onTagInput(val);
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onTagEditCancel?.();
+                                    return;
+                                }
+                                const suggestionCount = pickableTagSuggestions.length;
+                                if (e.key === 'ArrowDown' && suggestionCount > 0 && onTagPick) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setTagSuggestIndex((prev) =>
+                                        prev < 0 ? 0 : Math.min(prev + 1, suggestionCount - 1)
+                                    );
+                                    return;
+                                }
+                                if (e.key === 'ArrowUp' && suggestionCount > 0 && onTagPick) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setTagSuggestIndex((prev) => (prev <= 0 ? -1 : prev - 1));
+                                    return;
+                                }
+                                if (e.key === 'Enter' && !isComposing.current) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (
+                                        onTagPick &&
+                                        tagSuggestIndex >= 0 &&
+                                        tagSuggestIndex < suggestionCount
+                                    ) {
+                                        const picked = pickableTagSuggestions[tagSuggestIndex];
+                                        onTagPick(picked);
+                                        setLocalTagInput('');
+                                        setTagSuggestIndex(-1);
+                                    } else {
+                                        onTagAdd();
+                                        setLocalTagInput('');
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                    {pickableTagSuggestions.length > 0 && onTagPick && (
+                        <div
+                            ref={tagSuggestListRef}
+                            className="tag-flyout-suggestions hide-scrollbar"
+                            role="listbox"
+                        >
+                            {pickableTagSuggestions.map((sTag, sIdx) => {
+                                const dbKey = sTag === t("tag_builtin_sensitive")
+                                    ? "sensitive"
+                                    : sTag === t("tag_builtin_password")
+                                    ? "password"
+                                    : sTag;
+                                const bg = tagColors?.[dbKey] || getTagColor(dbKey, theme);
+                                return (
+                                    <button
+                                        key={sTag}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={tagSuggestIndex === sIdx}
+                                        className={`tag-flyout-suggest-item${tagSuggestIndex === sIdx ? ' active' : ''}`}
+                                        onMouseEnter={() => setTagSuggestIndex(sIdx)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onTagPick(sTag);
+                                            setLocalTagInput('');
+                                            setTagSuggestIndex(-1);
+                                        }}
+                                    >
+                                        <span
+                                            className="tag-flyout-color-dot"
+                                            style={{ backgroundColor: bg }}
+                                        />
+                                        <span className="tag-flyout-text">
+                                            {sTag}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>,
+                document.body
+            )}
         </motion.div >
     );
 };
