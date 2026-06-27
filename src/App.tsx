@@ -350,6 +350,27 @@ const App = () => {
   const searchInputRef = useInputFocus<HTMLInputElement>();
   const tagColors = useTagColors();
   const [dbTags, setDbTags] = useState<string[]>([]);
+  const [entranceActive, setEntranceActive] = useState(false);
+
+  useEffect(() => {
+    if (!isTauriRuntime()) return;
+
+    // Initial entrance on mount
+    setEntranceActive(true);
+    const timer = setTimeout(() => setEntranceActive(false), 250);
+
+    const unlistenPromise = listen("tauri://focus", () => {
+      // Re-trigger entrance animation on window focus (activation)
+      setEntranceActive(true);
+      const t = setTimeout(() => setEntranceActive(false), 250);
+      return () => clearTimeout(t);
+    });
+
+    return () => {
+      clearTimeout(timer);
+      unlistenPromise.then((off) => off());
+    };
+  }, []);
 
   useEffect(() => {
     if (effectiveShowTagManager || showTagFilter || editingTagsId !== null) {
@@ -1010,7 +1031,7 @@ const App = () => {
 
   return (
     <div
-      className="app-container"
+      className={`app-container ${entranceActive ? "window-entrance" : ""}`}
     >
       <AppHeader
         t={t}
