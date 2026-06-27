@@ -22,7 +22,6 @@
 }
 
 .history-item.selected {
-  background: var(--card-selected-background);
   color: inherit;
   transform: none !important;
 }

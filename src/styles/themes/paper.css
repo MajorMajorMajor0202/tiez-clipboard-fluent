@@ -134,9 +134,7 @@ body.theme-paper::before {
   font-family: var(--font-main);
 }
 
-.theme-paper .history-item.selected {
-  background-color: #fbf1c7 !important;
-}
+
 
 /* Dark Mode Overrides for Paper */
 @media (prefers-color-scheme: dark) {
