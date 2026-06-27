@@ -427,6 +427,18 @@ const SettingsWindow = () => {
   }, [updateIndicator]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlColorMode = params.get("color_mode");
+    const urlTheme = params.get("theme") || "retro";
+    if (urlColorMode) {
+      invoke("set_theme", {
+        theme: urlTheme,
+        color_mode: urlColorMode
+      }).catch(console.error);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!settingsLoaded) return;
 
     const applyAccent = (hex: string) => {

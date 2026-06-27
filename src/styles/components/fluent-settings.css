@@ -1,4 +1,7 @@
-/* Fluent Design Settings Window Stylesheet */
+body:has(.fluent-settings-layout),
+body:has(.advanced-settings-window-shell) {
+  background-color: var(--bg-body) !important;
+}
 
 .fluent-settings-layout {
   display: flex;

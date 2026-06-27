@@ -100,6 +100,7 @@ pub fn set_theme(
     use windows::Win32::Graphics::Dwm::{
         DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_USE_IMMERSIVE_DARK_MODE,
         DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND, DWM_WINDOW_CORNER_PREFERENCE,
+        DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR,
     };
 
     #[cfg(target_os = "windows")]
@@ -146,19 +147,40 @@ pub fn set_theme(
                 &corner_pref as *const _ as _,
                 std::mem::size_of::<DWM_WINDOW_CORNER_PREFERENCE>() as u32,
             );
+
+            // On Windows 11, set solid titlebar background (DWMWA_CAPTION_COLOR)
+            // and solid text color (DWMWA_TEXT_COLOR) to prevent translucent Acrylic/Mica titlebar.
+            let build = windows_version::OsVersion::current().build;
+            if build >= 22000 {
+                let caption_color: u32 = if is_dark { 0x00202020 } else { 0x00f3f3f3 };
+                let text_color: u32 = if is_dark { 0x00ffffff } else { 0x001f1f1f };
+                let _ = DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_CAPTION_COLOR,
+                    &caption_color as *const _ as _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+                let _ = DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_TEXT_COLOR,
+                    &text_color as *const _ as _,
+                    std::mem::size_of::<u32>() as u32,
+                );
+            }
         }
 
         let build = windows_version::OsVersion::current().build;
         let is_win11 = build >= 22000;
         let is_win10_1803 = build >= 17134;
         let is_win10 = build >= 10240 && build < 22000;
+        let is_settings = window.label() == "settings";
 
         match theme.as_str() {
-            "mica" if is_win11 => {
+            "mica" if is_win11 && !is_settings => {
                 let _ = window_vibrancy::apply_mica(&window, Some(is_dark));
                 let _ = window.set_shadow(show_border);
             }
-            "acrylic" if is_win10_1803 && !is_win10 => {
+            "acrylic" if is_win10_1803 && !is_win10 && !is_settings => {
                 let _ = window_vibrancy::apply_acrylic(
                     &window,
                     Some(if is_dark {

@@ -141,14 +141,19 @@ const AppHeader = ({
       } else {
         const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
         const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
+        const isDark = document.documentElement.classList.contains("dark-mode");
+        const themeParam = `&theme=${encodeURIComponent(theme || "retro")}`;
+        const colorModeParam = `&color_mode=${isDark ? "dark" : "light"}`;
+        const bodyBg = getComputedStyle(document.documentElement).getPropertyValue("--bg-body").trim() || "#f3f3f3";
         const win = new WebviewWindow("settings", {
-          url: `index.html?window=settings${accentParam}`,
+          url: `index.html?window=settings${accentParam}${themeParam}${colorModeParam}`,
           title: t('settings') || "Settings",
           width: 780,
           height: 560,
           resizable: true,
           decorations: true,
           transparent: false,
+          backgroundColor: bodyBg,
           skipTaskbar: false,
           visible: false,
           alwaysOnTop: isWindowPinned,
