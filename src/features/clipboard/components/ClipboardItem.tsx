@@ -790,38 +790,85 @@ const ClipboardItem = ({
         row?.scrollIntoView({ block: "nearest" });
     }, [tagSuggestIndex, pickableTagSuggestions]);
 
-    useLayoutEffect(() => {
-        if (isEditingTags && tagButtonRef.current) {
-            const rect = tagButtonRef.current.getBoundingClientRect();
-            const flyoutHeight = 180;
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const isAbove = spaceBelow < flyoutHeight;
-            
-            const flyoutWidth = 192;
-            let left = rect.left + rect.width / 2 - flyoutWidth / 2;
-            
-            if (left + flyoutWidth > window.innerWidth - 12) {
-                left = window.innerWidth - flyoutWidth - 12;
-            }
-            if (left < 12) left = 12;
+    const updatePosition = useCallback(() => {
+        if (!isEditingTags || !tagButtonRef.current || !onTagEditCancel) return;
+        
+        if (!document.body.contains(tagButtonRef.current)) {
+            onTagEditCancel();
+            return;
+        }
 
-            if (isAbove) {
-                setFlyoutPosition({
-                    bottom: window.innerHeight - rect.top + 4,
-                    left,
-                    isAbove: true
-                });
-            } else {
-                setFlyoutPosition({
-                    top: rect.bottom + 4,
-                    left,
-                    isAbove: false
-                });
+        const rect = tagButtonRef.current.getBoundingClientRect();
+        
+        const scrollContainer = tagButtonRef.current.closest(".fluent-scrollbar-host");
+        if (scrollContainer) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const isButtonInViewport = 
+                rect.bottom > containerRect.top &&
+                rect.top < containerRect.bottom &&
+                rect.right > containerRect.left &&
+                rect.left < containerRect.right;
+                
+            if (!isButtonInViewport) {
+                onTagEditCancel();
+                return;
             }
         } else {
-            setFlyoutPosition(null);
+            const isButtonInViewport = 
+                rect.bottom > 0 &&
+                rect.top < window.innerHeight &&
+                rect.right > 0 &&
+                rect.left < window.innerWidth;
+                
+            if (!isButtonInViewport) {
+                onTagEditCancel();
+                return;
+            }
         }
-    }, [isEditingTags]);
+
+        const flyoutHeight = 180;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const isAbove = spaceBelow < flyoutHeight;
+        
+        const flyoutWidth = 192;
+        let left = rect.left + rect.width / 2 - flyoutWidth / 2;
+        
+        if (left + flyoutWidth > window.innerWidth - 12) {
+            left = window.innerWidth - flyoutWidth - 12;
+        }
+        if (left < 12) left = 12;
+
+        setFlyoutPosition((prev) => {
+            const next = isAbove 
+                ? { bottom: window.innerHeight - rect.top + 4, left, isAbove: true }
+                : { top: rect.bottom + 4, left, isAbove: false };
+            
+            if (prev && 
+                prev.left === next.left && 
+                prev.isAbove === next.isAbove && 
+                prev.top === next.top && 
+                prev.bottom === next.bottom) {
+                return prev;
+            }
+            return next;
+        });
+    }, [isEditingTags, onTagEditCancel]);
+
+    useEffect(() => {
+        if (!isEditingTags) return;
+
+        let active = true;
+        const tick = () => {
+            if (!active) return;
+            updatePosition();
+            requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+        return () => {
+            active = false;
+        };
+    }, [isEditingTags, updatePosition]);
 
     useEffect(() => {
         if (!isEditingTags || !onTagEditCancel) return;
@@ -1422,14 +1469,13 @@ const ClipboardItem = ({
             animate={{ marginBottom: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className={`history-item ${isSelected ? "selected" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
+            className={`history-item ${isSelected ? "selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
             onMouseDown={(e) => {
                 const target = e.target as HTMLElement;
                 if (e.button !== 0) return;
 
                 if (isEditingTags) {
-                    if (target.closest(".tag-edit-anchor")) return;
-                    if (target.closest(".item-tags-container .tag-chip")) return;
+                    if (target.closest(".tag-edit-flyout")) return;
                     if (target.closest('button, input, textarea, [role="button"], .drag-handle')) {
                         return;
                     }

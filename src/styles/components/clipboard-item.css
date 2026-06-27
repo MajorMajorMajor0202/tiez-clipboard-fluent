@@ -360,7 +360,8 @@
 }
 
 .history-item:hover .item-actions,
-.history-item.selected .item-actions {
+.history-item.selected .item-actions,
+.history-item.tag-editing .item-actions {
   opacity: 1;
   visibility: visible;
 }
