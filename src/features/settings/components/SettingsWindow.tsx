@@ -1,24 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getVersion } from "@tauri-apps/api/app";
 import {
   ChevronDown,
-  ChevronRight,
   Sliders,
-  Keyboard,
   Shield,
   Wifi,
   Cpu,
   Palette,
-  Settings,
-  HelpCircle,
-  FolderOpen,
-  RefreshCw,
-  Plus,
-  Trash2,
-  Edit2,
-  X
+  Settings
 } from "lucide-react";
 import { translations } from "../../../locales";
 import { useAppState } from "../../app/hooks/useAppState";
@@ -30,12 +21,12 @@ import { useCustomBackground } from "../../../shared/hooks/useCustomBackground";
 import { useHotkeyConfig } from "../../../shared/hooks/useHotkeyConfig";
 import { getHotkeyDisplayTokens } from "../../../shared/lib/hotkeyDisplay";
 import { isMacPlatform } from "../../../shared/lib/platform";
-import { getTagColor } from "../../../shared/lib/utils";
 import { CLOUD_SYNC_ENABLED } from "../../../shared/config/edition";
 import { THEMES, getThemeLabel, supportsCustomBackground, supportsSurfaceOpacity } from "../../../shared/config/themes";
 
 import type { Locale } from "../../../shared/types";
-import type { QuickPasteModifier, CloudSyncContentPrefs, AiProfile, AppCleanupPolicy, EditableAiProfile, AiProfileStatusMap } from "../../settings/types";
+import type { QuickPasteModifier } from "../../app/types";
+import type { AiProfile, EditableAiProfile, AiProfileStatusMap } from "../../settings/types";
 import type { CloudSyncStatusPayload } from "./groups/CloudSyncSettingsGroup";
 
 // Modals & Panels
@@ -49,8 +40,11 @@ const SettingsWindow = () => {
   const {
     setAppSettings,
     setHotkey,
+    theme,
     setTheme,
+    colorMode,
     setColorMode,
+    compactMode,
     setCompactMode,
     language,
     setLanguage,
@@ -144,7 +138,6 @@ const SettingsWindow = () => {
     setCloudSyncWebdavPassword,
     cloudSyncWebdavBasePath,
     setCloudSyncWebdavBasePath,
-    cloudSyncContentPrefs,
     setCloudSyncContentPrefs,
     fileServerEnabled,
     setFileServerEnabled,
@@ -212,7 +205,28 @@ const SettingsWindow = () => {
     tagManagerEnabled,
     setTagManagerEnabled,
     appSettings,
-    defaultApps
+    defaultApps,
+    autoStart,
+    setAutoStart,
+    setCloudSyncServer,
+    clipboardItemFontSize,
+    setClipboardItemFontSize,
+    clipboardTagFontSize,
+    setClipboardTagFontSize,
+    setDefaultApps,
+    settingsLoaded,
+    setSettingsLoaded,
+    setFollowMouse,
+    showAppBorder,
+    setShowAppBorder,
+    setWinClipboardDisabled,
+    setRegistryWinVEnabled,
+    setPasteMethod,
+    setIsWindowPinned,
+    setEmojiPanelTab,
+    setEmojiFavorites,
+    setCloudSyncProvider,
+    setCloudSyncApiKey
   } = appState;
 
   // Local state for UI navigation and overlays
@@ -235,22 +249,14 @@ const SettingsWindow = () => {
   const [showAppSelector, setShowAppSelector] = useState<string | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
-  // Hint toggling helper
-  const [openHints, setOpenHints] = useState<Set<string>>(new Set());
-  const toggleHint = (key: string) => {
-    setOpenHints(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
+  const tagManagerSizeRef = useRef<{ width: number; height: number } | null>(null);
 
-  const pushToast = useCallback((msg: string) => {
+  const pushToast = useCallback((msg: string, duration?: number) => {
     setToast(msg);
     setTimeout(() => {
       setToast(null);
-    }, 2500);
+    }, duration || 2500);
+    return Date.now();
   }, []);
 
   const t = useCallback((key: string) => {
@@ -270,7 +276,7 @@ const SettingsWindow = () => {
 
   useSettingsPostInit({
     settings,
-    tagManagerSizeRef: useRef(null),
+    tagManagerSizeRef,
     setCustomBackground,
     setCustomBackgroundOpacity,
     setSurfaceOpacity,
@@ -290,8 +296,8 @@ const SettingsWindow = () => {
     setCleanupRules,
     setAppCleanupPolicies,
     setSilentStart,
-    setFollowMouse: () => {},
-    setShowAppBorder: () => {},
+    setFollowMouse,
+    setShowAppBorder,
     setShowSourceAppIcon,
     setDeleteAfterPaste,
     setMoveToTopAfterPaste,
@@ -302,7 +308,7 @@ const SettingsWindow = () => {
     setArrowKeySelection,
     setMqttEnabled,
     setMqttServer,
-    setRegistryWinVEnabled: () => {},
+    setRegistryWinVEnabled,
     setMqttPort,
     setMqttUser,
     setMqttPass,
@@ -312,9 +318,9 @@ const SettingsWindow = () => {
     setMqttNotificationEnabled,
     setCloudSyncEnabled,
     setCloudSyncAuto,
-    setCloudSyncProvider: () => {},
+    setCloudSyncProvider,
     setCloudSyncServer,
-    setCloudSyncApiKey: () => {},
+    setCloudSyncApiKey,
     setCloudSyncIntervalSec,
     setCloudSyncSnapshotIntervalMin,
     setCloudSyncWebdavUrl,
@@ -333,22 +339,22 @@ const SettingsWindow = () => {
     setSoundEnabled,
     setSoundVolume,
     setPasteSoundEnabled,
-    setPasteMethod: () => {},
+    setPasteMethod,
     setAiEnabled,
     setAiTargetLang,
     setAiThinkingBudget,
-    setIsWindowPinned: () => {},
+    setIsWindowPinned,
     setAiProfiles,
     setAiAssignedProfileTask,
     setAiAssignedProfileMouthpiece,
     setAiAssignedProfileTranslate,
-    setSettingsLoaded: () => {},
+    setSettingsLoaded,
     setClipboardItemFontSize,
     setClipboardTagFontSize,
     setEmojiPanelEnabled,
     setTagManagerEnabled,
-    setEmojiPanelTab: () => {},
-    setEmojiFavorites: () => {},
+    setEmojiPanelTab,
+    setEmojiFavorites,
     setHideDockIcon,
     setCloudSyncContentPrefs
   });
@@ -363,8 +369,8 @@ const SettingsWindow = () => {
     fetchEffectiveTransferPath,
     setDataPath,
     setInstalledApps,
-    setAutoStart: () => {},
-    setWinClipboardDisabled: () => {},
+    setAutoStart,
+    setWinClipboardDisabled,
     setDefaultApps,
     setFileServerEnabled,
     setActualPort,
@@ -375,9 +381,9 @@ const SettingsWindow = () => {
   useSettingsApply({
     theme,
     colorMode,
-    showAppBorder: false,
+    showAppBorder,
     compactMode,
-    settingsLoaded: true,
+    settingsLoaded,
     clipboardItemFontSize,
     clipboardTagFontSize,
     surfaceOpacity
@@ -488,7 +494,6 @@ const SettingsWindow = () => {
 
   // Hotkeys handling
   const {
-    checkHotkeyConflict,
     updateHotkey,
     updateSequentialHotkey,
     updateRichPasteHotkey,
@@ -515,11 +520,6 @@ const SettingsWindow = () => {
     t,
     pushToast
   });
-
-  const hotkeyParts = useMemo(
-    () => (hotkey || '').split('+').map((part) => part.trim()).filter(Boolean),
-    [hotkey]
-  );
 
   // Listeners for system status (MQTT/Cloud)
   useEffect(() => {
@@ -755,6 +755,82 @@ const SettingsWindow = () => {
                     const val = e.target.checked;
                     setEdgeDocking(val);
                     invoke("set_edge_docking", { enabled: val }).catch(console.error);
+                  }}
+                />
+                <span className="fluent-slider" />
+              </label>
+            </div>
+
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">显示快捷搜索框</span>
+                <span className="fluent-setting-description">展示主界面底部的全局搜索输入框</span>
+              </div>
+              <label className="fluent-switch">
+                <input
+                  type="checkbox"
+                  checked={showSearchBox}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setShowSearchBox(enabled);
+                    saveAppSetting('show_search_box', String(enabled));
+                  }}
+                />
+                <span className="fluent-slider" />
+              </label>
+            </div>
+
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">显示回到顶部浮动按钮</span>
+                <span className="fluent-setting-description">当剪贴板列表滚动较深时，展示一键回到顶部的悬浮按钮</span>
+              </div>
+              <label className="fluent-switch">
+                <input
+                  type="checkbox"
+                  checked={scrollTopButtonEnabled}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setScrollTopButtonEnabled(enabled);
+                    saveAppSetting('show_scroll_top_button', String(enabled));
+                  }}
+                />
+                <span className="fluent-slider" />
+              </label>
+            </div>
+
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">启用标签管理器</span>
+                <span className="fluent-setting-description">开启后可以为剪贴板项分配多色分类标签</span>
+              </div>
+              <label className="fluent-switch">
+                <input
+                  type="checkbox"
+                  checked={tagManagerEnabled}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setTagManagerEnabled(enabled);
+                    saveAppSetting('tag_manager_enabled', String(enabled));
+                  }}
+                />
+                <span className="fluent-slider" />
+              </label>
+            </div>
+
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">启用表情包栏面板</span>
+                <span className="fluent-setting-description">开启后允许在主界面头部快速插入常用表情包和GIF图片</span>
+              </div>
+              <label className="fluent-switch">
+                <input
+                  type="checkbox"
+                  checked={emojiPanelEnabled}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setEmojiPanelEnabled(enabled);
+                    saveAppSetting('emoji_panel_enabled', String(enabled));
                   }}
                 />
                 <span className="fluent-slider" />

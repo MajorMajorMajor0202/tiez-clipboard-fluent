@@ -8,10 +8,8 @@ import { translations } from "./locales";
 import AppHeader from "./features/app/components/AppHeader";
 import AppMainContent from "./features/app/components/AppMainContent";
 import { useAppState } from "./features/app/hooks/useAppState";
-import { useSettingsPanelProps } from "./features/settings/hooks/useSettingsPanelProps";
 import { useDebounce } from "./shared/hooks/useDebounce";
 import { useHistoryFetch } from "./shared/hooks/useHistoryFetch";
-import { useHotkeyConfig } from "./shared/hooks/useHotkeyConfig";
 import { useInputFocus } from "./shared/hooks/useInputFocus";
 import { useSearchScroll } from "./shared/hooks/useSearchScroll";
 import { useSettingsApply } from "./shared/hooks/useSettingsApply";
@@ -179,24 +177,17 @@ const App = () => {
     setDataPath,
     hotkey,
     setHotkey,
-    sequentialHotkey,
     setSequentialHotkey,
     richPasteHotkey,
     setRichPasteHotkey,
-    searchHotkey,
     setSearchHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
-    sequentialMode,
     setSequentialModeState,
     isRecording,
-    setIsRecording,
     isRecordingSequential,
-    setIsRecordingSequential,
     isRecordingRich,
-    setIsRecordingRich,
     isRecordingSearch,
-    setIsRecordingSearch,
     deleteAfterPaste,
     setDeleteAfterPaste,
     moveToTopAfterPaste,
@@ -480,17 +471,6 @@ const App = () => {
     handleSearchScroll(offset);
   }, [handleSearchScroll]);
 
-  const toggleGroup = (group: string) => {
-    setCollapsedGroups(prev => ({
-      ...prev,
-      [group]: !prev[group],
-    }));
-  };
-
-  const hotkeyParts = useMemo(
-    () => (hotkey || '').split('+').map((part) => part.trim()).filter(Boolean),
-    [hotkey]
-  );
 
   // Compute all tags when tag manager / tag filter is open, or while editing an item's tags (quick-pick list)
   const allTags = useMemo(() => {
@@ -904,35 +884,15 @@ const App = () => {
     setSelectedIndex
   });
 
-  const {
-    checkHotkeyConflict,
-    updateHotkey,
-    updateSequentialHotkey,
-    updateRichPasteHotkey,
-    updateSearchHotkey
-  } =
-    useHotkeyConfig({
-      hotkey,
-      setHotkey,
-      sequentialHotkey,
-      setSequentialHotkey,
-      richPasteHotkey,
-      setRichPasteHotkey,
-      searchHotkey,
-      setSearchHotkey,
-      sequentialMode,
-      isRecording,
-      setIsRecording,
-      isRecordingSequential,
-      setIsRecordingSequential,
-      isRecordingRich,
-      setIsRecordingRich,
-      isRecordingSearch,
-      setIsRecordingSearch,
-      saveAppSetting,
-      t,
-      pushToast
-    });
+  const { clearHistory } = useAppActions({
+    t,
+    mqttEnabled,
+    cloudSyncEnabled,
+    openConfirm,
+    closeConfirm,
+    pushToast,
+    fetchHistory
+  });
 
   useNavigationSync({ showSettings, showTagManager: effectiveShowTagManager, chatMode, showEmojiPanel: effectiveShowEmojiPanel });
 
@@ -946,16 +906,6 @@ const App = () => {
       setHistory,
       virtualListRef
     });
-
-  const { saveMqtt, saveCloudSync, clearHistory, handleResetSettings } = useAppActions({
-    t,
-    mqttEnabled,
-    cloudSyncEnabled,
-    openConfirm,
-    closeConfirm,
-    pushToast,
-    fetchHistory
-  });
 
   const { handleAIAction } = useAiActions({
     aiProfiles,
@@ -1057,27 +1007,6 @@ const App = () => {
     handleAIAction
   });
 
-  const settingsPanelProps = useSettingsPanelProps({
-    t,
-    theme,
-    language,
-    colorMode,
-    hotkeyParts,
-    checkHotkeyConflict,
-    updateHotkey,
-    updateSequentialHotkey,
-    updateRichPasteHotkey,
-    updateSearchHotkey,
-    saveAppSetting,
-    saveSetting,
-    saveMqtt,
-    saveCloudSync,
-    fetchEffectiveTransferPath,
-    handleResetSettings,
-    toggleGroup,
-    onOpenChat: openFileTransfer,
-    state: appState
-  });
 
   return (
     <div

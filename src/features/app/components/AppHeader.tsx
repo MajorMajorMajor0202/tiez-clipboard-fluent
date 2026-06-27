@@ -54,7 +54,6 @@ interface AppHeaderProps {
 const AppHeader = ({
   t,
   showSettings,
-  setShowSettings,
   showTagManager,
   setShowTagManager,
   tagManagerEnabled,
@@ -139,7 +138,7 @@ const AppHeader = ({
         await existing.show();
         await existing.setFocus();
       } else {
-        new WebviewWindow("settings", {
+        const win = new WebviewWindow("settings", {
           url: "index.html?window=settings",
           title: t('settings') || "Settings",
           width: 780,
@@ -149,6 +148,12 @@ const AppHeader = ({
           transparent: true,
           backgroundColor: "#00000000",
           skipTaskbar: false,
+          visible: false,
+        });
+        win.once("tauri://created", () => {
+          win.show().then(() => {
+            win.setFocus();
+          }).catch(console.error);
         });
       }
     } catch (err) {
