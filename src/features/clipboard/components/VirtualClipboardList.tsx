@@ -9,13 +9,14 @@ type VirtuosoListContext = {
     header?: React.ReactNode;
     hasMore: boolean;
     isLoading: boolean;
+    compactMode: boolean;
 };
 
 const ListHeader = ({ context }: { context?: VirtuosoListContext }) => {
     const header = context?.header;
     return (
         <div className="list-header-wrapper">
-            <div style={{ height: '12px' }} />
+            <div style={{ height: '8px' }} />
             {header ? <div className="list-header">{header}</div> : null}
         </div>
     );
@@ -23,8 +24,9 @@ const ListHeader = ({ context }: { context?: VirtuosoListContext }) => {
 
 const ListFooter = ({ context }: { context?: VirtuosoListContext }) => {
     if (!context) return null;
-    const { isLoading, hasMore } = context;
+    const { isLoading, hasMore, compactMode } = context;
     const showFooterContent = isLoading || hasMore;
+    const spacerHeight = compactMode ? 6 : 2;
 
     return (
         <div className="list-footer-wrapper">
@@ -39,7 +41,7 @@ const ListFooter = ({ context }: { context?: VirtuosoListContext }) => {
                     {isLoading ? '加载中...' : '加载更多...'}
                 </div>
             ) : null}
-            <div style={{ height: '12px' }} />
+            <div style={{ height: `${spacerHeight}px` }} />
         </div>
     );
 };
@@ -156,8 +158,9 @@ const VirtualClipboardList = React.forwardRef<VirtualClipboardListHandle, Virtua
         const context = useMemo(() => ({
             header,
             hasMore,
-            isLoading
-        }), [header, hasMore, isLoading]);
+            isLoading,
+            compactMode
+        }), [header, hasMore, isLoading, compactMode]);
 
         return (
             <div className="virtual-list-wrapper" style={{ height: '100%', width: '100%' }}>
