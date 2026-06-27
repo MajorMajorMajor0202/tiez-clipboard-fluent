@@ -924,10 +924,12 @@ const SettingsWindow = () => {
             </div>
 
             {/* Audio Feedback Expander */}
-            <div className="fluent-setting-expander">
+            <div className={`fluent-setting-expander ${!soundEnabled ? 'disabled' : ''}`}>
               <div
-                className={`fluent-setting-expander-header ${expandedCards['audio'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('audio')}
+                className={`fluent-setting-expander-header ${expandedCards['audio'] && soundEnabled ? 'expanded' : ''} ${!soundEnabled ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (soundEnabled) toggleExpander('audio');
+                }}
               >
                 <div className="fluent-setting-info">
                   <span className="fluent-setting-title">按键与粘贴音效</span>
@@ -946,49 +948,45 @@ const SettingsWindow = () => {
                     />
                     <span className="fluent-slider" />
                   </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['audio'] ? 'expanded' : ''}`} />
+                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['audio'] && soundEnabled ? 'expanded' : ''}`} />
                 </div>
               </div>
-              {expandedCards['audio'] && (
+              {expandedCards['audio'] && soundEnabled && (
                 <div className="fluent-setting-expander-content">
-                  {soundEnabled && (
-                    <>
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">粘贴音效</span>
-                          <span className="fluent-setting-description">当成功模拟粘贴完成后播放提示音</span>
-                        </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={pasteSoundEnabled}
-                            onChange={(e) => {
-                              const enabled = e.target.checked;
-                              setPasteSoundEnabled(enabled);
-                              invoke("save_setting", { key: 'app.sound_paste_enabled', value: String(enabled) }).catch(console.error);
-                            }}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
-                      </div>
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">粘贴音效</span>
+                      <span className="fluent-setting-description">当成功模拟粘贴完成后播放提示音</span>
+                    </div>
+                    <label className="fluent-switch">
+                      <input
+                        type="checkbox"
+                        checked={pasteSoundEnabled}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          setPasteSoundEnabled(enabled);
+                          invoke("save_setting", { key: 'app.sound_paste_enabled', value: String(enabled) }).catch(console.error);
+                        }}
+                      />
+                      <span className="fluent-slider" />
+                    </label>
+                  </div>
 
-                      <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span className="fluent-setting-title">音量大小</span>
-                          <span style={{ fontSize: "11px" }}>{Math.round(soundVolume * 100)}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          className="fluent-range"
-                          min="0"
-                          max="1"
-                          step="0.01"
-                          value={soundVolume}
-                          onChange={(e) => setSoundVolume(parseFloat(e.target.value))}
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span className="fluent-setting-title">音量大小</span>
+                      <span style={{ fontSize: "11px" }}>{Math.round(soundVolume * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      className="fluent-range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={soundVolume}
+                      onChange={(e) => setSoundVolume(parseFloat(e.target.value))}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -1648,10 +1646,13 @@ const SettingsWindow = () => {
             <h2 className="fluent-page-header">同步与传输</h2>
 
             {/* LAN File Server Expander */}
-            <div className="fluent-setting-expander">
+            {/* LAN File Server Expander */}
+            <div className={`fluent-setting-expander ${!fileServerEnabled ? 'disabled' : ''}`}>
               <div
-                className={`fluent-setting-expander-header ${expandedCards['lan'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('lan')}
+                className={`fluent-setting-expander-header ${expandedCards['lan'] && fileServerEnabled ? 'expanded' : ''} ${!fileServerEnabled ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (fileServerEnabled) toggleExpander('lan');
+                }}
               >
                 <div className="fluent-setting-info">
                   <span className="fluent-setting-title">局域网极速文件传输 (LAN)</span>
@@ -1671,138 +1672,137 @@ const SettingsWindow = () => {
                     />
                     <span className="fluent-slider" />
                   </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['lan'] ? 'expanded' : ''}`} />
+                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['lan'] && fileServerEnabled ? 'expanded' : ''}`} />
                 </div>
               </div>
-              {expandedCards['lan'] && (
+              {expandedCards['lan'] && fileServerEnabled && (
                 <div className="fluent-setting-expander-content">
-                  {fileServerEnabled && (
-                    <>
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">服务端口</span>
-                          <span className="fluent-setting-description">局域网接收端运行的端口号，默认 18888</span>
-                        </div>
-                        <input
-                          type="text"
-                          className="fluent-input"
-                          style={{ width: "80px", textAlign: "center" }}
-                          value={fileServerPort}
-                          onChange={e => setFileServerPort(e.target.value)}
-                          onBlur={() => applyFileServerPort(fileServerPort)}
-                        />
-                      </div>
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">服务端口</span>
+                      <span className="fluent-setting-description">局域网接收端运行的端口号，默认 18888</span>
+                    </div>
+                    <input
+                      type="text"
+                      className="fluent-input"
+                      style={{ width: "80px", textAlign: "center" }}
+                      value={fileServerPort}
+                      onChange={e => setFileServerPort(e.target.value)}
+                      onBlur={() => applyFileServerPort(fileServerPort)}
+                    />
+                  </div>
 
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">服务局域网 IP</span>
-                          <span className="fluent-setting-description">在浏览器里访问的地址，同局域网设备可用</span>
-                        </div>
-                        <div className="fluent-value-display">
-                          {availableIps && availableIps.length > 1 && setLocalIp ? (
-                            <select
-                              className="fluent-select"
-                              style={{ border: "none", background: "transparent", minWidth: "0", padding: "0" }}
-                              value={localIp}
-                              onChange={(e) => {
-                                setLocalIp(e.target.value);
-                                invoke("set_display_ip", { ip: e.target.value }).catch(console.error);
-                              }}
-                            >
-                              {availableIps.map(ip => <option key={ip} value={ip}>{ip}</option>)}
-                            </select>
-                          ) : (
-                            <span>{localIp}</span>
-                          )}
-                          <span>:{actualPort || fileServerPort}</span>
-                        </div>
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">自动打开接收网页</span>
-                          <span className="fluent-setting-description">接收到文件后，主窗口自动显示传输列表</span>
-                        </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={fileTransferAutoOpen}
-                            onChange={(e) => setFileTransferAutoOpen(e.target.checked)}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">服务自动关闭机制</span>
-                          <span className="fluent-setting-description">若检测到无任务且接收网页关闭后自动休眠关闭服务</span>
-                        </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={fileServerAutoClose}
-                            onChange={(e) => setFileServerAutoClose(e.target.checked)}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">自动复制接收的文件</span>
-                          <span className="fluent-setting-description">文件接收完毕后自动放进您的剪贴板首位</span>
-                        </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={fileTransferAutoCopy}
-                            onChange={(e) => setFileTransferAutoCopy(e.target.checked)}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
-                      </div>
-
-                      <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                          <span className="fluent-setting-title">传输文件保存路径</span>
-                          <button
-                            className="fluent-button"
-                            onClick={async () => {
-                              const { open } = await import("@tauri-apps/plugin-dialog");
-                              try {
-                                const selected = await open({ directory: true, multiple: false });
-                                if (selected) {
-                                  saveSetting('file_transfer_path', selected as string);
-                                  setTimeout(fetchEffectiveTransferPath, 100);
-                                }
-                              } catch (e) {}
-                            }}
-                          >
-                            更改路径
-                          </button>
-                        </div>
-                        <div
-                          className="fluent-value-display"
-                          style={{ cursor: "pointer", wordBreak: "break-all" }}
-                          onClick={() => {
-                            if (fileTransferPath) invoke("open_folder", { path: fileTransferPath }).catch(console.error);
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">服务局域网 IP</span>
+                      <span className="fluent-setting-description">在浏览器里访问的地址，同局域网设备可用</span>
+                    </div>
+                    <div className="fluent-value-display">
+                      {availableIps && availableIps.length > 1 && setLocalIp ? (
+                        <select
+                          className="fluent-select"
+                          style={{ border: "none", background: "transparent", minWidth: "0", padding: "0" }}
+                          value={localIp}
+                          onChange={(e) => {
+                            setLocalIp(e.target.value);
+                            invoke("set_display_ip", { ip: e.target.value }).catch(console.error);
                           }}
                         >
-                          {fileTransferPath || "未设置，默认下载路径"}
-                        </div>
-                      </div>
-                    </>
-                  )}
+                          {availableIps.map(ip => <option key={ip} value={ip}>{ip}</option>)}
+                        </select>
+                      ) : (
+                        <span>{localIp}</span>
+                      )}
+                      <span>:{actualPort || fileServerPort}</span>
+                    </div>
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">自动打开接收网页</span>
+                      <span className="fluent-setting-description">接收到文件后，主窗口自动显示传输列表</span>
+                    </div>
+                    <label className="fluent-switch">
+                      <input
+                        type="checkbox"
+                        checked={fileTransferAutoOpen}
+                        onChange={(e) => setFileTransferAutoOpen(e.target.checked)}
+                      />
+                      <span className="fluent-slider" />
+                    </label>
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">服务自动关闭机制</span>
+                      <span className="fluent-setting-description">若检测到无任务且接收网页关闭后自动休眠关闭服务</span>
+                    </div>
+                    <label className="fluent-switch">
+                      <input
+                        type="checkbox"
+                        checked={fileServerAutoClose}
+                        onChange={(e) => setFileServerAutoClose(e.target.checked)}
+                      />
+                      <span className="fluent-slider" />
+                    </label>
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">自动复制接收的文件</span>
+                      <span className="fluent-setting-description">文件接收完毕后自动放进您的剪贴板首位</span>
+                    </div>
+                    <label className="fluent-switch">
+                      <input
+                        type="checkbox"
+                        checked={fileTransferAutoCopy}
+                        onChange={(e) => setFileTransferAutoCopy(e.target.checked)}
+                      />
+                      <span className="fluent-slider" />
+                    </label>
+                  </div>
+
+                  <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                      <span className="fluent-setting-title">传输文件保存路径</span>
+                      <button
+                        className="fluent-button"
+                        onClick={async () => {
+                          const { open } = await import("@tauri-apps/plugin-dialog");
+                          try {
+                            const selected = await open({ directory: true, multiple: false });
+                            if (selected) {
+                              saveSetting('file_transfer_path', selected as string);
+                              setTimeout(fetchEffectiveTransferPath, 100);
+                            }
+                          } catch (e) {}
+                        }}
+                      >
+                        更改路径
+                      </button>
+                    </div>
+                    <div
+                      className="fluent-value-display"
+                      style={{ cursor: "pointer", wordBreak: "break-all" }}
+                      onClick={() => {
+                        if (fileTransferPath) invoke("open_folder", { path: fileTransferPath }).catch(console.error);
+                      }}
+                    >
+                      {fileTransferPath || "未设置，默认下载路径"}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* MQTT Sync Expander */}
-            <div className="fluent-setting-expander">
+            {/* MQTT Sync Expander */}
+            <div className={`fluent-setting-expander ${!mqttEnabled ? 'disabled' : ''}`}>
               <div
-                className={`fluent-setting-expander-header ${expandedCards['mqtt'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('mqtt')}
+                className={`fluent-setting-expander-header ${expandedCards['mqtt'] && mqttEnabled ? 'expanded' : ''} ${!mqttEnabled ? 'disabled' : ''}`}
+                onClick={() => {
+                  if (mqttEnabled) toggleExpander('mqtt');
+                }}
               >
                 <div className="fluent-setting-info">
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1831,152 +1831,150 @@ const SettingsWindow = () => {
                     />
                     <span className="fluent-slider" />
                   </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['mqtt'] ? 'expanded' : ''}`} />
+                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['mqtt'] && mqttEnabled ? 'expanded' : ''}`} />
                 </div>
               </div>
-              {expandedCards['mqtt'] && (
+              {expandedCards['mqtt'] && mqttEnabled && (
                 <div className="fluent-setting-expander-content">
-                  {mqttEnabled && (
-                    <>
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">连接协议</span>
-                          <span className="fluent-setting-description">mqtt:// 默认(1883), mqtts:// 安全加密(8883), ws:// websocket(8083)</span>
-                        </div>
-                        <select
-                          className="fluent-select"
-                          value={mqttProtocol}
-                          onChange={(e) => {
-                            const protocol = e.target.value;
-                            setMqttProtocol(protocol);
-                            saveMqtt('mqtt_protocol', protocol);
-                            invoke('save_setting', { key: 'mqtt_ssl', value: String(protocol === 'mqtts://' || protocol === 'wss://') }).catch(console.error);
-                            let defaultPort = '1883';
-                            if (protocol === 'mqtts://') defaultPort = '8883';
-                            else if (protocol === 'ws://') defaultPort = '8083';
-                            else if (protocol === 'wss://') defaultPort = '8084';
-                            setMqttPort(defaultPort);
-                            saveMqtt('mqtt_port', defaultPort);
-                          }}
-                        >
-                          <option value="mqtt://">mqtt://</option>
-                          <option value="mqtts://">mqtts://</option>
-                          <option value="ws://">ws://</option>
-                          <option value="wss://">wss://</option>
-                        </select>
-                      </div>
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">连接协议</span>
+                      <span className="fluent-setting-description">mqtt:// 默认(1883), mqtts:// 安全加密(8883), ws:// websocket(8083)</span>
+                    </div>
+                    <select
+                      className="fluent-select"
+                      value={mqttProtocol}
+                      onChange={(e) => {
+                        const protocol = e.target.value;
+                        setMqttProtocol(protocol);
+                        saveMqtt('mqtt_protocol', protocol);
+                        invoke('save_setting', { key: 'mqtt_ssl', value: String(protocol === 'mqtts://' || protocol === 'wss://') }).catch(console.error);
+                        let defaultPort = '1883';
+                        if (protocol === 'mqtts://') defaultPort = '8883';
+                        else if (protocol === 'ws://') defaultPort = '8083';
+                        else if (protocol === 'wss://') defaultPort = '8084';
+                        setMqttPort(defaultPort);
+                        saveMqtt('mqtt_port', defaultPort);
+                      }}
+                    >
+                      <option value="mqtt://">mqtt://</option>
+                      <option value="mqtts://">mqtts://</option>
+                      <option value="ws://">ws://</option>
+                      <option value="wss://">wss://</option>
+                    </select>
+                  </div>
 
-                      { (mqttProtocol === 'ws://' || mqttProtocol === 'wss://') && (
-                        <div className="fluent-setting-card">
-                          <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">WS Path 路径</span>
-                            <span className="fluent-setting-description">网页同步服务特定的路径，默认 /mqtt</span>
-                          </div>
-                          <input
-                            type="text"
-                            className="fluent-input"
-                            value={mqttWsPath}
-                            onChange={(e) => { setMqttWsPath(e.target.value); saveMqtt('mqtt_ws_path', e.target.value); }}
-                            placeholder="/mqtt"
-                          />
-                        </div>
-                      )}
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">服务器主机地址</span>
-                          <span className="fluent-setting-description">MQTT 代理服务器的 IP 或域名</span>
-                        </div>
-                        <input
-                          type="text"
-                          className="fluent-input"
-                          value={mqttServer}
-                          onChange={(e) => { setMqttServer(e.target.value); saveMqtt('mqtt_server', e.target.value); }}
-                        />
+                  { (mqttProtocol === 'ws://' || mqttProtocol === 'wss://') && (
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">WS Path 路径</span>
+                        <span className="fluent-setting-description">网页同步服务特定的路径，默认 /mqtt</span>
                       </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">端口号</span>
-                          <span className="fluent-setting-description">MQTT 连接端口，默认 18883/1883</span>
-                        </div>
-                        <input
-                          type="text"
-                          className="fluent-input"
-                          style={{ width: "80px", textAlign: "center" }}
-                          value={mqttPort}
-                          onChange={(e) => { setMqttPort(e.target.value); saveMqtt('mqtt_port', e.target.value); }}
-                        />
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">用户名</span>
-                          <span className="fluent-setting-description">连接服务器所需的用户名，选填</span>
-                        </div>
-                        <input
-                          type="text"
-                          className="fluent-input"
-                          value={mqttUser}
-                          onChange={(e) => { setMqttUser(e.target.value); saveMqtt('mqtt_username', e.target.value); }}
-                        />
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">密码</span>
-                          <span className="fluent-setting-description">连接所需的密码，选填</span>
-                        </div>
-                        <input
-                          type="password"
-                          className="fluent-input"
-                          value={mqttPass}
-                          onChange={(e) => { setMqttPass(e.target.value); saveMqtt('mqtt_password', e.target.value); }}
-                        />
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">同步 Topic 订阅名</span>
-                          <span className="fluent-setting-description">所有端必须使用一致的主题名才可以实现互相通讯</span>
-                        </div>
-                        <input
-                          type="text"
-                          className="fluent-input"
-                          value={mqttTopic}
-                          onChange={(e) => { setMqttTopic(e.target.value); saveMqtt('mqtt_topic', e.target.value); }}
-                        />
-                      </div>
-
-                      <div className="fluent-setting-card">
-                        <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">接收同步提醒推送通知</span>
-                          <span className="fluent-setting-description">当别的电脑或手机同步新验证码时发出系统弹窗通知</span>
-                        </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={mqttNotificationEnabled}
-                            onChange={(e) => {
-                              setMqttNotificationEnabled(e.target.checked);
-                              saveMqtt('mqtt_notification_enabled', String(e.target.checked));
-                            }}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
-                      </div>
-                    </>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={mqttWsPath}
+                        onChange={(e) => { setMqttWsPath(e.target.value); saveMqtt('mqtt_ws_path', e.target.value); }}
+                        placeholder="/mqtt"
+                      />
+                    </div>
                   )}
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">服务器主机地址</span>
+                      <span className="fluent-setting-description">MQTT 代理服务器的 IP 或域名</span>
+                    </div>
+                    <input
+                      type="text"
+                      className="fluent-input"
+                      value={mqttServer}
+                      onChange={(e) => { setMqttServer(e.target.value); saveMqtt('mqtt_server', e.target.value); }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">端口号</span>
+                      <span className="fluent-setting-description">MQTT 连接端口，默认 18883/1883</span>
+                    </div>
+                    <input
+                      type="text"
+                      className="fluent-input"
+                      style={{ width: "80px", textAlign: "center" }}
+                      value={mqttPort}
+                      onChange={(e) => { setMqttPort(e.target.value); saveMqtt('mqtt_port', e.target.value); }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">用户名</span>
+                      <span className="fluent-setting-description">连接服务器所需的用户名，选填</span>
+                    </div>
+                    <input
+                      type="text"
+                      className="fluent-input"
+                      value={mqttUser}
+                      onChange={(e) => { setMqttUser(e.target.value); saveMqtt('mqtt_username', e.target.value); }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">密码</span>
+                      <span className="fluent-setting-description">连接所需的密码，选填</span>
+                    </div>
+                    <input
+                      type="password"
+                      className="fluent-input"
+                      value={mqttPass}
+                      onChange={(e) => { setMqttPass(e.target.value); saveMqtt('mqtt_password', e.target.value); }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">同步 Topic 订阅名</span>
+                      <span className="fluent-setting-description">所有端必须使用一致的主题名才可以实现互相通讯</span>
+                    </div>
+                    <input
+                      type="text"
+                      className="fluent-input"
+                      value={mqttTopic}
+                      onChange={(e) => { setMqttTopic(e.target.value); saveMqtt('mqtt_topic', e.target.value); }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">接收同步提醒推送通知</span>
+                      <span className="fluent-setting-description">当别的电脑或手机同步新验证码时发出系统弹窗通知</span>
+                    </div>
+                    <label className="fluent-switch">
+                      <input
+                        type="checkbox"
+                        checked={mqttNotificationEnabled}
+                        onChange={(e) => {
+                          setMqttNotificationEnabled(e.target.checked);
+                          saveMqtt('mqtt_notification_enabled', String(e.target.checked));
+                        }}
+                      />
+                      <span className="fluent-slider" />
+                    </label>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Cloud sync WebDAV expander */}
             {CLOUD_SYNC_ENABLED && (
-              <div className="fluent-setting-expander">
+              <div className={`fluent-setting-expander ${!cloudSyncEnabled ? 'disabled' : ''}`}>
                 <div
-                  className={`fluent-setting-expander-header ${expandedCards['cloud'] ? 'expanded' : ''}`}
-                  onClick={() => toggleExpander('cloud')}
+                  className={`fluent-setting-expander-header ${expandedCards['cloud'] && cloudSyncEnabled ? 'expanded' : ''} ${!cloudSyncEnabled ? 'disabled' : ''}`}
+                  onClick={() => {
+                    if (cloudSyncEnabled) toggleExpander('cloud');
+                  }}
                 >
                   <div className="fluent-setting-info">
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -2005,168 +2003,164 @@ const SettingsWindow = () => {
                       />
                       <span className="fluent-slider" />
                     </label>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['cloud'] ? 'expanded' : ''}`} />
+                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['cloud'] && cloudSyncEnabled ? 'expanded' : ''}`} />
                   </div>
                 </div>
-                {expandedCards['cloud'] && (
+                {expandedCards['cloud'] && cloudSyncEnabled && (
                   <div className="fluent-setting-expander-content">
-                    {cloudSyncEnabled && (
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">定时自动静默同步</span>
+                        <span className="fluent-setting-description">自动在后台检测更新并同步备份</span>
+                      </div>
+                      <label className="fluent-switch">
+                        <input
+                          type="checkbox"
+                          checked={cloudSyncAuto}
+                          onChange={(e) => {
+                            setCloudSyncAuto(e.target.checked);
+                            saveCloudSync('cloud_sync_auto', String(e.target.checked));
+                          }}
+                        />
+                        <span className="fluent-slider" />
+                      </label>
+                    </div>
+
+                    {cloudSyncAuto && (
                       <>
                         <div className="fluent-setting-card">
                           <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">定时自动静默同步</span>
-                            <span className="fluent-setting-description">自动在后台检测更新并同步备份</span>
-                          </div>
-                          <label className="fluent-switch">
-                            <input
-                              type="checkbox"
-                              checked={cloudSyncAuto}
-                              onChange={(e) => {
-                                setCloudSyncAuto(e.target.checked);
-                                saveCloudSync('cloud_sync_auto', String(e.target.checked));
-                              }}
-                            />
-                            <span className="fluent-slider" />
-                          </label>
-                        </div>
-
-                        {cloudSyncAuto && (
-                          <>
-                            <div className="fluent-setting-card">
-                              <div className="fluent-setting-info">
-                                <span className="fluent-setting-title">同步扫描周期 (秒)</span>
-                                <span className="fluent-setting-description">检查同步内容变化的频率 (5 - 3600)</span>
-                              </div>
-                              <input
-                                type="number"
-                                className="fluent-input"
-                                style={{ width: "70px", textAlign: "right" }}
-                                value={cloudSyncIntervalSec}
-                                onChange={e => setCloudSyncIntervalSec(e.target.value)}
-                                onBlur={() => {
-                                  const v = Math.min(3600, Math.max(5, parseInt(cloudSyncIntervalSec) || 120));
-                                  setCloudSyncIntervalSec(v.toString());
-                                  saveCloudSync('cloud_sync_interval_sec', v.toString());
-                                }}
-                              />
-                            </div>
-
-                            <div className="fluent-setting-card">
-                              <div className="fluent-setting-info">
-                                <span className="fluent-setting-title">全量物理快照间隔 (分钟)</span>
-                                <span className="fluent-setting-description">执行强力校准合并与垃圾清理的间隔</span>
-                              </div>
-                              <input
-                                type="number"
-                                className="fluent-input"
-                                style={{ width: "70px", textAlign: "right" }}
-                                value={cloudSyncSnapshotIntervalMin}
-                                onChange={e => setCloudSyncSnapshotIntervalMin(e.target.value)}
-                                onBlur={() => {
-                                  const v = Math.min(1440, Math.max(5, parseInt(cloudSyncSnapshotIntervalMin) || 720));
-                                  setCloudSyncSnapshotIntervalMin(v.toString());
-                                  saveCloudSync('cloud_sync_snapshot_interval_min', v.toString());
-                                }}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        <div className="fluent-setting-card">
-                          <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">WebDAV 服务商链接 URL</span>
-                            <span className="fluent-setting-description">提供 WebDAV 接口的服务商网络地址</span>
+                            <span className="fluent-setting-title">同步扫描周期 (秒)</span>
+                            <span className="fluent-setting-description">检查同步内容变化的频率 (5 - 3600)</span>
                           </div>
                           <input
-                            type="text"
+                            type="number"
                             className="fluent-input"
-                            value={cloudSyncWebdavUrl}
-                            onChange={e => setCloudSyncWebdavUrl(e.target.value)}
-                            onBlur={() => saveCloudSync('cloud_sync_webdav_url', cloudSyncWebdavUrl.trim())}
+                            style={{ width: "70px", textAlign: "right" }}
+                            value={cloudSyncIntervalSec}
+                            onChange={e => setCloudSyncIntervalSec(e.target.value)}
+                            onBlur={() => {
+                              const v = Math.min(3600, Math.max(5, parseInt(cloudSyncIntervalSec) || 120));
+                              setCloudSyncIntervalSec(v.toString());
+                              saveCloudSync('cloud_sync_interval_sec', v.toString());
+                            }}
                           />
                         </div>
 
                         <div className="fluent-setting-card">
                           <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">WebDAV 登录用户名</span>
-                            <span className="fluent-setting-description">您的云盘登录账户名</span>
+                            <span className="fluent-setting-title">全量物理快照间隔 (分钟)</span>
+                            <span className="fluent-setting-description">执行强力校准合并与垃圾清理的间隔</span>
                           </div>
                           <input
-                            type="text"
+                            type="number"
                             className="fluent-input"
-                            value={cloudSyncWebdavUsername}
-                            onChange={e => setCloudSyncWebdavUsername(e.target.value)}
-                            onBlur={() => saveCloudSync('cloud_sync_webdav_username', cloudSyncWebdavUsername.trim())}
+                            style={{ width: "70px", textAlign: "right" }}
+                            value={cloudSyncSnapshotIntervalMin}
+                            onChange={e => setCloudSyncSnapshotIntervalMin(e.target.value)}
+                            onBlur={() => {
+                              const v = Math.min(1440, Math.max(5, parseInt(cloudSyncSnapshotIntervalMin) || 720));
+                              setCloudSyncSnapshotIntervalMin(v.toString());
+                              saveCloudSync('cloud_sync_snapshot_interval_min', v.toString());
+                            }}
                           />
-                        </div>
-
-                        <div className="fluent-setting-card">
-                          <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">WebDAV 专属应用授权密码</span>
-                            <span className="fluent-setting-description">推荐在云盘后台生成一个特定“应用密码”填写于此</span>
-                          </div>
-                          <input
-                            type="password"
-                            className="fluent-input"
-                            value={cloudSyncWebdavPassword}
-                            onChange={e => setCloudSyncWebdavPassword(e.target.value)}
-                            onBlur={() => saveCloudSync('cloud_sync_webdav_password', cloudSyncWebdavPassword)}
-                          />
-                        </div>
-
-                        <div className="fluent-setting-card">
-                          <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">同步根目录文件夹名称</span>
-                            <span className="fluent-setting-description">云盘中保存备份数据的根目录，默认 tiez-sync</span>
-                          </div>
-                          <input
-                            type="text"
-                            className="fluent-input"
-                            value={cloudSyncWebdavBasePath}
-                            onChange={e => setCloudSyncWebdavBasePath(e.target.value)}
-                            onBlur={() => saveCloudSync('cloud_sync_webdav_base_path', cloudSyncWebdavBasePath.trim() || 'tiez-sync')}
-                          />
-                        </div>
-
-                        {/* Cloud Status Box */}
-                        <div style={{ background: "rgba(0,0,0,0.03)", padding: "12px", borderRadius: "4px", margin: "8px 0" }}>
-                          <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "4px" }}>云端同步状态</div>
-                          <div style={{ fontSize: "12px", display: "flex", gap: "16px" }}>
-                            <span>上传项: {cloudSyncStatus.uploaded_items ?? 0}</span>
-                            <span>接收项: {cloudSyncStatus.received_items ?? 0}</span>
-                            <span>状态: {cloudSyncStatus.state === 'syncing' ? '同步中...' : cloudSyncStatus.state === 'idle' ? '就绪' : '错误/未启动'}</span>
-                          </div>
-                          {cloudSyncStatus.last_sync_at && (
-                            <div style={{ fontSize: "10px", color: "var(--text-secondary)", marginTop: "4px" }}>
-                              上次同步: {new Date(cloudSyncStatus.last_sync_at).toLocaleString()}
-                            </div>
-                          )}
-                          {cloudSyncStatus.last_error && (
-                            <div style={{ fontSize: "10px", color: "#f44336", marginTop: "4px" }}>
-                              上次错误: {cloudSyncStatus.last_error}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="fluent-setting-card">
-                          <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">立即触发数据强制同步</span>
-                            <span className="fluent-setting-description">手动强制执行一次云端数据同步比对</span>
-                          </div>
-                          <button
-                            className="fluent-button"
-                            disabled={cloudSyncNowRunning || cloudSyncStatus.state === "syncing"}
-                            onClick={handleCloudSyncNow}
-                          >
-                            {cloudSyncNowRunning ? "同步中..." : "立即同步"}
-                          </button>
                         </div>
                       </>
                     )}
-                  </div>
-                )}
-              </div>
-            )}
+
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">WebDAV 服务商链接 URL</span>
+                        <span className="fluent-setting-description">提供 WebDAV 接口的服务商网络地址</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={cloudSyncWebdavUrl}
+                        onChange={e => setCloudSyncWebdavUrl(e.target.value)}
+                        onBlur={() => saveCloudSync('cloud_sync_webdav_url', cloudSyncWebdavUrl.trim())}
+                      />
+                    </div>
+
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">WebDAV 登录用户名</span>
+                        <span className="fluent-setting-description">您的云盘登录账户名</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={cloudSyncWebdavUsername}
+                        onChange={e => setCloudSyncWebdavUsername(e.target.value)}
+                        onBlur={() => saveCloudSync('cloud_sync_webdav_username', cloudSyncWebdavUsername.trim())}
+                      />
+                    </div>
+
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">WebDAV 专属应用授权密码</span>
+                        <span className="fluent-setting-description">推荐在云盘后台生成一个特定“应用密码”填写于此</span>
+                      </div>
+                      <input
+                        type="password"
+                        className="fluent-input"
+                        value={cloudSyncWebdavPassword}
+                        onChange={e => setCloudSyncWebdavPassword(e.target.value)}
+                        onBlur={() => saveCloudSync('cloud_sync_webdav_password', cloudSyncWebdavPassword)}
+                      />
+                    </div>
+
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">同步根目录文件夹名称</span>
+                        <span className="fluent-setting-description">云盘中保存备份数据的根目录，默认 tiez-sync</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={cloudSyncWebdavBasePath}
+                        onChange={e => setCloudSyncWebdavBasePath(e.target.value)}
+                        onBlur={() => saveCloudSync('cloud_sync_webdav_base_path', cloudSyncWebdavBasePath.trim() || 'tiez-sync')}
+                      />
+                    </div>
+
+                    {/* Cloud Status Box */}
+                    <div style={{ background: "rgba(0,0,0,0.03)", padding: "12px", borderRadius: "4px", margin: "8px 0" }}>
+                      <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "4px" }}>云端同步状态</div>
+                      <div style={{ fontSize: "12px", display: "flex", gap: "16px" }}>
+                        <span>上传项: {cloudSyncStatus.uploaded_items ?? 0}</span>
+                        <span>接收项: {cloudSyncStatus.received_items ?? 0}</span>
+                        <span>状态: {cloudSyncStatus.state === 'syncing' ? '同步中...' : cloudSyncStatus.state === 'idle' ? '就绪' : '错误/未启动'}</span>
+                      </div>
+                      {cloudSyncStatus.last_sync_at && (
+                        <div style={{ fontSize: "10px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                          上次同步: {new Date(cloudSyncStatus.last_sync_at).toLocaleString()}
+                        </div>
+                      )}
+                      {cloudSyncStatus.last_error && (
+                        <div style={{ fontSize: "10px", color: "#f44336", marginTop: "4px" }}>
+                          上次错误: {cloudSyncStatus.last_error}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="fluent-setting-card">
+                      <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">立即触发数据强制同步</span>
+                        <span className="fluent-setting-description">手动强制执行一次云端数据同步比对</span>
+                      </div>
+                      <button
+                        className="fluent-button"
+                        disabled={cloudSyncNowRunning || cloudSyncStatus.state === "syncing"}
+                        onClick={handleCloudSyncNow}
+                      >
+                        {cloudSyncNowRunning ? "同步中..." : "立即同步"}
+                      </button>
+                    </div>
+                </div>
+              )}
+            </div>
+          )}
           </div>
         )}
 

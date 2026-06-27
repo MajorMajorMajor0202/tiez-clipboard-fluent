@@ -202,6 +202,23 @@
   border-bottom-right-radius: 0;
 }
 
+.fluent-setting-expander.disabled {
+  opacity: 0.7;
+}
+
+.fluent-setting-expander-header.disabled {
+  cursor: not-allowed !important;
+}
+
+.fluent-setting-expander-header.disabled:hover {
+  background-color: var(--bg-panel) !important;
+}
+
+.fluent-setting-expander-header.disabled .fluent-chevron {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+
 .fluent-setting-expander-content {
   background-color: rgba(0, 0, 0, 0.02);
   border: 1px solid var(--line-soft);
