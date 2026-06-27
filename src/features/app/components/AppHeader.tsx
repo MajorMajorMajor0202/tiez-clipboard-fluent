@@ -135,6 +135,7 @@ const AppHeader = ({
       const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
       const existing = await WebviewWindow.getByLabel("settings");
       if (existing) {
+        await existing.setAlwaysOnTop(isWindowPinned);
         await existing.show();
         await existing.setFocus();
       } else {
@@ -149,6 +150,7 @@ const AppHeader = ({
           backgroundColor: "#00000000",
           skipTaskbar: false,
           visible: false,
+          alwaysOnTop: isWindowPinned,
         });
         win.once("tauri://created", () => {
           win.show().then(() => {
@@ -159,7 +161,7 @@ const AppHeader = ({
     } catch (err) {
       console.error("Failed to open settings window:", err);
     }
-  }, [t]);
+  }, [t, isWindowPinned]);
 
   // Segoe Fluent Icons — official Microsoft icon codepoints
   const FILTER_ICONS: Record<string, string> = {

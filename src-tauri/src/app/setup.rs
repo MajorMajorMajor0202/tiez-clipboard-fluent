@@ -1364,10 +1364,24 @@ fn handle_blur(window: &tauri::Window) {
             };
         if !down && matches!(w.is_focused(), Ok(false)) {
             if !IGNORE_BLUR.load(Ordering::Relaxed) && !WINDOW_PINNED.load(Ordering::Relaxed) {
+                let app_handle = w.app_handle();
+                let mut other_focused = false;
+                for (label, win) in app_handle.webview_windows() {
+                    if label != "main" {
+                        if let Ok(true) = win.is_focused() {
+                            other_focused = true;
+                            break;
+                        }
+                    }
+                }
+
                 let _ = w.hide();
                 NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
                 release_win_keys();
-                let _ = restore_last_focus(w.app_handle().clone());
+
+                if !other_focused {
+                    let _ = restore_last_focus(w.app_handle().clone());
+                }
             }
         }
     });
