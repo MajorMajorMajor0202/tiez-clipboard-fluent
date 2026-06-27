@@ -1307,8 +1307,19 @@ const ClipboardItem = ({
     const renderTagsContainer = (overlay = false) => (
         <div
             className={`item-tags-container${overlay ? ' overlay' : ''}${isEditingTags ? ' tag-edit-active' : ''}`}
-            style={{
-                marginTop: overlay ? '0' : '2px',
+            style={overlay ? {
+                position: 'absolute',
+                left: '8px',
+                bottom: '0px',
+                zIndex: 5,
+                margin: 0,
+                display: 'flex',
+                flexDirection: 'row-reverse',
+                alignItems: 'center',
+                gap: '8px',
+                pointerEvents: 'auto'
+            } : {
+                marginTop: '2px',
                 display: 'flex',
                 flexWrap: 'wrap',
                 justifyContent: 'flex-end',
@@ -1324,6 +1335,27 @@ const ClipboardItem = ({
                     : tag;
                 const tagBackground = tagColors?.[tag] || getTagColor(tag, theme);
                 const tagTextColor = getTagTextColor(tagBackground);
+
+                if (overlay) {
+                    return (
+                        <FluentTooltip key={tag} text={displayTag}>
+                            <button
+                                className="tag-dot"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onTagDelete(tag);
+                                }}
+                                style={{
+                                    backgroundColor: tagBackground,
+                                    color: tagTextColor,
+                                }}
+                            >
+                                <X size={10} className="tag-dot-delete-icon" />
+                            </button>
+                        </FluentTooltip>
+                    );
+                }
+
                 return (
                     <span
                         key={tag}
