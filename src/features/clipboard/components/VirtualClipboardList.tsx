@@ -13,23 +13,33 @@ type VirtuosoListContext = {
 
 const ListHeader = ({ context }: { context?: VirtuosoListContext }) => {
     const header = context?.header;
-    return header ? <div className="list-header">{header}</div> : null;
+    return (
+        <div className="list-header-wrapper">
+            <div style={{ height: '12px' }} />
+            {header ? <div className="list-header">{header}</div> : null}
+        </div>
+    );
 };
 
 const ListFooter = ({ context }: { context?: VirtuosoListContext }) => {
     if (!context) return null;
     const { isLoading, hasMore } = context;
-    if (!isLoading && !hasMore) return null;
+    const showFooterContent = isLoading || hasMore;
 
     return (
-        <div style={{
-            padding: '20px',
-            textAlign: 'center',
-            opacity: 0.6,
-            fontSize: '12px',
-            color: 'var(--text-secondary)'
-        }}>
-            {isLoading ? '加载中...' : '加载更多...'}
+        <div className="list-footer-wrapper">
+            {showFooterContent ? (
+                <div style={{
+                    padding: '20px',
+                    textAlign: 'center',
+                    opacity: 0.6,
+                    fontSize: '12px',
+                    color: 'var(--text-secondary)'
+                }}>
+                    {isLoading ? '加载中...' : '加载更多...'}
+                </div>
+            ) : null}
+            <div style={{ height: '12px' }} />
         </div>
     );
 };
