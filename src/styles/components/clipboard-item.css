@@ -206,18 +206,18 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px;
-  background: var(--bg-panel);
-  border: var(--panel-border);
-  border-radius: var(--panel-radius);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
 }
 
 .video-thumbnail-card:hover {
-  background: var(--bg-input);
-  box-shadow: var(--shadow-xs);
+  background: transparent;
+  box-shadow: none;
 }
 
 .video-thumbnail-wrapper {
@@ -252,18 +252,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 5px 6px;
-  background: var(--bg-panel);
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: var(--panel-radius);
+  border-radius: 0;
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
-}
-
-.history-item.file-item .file-thumbnail-card {
-  width: 100%;
-  background: transparent;
 }
 
 .file-thumbnail-card:hover {

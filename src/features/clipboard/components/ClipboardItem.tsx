@@ -1735,11 +1735,11 @@ const ClipboardItem = ({
                                 src={item.content.startsWith("data:")
                                     ? item.content
                                     : (toTauriLocalImageSrc(item.content) || item.content)}
-                                preload="metadata"
+                                preload="auto"
                                 muted
                                 playsInline
                                 className="video-thumbnail-element"
-                                onLoadedMetadata={(e) => seekVideoPreviewFrame(e.currentTarget)}
+                                onLoadedData={(e) => seekVideoPreviewFrame(e.currentTarget)}
                             />
                             <div className="video-play-overlay">
                                 <Video size={16} />
