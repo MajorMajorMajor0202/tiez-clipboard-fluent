@@ -69,7 +69,7 @@
 
 /* Make content preview shell taller when has overlay tags */
 .content-preview-shell.has-overlay-tags {
-  padding-bottom: 24px; /* multiple of 4: 24px space at the bottom */
+  padding-bottom: 16px; /* multiple of 4: 16px space at the bottom */
 }
 
 /* Tag dot indicators in bottom-right corner */

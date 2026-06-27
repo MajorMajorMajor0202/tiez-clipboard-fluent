@@ -1309,8 +1309,9 @@ const ClipboardItem = ({
             className={`item-tags-container${overlay ? ' overlay' : ''}${isEditingTags ? ' tag-edit-active' : ''}`}
             style={overlay ? {
                 position: 'absolute',
-                right: '8px',
+                right: '4px',
                 bottom: '0px',
+                height: '16px',
                 zIndex: 5,
                 margin: 0,
                 display: 'flex',
