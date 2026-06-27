@@ -993,23 +993,6 @@ const App = () => {
 
   useListSelectionReset({ filteredHistory, setSelectedIndex });
 
-  useEffect(() => {
-    if (isKeyboardMode && selectedIndex >= 0 && selectedIndex < filteredHistory.length) {
-      const item = filteredHistory[selectedIndex];
-      const hasSensitiveTag = item.tags?.some(tag => {
-        const lower = tag.toLowerCase();
-        return lower === "sensitive" || lower === "敏感" || lower === "password" || lower === "密码" || lower === "密碼";
-      });
-      if (hasSensitiveTag && !revealedIds.has(item.id)) {
-        setRevealedIds((prev) => {
-          const next = new Set(prev);
-          next.add(item.id);
-          return next;
-        });
-      }
-    }
-  }, [isKeyboardMode, selectedIndex, filteredHistory, revealedIds, setRevealedIds]);
-
   useSearchFetchTrigger({ debouncedSearch, isComposing, typeFilter, fetchHistory });
 
   useScrollToSelection({
