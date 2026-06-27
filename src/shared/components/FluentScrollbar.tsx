@@ -19,6 +19,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
   const dragStartY = useRef(0);
   const dragStartScrollTop = useRef(0);
   const trackRef = useRef<HTMLDivElement>(null);
+  const ARROW_H = 12;
 
   const update = useCallback(() => {
     const el = scrollContainer;
@@ -29,7 +30,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
       return;
     }
     setVisible(true);
-    const trackH = clientHeight;
+    const trackH = clientHeight - ARROW_H * 2;
     const ratio = clientHeight / scrollHeight;
     const th = Math.max(30, trackH * ratio);
     const maxTop = trackH - th;
@@ -69,7 +70,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
     const onMove = (me: MouseEvent) => {
       const el = scrollContainer;
       if (!el) return;
-      const trackH = el.clientHeight;
+      const trackH = el.clientHeight - ARROW_H * 2;
       const th = Math.max(30, trackH * (el.clientHeight / el.scrollHeight));
       const maxTop = trackH - th;
       const dy = me.clientY - dragStartY.current;
@@ -92,8 +93,8 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
   const handleTrackClick = useCallback((e: React.MouseEvent) => {
     if (!trackRef.current || !scrollContainer) return;
     const trackRect = trackRef.current.getBoundingClientRect();
-    const trackH = scrollContainer.clientHeight;
-    const clickY = e.clientY - trackRect.top;
+    const trackH = scrollContainer.clientHeight - ARROW_H * 2;
+    const clickY = e.clientY - trackRect.top - ARROW_H;
     const ratio = trackH > 0 ? clickY / trackH : 0;
     scrollContainer.scrollTop = ratio * (scrollContainer.scrollHeight - scrollContainer.clientHeight);
   }, [scrollContainer]);
@@ -146,7 +147,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
         {/* Thumb */}
         <div
           className="fluent-scrollbar__thumb"
-          style={{ top: thumbTop, height: thumbHeight }}
+          style={{ top: thumbTop + ARROW_H, height: thumbHeight }}
           onMouseDown={handleThumbMouseDown}
         />
 
