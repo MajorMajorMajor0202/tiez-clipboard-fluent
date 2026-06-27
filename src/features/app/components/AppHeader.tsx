@@ -139,8 +139,10 @@ const AppHeader = ({
         await existing.show();
         await existing.setFocus();
       } else {
+        const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
+        const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
         const win = new WebviewWindow("settings", {
-          url: "index.html?window=settings",
+          url: `index.html?window=settings${accentParam}`,
           title: t('settings') || "Settings",
           width: 780,
           height: 560,
