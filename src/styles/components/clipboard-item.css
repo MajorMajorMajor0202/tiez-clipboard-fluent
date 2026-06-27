@@ -72,10 +72,10 @@
   padding-bottom: 24px; /* multiple of 4: 24px space at the bottom */
 }
 
-/* Tag dot indicators in bottom-left corner */
+/* Tag dot indicators in bottom-right corner */
 .tag-dot {
-  width: 16px; /* multiple of 4 */
-  height: 16px; /* multiple of 4 */
+  width: 8px; /* 8px normally */
+  height: 8px; /* 8px normally */
   border-radius: 50%;
   border: none;
   padding: 0;
@@ -98,7 +98,7 @@
 }
 
 .tag-dot:hover {
-  transform: scale(1.25);
+  transform: scale(1.5); /* scales up to 12px (8px * 1.5) */
 }
 
 .tag-dot:hover .tag-dot-delete-icon {

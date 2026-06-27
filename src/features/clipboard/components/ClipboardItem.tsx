@@ -1309,7 +1309,7 @@ const ClipboardItem = ({
             className={`item-tags-container${overlay ? ' overlay' : ''}${isEditingTags ? ' tag-edit-active' : ''}`}
             style={overlay ? {
                 position: 'absolute',
-                left: '8px',
+                right: '8px',
                 bottom: '0px',
                 zIndex: 5,
                 margin: 0,
@@ -1350,7 +1350,7 @@ const ClipboardItem = ({
                                     color: tagTextColor,
                                 }}
                             >
-                                <X size={10} className="tag-dot-delete-icon" />
+                                <X size={8} className="tag-dot-delete-icon" />
                             </button>
                         </FluentTooltip>
                     );
