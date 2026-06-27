@@ -1,10 +1,24 @@
 /* Clipboard Item Selection */
 .history-item.selected {
-  outline: var(--card-selected-outline) !important;
-  outline-offset: var(--card-selected-outline-offset) !important;
-  border-color: var(--card-selected-border-color) !important;
-  box-shadow: var(--card-selected-shadow) !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--card-border-color, rgba(128, 128, 128, 0.2)) !important;
+  box-shadow: none !important;
   z-index: 10;
+  position: relative;
+}
+
+.history-item.selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--text-primary) !important;
+  z-index: 2;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
 .history-item.selected {

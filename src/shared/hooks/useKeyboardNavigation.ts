@@ -120,20 +120,6 @@ export const useKeyboardNavigation = ({
       if (arrowKeySelectionRef.current && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
         e.preventDefault();
         e.stopPropagation();
-
-        setIsKeyboardMode((prev) => {
-          if (!prev) {
-            setSelectedIndex(0);
-            return true;
-          }
-
-          if (e.key === "ArrowDown") {
-            setSelectedIndex((s) => Math.min(s + 1, filteredHistoryRef.current.length - 1));
-          } else {
-            setSelectedIndex((s) => Math.max(s - 1, 0));
-          }
-          return true;
-        });
         return;
       }
 
