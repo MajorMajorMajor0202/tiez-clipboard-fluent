@@ -1,4 +1,4 @@
-import { useRef, useEffect, useLayoutEffect, useState, useMemo, memo } from "react";
+import { useRef, useEffect, useLayoutEffect, useState, useMemo, useCallback, memo } from "react";
 import { createPortal } from "react-dom";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -17,7 +17,6 @@ import {
     Link as LinkIcon,
     Code,
     File,
-    Plus,
     Video,
     Sparkles,
     Loader2,
