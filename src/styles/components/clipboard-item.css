@@ -159,6 +159,7 @@
   background: transparent;
   display: block;
   object-fit: contain;
+  margin-top: 8px;
 }
 
 /* Clipboard Item Video Cards */
