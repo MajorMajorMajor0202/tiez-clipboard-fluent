@@ -13,12 +13,12 @@
   position: absolute;
   left: 0;
   top: 0;
+  right: 0;
   bottom: 0;
-  width: 2px;
-  background-color: var(--text-primary) !important;
+  border: 2px solid var(--text-primary) !important;
   z-index: 2;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .history-item.selected {
