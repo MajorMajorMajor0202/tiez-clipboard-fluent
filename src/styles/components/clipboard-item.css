@@ -10,7 +10,6 @@
   letter-spacing: var(--meta-letter-spacing);
   color: var(--text-secondary);
   margin-bottom: 0;
-  border-bottom: 1px dashed var(--panel-divider-color);
   padding-bottom: 0;
 }
 
