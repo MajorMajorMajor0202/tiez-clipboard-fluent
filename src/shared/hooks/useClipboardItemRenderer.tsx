@@ -95,11 +95,13 @@ export const useClipboardItemRenderer = ({
 }: UseClipboardItemRendererOptions): { renderItemContent: RenderItemContent } => {
   const renderItemContent = useCallback(
     (item: ClipboardEntry, index: number, dragControls?: DragControls, disableLayout?: boolean) => {
+      const hasSensitiveTag = item.tags?.some(tag => {
+        const lower = tag.toLowerCase();
+        return lower === "sensitive" || lower === "敏感" || lower === "password" || lower === "密码" || lower === "密碼";
+      });
       const isSensitiveHidden =
         privacyProtection &&
-        (item.tags?.includes("sensitive") ||
-          item.tags?.includes("密码") ||
-          item.tags?.includes("password")) &&
+        hasSensitiveTag &&
         !revealedIds.has(item.id);
       const isEditingTags = editingTagsId === item.id;
 
@@ -156,7 +158,14 @@ export const useClipboardItemRenderer = ({
           }}
           onTagInput={setTagInput}
           onTagAdd={() => {
-            const newTag = tagInput.trim();
+            const rawTag = tagInput.trim();
+            const lower = rawTag.toLowerCase();
+            let newTag = rawTag;
+            if (lower === "敏感" || lower === "sensitive") {
+              newTag = "sensitive";
+            } else if (lower === "密码" || lower === "密碼" || lower === "password") {
+              newTag = "password";
+            }
             if (newTag && !item.tags?.includes(newTag)) {
               handleUpdateTags(item.id, [...(item.tags || []), newTag]);
             }
@@ -164,7 +173,14 @@ export const useClipboardItemRenderer = ({
             setEditingTagsId(null);
           }}
           onTagPick={(picked) => {
-            const next = picked.trim();
+            const rawTag = picked.trim();
+            const lower = rawTag.toLowerCase();
+            let next = rawTag;
+            if (lower === "敏感" || lower === "sensitive") {
+              next = "sensitive";
+            } else if (lower === "密码" || lower === "密碼" || lower === "password") {
+              next = "password";
+            }
             if (!next || item.tags?.includes(next)) return;
             handleUpdateTags(item.id, [...(item.tags || []), next]);
             setTagInput("");

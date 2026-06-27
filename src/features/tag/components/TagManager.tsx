@@ -22,6 +22,11 @@ interface TagInfo {
 }
 
 export default function TagManager({ t, theme }: TagManagerProps) {
+    const isBuiltinSensitiveTag = (tag: string) => {
+        const l = tag.toLowerCase();
+        return l === 'sensitive' || l === '敏感' || l === 'password' || l === '密码' || l === '密碼';
+    };
+
     const TAG_MANAGER_VIEW_MODE_KEY = "tiez_tag_manager_view_mode";
     const [tags, setTags] = useState<TagInfo[]>([]);
     const [tagSearch, setTagSearch] = useState('');
@@ -185,8 +190,16 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     };
 
     const createTag = async (rawName: string) => {
-        const trimmed = rawName.trim();
-        if (!trimmed) return;
+        const rawTrimmed = rawName.trim();
+        if (!rawTrimmed) return;
+
+        const lower = rawTrimmed.toLowerCase();
+        let trimmed = rawTrimmed;
+        if (lower === "敏感" || lower === "sensitive") {
+            trimmed = "sensitive";
+        } else if (lower === "密码" || lower === "密碼" || lower === "password") {
+            trimmed = "password";
+        }
 
         try {
             await invoke('create_new_tag', { tagName: trimmed });
@@ -201,7 +214,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         const trimmed = newTagName.trim();
         if (!trimmed || trimmed === oldName) { setEditingTag(null); return; }
 
-        if (oldName === 'sensitive' || oldName === '密码') {
+        if (isBuiltinSensitiveTag(oldName)) {
             setEditingTag(null);
             return;
         }
@@ -217,7 +230,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     };
 
     const handleDeleteTag = async (tagName: string) => {
-        if (tagName === 'sensitive' || tagName === '密码') return;
+        if (isBuiltinSensitiveTag(tagName)) return;
         setIsDeleting(true);
         try {
             await invoke('delete_tag_from_all', { tagName });
@@ -350,7 +363,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {filteredTags.map(tag => {
                         const tagItemContent = (
                             <div
-                                className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${(tag.name !== 'sensitive' && tag.name !== '密码') ? 'has-actions' : ''}`}
+                                className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${!isBuiltinSensitiveTag(tag.name) ? 'has-actions' : ''}`}
                                 onClick={() => loadTagItems(tag.name)}
                             >
                                 <div className="tag-color-wrapper">
@@ -396,8 +409,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                         />
                                     ) : (
                                         <div className="tag-name-area">
-                                            <span className="tag-name">{tag.name}</span>
-                                            {(tag.name !== 'sensitive' && tag.name !== '密码') && (
+                                            <span className="tag-name">
+                                                {tag.name.toLowerCase() === "sensitive"
+                                                    ? t("tag_builtin_sensitive")
+                                                    : (tag.name.toLowerCase() === "password" || tag.name === "密码" || tag.name === "密碼")
+                                                    ? t("tag_builtin_password")
+                                                    : tag.name}
+                                            </span>
+                                            {!isBuiltinSensitiveTag(tag.name) && (
                                                 <div className="tag-hover-actions">
                                                     <FluentTooltip text={t('rename') || '重命名'}>
                                                         <span
@@ -432,7 +451,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                         );
 
                         return isCollapsed ? (
-                            <FluentTooltip key={tag.name} text={tag.name}>
+                            <FluentTooltip
+                                key={tag.name}
+                                text={tag.name.toLowerCase() === "sensitive"
+                                    ? t("tag_builtin_sensitive")
+                                    : (tag.name.toLowerCase() === "password" || tag.name === "密码" || tag.name === "密碼")
+                                    ? t("tag_builtin_password")
+                                    : tag.name}
+                            >
                                 {tagItemContent}
                             </FluentTooltip>
                         ) : (

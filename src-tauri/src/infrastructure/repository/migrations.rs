@@ -87,7 +87,7 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
             [],
         );
         let _ = conn.execute(
-            "INSERT OR IGNORE INTO saved_tags (name) VALUES ('密码')",
+            "INSERT OR IGNORE INTO saved_tags (name) VALUES ('password')",
             [],
         );
 
@@ -205,6 +205,31 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
             [],
         )?;
         conn.execute("INSERT INTO schema_migrations (version) VALUES (10)", [])?;
+    }
+
+    // Migration 11: Rename '密码' tag to 'password'
+    if current_version < 11 {
+        let _ = conn.execute(
+            "UPDATE OR IGNORE entry_tags SET tag = 'password' WHERE tag = '密码'",
+            [],
+        );
+        let _ = conn.execute(
+            "DELETE FROM entry_tags WHERE tag = '密码'",
+            [],
+        );
+        let _ = conn.execute(
+            "UPDATE OR IGNORE saved_tags SET name = 'password' WHERE name = '密码'",
+            [],
+        );
+        let _ = conn.execute(
+            "DELETE FROM saved_tags WHERE name = '密码'",
+            [],
+        );
+        let _ = conn.execute(
+            "INSERT OR IGNORE INTO saved_tags (name) VALUES ('password')",
+            [],
+        );
+        conn.execute("INSERT INTO schema_migrations (version) VALUES (11)", [])?;
     }
 
     Ok(())

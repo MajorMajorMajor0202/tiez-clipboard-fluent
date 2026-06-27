@@ -48,6 +48,7 @@ interface AppHeaderProps {
   setTypeFilter: (val: string | null) => void;
   onBack: () => void;
   onToggleChat: () => void;
+  tagColors?: Record<string, string>;
 }
 
 const AppHeader = ({
@@ -81,7 +82,8 @@ const AppHeader = ({
   typeFilter,
   setTypeFilter,
   onBack,
-  onToggleChat
+  onToggleChat,
+  tagColors
 }: AppHeaderProps) => {
   const getTypeName = (type: string) => {
     switch (type) {
@@ -287,7 +289,12 @@ const AppHeader = ({
                       <div className="tags-label">{t('tags') || "Tags"}</div>
                       <div className="tags-list">
                         {allTags.map(tag => {
-                          const tagBackground = getTagColor(tag, theme);
+                          const dbTagKey = tag === t("tag_builtin_sensitive")
+                            ? "sensitive"
+                            : tag === t("tag_builtin_password")
+                            ? "password"
+                            : tag;
+                          const tagBackground = tagColors?.[dbTagKey] || getTagColor(dbTagKey, theme);
                           return (
                             <span
                               className="tag-chip"

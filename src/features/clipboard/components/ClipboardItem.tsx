@@ -750,13 +750,20 @@ const ClipboardItem = ({
         : null;
     const pickableTagSuggestions = useMemo(() => {
         if (!isEditingTags) return [];
-        const existing = new Set(item.tags || []);
+        const existing = new Set((item.tags || []).map(tag => {
+            const lower = tag.toLowerCase();
+            return lower === "sensitive"
+                ? t("tag_builtin_sensitive")
+                : lower === "password"
+                ? t("tag_builtin_password")
+                : tag;
+        }));
         const q = localTagInput.trim().toLowerCase();
         return tagSuggestions
             .filter((tag) => !existing.has(tag))
             .filter((tag) => !q || tag.toLowerCase().includes(q))
             .slice(0, 14);
-    }, [isEditingTags, item.tags, localTagInput, tagSuggestions]);
+    }, [isEditingTags, item.tags, localTagInput, tagSuggestions, t]);
 
     const [tagSuggestIndex, setTagSuggestIndex] = useState(-1);
     const tagSuggestListRef = useRef<HTMLDivElement | null>(null);
@@ -1310,6 +1317,11 @@ const ClipboardItem = ({
             }}
         >
             {item.tags?.map((tag) => {
+                const displayTag = tag.toLowerCase() === "sensitive"
+                    ? t("tag_builtin_sensitive")
+                    : (tag.toLowerCase() === "password" || tag === "密码" || tag === "密碼")
+                    ? t("tag_builtin_password")
+                    : tag;
                 const tagBackground = tagColors?.[tag] || getTagColor(tag, theme);
                 const tagTextColor = getTagTextColor(tagBackground);
                 return (
@@ -1324,7 +1336,7 @@ const ClipboardItem = ({
                             gap: '4px'
                         }}
                     >
-                        {tag}
+                        {displayTag}
                         {isEditingTags && (
                             <button
                                 onClick={(e) => {
@@ -1454,7 +1466,12 @@ const ClipboardItem = ({
                             onMouseDown={(e) => e.stopPropagation()}
                         >
                             {pickableTagSuggestions.map((sTag, sIdx) => {
-                                const bg = tagColors?.[sTag] || getTagColor(sTag, theme);
+                                const dbKey = sTag === t("tag_builtin_sensitive")
+                                    ? "sensitive"
+                                    : sTag === t("tag_builtin_password")
+                                    ? "password"
+                                    : sTag;
+                                const bg = tagColors?.[dbKey] || getTagColor(dbKey, theme);
                                 const fg = getTagTextColor(bg);
                                 return (
                                     <button
@@ -1642,7 +1659,10 @@ const ClipboardItem = ({
 
                 <div className="item-meta-right">
                     <div className="item-actions">
-                        {(item.tags?.includes('sensitive') || item.tags?.includes('密码') || item.tags?.includes('password')) && (
+                        {item.tags?.some(tag => {
+                            const l = tag.toLowerCase();
+                            return l === 'sensitive' || l === '敏感' || l === 'password' || l === '密码' || l === '密碼';
+                        }) && (
                             <FluentTooltip text={isRevealed ? t('hide') : t('reveal')}>
                                 <button
                                     className={`btn-icon-ghost ${isRevealed ? "active" : ""}`}
