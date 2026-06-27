@@ -1126,7 +1126,7 @@ const App = () => {
       <main
         className={`main-content${chatMode ? " file-transfer-mode" : ""}${effectiveShowTagManager ? " tag-manager-mode" : ""}`}
         style={{ 
-          overflowY: (showSettings || effectiveShowTagManager) ? 'auto' : 'hidden',
+          overflowY: effectiveShowTagManager ? 'auto' : 'hidden',
           padding: effectiveShowTagManager ? '0' : undefined
         }}
         onWheel={handleMainWheel}
@@ -1134,14 +1134,12 @@ const App = () => {
         <AppMainContent
           t={t}
           theme={theme}
-          showSettings={showSettings}
           showTagManager={effectiveShowTagManager}
           tagManagerEnabled={tagManagerEnabled}
           showEmojiPanel={effectiveShowEmojiPanel}
           chatMode={chatMode}
           localIp={localIp}
           actualPort={actualPort}
-          settingsPanelProps={settingsPanelProps}
           emojiFavorites={emojiFavorites}
           setEmojiFavorites={setEmojiFavorites}
           emojiPanelTab={emojiPanelTab}

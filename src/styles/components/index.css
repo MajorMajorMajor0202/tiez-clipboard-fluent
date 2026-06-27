@@ -17,6 +17,7 @@
 @import "./rich-text-preview.css";
 @import "./scrollbar.css";
 @import "./settings.css";
+@import "./fluent-settings.css";
 @import "./tag-manager.css";
 @import "./tags.css";
 @import "./toast.css";

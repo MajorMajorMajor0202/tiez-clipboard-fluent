@@ -131,6 +131,31 @@ const AppHeader = ({
     return () => window.removeEventListener('resize', updateIndicator);
   }, [updateIndicator]);
 
+  const handleOpenSettings = useCallback(async () => {
+    try {
+      const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+      const existing = await WebviewWindow.getByLabel("settings");
+      if (existing) {
+        await existing.show();
+        await existing.setFocus();
+      } else {
+        new WebviewWindow("settings", {
+          url: "index.html?window=settings",
+          title: t('settings') || "Settings",
+          width: 780,
+          height: 560,
+          resizable: true,
+          decorations: true,
+          transparent: true,
+          backgroundColor: "#00000000",
+          skipTaskbar: false,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to open settings window:", err);
+    }
+  }, [t]);
+
   // Segoe Fluent Icons — official Microsoft icon codepoints
   const FILTER_ICONS: Record<string, string> = {
     text:      '',  // TextDocument
@@ -202,7 +227,7 @@ const AppHeader = ({
               </FluentTooltip>
             )}
             <FluentTooltip text={t('settings')}>
-              <button className="btn-icon-ghost" onClick={() => setShowSettings(true)}>
+              <button className="btn-icon-ghost" onClick={handleOpenSettings}>
                 <SettingsIcon size={16} />
               </button>
             </FluentTooltip>

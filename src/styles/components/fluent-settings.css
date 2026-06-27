@@ -1,0 +1,480 @@
+/* Fluent Design Settings Window Stylesheet */
+
+.fluent-settings-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: var(--fluent-font-family);
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Sidebar navigation */
+.fluent-sidebar {
+  width: 200px;
+  background-color: var(--bg-window);
+  border-right: 1px solid var(--line-soft);
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.fluent-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease;
+  position: relative;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.fluent-sidebar-item:hover {
+  background-color: var(--bg-subtle-hover);
+}
+
+.fluent-sidebar-item:active {
+  background-color: var(--bg-subtle-active);
+}
+
+.fluent-sidebar-item.active {
+  background-color: var(--bg-subtle-active);
+  font-weight: 600;
+}
+
+/* Active indicator bar */
+.fluent-sidebar-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 4px;
+  background-color: var(--accent-color);
+}
+
+/* Content area */
+.fluent-settings-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fluent-settings-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fluent-settings-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fluent-settings-content::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 4px;
+}
+
+.fluent-settings-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.fluent-page-header {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.fluent-section-title {
+  margin: 16px 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Setting Card */
+.fluent-setting-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.fluent-setting-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.fluent-setting-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fluent-setting-description {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.fluent-setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Settings Expander */
+.fluent-setting-expander {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.fluent-setting-expander-header {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.fluent-setting-expander-header:hover {
+  background-color: var(--bg-subtle-hover);
+}
+
+.fluent-setting-expander-header.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.fluent-setting-expander-content {
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--line-soft);
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  padding: 8px 16px 8px 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* Ensure controls in expander content look nested and clean */
+.fluent-setting-expander-content .fluent-setting-card {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  margin-bottom: 0;
+  padding: 10px 0;
+  box-shadow: none;
+}
+
+.fluent-setting-expander-content .fluent-setting-card:last-child {
+  border-bottom: none;
+}
+
+/* Custom backgrounds / values style */
+.fluent-value-display {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-body);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+}
+
+/* Custom form elements */
+.fluent-select {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  min-width: 120px;
+  transition: border-color 0.15s ease;
+}
+
+.fluent-select:focus {
+  border-color: var(--accent-color);
+}
+
+.fluent-input {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.fluent-input:focus {
+  border-color: var(--accent-color);
+}
+
+.fluent-button {
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-button);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fluent-button:hover {
+  background-color: var(--bg-subtle-hover);
+}
+
+.fluent-button:active {
+  background-color: var(--bg-subtle-active);
+}
+
+.fluent-button-primary {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+}
+
+.fluent-button-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.fluent-textarea {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+  resize: vertical;
+}
+
+.fluent-textarea:focus {
+  border-color: var(--accent-color);
+}
+
+/* Custom Switch styling following Fluent standard */
+.fluent-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.fluent-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.fluent-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  border: 1px solid var(--text-secondary);
+  transition: .15s;
+  border-radius: 10px;
+}
+
+.fluent-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-primary);
+  transition: .15s;
+  border-radius: 50%;
+}
+
+.fluent-switch input:checked + .fluent-slider {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.fluent-switch input:checked + .fluent-slider:before {
+  transform: translateX(20px);
+  background-color: #ffffff;
+}
+
+/* Custom range slider */
+.fluent-range {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-strong);
+  outline: none;
+  cursor: pointer;
+}
+
+.fluent-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.fluent-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Chevron animate */
+.fluent-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.fluent-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+/* Modal window styling */
+.fluent-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.fluent-modal {
+  background: var(--bg-window);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fluent-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.fluent-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fluent-modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fluent-modal-row label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.fluent-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Toast styling for Settings Window */
+.fluent-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 2000;
+  animation: fluent-toast-fade-in 0.2s ease;
+}
+
+@keyframes fluent-toast-fade-in {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Fix theme support and overrides inside fluent window */
+.fluent-settings-layout select option {
+  background-color: var(--bg-panel);
+  color: var(--text-primary);
+}
+
+/* Integration with retro/classic styles if required */
+body[data-theme="retro"] .fluent-settings-layout {
+  --radius-panel: 0px !important;
+  --radius-card: 0px !important;
+  --radius-control: 0px !important;
+  border-radius: 0px !important;
+}
