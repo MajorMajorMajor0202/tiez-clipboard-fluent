@@ -15,7 +15,7 @@ const ListHeader = ({ context }: { context?: VirtuosoListContext }) => {
     const header = context?.header;
     return (
         <div className="list-header-wrapper">
-            <div style={{ height: '48px' }} />
+            <div style={{ height: '24px' }} />
             {header ? <div className="list-header">{header}</div> : null}
         </div>
     );
@@ -39,7 +39,7 @@ const ListFooter = ({ context }: { context?: VirtuosoListContext }) => {
                     {isLoading ? '加载中...' : '加载更多...'}
                 </div>
             ) : null}
-            <div style={{ height: '48px' }} />
+            <div style={{ height: '24px' }} />
         </div>
     );
 };

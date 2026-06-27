@@ -9,9 +9,9 @@
 /* ── Scrollbar host: 12px wide column on the right of the list ── */
 .fluent-scrollbar {
   position: absolute;
-  top: 24px;
+  top: 0;
   right: 2px;
-  bottom: 24px;
+  bottom: 0;
   width: 12px;
   pointer-events: auto;
   z-index: 100;
