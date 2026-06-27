@@ -42,7 +42,7 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
         nextPlacement = 'top';
       }
       
-      const top = nextPlacement === 'top' ? rect.top - 6 : rect.bottom + 6;
+      const top = nextPlacement === 'top' ? rect.top - 12 : rect.bottom + 12;
       setPos({ left: cx, top });
       setPlacement(nextPlacement);
       setVisible(true);
