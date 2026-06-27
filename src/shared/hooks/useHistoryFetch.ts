@@ -67,7 +67,15 @@ export const useHistoryFetch = ({
           let term = debouncedSearch;
           let tagOnly = false;
           if (term.startsWith("tag:")) {
-            term = term.slice(4);
+            const rawTerm = term.slice(4).trim();
+            const lower = rawTerm.toLowerCase();
+            if (lower === "敏感" || lower === "sensitive") {
+              term = "sensitive";
+            } else if (lower === "密码" || lower === "密碼" || lower === "password") {
+              term = "password";
+            } else {
+              term = rawTerm;
+            }
             tagOnly = true;
           }
 

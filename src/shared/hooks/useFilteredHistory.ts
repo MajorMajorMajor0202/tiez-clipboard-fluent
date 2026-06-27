@@ -23,19 +23,43 @@ export const useFilteredHistory = ({
       let effectiveSearch = lowerSearch;
       const isTagSearch = effectiveSearch.startsWith("tag:");
       if (isTagSearch) {
-        effectiveSearch = effectiveSearch.slice(4);
+        effectiveSearch = effectiveSearch.slice(4).trim();
       }
 
       if (!effectiveSearch) return true;
 
+      const matchesTag = (tag: string, term: string) => {
+        const lowerTag = tag.toLowerCase();
+        const displayZh = lowerTag === "sensitive"
+          ? "敏感"
+          : lowerTag === "password"
+          ? "密码"
+          : tag;
+        const displayTc = lowerTag === "sensitive"
+          ? "敏感"
+          : lowerTag === "password"
+          ? "密碼"
+          : tag;
+        const displayEn = lowerTag === "sensitive"
+          ? "sensitive"
+          : lowerTag === "password"
+          ? "password"
+          : tag;
+        return (
+          displayZh.toLowerCase().includes(term) ||
+          displayTc.toLowerCase().includes(term) ||
+          displayEn.toLowerCase().includes(term)
+        );
+      };
+
       if (isTagSearch) {
-        return item.tags?.some((tag) => tag.toLowerCase().includes(effectiveSearch)) ?? false;
+        return item.tags?.some((tag) => matchesTag(tag, effectiveSearch)) ?? false;
       }
 
       return (
         item.content?.toLowerCase().includes(effectiveSearch) ||
         item.source_app?.toLowerCase().includes(effectiveSearch) ||
-        item.tags?.some((tag) => tag.toLowerCase().includes(effectiveSearch))
+        item.tags?.some((tag) => matchesTag(tag, effectiveSearch))
       );
     });
 
