@@ -1694,7 +1694,6 @@ const ClipboardItem = ({
                 )
             }
             <div className={`content-preview-shell${overlayTagsInPreview ? ' has-overlay-tags' : ''}`}>
-                <div className={`content-preview ${item.content_type === 'rich_text' ? 'rich-text' : ''} ${item.content_type === 'file' ? 'file-preview' : ''} ${isSensitiveHidden ? 'sensitive-blur' : ''}`}>
                 {item.content_type === "image" ? (
                     <div style={{ position: 'relative' }}>
                         {item.is_external && item.file_preview_exists === false ? (
@@ -1857,8 +1856,8 @@ const ClipboardItem = ({
                         <span className="color-code-value">{standaloneColorValue}</span>
                     </div>
                 ) : (
-                    isSensitiveHidden
-                        ? (
+                    <div className={`content-preview ${isSensitiveHidden ? 'sensitive-blur' : ''}`}>
+                        {isSensitiveHidden ? (
                             <div style={{ minHeight: '24px', opacity: 0.6, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)' }}>
                                 <span style={{ letterSpacing: '1px' }}>
                                     {sensitivePreview}
@@ -1867,11 +1866,10 @@ const ClipboardItem = ({
                                     ({item.content.length} {t('chars') || 'chars'})
                                 </span>
                             </div>
-                        )
-                        : item.preview
+                        ) : item.preview}
+                    </div>
                 )}
                 {overlayTagsInPreview && renderTagsContainer(true)}
-                </div>
             </div>
 
             {/* AI Options - Compact Mode: Dropdown Panel, Normal Mode: Inline */}
