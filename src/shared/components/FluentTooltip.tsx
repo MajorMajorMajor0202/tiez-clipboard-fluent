@@ -23,8 +23,16 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const [placement, setPlacement] = useState<'top' | 'bottom'>('bottom');
+  const [realWidth, setRealWidth] = useState<number | null>(null);
   const triggerRef = useRef<HTMLSpanElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const tooltipRef = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      const width = node.getBoundingClientRect().width;
+      setRealWidth(width);
+    }
+  }, []);
 
   const show = useCallback(() => {
     timerRef.current = setTimeout(() => {
@@ -56,6 +64,7 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
     }
     setVisible(false);
     setPos(null);
+    setRealWidth(null);
   }, []);
 
   useEffect(() => {
@@ -77,7 +86,7 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
     return Math.min(len + 20, 240); // Clamp to max-width
   };
 
-  const estW = getTextWidth(text);
+  const estW = realWidth || getTextWidth(text);
 
   // Clamp horizontal position within viewport
   const adjustedPos =
@@ -100,6 +109,7 @@ const FluentTooltip = ({ text, children }: FluentTooltipProps) => {
     visible && adjustedPos
       ? createPortal(
           <div
+            ref={tooltipRef}
             className={`fluent-tooltip placement-${placement} ${visible ? "fluent-tooltip-visible" : "fluent-tooltip-enter"}`}
             style={{
               position: "absolute",
