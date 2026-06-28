@@ -2054,6 +2054,7 @@ const ClipboardItem = ({
                             ref={tagSuggestListRef}
                             className="tag-flyout-suggestions hide-scrollbar"
                             role="listbox"
+                            onWheel={(e) => e.stopPropagation()}
                         >
                             {pickableTagSuggestions.map((sTag, sIdx) => {
                                 const dbKey = sTag === t("tag_builtin_sensitive")

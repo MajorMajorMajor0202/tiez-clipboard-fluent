@@ -95,7 +95,14 @@ pub fn update_tags(
             let new_id = state.repo.save(&item, Some(&data_dir))?;
 
             session_items[index].id = new_id;
-            session_items[index].tags = tags;
+            session_items[index].tags = tags.clone();
+            // Ensure every tag is registered in saved_tags for cross-component discovery.
+            for tag in &tags {
+                let trimmed = tag.trim();
+                if !trimmed.is_empty() {
+                    let _ = state.tag_repo.create(trimmed);
+                }
+            }
             crate::services::cloud_sync::request_cloud_sync(app_handle);
             return Ok(new_id);
         }
@@ -121,8 +128,17 @@ pub fn update_tags(
     let new_sensitive = has_sensitive_tag(&tags);
     state
         .tag_repo
-        .update_entry_tags(id, tags)
+        .update_entry_tags(id, tags.clone())
         .map_err(AppError::from)?;
+    // Ensure every tag is registered in saved_tags so it is discoverable
+    // everywhere (popup suggestions, search box, tag manager) regardless of
+    // which code path created it.
+    for tag in &tags {
+        let trimmed = tag.trim();
+        if !trimmed.is_empty() {
+            let _ = state.tag_repo.create(trimmed);
+        }
+    }
     if old_sensitive != new_sensitive {
         let queue = app_handle.state::<EncryptionQueueState>();
         let action = if new_sensitive {

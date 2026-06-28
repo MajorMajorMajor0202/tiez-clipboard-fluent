@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 const EMPTY_TAG_SUGGESTIONS: string[] = [];
 import type { Dispatch, SetStateAction, MouseEvent, ReactNode } from "react";
@@ -167,6 +168,9 @@ export const useClipboardItemRenderer = ({
               newTag = "password";
             }
             if (newTag && !item.tags?.includes(newTag)) {
+              // Ensure the tag is registered in saved_tags so it appears
+              // in suggestions everywhere (popup, search box, tag manager).
+              invoke('create_new_tag', { tagName: newTag }).catch(() => {});
               handleUpdateTags(item.id, [...(item.tags || []), newTag]);
             }
             setTagInput("");
@@ -182,6 +186,9 @@ export const useClipboardItemRenderer = ({
               next = "password";
             }
             if (!next || item.tags?.includes(next)) return;
+            // Ensure the tag is registered in saved_tags for cross-component
+            // discovery (popup, search box, tag manager).
+            invoke('create_new_tag', { tagName: next }).catch(() => {});
             handleUpdateTags(item.id, [...(item.tags || []), next]);
             setTagInput("");
             setEditingTagsId(null);
