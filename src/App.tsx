@@ -357,18 +357,28 @@ const App = () => {
 
     // Initial entrance on mount
     setEntranceActive(true);
-    const timer = setTimeout(() => setEntranceActive(false), 250);
 
-    const unlistenPromise = listen("tauri://focus", () => {
-      // Re-trigger entrance animation on window focus (activation)
+    const unlistenFocus = listen("tauri://focus", () => {
       setEntranceActive(true);
-      const t = setTimeout(() => setEntranceActive(false), 250);
-      return () => clearTimeout(t);
+    });
+
+    const unlistenShown = listen("window-shown", () => {
+      setEntranceActive(true);
+    });
+
+    const unlistenBlur = listen("tauri://blur", () => {
+      setEntranceActive(false);
+    });
+
+    const unlistenHidden = listen("window-hidden", () => {
+      setEntranceActive(false);
     });
 
     return () => {
-      clearTimeout(timer);
-      unlistenPromise.then((off) => off());
+      unlistenFocus.then((off) => off());
+      unlistenShown.then((off) => off());
+      unlistenBlur.then((off) => off());
+      unlistenHidden.then((off) => off());
     };
   }, []);
 

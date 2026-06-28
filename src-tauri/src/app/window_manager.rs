@@ -83,6 +83,7 @@ pub fn toggle_window(app: &AppHandle) {
             WindowExt::release_win_keys();
             let _ = window.set_focusable(false);
             let _ = window.hide();
+            let _ = window.emit("window-hidden", ());
 
             let _ = restore_last_focus(app.clone());
 
@@ -374,6 +375,8 @@ pub fn toggle_window(app: &AppHandle) {
         {
             let _ = window.show();
         }
+
+        let _ = window.emit("window-shown", ());
     }
 }
 
@@ -422,6 +425,7 @@ pub fn hide_window_cmd(app_handle: AppHandle) -> Result<(), String> {
         WindowExt::release_win_keys();
         let _ = window.set_focusable(false);
         let _ = window.hide();
+        let _ = window.emit("window-hidden", ());
         NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
         NAVIGATION_MODE_ACTIVE.store(false, Ordering::SeqCst);
         let _ = restore_last_focus(app_handle.clone());
