@@ -107,19 +107,22 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* Default hidden — no transition here to avoid initial flash */
   opacity: 0;
   pointer-events: none;
 }
 
-/* Tab visibility */
+/* Tab visibility — pure CSS opacity transition, GPU-composited, zero JS */
 .tab-active {
   opacity: 1;
   pointer-events: auto;
+  transition: opacity 0.15s ease-out;
 }
 
 .tab-hidden {
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.1s ease-in;
 }
 
 /* Scrollbar */

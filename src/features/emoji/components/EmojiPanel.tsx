@@ -571,16 +571,12 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       </div>
 
       <div className="emoji-content-wrapper">
+        {/* Both panels stay mounted once animationCompleted — no remount lag on tab switch */}
         <div
           className={`emoji-content ${activeTab === "emoji" ? "tab-active" : "tab-hidden"}`}
         >
-          {animationCompleted && activeTab === "emoji" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%" }}
-            >
+          {animationCompleted && (
+            <>
               {emojiGroups.map((group) => (
                 <div key={group.name} className="emoji-group">
                   <div className="emoji-group-title">{group.name}</div>
@@ -601,7 +597,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               {flatEmoji.length === 0 && (
                 <div className="emoji-empty">{t("emoji_empty") || "暂无表情"}</div>
               )}
-            </motion.div>
+            </>
           )}
         </div>
 
@@ -626,13 +622,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
             void handleDomDrop(e);
           }}
         >
-          {animationCompleted && activeTab === "favorites" && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", height: "100%" }}
-            >
+          {animationCompleted && (
+            <>
               <div className="emoji-fav-grid">
                 {favorites.map((path, idx) => {
                   const name = path.split(/[/\\]/).pop() || path;
@@ -704,7 +695,13 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               {hasFavorites && (
                 <div className="emoji-fav-tip">{t("emoji_fav_tip") || "可直接拖拽图片添加"}</div>
               )}
-            </motion.div>
+
+              {isDragging && (
+                <div className="drop-overlay">
+                  <p>{t("emoji_drop_hint") || "松开鼠标即可添加"}</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
