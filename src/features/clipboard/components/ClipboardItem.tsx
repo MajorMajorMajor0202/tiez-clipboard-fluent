@@ -729,6 +729,8 @@ const ClipboardItem = ({
     const [snapshotFailed, setSnapshotFailed] = useState(false);
     const [richImageFallbackFailed, setRichImageFallbackFailed] = useState(false);
     const [videoLoadError, setVideoLoadError] = useState(false);
+    const [snapshotOverflows, setSnapshotOverflows] = useState(false);
+    const [richTextOverflows, setRichTextOverflows] = useState(false);
     const [sourceAppIcon, setSourceAppIcon] = useState<string | null>(() => peekSourceAppIcon(item.source_app_path) ?? null);
     const filePaths = useMemo(
         () => (item.content_type === "file" || item.content_type === "video") ? item.content.split('\n').filter((p) => p.trim()) : [],
@@ -738,6 +740,7 @@ const ClipboardItem = ({
     const [fileIcon, setFileIcon] = useState<string | null>(() => peekFileIcon(singleFilePath) ?? null);
     const isComposing = useRef(false);
     const richSnapshotImgRef = useRef<HTMLImageElement | null>(null);
+    const richTextPreviewRef = useRef<HTMLDivElement | null>(null);
     const richSnapshotFallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hoverAnchorRef = useRef<CompactPreviewAnchor | null>(null);
@@ -1249,7 +1252,20 @@ const ClipboardItem = ({
     useEffect(() => {
         setSnapshotFailed(false);
         setRichImageFallbackFailed(false);
+        setSnapshotOverflows(false);
+        setRichTextOverflows(false);
     }, [item.id, item.html_content, richTextSnapshotPreview, compactMode]);
+
+    // Measure whether the HTML preview content overflows its maxHeight,
+    // so we only show the fade mask when truncation is actually happening.
+    useLayoutEffect(() => {
+        const el = richTextPreviewRef.current;
+        if (!el) return;
+        const raf = requestAnimationFrame(() => {
+            setRichTextOverflows(el.scrollHeight > el.clientHeight + 1);
+        });
+        return () => cancelAnimationFrame(raf);
+    }, [item.html_content, richTextCleanHtml, richTextSnapshotDisplayMaxHeight]);
 
     useEffect(() => {
         if (richSnapshotFallbackTimerRef.current) {
@@ -1806,6 +1822,14 @@ const ClipboardItem = ({
                                     clearTimeout(richSnapshotFallbackTimerRef.current);
                                     richSnapshotFallbackTimerRef.current = null;
                                 }
+                                // Only show the fade mask when the image
+                                // actually exceeds the preview max height.
+                                if (richSnapshotImgRef.current) {
+                                    setSnapshotOverflows(
+                                        richSnapshotImgRef.current.naturalHeight >
+                                        richTextSnapshotDisplayMaxHeight
+                                    );
+                                }
                             }}
                             onError={() => {
                                 if (useRichImageFallback) {
@@ -1838,27 +1862,37 @@ const ClipboardItem = ({
                                 marginRight: 'auto',
                                 pointerEvents: 'none',
                                 borderRadius: '4px',
-                                maskImage: 'linear-gradient(to bottom, black 78%, transparent 100%)',
-                                WebkitMaskImage: 'linear-gradient(to bottom, black 78%, transparent 100%)'
+                                ...(snapshotOverflows ? {
+                                    maskImage: 'linear-gradient(to bottom, black 78%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to bottom, black 78%, transparent 100%)',
+                                } : {}),
                             }}
                         />
                     ) : (
-                        <HtmlContent
-                            className="rich-text-preview"
-                            htmlContent={richTextCleanHtml || item.html_content}
-                            fallbackText={item.preview}
-                            preview={true}
+                        <div
+                            ref={richTextPreviewRef}
                             style={{
                                 maxHeight: `${richTextSnapshotDisplayMaxHeight}px`,
                                 overflow: 'hidden',
-                                fontSize: 'var(--clipboard-item-font-size)',
-                                lineHeight: '1.4',
-                                position: 'relative',
-                                pointerEvents: 'none', // Prevent interacting with links in the list
-                                maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
-                                WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)'
+                                ...(richTextOverflows ? {
+                                    maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                                    WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+                                } : {}),
                             }}
-                        />
+                        >
+                            <HtmlContent
+                                className="rich-text-preview"
+                                htmlContent={richTextCleanHtml || item.html_content}
+                                fallbackText={item.preview}
+                                preview={true}
+                                style={{
+                                    fontSize: 'var(--clipboard-item-font-size)',
+                                    lineHeight: '1.4',
+                                    position: 'relative',
+                                    pointerEvents: 'none', // Prevent interacting with links in the list
+                                }}
+                            />
+                        </div>
                     )
                 ) : standaloneColorValue && !isSensitiveHidden ? (
                     <div className="color-code-preview">
