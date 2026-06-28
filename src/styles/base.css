@@ -393,11 +393,11 @@ body.hide-app-border #root {
   /* Content Transition: slide down and fade out by default (closing/closed state) */
   opacity: 0;
   transform: translateY(12px);
-  transition: transform 0.22s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.22s ease-out;
 }
 
 .app-container.window-entrance {
   /* Open state: slide up and fade in */
   opacity: 1;
   transform: translateY(0);
+  transition: transform 0.22s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.22s ease-out;
 }
