@@ -1,3 +1,22 @@
+/* Mount animation - GPU-composited only (opacity + transform, no layout props) */
+@keyframes emoji-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.emoji-panel-mount-wrapper {
+  height: 100%;
+  overflow: hidden;
+  will-change: transform, opacity;
+  animation: emoji-slide-in 0.22s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
 /* Emoji Panel - Simplified Premium */
 .emoji-panel {
   display: flex;
@@ -75,19 +94,32 @@
 .emoji-content-wrapper {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
+  position: relative;
 }
 
 .emoji-content,
 .emoji-fav-container {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 4px 0px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Tab visibility */
+.tab-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tab-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Scrollbar */
