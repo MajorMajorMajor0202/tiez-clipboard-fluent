@@ -375,29 +375,19 @@
   border: 1px solid var(--line-soft);
 }
 
-/* Fluent UI Custom Tooltip */
-.fluent-tooltip {
-  position: absolute;
-  z-index: 10000;
-  pointer-events: none;
-  background: var(--bg-panel);
-  border: 1px solid var(--line-soft);
-  color: var(--text-primary);
-  padding: 4px 8px;
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  white-space: nowrap;
-  
-  /* Initial hidden state with slide-up micro-animation */
-  opacity: 0;
-  transform: translate(-50%, -100%) translateY(-4px) scale(0.96);
-  transition: transform 0.12s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.12s ease;
-  will-change: transform, opacity;
+/* Layout overrides for FluentTooltip wrapper span inside grids */
+.emoji-grid > span,
+.emoji-fav-card > span:has(.emoji-fav-preview),
+.emoji-fav-card.emoji-fav-add > span {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
 }
 
-.fluent-tooltip.visible {
-  opacity: 1;
-  transform: translate(-50%, -100%) translateY(-8px) scale(1);
+/* Absolute positioning for delete button tooltip trigger wrapper */
+.emoji-fav-card > span:has(.emoji-fav-remove) {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  z-index: 10;
 }

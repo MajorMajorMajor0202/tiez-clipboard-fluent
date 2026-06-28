@@ -5,6 +5,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Plus, X } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
+import FluentTooltip from "../../../shared/components/FluentTooltip";
 
 interface EmojiPanelProps {
   t: (key: string) => string;
@@ -181,33 +182,6 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(() => getPreloadedEmojis() ?? FALLBACK_GROUPS);
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
-  const [tooltip, setTooltip] = useState<{
-    text: string;
-    x: number;
-    y: number;
-    visible: boolean;
-  } | null>(null);
-
-  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>, text: string) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const parent = e.currentTarget.closest(".emoji-panel");
-    const parentRect = parent?.getBoundingClientRect();
-    if (!parentRect) return;
-
-    const x = rect.left - parentRect.left + rect.width / 2;
-    const y = rect.top - parentRect.top;
-
-    setTooltip({
-      text,
-      x,
-      y,
-      visible: true
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setTooltip((prev) => (prev ? { ...prev, visible: false } : null));
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -619,15 +593,14 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                   <div className="emoji-group-title">{group.name}</div>
                   <div className="emoji-grid">
                     {group.emojis.map((emoji) => (
-                      <button
-                        key={`${group.name}-${emoji}`}
-                        className="emoji-btn"
-                        onClick={() => handleSend(emoji, "text")}
-                        onMouseEnter={(e) => handleMouseEnter(e, emoji)}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        {emoji}
-                      </button>
+                      <FluentTooltip key={`${group.name}-${emoji}`} text={emoji}>
+                        <button
+                          className="emoji-btn"
+                          onClick={() => handleSend(emoji, "text")}
+                        >
+                          {emoji}
+                        </button>
+                      </FluentTooltip>
                     ))}
                   </div>
                 </div>
@@ -678,50 +651,50 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                         setDeleteTarget(path);
                       }}
                     >
-                      <button
-                        className="emoji-fav-remove"
-                        onMouseEnter={(e) => handleMouseEnter(e, t("delete") || "删除")}
-                        onMouseLeave={handleMouseLeave}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFavoritePath(path);
-                        }}
-                      >
-                        <X size={14} />
-                      </button>
-                      <button
-                        className="emoji-fav-preview"
-                        onMouseEnter={(e) => handleMouseEnter(e, name)}
-                        onMouseLeave={handleMouseLeave}
-                        onClick={() => handleSend(path, "image")}
-                      >
-                        <img
-                          src={convertFileSrc(path)}
-                          alt={name}
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
+                      <FluentTooltip text={t("delete") || "删除"}>
+                        <button
+                          className="emoji-fav-remove"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             removeFavoritePath(path);
                           }}
-                        />
-                      </button>
+                        >
+                          <X size={14} />
+                        </button>
+                      </FluentTooltip>
+                      <FluentTooltip text={name}>
+                        <button
+                          className="emoji-fav-preview"
+                          onClick={() => handleSend(path, "image")}
+                        >
+                          <img
+                            src={convertFileSrc(path)}
+                            alt={name}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              removeFavoritePath(path);
+                            }}
+                          />
+                        </button>
+                      </FluentTooltip>
                     </motion.div>
                   );
                 })}
 
                 <div className="emoji-fav-card emoji-fav-add">
-                  <button
-                    className="emoji-fav-add-btn"
-                    onMouseEnter={(e) => handleMouseEnter(e, t("emoji_add_files") || "添加表情")}
-                    onMouseLeave={handleMouseLeave}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void handleSelectFiles();
-                    }}
-                  >
-                    <div className="add-icon-wrapper">
-                      <Plus size={22} strokeWidth={2.5} />
-                    </div>
-                  </button>
+                  <FluentTooltip text={t("emoji_add_files") || "添加表情"}>
+                    <button
+                      className="emoji-fav-add-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleSelectFiles();
+                      }}
+                    >
+                      <div className="add-icon-wrapper">
+                        <Plus size={22} strokeWidth={2.5} />
+                      </div>
+                    </button>
+                  </FluentTooltip>
                 </div>
               </div>
 
@@ -744,19 +717,6 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
           </div>
         )}
       </div>
-
-      {/* Fluent UI Tooltip */}
-      {tooltip && (
-        <div
-          className={`fluent-tooltip ${tooltip.visible ? "visible" : ""}`}
-          style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`
-          }}
-        >
-          {tooltip.text}
-        </div>
-      )}
     </div>
   );
 };
