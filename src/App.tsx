@@ -353,10 +353,10 @@ const App = () => {
   const [entranceActive, setEntranceActive] = useState(false);
 
   useEffect(() => {
-    if (!isTauriRuntime()) return;
-
     // Initial entrance on mount
     setEntranceActive(true);
+
+    if (!isTauriRuntime()) return;
 
     const unlistenFocus = listen("tauri://focus", () => {
       setEntranceActive(true);
@@ -381,19 +381,6 @@ const App = () => {
       unlistenHidden.then((off) => off());
     };
   }, []);
-
-  useEffect(() => {
-    const rootEl = document.getElementById("root");
-    if (!rootEl) return;
-
-    rootEl.classList.add("main-window-root");
-
-    if (entranceActive) {
-      rootEl.classList.add("window-entrance");
-    } else {
-      rootEl.classList.remove("window-entrance");
-    }
-  }, [entranceActive]);
 
   useEffect(() => {
     if (effectiveShowTagManager || showTagFilter || editingTagsId !== null) {
@@ -1054,7 +1041,7 @@ const App = () => {
 
   return (
     <div
-      className="app-container"
+      className={`app-container ${entranceActive ? "window-entrance" : ""}`}
     >
       <AppHeader
         t={t}

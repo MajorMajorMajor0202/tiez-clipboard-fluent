@@ -82,10 +82,15 @@ pub fn toggle_window(app: &AppHandle) {
             #[cfg(target_os = "windows")]
             WindowExt::release_win_keys();
             let _ = window.set_focusable(false);
-            let _ = window.hide();
             let _ = window.emit("window-hidden", ());
 
-            let _ = restore_last_focus(app.clone());
+            let w = window.clone();
+            let app_c = app.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(200));
+                let _ = w.hide();
+                let _ = restore_last_focus(app_c);
+            });
 
             IS_HIDDEN.store(false, Ordering::Relaxed);
             NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
@@ -424,11 +429,18 @@ pub fn hide_window_cmd(app_handle: AppHandle) -> Result<(), String> {
         #[cfg(target_os = "windows")]
         WindowExt::release_win_keys();
         let _ = window.set_focusable(false);
-        let _ = window.hide();
         let _ = window.emit("window-hidden", ());
+
+        let w = window.clone();
+        let app_c = app_handle.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            let _ = w.hide();
+            let _ = restore_last_focus(app_c);
+        });
+
         NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
         NAVIGATION_MODE_ACTIVE.store(false, Ordering::SeqCst);
-        let _ = restore_last_focus(app_handle.clone());
     }
     Ok(())
 }
