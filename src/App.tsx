@@ -383,6 +383,19 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const rootEl = document.getElementById("root");
+    if (!rootEl) return;
+
+    rootEl.classList.add("main-window-root");
+
+    if (entranceActive) {
+      rootEl.classList.add("window-entrance");
+    } else {
+      rootEl.classList.remove("window-entrance");
+    }
+  }, [entranceActive]);
+
+  useEffect(() => {
     if (effectiveShowTagManager || showTagFilter || editingTagsId !== null) {
       invoke<Record<string, number>>('get_all_tags_info')
         .then((tagMap) => {
@@ -1041,7 +1054,7 @@ const App = () => {
 
   return (
     <div
-      className={`app-container ${entranceActive ? "window-entrance" : ""}`}
+      className="app-container"
     >
       <AppHeader
         t={t}
