@@ -1107,6 +1107,7 @@ const App = () => {
           saveSetting={saveSetting}
           filteredHistory={filteredHistory}
           search={search}
+          typeFilter={typeFilter}
           pinnedItems={pinnedItems}
           unpinnedItems={unpinnedItems}
           compactMode={compactMode}

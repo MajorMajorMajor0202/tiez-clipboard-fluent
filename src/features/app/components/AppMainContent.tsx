@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject, ReactNode } from "react";
-import { motion, Reorder, useDragControls } from "framer-motion";
+import { motion, AnimatePresence, Reorder, useDragControls } from "framer-motion";
 import type { DragControls } from "framer-motion";
 import { Clipboard } from "lucide-react";
 import FileTransferChatView from "../../file-transfer/components/FileTransferChatView";
@@ -35,6 +35,7 @@ interface AppMainContentProps {
   saveSetting: (key: string, val: string) => void;
   filteredHistory: ClipboardEntry[];
   search: string;
+  typeFilter: string | null;
   pinnedItems: ClipboardEntry[];
   unpinnedItems: ClipboardEntry[];
   compactMode: boolean;
@@ -105,6 +106,7 @@ const AppMainContent = ({
   saveSetting,
   filteredHistory,
   search,
+  typeFilter,
   pinnedItems,
   unpinnedItems,
   compactMode,
@@ -221,84 +223,91 @@ const AppMainContent = ({
     );
   }
 
-  if (filteredHistory.length === 0) {
-    return (
-      <div className="empty-state">
-        <Clipboard size={40} opacity={0.2} style={{ marginBottom: "12px" }} />
-        {search ? (
-          <p>{t("no_records")}</p>
-        ) : (
-          <>
-            <p
-              style={{
-                fontSize: "15px",
-                fontWeight: "bold",
-                color: "var(--text-primary)",
-                marginBottom: "4px"
-              }}
-            >
-              {t("empty_title")}
-            </p>
-            <p style={{ fontSize: "12px", opacity: 0.6 }}>{t("empty_desc")}</p>
-          </>
-        )}
-      </div>
-    );
-  }
+  const filterKey = typeFilter || 'all';
 
   return (
-    <>
-      {filteredHistory.length > 0 && (
-        <div className="history-list-container">
-          <VirtualClipboardList
-            ref={virtualListRef}
-            items={unpinnedItems}
-            compactMode={compactMode}
-            selectedIndex={selectedIndex - pinnedItems.length}
-            isKeyboardMode={isKeyboardMode}
-            header={
-              pinnedItems.length > 0 ? (
-                <Reorder.Group
-                  axis="y"
-                  values={orderedPinnedIds}
-                  onReorder={handlePinnedIdsReorder}
-                  className={isDraggingPinned ? "pinned-reorder dragging" : "pinned-reorder"}
-                  style={{ listStyle: "none", padding: 0 }}
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={filterKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+        style={{ height: "100%" }}
+      >
+        {filteredHistory.length === 0 ? (
+          <div className="empty-state">
+            <Clipboard size={40} opacity={0.2} style={{ marginBottom: "12px" }} />
+            {search ? (
+              <p>{t("no_records")}</p>
+            ) : (
+              <>
+                <p
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: "bold",
+                    color: "var(--text-primary)",
+                    marginBottom: "4px"
+                  }}
                 >
-                  {orderedPinnedItems.map((item, index) => (
-                    <SortableItem
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      renderItem={renderItemContent}
-                      isFirst={index === 0}
-                      compactMode={compactMode}
-                      onDragStart={handlePinnedDragStart}
-                      onDragEnd={handlePinnedDragEnd}
-                    />
-                  ))}
-                </Reorder.Group>
-              ) : null
-            }
-            renderItem={(item, index, isFirst?: boolean) => {
-              const el = renderItemContent(item, pinnedItems.length + index, undefined, true);
-              if (isFirst && pinnedItems.length === 0) {
-                return (
-                  <div className="first-virtual-item" style={{ height: "100%", paddingTop: "4px" }}>
-                    {el}
-                  </div>
-                );
+                  {t("empty_title")}
+                </p>
+                <p style={{ fontSize: "12px", opacity: 0.6 }}>{t("empty_desc")}</p>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="history-list-container">
+            <VirtualClipboardList
+              ref={virtualListRef}
+              items={unpinnedItems}
+              compactMode={compactMode}
+              selectedIndex={selectedIndex - pinnedItems.length}
+              isKeyboardMode={isKeyboardMode}
+              header={
+                pinnedItems.length > 0 ? (
+                  <Reorder.Group
+                    axis="y"
+                    values={orderedPinnedIds}
+                    onReorder={handlePinnedIdsReorder}
+                    className={isDraggingPinned ? "pinned-reorder dragging" : "pinned-reorder"}
+                    style={{ listStyle: "none", padding: 0 }}
+                  >
+                    {orderedPinnedItems.map((item, index) => (
+                      <SortableItem
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        renderItem={renderItemContent}
+                        isFirst={index === 0}
+                        compactMode={compactMode}
+                        onDragStart={handlePinnedDragStart}
+                        onDragEnd={handlePinnedDragEnd}
+                      />
+                    ))}
+                  </Reorder.Group>
+                ) : null
               }
-              return el;
-            }}
-            onLoadMore={loadMoreHistory}
-            onScroll={handleListScroll}
-            hasMore={hasMore}
-            isLoading={isLoadingMore}
-          />
-        </div>
-      )}
-    </>
+              renderItem={(item, index, isFirst?: boolean) => {
+                const el = renderItemContent(item, pinnedItems.length + index, undefined, true);
+                if (isFirst && pinnedItems.length === 0) {
+                  return (
+                    <div className="first-virtual-item" style={{ height: "100%", paddingTop: "4px" }}>
+                      {el}
+                    </div>
+                  );
+                }
+                return el;
+              }}
+              onLoadMore={loadMoreHistory}
+              onScroll={handleListScroll}
+              hasMore={hasMore}
+              isLoading={isLoadingMore}
+            />
+          </div>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

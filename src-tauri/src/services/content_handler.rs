@@ -84,8 +84,8 @@ pub async fn open_content(
     let path_str = temp_path.to_str().unwrap().to_string();
     let file_path_clone = temp_path.clone();
 
-    // Briefly hide the TieZ window so the external app appears in front,
-    // then restore it after a short delay.
+    // Hide the TieZ window so the external app appears in front.
+    // The user can bring TieZ back with the global hotkey.
     hide_window_for_open(&app_handle);
 
     // Launch the file with appropriate application
@@ -106,25 +106,22 @@ pub async fn open_content(
     Ok(())
 }
 
-/// Briefly hides the TieZ main window so an external application
-/// launched by "Open" can appear in front. The window is restored
-/// after a short delay.
+/// Hides the TieZ main window so the external application opened
+/// by "Open" appears in front. The user can bring TieZ back with
+/// the global hotkey.
 fn hide_window_for_open(app_handle: &tauri::AppHandle) {
     if let Some(window) = app_handle.get_webview_window("main") {
-        if window.is_visible().unwrap_or(false) {
-            let _ = window.hide();
-            let app_handle = app_handle.clone();
-            std::thread::spawn(move || {
-                std::thread::sleep(std::time::Duration::from_millis(500));
-                if let Some(window) = app_handle.get_webview_window("main") {
-                    let pinned =
-                        crate::WINDOW_PINNED.load(std::sync::atomic::Ordering::Relaxed);
-                    let _ = window.set_always_on_top(pinned);
-                    let _ = window.set_focusable(false);
-                    let _ = window.show();
-                }
-            });
+        if !window.is_visible().unwrap_or(true) {
+            return;
         }
+        #[cfg(target_os = "windows")]
+        crate::infrastructure::windows_ext::WindowExt::release_win_keys();
+        let _ = window.set_focusable(false);
+        let _ = window.hide();
+        let _ = window.emit("window-hidden", ());
+        crate::NAVIGATION_ENABLED.store(false, std::sync::atomic::Ordering::SeqCst);
+        crate::NAVIGATION_MODE_ACTIVE.store(false, std::sync::atomic::Ordering::SeqCst);
+        let _ = crate::app::window_manager::restore_last_focus(app_handle.clone());
     }
 }
 
