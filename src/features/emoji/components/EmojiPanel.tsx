@@ -171,10 +171,14 @@ const dedupeFavoritePaths = (paths: string[]) =>
     )
   );
 
+const getPreloadedEmojis = () => {
+  return (window as any).__EMOJI_CACHE__ as EmojiGroup[] | undefined;
+};
+
 const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveSetting }: EmojiPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(FALLBACK_GROUPS);
+  const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(() => getPreloadedEmojis() ?? FALLBACK_GROUPS);
 
   const flatEmoji = useMemo(() => emojiGroups.flatMap((g) => g.emojis), [emojiGroups]);
   const hasFavorites = favorites.length > 0;
@@ -405,6 +409,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   };
 
   useEffect(() => {
+    if (getPreloadedEmojis()) return;
+
     let alive = true;
     fetch("/emoji-data.json")
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load emoji data"))))
@@ -412,6 +418,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
         if (!alive) return;
         const groups = Array.isArray(data?.groups) ? data.groups.filter((g) => g && Array.isArray(g.emojis)) : [];
         if (groups.length > 0) {
+          (window as any).__EMOJI_CACHE__ = groups;
           setEmojiGroups(groups);
         }
       })
@@ -541,7 +548,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.1, ease: "easeOut" }}
+              transition={{ duration: 0.15 }}
             >
               {emojiGroups.map((group) => (
                 <div key={group.name} className="emoji-group">
@@ -571,7 +578,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.1, ease: "easeOut" }}
+              transition={{ duration: 0.15 }}
               onClick={() => setDeleteTarget(null)}
               onContextMenu={(e) => {
                 if ((e.target as HTMLElement).closest(".emoji-fav-card")) return;

@@ -197,9 +197,9 @@ const AppMainContent = ({
   if (showEmojiPanel) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.12, ease: "easeOut" }}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.25, ease: [0.1, 0.9, 0.2, 1] }}
         style={{ height: "100%", overflow: "hidden" }}
       >
         <EmojiPanel

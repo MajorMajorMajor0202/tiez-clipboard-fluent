@@ -356,6 +356,16 @@ const App = () => {
     // Initial entrance on mount
     setEntranceActive(true);
 
+    // Preload emoji data to cache it in memory
+    fetch("/emoji-data.json")
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (data && Array.isArray(data.groups)) {
+          (window as any).__EMOJI_CACHE__ = data.groups;
+        }
+      })
+      .catch(() => {});
+
     if (!isTauriRuntime()) return;
 
     const unlistenShown = listen("window-shown", () => {
