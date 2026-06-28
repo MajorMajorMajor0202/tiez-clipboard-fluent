@@ -541,23 +541,21 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
             >
               {emojiGroups.map((group) => (
                 <div key={group.name} className="emoji-group">
                   <div className="emoji-group-title">{group.name}</div>
                   <div className="emoji-grid">
                     {group.emojis.map((emoji) => (
-                      <motion.button
+                      <button
                         key={`${group.name}-${emoji}`}
                         className="emoji-btn"
                         onClick={() => handleSend(emoji, "text")}
                         title={emoji}
-                        whileHover={{ scale: 1.15 }}
-                        whileTap={{ scale: 0.9 }}
                       >
                         {emoji}
-                      </motion.button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -573,7 +571,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
               onClick={() => setDeleteTarget(null)}
               onContextMenu={(e) => {
                 if ((e.target as HTMLElement).closest(".emoji-fav-card")) return;
@@ -640,11 +638,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                   );
                 })}
 
-                <motion.div 
-                  className="emoji-fav-card emoji-fav-add"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <div className="emoji-fav-card emoji-fav-add">
                   <button
                     className="emoji-fav-add-btn"
                     onClick={(e) => {
@@ -657,7 +651,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                       <Plus size={22} strokeWidth={2.5} />
                     </div>
                   </button>
-                </motion.div>
+                </div>
               </div>
 
               {!hasFavorites && (

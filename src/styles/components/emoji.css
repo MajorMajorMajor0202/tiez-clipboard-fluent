@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: 12px;
   height: 100%;
-  padding: 12px 14px 14px;
+  padding: 12px 16px 16px;
   background: transparent;
   position: relative;
 }
@@ -13,7 +13,7 @@
 .emoji-tabs {
   display: flex;
   background: var(--bg-element);
-  padding: 3px;
+  padding: 4px;
   border-radius: 4px;
   border: 1px solid var(--line-soft);
   position: relative;
@@ -96,7 +96,7 @@
 }
 
 .emoji-group-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -106,54 +106,53 @@
 
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 0px;
 }
 
 .emoji-btn {
-  height: 36px;
+  height: 40px;
   width: 100%;
-  background: var(--bg-button);
-  border: 1px solid var(--line-soft);
+  background: transparent;
+  border: 2px solid transparent;
   border-radius: 4px;
-  font-size: 18px;
+  font-size: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: background-color 0.1s ease, border-color 0.1s ease;
 }
 
 .emoji-btn:hover {
-  background: var(--bg-panel);
-  border-color: var(--accent-color);
-  transform: scale(1.05);
+  background: rgba(120, 120, 120, 0.15) !important;
+  border-color: #000000 !important;
 }
 
 /* Favorites Grid - Clean Grid */
 .emoji-fav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
-  gap: 10px;
-  padding: 2px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  padding: 4px;
 }
 
 .emoji-fav-card {
   aspect-ratio: 1;
   position: relative;
   background: var(--bg-button);
-  border: 1px solid var(--line-soft);
+  border: 2px solid var(--line-soft);
   border-radius: 4px;
-  padding: 6px;
-  transition: all 0.2s ease;
+  padding: 8px;
+  transition: border-color 0.1s ease, background-color 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .emoji-fav-card:hover {
-  border-color: var(--accent-color);
-  background: var(--bg-panel);
+  border-color: #000000 !important;
+  background: var(--bg-hover);
 }
 
 .emoji-fav-preview {
@@ -209,7 +208,7 @@
 
 /* Add Button Card - Ultra Minimalist */
 .emoji-fav-add {
-  border: 1px dashed var(--line-strong);
+  border: 2px dashed var(--line-strong);
   background: transparent;
   cursor: pointer;
 }
@@ -234,12 +233,12 @@
 }
 
 .emoji-fav-add:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
 }
 
 .emoji-fav-add:hover .emoji-fav-add-btn {
-  color: var(--accent-color);
+  color: #000000 !important;
 }
 
 /* Empty State - Background Text */
@@ -255,7 +254,7 @@
 }
 
 .emoji-fav-empty span {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
   opacity: 0.5;
   font-weight: 500;
@@ -264,7 +263,7 @@
 }
 
 .emoji-fav-tip {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   text-align: center;
   margin-top: 12px;
@@ -288,7 +287,7 @@
 }
 
 .drop-overlay p {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--accent-color);
   background: var(--bg-panel);
