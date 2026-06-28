@@ -358,16 +358,8 @@ const App = () => {
 
     if (!isTauriRuntime()) return;
 
-    const unlistenFocus = listen("tauri://focus", () => {
-      setEntranceActive(true);
-    });
-
     const unlistenShown = listen("window-shown", () => {
       setEntranceActive(true);
-    });
-
-    const unlistenBlur = listen("tauri://blur", () => {
-      setEntranceActive(false);
     });
 
     const unlistenHidden = listen("window-hidden", () => {
@@ -375,9 +367,7 @@ const App = () => {
     });
 
     return () => {
-      unlistenFocus.then((off) => off());
       unlistenShown.then((off) => off());
-      unlistenBlur.then((off) => off());
       unlistenHidden.then((off) => off());
     };
   }, []);

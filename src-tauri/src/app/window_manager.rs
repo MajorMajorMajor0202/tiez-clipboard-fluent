@@ -444,6 +444,7 @@ pub fn focus_clipboard_window(app_handle: AppHandle) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("main") {
         let _ = window.set_focusable(true);
         let _ = window.show();
+        let _ = window.emit("window-shown", ());
 
         #[cfg(windows)]
         {

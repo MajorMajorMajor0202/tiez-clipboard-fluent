@@ -472,6 +472,7 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
     if !is_autostart && !s.silent_start {
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
+            let _ = window.emit("window-shown", ());
         }
     }
 }
@@ -674,6 +675,7 @@ fn start_edge_docking_monitor(app_handle: AppHandle) {
                 if IS_HIDDEN.load(Ordering::Relaxed) {
                     if let Some(window) = app_handle.get_webview_window("main") {
                         let _ = window.show();
+                        let _ = window.emit("window-shown", ());
                         IS_HIDDEN.store(false, Ordering::Relaxed);
                         CURRENT_DOCK.store(0, Ordering::Relaxed);
                     }
@@ -817,6 +819,7 @@ fn start_edge_docking_monitor(app_handle: AppHandle) {
 
                         if dock_actual != DockPosition::None {
                             let _ = window.show();
+                            let _ = window.emit("window-shown", ());
                             match dock_actual {
                                 DockPosition::Top => {
                                     let _ = window.set_position(tauri::Position::Physical(
@@ -1015,6 +1018,7 @@ fn setup_tray(app: &App, hide_tray: bool) {
             if event.id.as_ref() == "show" {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.show();
+                    let _ = window.emit("window-shown", ());
                 }
             } else if event.id.as_ref() == "quit" {
                 app.exit(0);
@@ -1028,6 +1032,7 @@ fn setup_tray(app: &App, hide_tray: bool) {
             {
                 if let Some(window) = tray.app_handle().get_webview_window("main") {
                     let _ = window.show();
+                    let _ = window.emit("window-shown", ());
                     let _ = window.set_focus();
                     let now = std::time::SystemTime::now()
                         .duration_since(std::time::UNIX_EPOCH)
@@ -1260,6 +1265,7 @@ pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             }
             api.prevent_close();
             let _ = window.hide();
+            let _ = window.emit("window-hidden", ());
             NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
             NAVIGATION_MODE_ACTIVE.store(false, Ordering::SeqCst);
         }
@@ -1376,6 +1382,7 @@ fn handle_blur(window: &tauri::Window) {
                 }
 
                 let _ = w.hide();
+                let _ = w.emit("window-hidden", ());
                 NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
                 release_win_keys();
 
