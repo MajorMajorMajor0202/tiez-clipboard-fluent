@@ -525,7 +525,18 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
         >
           <span className="emoji-tab-text">{t("emoji_tab") || "Emoji"}</span>
           {activeTab === "emoji" && (
-            <motion.div layoutId="active-indicator" className="active-tab-indicator" />
+            <>
+              <motion.div
+                layoutId="active-bg"
+                className="active-tab-bg"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              />
+              <motion.div
+                layoutId="active-indicator"
+                className="active-tab-indicator"
+                transition={{ type: "spring", stiffness: 500, damping: 28 }}
+              />
+            </>
           )}
         </button>
         <button
@@ -534,7 +545,18 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
         >
           <span className="emoji-tab-text">{t("emoji_favorites") || "收藏"}</span>
           {activeTab === "favorites" && (
-            <motion.div layoutId="active-indicator" className="active-tab-indicator" />
+            <>
+              <motion.div
+                layoutId="active-bg"
+                className="active-tab-bg"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              />
+              <motion.div
+                layoutId="active-indicator"
+                className="active-tab-indicator"
+                transition={{ type: "spring", stiffness: 500, damping: 28 }}
+              />
+            </>
           )}
         </button>
       </div>

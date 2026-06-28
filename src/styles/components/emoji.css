@@ -12,7 +12,7 @@
 /* Tabs - Minimalist */
 .emoji-tabs {
   display: flex;
-  background: var(--bg-element);
+  background: var(--bg-secondary);
   padding: 4px;
   border-radius: 4px;
   border: 1px solid var(--line-soft);
@@ -28,10 +28,10 @@
   cursor: pointer;
   position: relative;
   border-radius: 4px;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
 }
 
 .emoji-tab-text {
@@ -41,20 +41,34 @@
   font-weight: 700;
   color: var(--text-secondary);
   transition: color 0.2s ease;
+  line-height: 16px;
+  height: 16px;
+  display: block;
 }
 
 .emoji-tab.active .emoji-tab-text {
-  color: var(--text-primary);
+  color: #000000 !important;
+}
+
+.active-tab-bg {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  border-radius: 4px;
+  z-index: 1;
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-sm);
 }
 
 .active-tab-indicator {
   position: absolute;
-  inset: 0;
-  background: var(--bg-panel);
-  border-radius: 4px;
-  z-index: 1;
-  border: 1px solid var(--line-soft);
-  box-shadow: var(--shadow-xs);
+  bottom: 1px;
+  left: calc(50% - 9px);
+  width: 18px;
+  height: 3px;
+  background: var(--accent-color);
+  border-radius: 9999px;
+  z-index: 2;
 }
 
 /* Content Area */
