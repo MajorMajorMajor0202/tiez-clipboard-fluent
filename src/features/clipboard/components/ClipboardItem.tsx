@@ -728,9 +728,10 @@ const ClipboardItem = ({
     const [localAiOptionsOpen, setLocalAiOptionsOpen] = useState(!!aiOptionsOpen);
     const [snapshotFailed, setSnapshotFailed] = useState(false);
     const [richImageFallbackFailed, setRichImageFallbackFailed] = useState(false);
+    const [videoLoadError, setVideoLoadError] = useState(false);
     const [sourceAppIcon, setSourceAppIcon] = useState<string | null>(() => peekSourceAppIcon(item.source_app_path) ?? null);
     const filePaths = useMemo(
-        () => item.content_type === "file" ? item.content.split('\n').filter((p) => p.trim()) : [],
+        () => (item.content_type === "file" || item.content_type === "video") ? item.content.split('\n').filter((p) => p.trim()) : [],
         [item.content, item.content_type]
     );
     const singleFilePath = filePaths.length === 1 ? filePaths[0] : null;
@@ -1003,7 +1004,7 @@ const ClipboardItem = ({
         let cancelled = false;
         const cachedIcon = peekFileIcon(singleFilePath);
 
-        if (item.content_type !== "file" || item.file_preview_exists === false || !singleFilePath) {
+        if ((item.content_type !== "file" && item.content_type !== "video") || item.file_preview_exists === false || !singleFilePath) {
             setFileIcon(null);
             return () => {
                 cancelled = true;
@@ -1731,19 +1732,32 @@ const ClipboardItem = ({
                 ) : item.content_type === "video" ? (
                     <div className="video-thumbnail-card">
                         <div className="video-thumbnail-wrapper">
-                            <video
-                                src={item.content.startsWith("data:")
-                                    ? item.content
-                                    : (toTauriLocalImageSrc(item.content) || item.content)}
-                                preload="auto"
-                                muted
-                                playsInline
-                                className="video-thumbnail-element"
-                                onLoadedData={(e) => seekVideoPreviewFrame(e.currentTarget)}
-                            />
-                            <div className="video-play-overlay">
-                                <Video size={16} />
-                            </div>
+                            {videoLoadError ? (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
+                                    {fileIcon ? (
+                                        <img src={fileIcon} alt="" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+                                    ) : (
+                                        <Video size={20} style={{ opacity: 0.5 }} />
+                                    )}
+                                </div>
+                            ) : (
+                                <video
+                                    src={item.content.startsWith("data:")
+                                        ? item.content
+                                        : (toTauriLocalImageSrc(item.content) || item.content)}
+                                    preload="auto"
+                                    muted
+                                    playsInline
+                                    className="video-thumbnail-element"
+                                    onLoadedData={(e) => seekVideoPreviewFrame(e.currentTarget)}
+                                    onError={() => setVideoLoadError(true)}
+                                />
+                            )}
+                            {!videoLoadError && (
+                                <div className="video-play-overlay">
+                                    <Video size={16} />
+                                </div>
+                            )}
                         </div>
                         <div className="video-info-wrapper">
                             <div className="video-name">{item.content.split(/[\\/]/).pop()}</div>
