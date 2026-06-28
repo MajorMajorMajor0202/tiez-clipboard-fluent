@@ -4,7 +4,7 @@ import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Plus, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, LayoutGroup } from "framer-motion";
 
 interface EmojiPanelProps {
   t: (key: string) => string;
@@ -180,11 +180,39 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(() => getPreloadedEmojis() ?? FALLBACK_GROUPS);
   const [animationCompleted, setAnimationCompleted] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [tooltip, setTooltip] = useState<{
+    text: string;
+    x: number;
+    y: number;
+    visible: boolean;
+  } | null>(null);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>, text: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const parent = e.currentTarget.closest(".emoji-panel");
+    const parentRect = parent?.getBoundingClientRect();
+    if (!parentRect) return;
+
+    const x = rect.left - parentRect.left + rect.width / 2;
+    const y = rect.top - parentRect.top;
+
+    setTooltip({
+      text,
+      x,
+      y,
+      visible: true
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTooltip((prev) => (prev ? { ...prev, visible: false } : null));
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setAnimationCompleted(true);
-    }, 280);
+    }, 80);
     return () => clearTimeout(timer);
   }, []);
 
@@ -355,8 +383,14 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   };
 
   const handleTabChange = (tab: "emoji" | "favorites") => {
-    setActiveTab(tab);
-    saveSetting("app.emoji_panel_tab", tab);
+    if (tab !== activeTab) {
+      setIsSwitching(true);
+      setActiveTab(tab);
+      saveSetting("app.emoji_panel_tab", tab);
+      setTimeout(() => {
+        setIsSwitching(false);
+      }, 260);
+    }
   };
 
   const handleSelectFiles = async () => {
@@ -526,57 +560,60 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   }, [isDragging]);
 
   return (
-    <div className="emoji-panel">
-      <div className="emoji-tabs">
-        <button
-          className={`emoji-tab ${activeTab === "emoji" ? "active" : ""}`}
-          onClick={() => handleTabChange("emoji")}
-        >
-          <span className="emoji-tab-text">{t("emoji_tab") || "Emoji"}</span>
-          {activeTab === "emoji" && (
-            <>
-              <motion.div
-                layoutId="active-bg"
-                className="active-tab-bg"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              />
-              <motion.div
-                layoutId="active-indicator"
-                className="active-tab-indicator"
-                transition={{ type: "spring", stiffness: 500, damping: 28 }}
-              />
-            </>
-          )}
-        </button>
-        <button
-          className={`emoji-tab ${activeTab === "favorites" ? "active" : ""}`}
-          onClick={() => handleTabChange("favorites")}
-        >
-          <span className="emoji-tab-text">{t("emoji_favorites") || "收藏"}</span>
-          {activeTab === "favorites" && (
-            <>
-              <motion.div
-                layoutId="active-bg"
-                className="active-tab-bg"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              />
-              <motion.div
-                layoutId="active-indicator"
-                className="active-tab-indicator"
-                transition={{ type: "spring", stiffness: 500, damping: 28 }}
-              />
-            </>
-          )}
-        </button>
-      </div>
+    <div className={`emoji-panel ${isSwitching ? "is-switching" : ""}`}>
+      {/* LayoutGroup scopes layoutId so the indicator springs correctly between tabs */}
+      <LayoutGroup id="emoji-tabs">
+        <div className="emoji-tabs">
+          <button
+            className={`emoji-tab ${activeTab === "emoji" ? "active" : ""}`}
+            onClick={() => handleTabChange("emoji")}
+          >
+            <span className="emoji-tab-text">{t("emoji_tab") || "Emoji"}</span>
+            {activeTab === "emoji" && (
+              <>
+                <motion.div
+                  layoutId="active-bg"
+                  className="active-tab-bg"
+                  transition={{ type: "spring", stiffness: 260, damping: 28 }}
+                />
+                <motion.div
+                  layoutId="active-indicator"
+                  className="active-tab-indicator"
+                  transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                />
+              </>
+            )}
+          </button>
+          <button
+            className={`emoji-tab ${activeTab === "favorites" ? "active" : ""}`}
+            onClick={() => handleTabChange("favorites")}
+          >
+            <span className="emoji-tab-text">{t("emoji_favorites") || "收藏"}</span>
+            {activeTab === "favorites" && (
+              <>
+                <motion.div
+                  layoutId="active-bg"
+                  className="active-tab-bg"
+                  transition={{ type: "spring", stiffness: 260, damping: 28 }}
+                />
+                <motion.div
+                  layoutId="active-indicator"
+                  className="active-tab-indicator"
+                  transition={{ type: "spring", stiffness: 360, damping: 28 }}
+                />
+              </>
+            )}
+          </button>
+        </div>
+      </LayoutGroup>
 
+      {/* Sliding track — both panels always in DOM, shifted with translateX */}
       <div className="emoji-content-wrapper">
-        {/* Both panels stay mounted once animationCompleted — no remount lag on tab switch */}
-        <div
-          className={`emoji-content ${activeTab === "emoji" ? "tab-active" : "tab-hidden"}`}
-        >
-          {animationCompleted && (
-            <>
+        {animationCompleted && (
+          <div className={`emoji-panels-track${activeTab === "favorites" ? " show-favorites" : ""}`}>
+            
+            {/* Panel 0 — Emoji grid */}
+            <div className="emoji-content">
               {emojiGroups.map((group) => (
                 <div key={group.name} className="emoji-group">
                   <div className="emoji-group-title">{group.name}</div>
@@ -586,7 +623,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                         key={`${group.name}-${emoji}`}
                         className="emoji-btn"
                         onClick={() => handleSend(emoji, "text")}
-                        title={emoji}
+                        onMouseEnter={(e) => handleMouseEnter(e, emoji)}
+                        onMouseLeave={handleMouseLeave}
                       >
                         {emoji}
                       </button>
@@ -597,35 +635,32 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               {flatEmoji.length === 0 && (
                 <div className="emoji-empty">{t("emoji_empty") || "暂无表情"}</div>
               )}
-            </>
-          )}
-        </div>
+            </div>
 
-        <div
-          className={`emoji-fav-container ${activeTab === "favorites" ? "tab-active" : "tab-hidden"}`}
-          onClick={() => setDeleteTarget(null)}
-          onContextMenu={(e) => {
-            if ((e.target as HTMLElement).closest(".emoji-fav-card")) return;
-            setDeleteTarget(null);
-          }}
-          onDragOver={(e) => {
-            e.preventDefault();
-            if (!isDragging) setIsDragging(true);
-          }}
-          onDragLeave={(e) => {
-            if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-            setIsDragging(false);
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragging(false);
-            void handleDomDrop(e);
-          }}
-        >
-          {animationCompleted && (
-            <>
+            {/* Panel 1 — Favorites */}
+            <div
+              className="emoji-fav-container"
+              onClick={() => setDeleteTarget(null)}
+              onContextMenu={(e) => {
+                if ((e.target as HTMLElement).closest(".emoji-fav-card")) return;
+                setDeleteTarget(null);
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (!isDragging) setIsDragging(true);
+              }}
+              onDragLeave={(e) => {
+                if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                setIsDragging(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                void handleDomDrop(e);
+              }}
+            >
               <div className="emoji-fav-grid">
-                {favorites.map((path, idx) => {
+                {favorites.map((path) => {
                   const name = path.split(/[/\\]/).pop() || path;
                   const isDeleteVisible = deleteTarget === path;
                   return (
@@ -634,7 +669,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                       layout
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: idx * 0.01 }}
+                      transition={{ delay: 0 }}
                       className="emoji-fav-card"
                       data-delete-visible={isDeleteVisible}
                       onContextMenu={(e) => {
@@ -645,7 +680,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                     >
                       <button
                         className="emoji-fav-remove"
-                        title={t("delete") || "删除"}
+                        onMouseEnter={(e) => handleMouseEnter(e, t("delete") || "删除")}
+                        onMouseLeave={handleMouseLeave}
                         onClick={(e) => {
                           e.stopPropagation();
                           removeFavoritePath(path);
@@ -655,7 +691,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                       </button>
                       <button
                         className="emoji-fav-preview"
-                        title={name}
+                        onMouseEnter={(e) => handleMouseEnter(e, name)}
+                        onMouseLeave={handleMouseLeave}
                         onClick={() => handleSend(path, "image")}
                       >
                         <img
@@ -674,11 +711,12 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                 <div className="emoji-fav-card emoji-fav-add">
                   <button
                     className="emoji-fav-add-btn"
+                    onMouseEnter={(e) => handleMouseEnter(e, t("emoji_add_files") || "添加表情")}
+                    onMouseLeave={handleMouseLeave}
                     onClick={(e) => {
                       e.stopPropagation();
                       void handleSelectFiles();
                     }}
-                    title={t("emoji_add_files") || "添加表情"}
                   >
                     <div className="add-icon-wrapper">
                       <Plus size={22} strokeWidth={2.5} />
@@ -701,10 +739,24 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                   <p>{t("emoji_drop_hint") || "松开鼠标即可添加"}</p>
                 </div>
               )}
-            </>
-          )}
-        </div>
+            </div>
+
+          </div>
+        )}
       </div>
+
+      {/* Fluent UI Tooltip */}
+      {tooltip && (
+        <div
+          className={`fluent-tooltip ${tooltip.visible ? "visible" : ""}`}
+          style={{
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`
+          }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   );
 };

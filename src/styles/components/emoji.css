@@ -90,40 +90,62 @@
   z-index: 2;
 }
 
-/* Content Area */
+/* Content Area — sliding track architecture */
 .emoji-content-wrapper {
   flex: 1;
   min-height: 0;
-  position: relative;
+  overflow: hidden; /* clips the offscreen panel */
 }
 
-.emoji-content,
-.emoji-fav-container {
-  position: absolute;
-  inset: 0;
+/* Fade-up animation for first content appearance — opacity only to avoid
+   conflicting with the horizontal translateX slide transition */
+@keyframes emoji-track-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Track holds both panels side-by-side at 200% width */
+.emoji-panels-track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  will-change: transform, opacity;
+  transform: translateX(0);
+  transition: transform 0.26s cubic-bezier(0.1, 0.9, 0.2, 1);
+  /* First-time fade-in — runs once on mount, doesn't touch transform */
+  animation: emoji-track-appear 0.2s ease-out both;
+}
+
+/* Slide to reveal favorites panel */
+.emoji-panels-track.show-favorites {
+  transform: translateX(-50%);
+}
+
+/* Each panel occupies 50% of the 200%-wide track = 100% of visible area */
+.emoji-content {
+  width: 50%;
+  flex-shrink: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 0px;
+  padding: 4px 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  /* Default hidden — no transition here to avoid initial flash */
-  opacity: 0;
-  pointer-events: none;
 }
 
-/* Tab visibility — pure CSS opacity transition, GPU-composited, zero JS */
-.tab-active {
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.15s ease-out;
+.emoji-fav-container {
+  width: 50%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative; /* Established positioning context for absolute overlays */
 }
 
-.tab-hidden {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.1s ease-in;
-}
+/* Remove old tab-active/tab-hidden opacity classes */
 
 /* Scrollbar */
 .emoji-content::-webkit-scrollbar,
@@ -135,6 +157,13 @@
 .emoji-fav-container::-webkit-scrollbar-thumb {
   background: var(--line-soft);
   border-radius: 4px;
+  transition: background-color 0.15s ease-out;
+}
+
+/* Hide scrollbar thumb during transition so it doesn't animate across the screen */
+.is-switching .emoji-content::-webkit-scrollbar-thumb,
+.is-switching .emoji-fav-container::-webkit-scrollbar-thumb {
+  background: transparent !important;
 }
 
 /* Emoji Grid */
@@ -344,4 +373,31 @@
   border-radius: 4px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--line-soft);
+}
+
+/* Fluent UI Custom Tooltip */
+.fluent-tooltip {
+  position: absolute;
+  z-index: 10000;
+  pointer-events: none;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  
+  /* Initial hidden state with slide-up micro-animation */
+  opacity: 0;
+  transform: translate(-50%, -100%) translateY(-4px) scale(0.96);
+  transition: transform 0.12s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.12s ease;
+  will-change: transform, opacity;
+}
+
+.fluent-tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, -100%) translateY(-8px) scale(1);
 }
