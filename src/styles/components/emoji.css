@@ -284,6 +284,32 @@
   border-color: #ff4757;
 }
 
+/* Rename button - same style as remove but gray hover instead of red */
+.emoji-fav-rename {
+  width: 20px;
+  height: 20px;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.emoji-fav-card:hover .emoji-fav-rename {
+  opacity: 1;
+}
+
+.emoji-fav-rename:hover {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
 /* Add Button Card - Ultra Minimalist */
 .emoji-fav-add {
   border: 2px dashed var(--line-strong);
@@ -384,10 +410,17 @@
   display: inline-flex;
 }
 
-/* Absolute positioning for delete button tooltip trigger wrapper */
+/* Absolute positioning for remove and rename button tooltip trigger wrappers */
 .emoji-fav-card > span:has(.emoji-fav-remove) {
   position: absolute;
   top: -4px;
+  right: -4px;
+  z-index: 10;
+}
+
+.emoji-fav-card > span:has(.emoji-fav-rename) {
+  position: absolute;
+  bottom: -4px;
   right: -4px;
   z-index: 10;
 }

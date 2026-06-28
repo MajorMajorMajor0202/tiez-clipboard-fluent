@@ -3,7 +3,7 @@ import type { DragEvent } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Pencil } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 
@@ -660,6 +660,16 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                           }}
                         >
                           <X size={14} />
+                        </button>
+                      </FluentTooltip>
+                      <FluentTooltip text={t("rename") || "重命名"}>
+                        <button
+                          className="emoji-fav-rename"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Pencil size={11} />
                         </button>
                       </FluentTooltip>
                       <FluentTooltip text={name}>
