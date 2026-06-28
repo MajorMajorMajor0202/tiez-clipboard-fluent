@@ -253,11 +253,10 @@
   object-fit: contain;
 }
 
-/* Remove button - Clean */
+/* Remove button - Clean. No position:absolute — the tooltip wrapper span
+   already handles corner placement. This keeps the button centered within
+   its span so FluentTooltip's cx calculation aligns with the visual button. */
 .emoji-fav-remove {
-  position: absolute;
-  top: -4px;
-  right: -4px;
   width: 20px;
   height: 20px;
   background: var(--bg-body);
@@ -270,7 +269,6 @@
   cursor: pointer;
   opacity: 0;
   transition: all 0.15s ease;
-  z-index: 10;
 }
 
 .emoji-fav-card:hover .emoji-fav-remove,
@@ -285,11 +283,9 @@
 }
 
 /* Rename button - same size & circular shape as remove, positioned at bottom-right corner
-   symmetrically opposite to remove (top-right). Light gray hover, icon stays dark. */
+   symmetrically opposite to remove (top-right). Light gray hover, icon stays dark.
+   No position:absolute — the tooltip wrapper span already handles corner placement. */
 .emoji-fav-rename {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
   width: 20px;
   height: 20px;
   background: var(--bg-body);
@@ -302,7 +298,6 @@
   cursor: pointer;
   opacity: 0;
   transition: all 0.15s ease;
-  z-index: 10;
 }
 
 .emoji-fav-card:hover .emoji-fav-rename {
