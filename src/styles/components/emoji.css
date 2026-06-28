@@ -415,11 +415,16 @@
   display: inline-flex;
 }
 
-/* Absolute positioning for remove and rename button tooltip trigger wrappers */
+/* Absolute positioning for remove and rename button tooltip trigger wrappers.
+   Explicit width/height prevents the span from collapsing to 0×0 (child buttons
+   are position:absolute, taken out of flow), ensuring FluentTooltip's
+   rect.bottom + 12 offset is measured from the actual 20×20 button area. */
 .emoji-fav-card > span:has(.emoji-fav-remove) {
   position: absolute;
   top: -4px;
   right: -4px;
+  width: 20px;
+  height: 20px;
   z-index: 10;
 }
 
@@ -427,5 +432,7 @@
   position: absolute;
   bottom: -4px;
   right: -4px;
+  width: 20px;
+  height: 20px;
   z-index: 10;
 }
