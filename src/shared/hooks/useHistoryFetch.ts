@@ -83,7 +83,8 @@ export const useHistoryFetch = ({
             data = await invoke<ClipboardEntry[]>("search_clipboard_history", {
               searchTerm: term,
               limit: 200,
-              tagOnly
+              tagOnly,
+              contentType: typeFilter || undefined,
             });
           } catch (e) {
             console.error("Search failed, falling back", e);

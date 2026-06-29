@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface UseSearchFetchTriggerOptions {
   debouncedSearch: string;
@@ -13,13 +13,18 @@ export const useSearchFetchTrigger = ({
   typeFilter,
   fetchHistory
 }: UseSearchFetchTriggerOptions) => {
-  useEffect(() => {
-    if (!isComposing) {
-      fetchHistory(true);
-    }
-  }, [debouncedSearch, isComposing, fetchHistory]);
+  // Keep a stable ref to fetchHistory so effect deps don't need it,
+  // avoiding double-fires when both search text and typeFilter change.
+  const fetchHistoryRef = useRef(fetchHistory);
+  fetchHistoryRef.current = fetchHistory;
 
   useEffect(() => {
-    fetchHistory(true);
-  }, [typeFilter, fetchHistory]);
+    if (!isComposing) {
+      fetchHistoryRef.current(true);
+    }
+  }, [debouncedSearch, isComposing]);
+
+  useEffect(() => {
+    fetchHistoryRef.current(true);
+  }, [typeFilter]);
 };

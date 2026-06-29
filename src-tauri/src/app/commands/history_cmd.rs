@@ -109,13 +109,26 @@ pub fn search_clipboard_history(
     search_term: String,
     limit: i32,
     tag_only: Option<bool>,
+    content_type: Option<String>,
 ) -> AppResult<Vec<ClipboardEntry>> {
     let is_tag_only = tag_only.unwrap_or(false);
     let mut history = state.repo.search(&search_term, limit, is_tag_only)?;
 
+    // Apply content_type filter to DB results
+    if let Some(ref ct) = content_type {
+        history.retain(|item| item.content_type == *ct);
+    }
+
     let term = search_term.to_lowercase();
     let session_items = session.inner().0.lock().unwrap();
     for item in session_items.iter().rev() {
+        // Apply content_type filter to session items as well
+        if let Some(ref ct) = content_type {
+            if item.content_type != *ct {
+                continue;
+            }
+        }
+
         let matches = if is_tag_only {
             item.tags.iter().any(|t| t.to_lowercase().contains(&term))
         } else {

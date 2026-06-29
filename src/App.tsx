@@ -395,7 +395,9 @@ const App = () => {
   const [quickPasteHintsById, setQuickPasteHintsById] = useState<Record<number, QuickPasteHint>>(
     {}
   );
-  const PAGE_SIZE = 80;
+  // Use a larger page size when filtering by type, since filtered results
+  // are sparser and the user expects to browse more items at once.
+  const PAGE_SIZE = typeFilter ? 200 : 80;
   const { fetchHistory, loadMoreHistory } = useHistoryFetch({
     debouncedSearch,
     typeFilter,
