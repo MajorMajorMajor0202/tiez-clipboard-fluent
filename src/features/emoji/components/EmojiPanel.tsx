@@ -3,7 +3,7 @@ import type { DragEvent } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Plus, X, Pencil, Check } from "lucide-react";
+import { Plus, X, Pencil } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
 import { createPortal } from "react-dom";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
@@ -845,7 +845,9 @@ const EmojiFavRenameFlyout = ({ initialValue, targetRect, onConfirm, onCancel }:
   };
 
   const top = targetRect.bottom + window.scrollY + 8;
-  const left = targetRect.left + targetRect.width / 2;
+  const windowWidth = typeof window !== "undefined" ? window.innerWidth : 800;
+  const preferredLeft = targetRect.left + targetRect.width / 2 - 96; // 96 is half of 192
+  const flyoutLeft = Math.max(8, Math.min(preferredLeft, windowWidth - 8 - 192));
 
   return createPortal(
     <div
@@ -854,23 +856,20 @@ const EmojiFavRenameFlyout = ({ initialValue, targetRect, onConfirm, onCancel }:
       style={{
         position: "absolute",
         top: `${top}px`,
-        left: `${left}px`,
-        transform: "translateX(-50%)",
+        left: `${flyoutLeft}px`,
         zIndex: 100000,
       }}
     >
-      <form onSubmit={handleSubmit} className="rename-flyout-form">
+      <form onSubmit={handleSubmit} className="rename-flyout-search-wrapper">
+        <Pencil size={12} className="rename-flyout-search-icon" />
         <input
           ref={inputRef}
           type="text"
-          className="rename-flyout-input"
+          className="rename-flyout-search-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="重命名表情..."
         />
-        <button type="submit" className="rename-flyout-submit-btn">
-          <Check size={14} />
-        </button>
       </form>
     </div>,
     document.body
