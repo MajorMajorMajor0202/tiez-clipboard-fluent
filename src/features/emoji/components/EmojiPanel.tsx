@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import type { DragEvent } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Plus, X, Pencil } from "lucide-react";
+import { Plus, X, Pencil, Check } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
+import { createPortal } from "react-dom";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 
 interface EmojiPanelProps {
@@ -195,6 +196,30 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   const [emojiDict, setEmojiDict] = useState<Record<string, EmojiDictEntry>>(() => (window as any).__EMOJI_DICT_CACHE__ ?? {});
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [favNames, setFavNames] = useState<Record<string, string>>({});
+  const [renameTarget, setRenameTarget] = useState<{ path: string; rect: DOMRect } | null>(null);
+
+  // Fetch favorite names on mount
+  useEffect(() => {
+    invoke<Record<string, string>>("get_settings")
+      .then((settings) => {
+        if (settings["app.emoji_favorite_names"]) {
+          try {
+            setFavNames(JSON.parse(settings["app.emoji_favorite_names"]));
+          } catch (e) {
+            console.error("Failed to parse emoji favorite names", e);
+          }
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleRenameFavorite = (path: string, newName: string) => {
+    const updated = { ...favNames, [path]: newName.trim() };
+    setFavNames(updated);
+    saveSetting("app.emoji_favorite_names", JSON.stringify(updated));
+    setRenameTarget(null);
+  };
 
   const currentLang = (language || "zh") as "zh" | "tc" | "en";
 
@@ -697,12 +722,16 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                           className="emoji-fav-rename"
                           onClick={(e) => {
                             e.stopPropagation();
+                            const rect = e.currentTarget.closest(".emoji-fav-card")?.getBoundingClientRect();
+                            if (rect) {
+                              setRenameTarget({ path, rect });
+                            }
                           }}
                         >
                           <Pencil size={11} />
                         </button>
                       </FluentTooltip>
-                      <FluentTooltip text={name}>
+                      <FluentTooltip text={favNames[path] || name}>
                         <button
                           className="emoji-fav-preview"
                           onClick={() => handleSend(path, "image")}
@@ -757,7 +786,94 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
           </div>
         )}
       </div>
+      {renameTarget && (
+        <EmojiFavRenameFlyout
+          initialValue={favNames[renameTarget.path] || renameTarget.path.split(/[/\\]/).pop() || renameTarget.path}
+          targetRect={renameTarget.rect}
+          onConfirm={(val) => handleRenameFavorite(renameTarget.path, val)}
+          onCancel={() => setRenameTarget(null)}
+        />
+      )}
     </div>
+  );
+};
+
+interface RenameFlyoutProps {
+  initialValue: string;
+  targetRect: DOMRect;
+  onConfirm: (val: string) => void;
+  onCancel: () => void;
+}
+
+const EmojiFavRenameFlyout = ({ initialValue, targetRect, onConfirm, onCancel }: RenameFlyoutProps) => {
+  const [value, setValue] = useState(initialValue);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        const isRenameBtn = (e.target as HTMLElement).closest(".emoji-fav-rename");
+        if (!isRenameBtn) {
+          onCancel();
+        }
+      }
+    };
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onCancel();
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onCancel]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onConfirm(value);
+  };
+
+  const top = targetRect.bottom + window.scrollY + 8;
+  const left = targetRect.left + targetRect.width / 2;
+
+  return createPortal(
+    <div
+      ref={containerRef}
+      className="emoji-fav-rename-flyout"
+      style={{
+        position: "absolute",
+        top: `${top}px`,
+        left: `${left}px`,
+        transform: "translateX(-50%)",
+        zIndex: 100000,
+      }}
+    >
+      <form onSubmit={handleSubmit} className="rename-flyout-form">
+        <input
+          ref={inputRef}
+          type="text"
+          className="rename-flyout-input"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="重命名表情..."
+        />
+        <button type="submit" className="rename-flyout-submit-btn">
+          <Check size={14} />
+        </button>
+      </form>
+    </div>,
+    document.body
   );
 };
 

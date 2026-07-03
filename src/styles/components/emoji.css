@@ -471,3 +471,76 @@ body.dark-mode .emoji-fav-rename:hover {
   color: #ffffff !important;
   border-color: var(--line-strong) !important;
 }
+
+/* Favorite Rename Flyout - Fluent UI 3 Style */
+@keyframes rename-flyout-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) translateY(0);
+  }
+}
+
+.emoji-fav-rename-flyout {
+  padding: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  width: 180px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
+  animation: rename-flyout-appear 0.15s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.rename-flyout-form {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.rename-flyout-input {
+  flex: 1;
+  height: 24px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+  font-size: 11px;
+}
+
+.rename-flyout-input:focus {
+  border-color: var(--accent-color);
+}
+
+.rename-flyout-submit-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-color);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.1s ease;
+}
+
+.rename-flyout-submit-btn:hover {
+  background: var(--accent-color-hover, #005a9e);
+}
+
+:root.dark-mode .rename-flyout-input,
+body.dark-mode .rename-flyout-input {
+  border-color: var(--line-strong);
+}
+
+:root.dark-mode .emoji-fav-rename-flyout,
+body.dark-mode .emoji-fav-rename-flyout {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
