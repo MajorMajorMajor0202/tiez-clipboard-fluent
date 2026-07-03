@@ -20,7 +20,7 @@ use crate::services::sensitive_align::spawn_sensitive_alignment;
 use std::ptr::null_mut;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Mutex, OnceLock};
-use tauri::{App, AppHandle, Emitter, Manager};
+use tauri::{App, AppHandle, Emitter, Listener, Manager};
 #[cfg(target_os = "windows")]
 use windows::Win32::Foundation::{HINSTANCE, HWND, POINT, RECT};
 #[cfg(target_os = "windows")]
@@ -461,6 +461,22 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
             IS_HIDDEN.store(false, Ordering::Relaxed);
             CURRENT_DOCK.store(0, Ordering::Relaxed);
         }
+
+        let app_handle = app.handle().clone();
+        window.listen("window-shown", move |_event| {
+            if let Some(w) = app_handle.get_webview_window("main") {
+                let settings = app_handle.state::<SettingsState>();
+                let db_state = app_handle.state::<DbState>();
+                let theme = settings.theme.lock().map(|g| g.clone()).unwrap_or_default();
+                let _ = crate::app::commands::ui_cmd::apply_theme_to_window_internal(
+                    &w,
+                    &db_state,
+                    &theme,
+                    None,
+                    None,
+                );
+            }
+        });
     }
 
     schedule_window_position_repair(app.handle().clone(), s.edge_docking);

@@ -59,15 +59,14 @@ pub fn send_system_notification(app: AppHandle, title: String, body: String) -> 
 }
 
 #[tauri::command]
-pub fn set_theme(
-    window: WebviewWindow,
-    state: State<'_, SettingsState>,
-    db_state: State<'_, DbState>,
-    theme: String,
-    color_mode: Option<String>,
+pub fn apply_theme_to_window_internal(
+    window: &WebviewWindow,
+    db_state: &DbState,
+    theme: &str,
+    color_mode: Option<&str>,
     show_app_border: Option<bool>,
 ) -> AppResult<()> {
-    let mut effective_color_mode = color_mode.clone();
+    let mut effective_color_mode = color_mode.map(|s| s.to_string());
     if effective_color_mode
         .as_deref()
         .map(|v| v.trim().is_empty())
@@ -88,10 +87,6 @@ pub fn set_theme(
     }
     let show_border = effective_show_app_border.unwrap_or(true);
 
-    if let Ok(mut guard) = state.theme.lock() {
-        *guard = theme.clone();
-    }
-
     #[cfg(target_os = "windows")]
     use windows::core::BOOL;
     #[cfg(target_os = "windows")]
@@ -109,7 +104,7 @@ pub fn set_theme(
             .hwnd()
             .map_err(|e| AppError::Internal(e.to_string()))?;
         let hwnd = HWND(hwnd.0 as _);
-        let _ = window_vibrancy::clear_vibrancy(&window);
+        let _ = window_vibrancy::clear_vibrancy(window);
 
         let is_dark = match effective_color_mode.as_deref() {
             Some("light") => false,
@@ -175,14 +170,14 @@ pub fn set_theme(
         let is_win10 = build >= 10240 && build < 22000;
         let is_settings = window.label() == "settings";
 
-        match theme.as_str() {
+        match theme {
             "mica" if is_win11 && !is_settings => {
-                let _ = window_vibrancy::apply_mica(&window, Some(is_dark));
+                let _ = window_vibrancy::apply_mica(window, Some(is_dark));
                 let _ = window.set_shadow(show_border);
             }
             "acrylic" if is_win10_1803 && !is_win10 && !is_settings => {
                 let _ = window_vibrancy::apply_acrylic(
-                    &window,
+                    window,
                     Some(if is_dark {
                         (30, 30, 30, 40)
                     } else {
@@ -209,10 +204,10 @@ pub fn set_theme(
             _ => window.theme().unwrap_or(Theme::Dark) == Theme::Dark,
         };
 
-        let _ = window_vibrancy::clear_vibrancy(&window);
+        let _ = window_vibrancy::clear_vibrancy(window);
         if theme == "mica" || theme == "acrylic" {
             let _ = window_vibrancy::apply_vibrancy(
-                &window,
+                window,
                 window_vibrancy::NSVisualEffectMaterial::HudWindow,
                 None,
                 None,
@@ -220,8 +215,23 @@ pub fn set_theme(
         }
     }
 
-    let _ = window.emit("theme-changed", theme);
+    let _ = window.emit("theme-changed", theme.to_string());
     Ok(())
+}
+
+#[tauri::command]
+pub fn set_theme(
+    window: WebviewWindow,
+    state: State<'_, SettingsState>,
+    db_state: State<'_, DbState>,
+    theme: String,
+    color_mode: Option<String>,
+    show_app_border: Option<bool>,
+) -> AppResult<()> {
+    if let Ok(mut guard) = state.theme.lock() {
+        *guard = theme.clone();
+    }
+    apply_theme_to_window_internal(&window, &db_state, &theme, color_mode.as_deref(), show_app_border)
 }
 
 /// Read the Windows system accent color via WinRT UISettings API.
