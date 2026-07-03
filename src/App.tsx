@@ -363,6 +363,9 @@ const App = () => {
         if (data && Array.isArray(data.groups)) {
           (window as any).__EMOJI_CACHE__ = data.groups;
         }
+        if (data && data.dictionary) {
+          (window as any).__EMOJI_DICT_CACHE__ = data.dictionary;
+        }
       })
       .catch(() => {});
 

@@ -451,7 +451,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       setEmojiDict(cachedDict);
     }
 
-    if (getPreloadedEmojis()) return;
+    if (getPreloadedEmojis() && (window as any).__EMOJI_DICT_CACHE__) return;
 
     let alive = true;
     fetch("/emoji-data.json")
