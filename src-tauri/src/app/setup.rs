@@ -2,7 +2,7 @@
 use crate::app::hooks::{keyboard_proc, mouse_proc};
 #[cfg(target_os = "windows")]
 use crate::app::system::tray_subclass_proc;
-use crate::app::window_manager::{release_win_keys, restore_last_focus, toggle_window};
+use crate::app::window_manager::{release_win_keys, restore_last_focus, reapply_vibrancy, toggle_window};
 use crate::app_state::{
     AppDataDir, EncryptionQueueState, PasteQueue, SessionHistory, SettingsState,
 };
@@ -20,7 +20,7 @@ use crate::services::sensitive_align::spawn_sensitive_alignment;
 use std::ptr::null_mut;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Mutex, OnceLock};
-use tauri::{App, AppHandle, Emitter, Listener, Manager};
+use tauri::{App, AppHandle, Emitter, Manager};
 #[cfg(target_os = "windows")]
 use windows::Win32::Foundation::{HINSTANCE, HWND, POINT, RECT};
 #[cfg(target_os = "windows")]
@@ -461,22 +461,6 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
             IS_HIDDEN.store(false, Ordering::Relaxed);
             CURRENT_DOCK.store(0, Ordering::Relaxed);
         }
-
-        let app_handle = app.handle().clone();
-        window.listen("window-shown", move |_event| {
-            if let Some(w) = app_handle.get_webview_window("main") {
-                let settings = app_handle.state::<SettingsState>();
-                let db_state = app_handle.state::<DbState>();
-                let theme = settings.theme.lock().map(|g| g.clone()).unwrap_or_default();
-                let _ = crate::app::commands::ui_cmd::apply_theme_to_window_internal(
-                    &w,
-                    &db_state,
-                    &theme,
-                    None,
-                    None,
-                );
-            }
-        });
     }
 
     schedule_window_position_repair(app.handle().clone(), s.edge_docking);
@@ -489,6 +473,7 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
             let _ = window.emit("window-shown", ());
+            reapply_vibrancy(app.handle());
         }
     }
 }
@@ -692,6 +677,7 @@ fn start_edge_docking_monitor(app_handle: AppHandle) {
                     if let Some(window) = app_handle.get_webview_window("main") {
                         let _ = window.show();
                         let _ = window.emit("window-shown", ());
+                        reapply_vibrancy(&app_handle);
                         IS_HIDDEN.store(false, Ordering::Relaxed);
                         CURRENT_DOCK.store(0, Ordering::Relaxed);
                     }
@@ -836,6 +822,7 @@ fn start_edge_docking_monitor(app_handle: AppHandle) {
                         if dock_actual != DockPosition::None {
                             let _ = window.show();
                             let _ = window.emit("window-shown", ());
+                            reapply_vibrancy(&app_handle);
                             match dock_actual {
                                 DockPosition::Top => {
                                     let _ = window.set_position(tauri::Position::Physical(
@@ -1035,6 +1022,7 @@ fn setup_tray(app: &App, hide_tray: bool) {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.show();
                     let _ = window.emit("window-shown", ());
+                    reapply_vibrancy(app);
                 }
             } else if event.id.as_ref() == "quit" {
                 app.exit(0);
@@ -1049,6 +1037,7 @@ fn setup_tray(app: &App, hide_tray: bool) {
                 if let Some(window) = tray.app_handle().get_webview_window("main") {
                     let _ = window.show();
                     let _ = window.emit("window-shown", ());
+                    reapply_vibrancy(tray.app_handle());
                     let _ = window.set_focus();
                     let now = std::time::SystemTime::now()
                         .duration_since(std::time::UNIX_EPOCH)

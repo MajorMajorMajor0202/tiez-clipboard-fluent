@@ -1,4 +1,5 @@
 use crate::app_state::SettingsState;
+use crate::database::DbState;
 use crate::global_state::*;
 #[cfg(target_os = "windows")]
 use crate::infrastructure::windows_ext::WindowExt;
@@ -29,6 +30,24 @@ fn monitor_bounds(monitor: &tauri::Monitor) -> MonitorBounds {
         y: position.y,
         width: size.width as i32,
         height: size.height as i32,
+    }
+}
+
+/// Re-applies the active window vibrancy/DWM theme to the main window.
+/// Called after every `window.show()` so that Windows DWM doesn't lose
+/// the Mica/Acrylic effect when the window was previously hidden.
+pub(crate) fn reapply_vibrancy(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let settings = app.state::<SettingsState>();
+        let db_state = app.state::<DbState>();
+        let theme = settings.theme.lock().map(|g| g.clone()).unwrap_or_default();
+        let _ = crate::app::commands::ui_cmd::apply_theme_to_window_internal(
+            &window,
+            &db_state,
+            &theme,
+            None,
+            None,
+        );
     }
 }
 
@@ -377,6 +396,7 @@ pub fn toggle_window(app: &AppHandle) {
         }
 
         let _ = window.emit("window-shown", ());
+        reapply_vibrancy(app);
     }
 }
 
@@ -445,6 +465,7 @@ pub fn focus_clipboard_window(app_handle: AppHandle) -> Result<(), String> {
         let _ = window.set_focusable(true);
         let _ = window.show();
         let _ = window.emit("window-shown", ());
+        reapply_vibrancy(&app_handle);
 
         #[cfg(windows)]
         {
