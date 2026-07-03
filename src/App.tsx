@@ -1122,6 +1122,7 @@ const App = () => {
           handleListScroll={handleListScroll}
           hasMore={effectiveHasMore}
           isLoadingMore={isLoadingMore}
+          language={language}
         />
       </main>
 

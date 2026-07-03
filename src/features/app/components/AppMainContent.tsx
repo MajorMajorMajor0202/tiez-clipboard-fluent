@@ -48,6 +48,7 @@ interface AppMainContentProps {
   handleListScroll: (offset: number) => void;
   hasMore: boolean;
   isLoadingMore: boolean;
+  language: string;
 }
 
 const SortableItem = ({
@@ -118,7 +119,8 @@ const AppMainContent = ({
   loadMoreHistory,
   handleListScroll,
   hasMore,
-  isLoadingMore
+  isLoadingMore,
+  language
 }: AppMainContentProps) => {
   const [pinnedOrderIds, setPinnedOrderIds] = useState<number[]>(
     () => pinnedItems.map((item) => item.id)
@@ -206,6 +208,7 @@ const AppMainContent = ({
           activeTab={emojiPanelTab}
           setActiveTab={setEmojiPanelTab}
           saveSetting={saveSetting}
+          language={language}
         />
       </div>
     );

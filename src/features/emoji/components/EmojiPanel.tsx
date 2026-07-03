@@ -14,10 +14,22 @@ interface EmojiPanelProps {
   activeTab: "emoji" | "favorites";
   setActiveTab: (val: "emoji" | "favorites") => void;
   saveSetting: (key: string, val: string) => void;
+  language?: string;
 }
 
 type EmojiGroup = { name: string; emojis: string[] };
-type EmojiData = { groups?: EmojiGroup[] };
+
+type EmojiDictEntry = {
+  zh: { name: string; keywords: string[] };
+  tc: { name: string; keywords: string[] };
+  en: { name: string; keywords: string[] };
+};
+
+type EmojiData = {
+  version?: number;
+  groups?: EmojiGroup[];
+  dictionary?: Record<string, EmojiDictEntry>;
+};
 
 const FALLBACK_GROUPS: EmojiGroup[] = [
   {
@@ -176,12 +188,21 @@ const getPreloadedEmojis = () => {
   return (window as any).__EMOJI_CACHE__ as EmojiGroup[] | undefined;
 };
 
-const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveSetting }: EmojiPanelProps) => {
+const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveSetting, language }: EmojiPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(() => getPreloadedEmojis() ?? FALLBACK_GROUPS);
+  const [emojiDict, setEmojiDict] = useState<Record<string, EmojiDictEntry>>(() => (window as any).__EMOJI_DICT_CACHE__ ?? {});
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+
+  const currentLang = (language || "zh") as "zh" | "tc" | "en";
+
+  const getEmojiName = (emojiChar: string): string => {
+    const entry = emojiDict[emojiChar];
+    if (!entry) return emojiChar;
+    return entry[currentLang]?.name || entry["zh"]?.name || emojiChar;
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -425,6 +446,11 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   };
 
   useEffect(() => {
+    const cachedDict = (window as any).__EMOJI_DICT_CACHE__;
+    if (cachedDict) {
+      setEmojiDict(cachedDict);
+    }
+
     if (getPreloadedEmojis()) return;
 
     let alive = true;
@@ -436,6 +462,10 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
         if (groups.length > 0) {
           (window as any).__EMOJI_CACHE__ = groups;
           setEmojiGroups(groups);
+        }
+        if (data.dictionary) {
+          (window as any).__EMOJI_DICT_CACHE__ = data.dictionary;
+          setEmojiDict(data.dictionary);
         }
       })
       .catch(() => {
@@ -593,7 +623,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                   <div className="emoji-group-title">{group.name}</div>
                   <div className="emoji-grid">
                     {group.emojis.map((emoji) => (
-                      <FluentTooltip key={`${group.name}-${emoji}`} text={emoji}>
+                      <FluentTooltip key={`${group.name}-${emoji}`} text={getEmojiName(emoji)}>
                         <button
                           className="emoji-btn"
                           onClick={() => handleSend(emoji, "text")}
