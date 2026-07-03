@@ -82,7 +82,7 @@ const SortableItem = ({
         paddingTop: isFirst ? "4px" : undefined
       }}
     >
-      <div style={{ paddingBottom: compactMode ? "2px" : "4px" }}>
+      <div style={{ paddingBottom: compactMode ? "4px" : "8px" }}>
         {renderItem(item, index, controls, true)}
       </div>
     </Reorder.Item>
