@@ -147,8 +147,20 @@ pub fn apply_theme_to_window_internal(
             // and solid text color (DWMWA_TEXT_COLOR) to prevent translucent Acrylic/Mica titlebar.
             let build = windows_version::OsVersion::current().build;
             if build >= 22000 {
-                let caption_color: u32 = if is_dark { 0x00202020 } else { 0x00f3f3f3 };
-                let text_color: u32 = if is_dark { 0x00ffffff } else { 0x001f1f1f };
+                let caption_color: u32 = if theme == "mica" || theme == "acrylic" {
+                    0xFFFFFFFF // DWMWA_COLOR_DEFAULT
+                } else if is_dark {
+                    0x00202020
+                } else {
+                    0x00f3f3f3
+                };
+                let text_color: u32 = if theme == "mica" || theme == "acrylic" {
+                    0xFFFFFFFF // DWMWA_COLOR_DEFAULT
+                } else if is_dark {
+                    0x00ffffff
+                } else {
+                    0x001f1f1f
+                };
                 let _ = DwmSetWindowAttribute(
                     hwnd,
                     DWMWA_CAPTION_COLOR,
@@ -168,14 +180,13 @@ pub fn apply_theme_to_window_internal(
         let is_win11 = build >= 22000;
         let is_win10_1803 = build >= 17134;
         let is_win10 = build >= 10240 && build < 22000;
-        let is_settings = window.label() == "settings";
 
         match theme {
-            "mica" if is_win11 && !is_settings => {
+            "mica" if is_win11 => {
                 let _ = window_vibrancy::apply_mica(window, Some(is_dark));
                 let _ = window.set_shadow(show_border);
             }
-            "acrylic" if is_win10_1803 && !is_win10 && !is_settings => {
+            "acrylic" if is_win10_1803 && !is_win10 => {
                 let _ = window_vibrancy::apply_acrylic(
                     window,
                     Some(if is_dark {

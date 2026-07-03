@@ -144,7 +144,6 @@ const AppHeader = ({
         const isDark = document.documentElement.classList.contains("dark-mode");
         const themeParam = `&theme=${encodeURIComponent(theme || "retro")}`;
         const colorModeParam = `&color_mode=${isDark ? "dark" : "light"}`;
-        const bodyBg = getComputedStyle(document.documentElement).getPropertyValue("--bg-body").trim() || "#f3f3f3";
         const win = new WebviewWindow("settings", {
           url: `index.html?window=settings${accentParam}${themeParam}${colorModeParam}`,
           title: t('settings') || "Settings",
@@ -152,8 +151,8 @@ const AppHeader = ({
           height: 560,
           resizable: true,
           decorations: true,
-          transparent: false,
-          backgroundColor: bodyBg,
+          transparent: true,
+          backgroundColor: "#00000000",
           skipTaskbar: false,
           visible: false,
           alwaysOnTop: isWindowPinned,

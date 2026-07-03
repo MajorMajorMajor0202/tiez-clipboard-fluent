@@ -1,5 +1,5 @@
-body:has(.fluent-settings-layout),
-body:has(.advanced-settings-window-shell) {
+body:has(.fluent-settings-layout):not(.theme-mica):not(.theme-acrylic),
+body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   background-color: var(--bg-body) !important;
 }
 
@@ -8,7 +8,7 @@ body:has(.advanced-settings-window-shell) {
   height: 100vh;
   width: 100vw;
   font-family: var(--fluent-font-family);
-  background-color: var(--bg-body);
+  background-color: var(--bg-window);
   color: var(--text-primary);
   overflow: hidden;
   user-select: none;
