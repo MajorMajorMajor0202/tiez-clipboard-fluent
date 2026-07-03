@@ -464,3 +464,10 @@ body.dark-mode .emoji-fav-add:hover {
 body.dark-mode .emoji-fav-add:hover .emoji-fav-add-btn {
   color: #ffffff !important;
 }
+
+:root.dark-mode .emoji-fav-rename:hover,
+body.dark-mode .emoji-fav-rename:hover {
+  background: #333333 !important;
+  color: #ffffff !important;
+  border-color: var(--line-strong) !important;
+}
