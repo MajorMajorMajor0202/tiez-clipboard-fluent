@@ -431,3 +431,36 @@
   height: 20px;
   z-index: 10;
 }
+
+/* Night Mode (Dark Mode) Adjustments */
+:root.dark-mode .emoji-tab.active .emoji-tab-text,
+body.dark-mode .emoji-tab.active .emoji-tab-text {
+  color: #ffffff !important;
+}
+
+:root.dark-mode .active-tab-bg,
+body.dark-mode .active-tab-bg {
+  background: var(--bg-button);
+  border-color: var(--line-strong);
+}
+
+:root.dark-mode .emoji-btn:hover,
+body.dark-mode .emoji-btn:hover {
+  border-color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-card:hover,
+body.dark-mode .emoji-fav-card:hover {
+  border-color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-add:hover,
+body.dark-mode .emoji-fav-add:hover {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-add:hover .emoji-fav-add-btn,
+body.dark-mode .emoji-fav-add:hover .emoji-fav-add-btn {
+  color: #ffffff !important;
+}
