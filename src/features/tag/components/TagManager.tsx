@@ -1614,6 +1614,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     grid-column: 1 / -1 !important;
                     grid-row: 1 / -1 !important;
                     z-index: 9999 !important;
+                    border-radius: var(--shell-radius);
+                    clip-path: inset(0 round var(--shell-radius));
+                    -webkit-clip-path: inset(0 round var(--shell-radius));
                 }
                 .dark-mode .modal-overlay {
                     background: rgba(0, 0, 0, 0.5) !important;

@@ -344,8 +344,8 @@ export const translations = {
         save_video_as: "将视频另存为...",
         waiting_connection: "等待连接...",
         type_message: "输入消息...",
-        clear_confirm_title: "清空记录",
-        clear_confirm_message: "确定要清空历史记录吗？已置顶和带标签的内容将会被保留。",
+        clear_confirm_title: "要清空历史记录吗?",
+        clear_confirm_message: "已置顶和带标签的内容将会被保留。",
 
         // Errors
         copy_failed: "拷贝失败: ",
@@ -530,8 +530,8 @@ export const translations = {
         emoji_drop_failed: "No importable image was detected. Try dragging the image itself or downloading it first.",
         emoji_favorites_empty: "No favorites yet",
         emoji_empty: "No emoji yet",
-        clear_confirm_title: "Clear History",
-        clear_confirm_message: "Are you sure you want to clear history? Pinned and tagged items will be preserved.",
+        clear_confirm_title: "Clear history?",
+        clear_confirm_message: "Pinned and tagged items will be preserved.",
 
         // Settings - Headers
         general_settings: "General Settings",
@@ -1351,8 +1351,8 @@ export const translations = {
         save_video_as: "將影片另存為...",
         waiting_connection: "等待連線...",
         type_message: "輸入訊息...",
-        clear_confirm_title: "清空紀錄",
-        clear_confirm_message: "確定要清空歷史紀錄嗎？已置頂和帶標籤的內容將會被保留。",
+        clear_confirm_title: "要清空歷史紀錄嗎?",
+        clear_confirm_message: "已置頂和帶標籤的內容將會被保留。",
 
         // Errors
         copy_failed: "複製失敗: ",

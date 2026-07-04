@@ -10,7 +10,9 @@
   justify-content: center;
   z-index: 3000;
   padding: 20px;
-  border-radius: 0;
+  border-radius: var(--shell-radius);
+  clip-path: inset(0 round var(--shell-radius));
+  -webkit-clip-path: inset(0 round var(--shell-radius));
 }
 
 .dark-mode .modal-overlay {
