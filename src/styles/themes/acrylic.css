@@ -99,6 +99,8 @@ body.theme-acrylic::before {
   opacity: 0.18;
   pointer-events: none;
   border-radius: calc(var(--shell-radius) + 1px);
+  clip-path: inset(1px round var(--shell-radius));
+  -webkit-clip-path: inset(1px round var(--shell-radius));
 }
 
 body.has-custom-bg.theme-acrylic::before {

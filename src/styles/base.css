@@ -369,6 +369,8 @@ body {
   box-shadow: var(--shell-shadow);
   backdrop-filter: var(--shell-backdrop-filter);
   -webkit-backdrop-filter: var(--shell-backdrop-filter);
+  clip-path: inset(0 round var(--shell-radius));
+  -webkit-clip-path: inset(0 round var(--shell-radius));
 }
 
 :root.hide-app-border #root,
