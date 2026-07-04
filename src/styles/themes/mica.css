@@ -147,9 +147,9 @@ body.theme-mica #root > * {
   :root.theme-mica:not(.light-mode),
   body.theme-mica:not(.light-mode) {
     --bg-window: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
-    --bg-panel: rgba(30, 30, 30, 0.55);
+    --bg-panel: rgba(255, 255, 255, 0.04);
     --bg-input: #202020;
-    --bg-element: rgba(45, 45, 45, 0.38);
+    --bg-element: rgba(255, 255, 255, 0.07);
     --bg-button: rgba(255, 255, 255, 0.05);
 
     --text-primary: #e8e8e8;
@@ -194,9 +194,9 @@ body.theme-mica #root > * {
 :root.dark-mode.theme-mica,
 body.dark-mode.theme-mica {
   --bg-window: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
-  --bg-panel: rgba(30, 30, 30, 0.55);
+  --bg-panel: rgba(255, 255, 255, 0.04);
   --bg-input: #202020;
-  --bg-element: rgba(45, 45, 45, 0.38);
+  --bg-element: rgba(255, 255, 255, 0.07);
   --bg-button: rgba(255, 255, 255, 0.05);
 
   --text-primary: #e8e8e8;
@@ -246,5 +246,5 @@ body.dark-mode.compact-preview.theme-mica #root {
 body.theme-mica:not(.light-mode) .history-item:hover,
 :root.dark-mode.theme-mica .history-item:hover,
 body.dark-mode.theme-mica .history-item:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
