@@ -155,7 +155,7 @@ pub fn apply_theme_to_window_internal(
             let build = windows_version::OsVersion::current().build;
             if build >= 22000 {
                 let caption_color: u32 = if theme == "mica" || theme == "acrylic" {
-                    0xFFFFFFFF // DWMWA_COLOR_DEFAULT
+                    0xFFFFFFFE // DWMWA_COLOR_NONE (transparent titlebar)
                 } else if is_dark {
                     0x00202020
                 } else {

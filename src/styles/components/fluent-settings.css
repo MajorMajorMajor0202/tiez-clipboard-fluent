@@ -515,3 +515,30 @@ body[data-theme="retro"] .fluent-settings-layout {
   --radius-control: 0px !important;
   border-radius: 0px !important;
 }
+
+/* Disable body rounded corners, borders and clipping for settings windows to align with native title bar */
+body.is-settings-window {
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  border-radius: 0px !important;
+}
+
+body.is-settings-window::before {
+  display: none !important;
+}
+
+body.is-settings-window #root {
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  border-radius: 0px !important;
+}
+
+body.is-settings-window #root::before {
+  display: none !important;
+}
+
+/* Under Mica and Acrylic, let layout background be transparent to merge seamlessly with window backdrop */
+body.theme-mica .fluent-settings-layout,
+body.theme-acrylic .fluent-settings-layout {
+  background-color: transparent !important;
+}

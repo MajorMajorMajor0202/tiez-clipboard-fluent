@@ -26,6 +26,10 @@ const isCompactPreview = params.get("window") === "compact-preview";
 const isAdvancedSettingsWindow = params.get("window") === "advanced-settings";
 const isSettingsWindow = params.get("window") === "settings";
 
+if (isSettingsWindow || isAdvancedSettingsWindow) {
+  document.body.classList.add("is-settings-window");
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     {isCompactPreview
