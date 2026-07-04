@@ -2,9 +2,9 @@
 .modal-overlay {
   position: fixed;
   inset: 0 !important;
-  background: rgba(0, 0, 0, 0.4) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,7 +16,7 @@
 }
 
 .dark-mode .modal-overlay {
-  background: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
 }
 
 body:has(.modal-overlay) #root,

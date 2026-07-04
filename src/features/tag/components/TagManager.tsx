@@ -1607,9 +1607,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 /* Overlay */
                 .modal-overlay {
                     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0, 0, 0, 0.4) !important;
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
+                    background: rgba(255, 255, 255, 0.4) !important;
+                    backdrop-filter: blur(2px) !important;
+                    -webkit-backdrop-filter: blur(2px) !important;
                     display: flex; align-items: center; justify-content: center;
                     grid-column: 1 / -1 !important;
                     grid-row: 1 / -1 !important;
@@ -1619,7 +1619,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     -webkit-clip-path: inset(0 round var(--shell-radius));
                 }
                 .dark-mode .modal-overlay {
-                    background: rgba(0, 0, 0, 0.5) !important;
+                    background: rgba(0, 0, 0, 0.4) !important;
                 }
 
                 /* Confirm Dialog - Modern Style */
