@@ -521,6 +521,7 @@ body.is-settings-window {
   clip-path: none !important;
   -webkit-clip-path: none !important;
   border-radius: 0px !important;
+  background: transparent !important;
 }
 
 body.is-settings-window::before {
@@ -537,8 +538,27 @@ body.is-settings-window #root::before {
   display: none !important;
 }
 
-/* Under Mica and Acrylic, let layout background be transparent to merge seamlessly with window backdrop */
-body.theme-mica .fluent-settings-layout,
-body.theme-acrylic .fluent-settings-layout {
+/* Under Mica and Acrylic, make EVERY paint layer fully transparent so
+   the system-composed Mica backdrop is visible uniformly behind both
+   the native title bar and the webview client area. */
+body.is-settings-window.theme-mica,
+body.is-settings-window.theme-acrylic {
+  background: transparent !important;
   background-color: transparent !important;
 }
+
+body.is-settings-window.theme-mica #root,
+body.is-settings-window.theme-acrylic #root {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.is-settings-window.theme-mica .fluent-settings-layout,
+body.is-settings-window.theme-acrylic .fluent-settings-layout {
+  background-color: transparent !important;
+}
+
