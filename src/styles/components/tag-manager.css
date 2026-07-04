@@ -1018,26 +1018,39 @@
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
 }
 
-.themed-tag-manager .tag-manager-textarea {
+.tag-manager-textarea {
+  display: block !important;
   width: 100% !important;
-  min-height: 132px !important;
-  margin-bottom: 16px !important;
-  padding: 12px !important;
-  border: var(--input-border) !important;
-  border-radius: var(--input-radius) !important;
+  max-width: 232px !important;
+  height: 96px !important;
+  min-height: 96px !important;
+  margin: 0 auto !important;
+  padding: 8px 12px 9px 12px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--line-soft) !important;
+  border-bottom: 1px solid var(--text-secondary) !important;
   background: var(--bg-input) !important;
   box-shadow: var(--input-shadow) !important;
   color: var(--text-primary) !important;
   font-family: inherit !important;
-  font-size: 13px !important;
-  line-height: 1.55 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
   outline: none !important;
   resize: vertical !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s ease, border-bottom-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
 }
 
-.themed-tag-manager .tag-manager-textarea:focus {
-  border-color: var(--input-focus-border-color) !important;
-  box-shadow: var(--input-focus-shadow) !important;
+.tag-manager-textarea:hover {
+  border-color: var(--text-secondary) !important;
+  background: var(--bg-input-hover, var(--bg-input)) !important;
+}
+
+.tag-manager-textarea:focus {
+  border-color: var(--line-soft) !important;
+  border-bottom: 2px solid var(--accent-color) !important;
+  padding-bottom: 8px !important;
+  box-shadow: 0 0 0 1px var(--accent-color) !important;
 }
 
 @container (max-width: 470px) {

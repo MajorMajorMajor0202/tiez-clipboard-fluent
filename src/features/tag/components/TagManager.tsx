@@ -2496,6 +2496,40 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                 }
 
+                .tag-manager-textarea {
+                    display: block !important;
+                    width: 100% !important;
+                    max-width: 232px !important;
+                    height: 96px !important;
+                    min-height: 96px !important;
+                    margin: 0 auto !important;
+                    padding: 8px 12px 9px 12px !important;
+                    border-radius: 4px !important;
+                    border: 1px solid var(--line-soft) !important;
+                    border-bottom: 1px solid var(--text-secondary) !important;
+                    background: var(--bg-input) !important;
+                    box-shadow: var(--input-shadow) !important;
+                    color: var(--text-primary) !important;
+                    font-family: inherit !important;
+                    font-size: 14px !important;
+                    line-height: 20px !important;
+                    outline: none !important;
+                    resize: vertical !important;
+                    box-sizing: border-box !important;
+                    transition: border-color 0.15s ease, border-bottom-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
+                }
+
+                .tag-manager-textarea:hover {
+                    border-color: var(--text-secondary) !important;
+                    background: var(--bg-input-hover, var(--bg-input)) !important;
+                }
+
+                .tag-manager-textarea:focus {
+                    border-color: var(--line-soft) !important;
+                    border-bottom: 2px solid var(--accent-color) !important;
+                    padding-bottom: 8px !important;
+                    box-shadow: 0 0 0 1px var(--accent-color) !important;
+                }
             `}</style>
         </div >
     );
