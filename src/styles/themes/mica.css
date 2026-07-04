@@ -7,7 +7,7 @@ body.theme-mica {
   --bg-toolbar: transparent;
   --bg-panel: rgba(255, 255, 255, 0.6);
   --bg-input: #ffffff;
-  --bg-element: rgba(255, 255, 255, 0.45);
+  --bg-element: rgba(255, 255, 255, 0.68);
   --bg-button: rgba(255, 255, 255, 0.45);
 
   --text-primary: #1a2435;
@@ -24,12 +24,12 @@ body.theme-mica {
   --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.12);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.52);
 
-  --card-border: 1px solid rgba(0, 0, 0, 0.08);
+  --card-border-color: rgba(0, 0, 0, 0.12);
   --card-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.04),
-    0 6px 16px rgba(0, 0, 0, 0.08),
-    -4px 4px 12px rgba(0, 0, 0, 0.04),
-    4px 4px 12px rgba(0, 0, 0, 0.04);
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 12px 24px rgba(0, 0, 0, 0.12),
+    -6px 6px 16px rgba(0, 0, 0, 0.06),
+    6px 6px 16px rgba(0, 0, 0, 0.06);
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.42);
@@ -171,12 +171,12 @@ body.theme-mica #root > * {
     --shadow-lg: 0 22px 44px rgba(0, 0, 0, 0.28);
     --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
-    --card-border: 1px solid rgba(255, 255, 255, 0.08);
+    --card-border-color: rgba(255, 255, 255, 0.15);
     --card-shadow: 
-      0 2px 4px rgba(0, 0, 0, 0.12),
-      0 6px 16px rgba(0, 0, 0, 0.24),
-      -4px 4px 12px rgba(0, 0, 0, 0.12),
-      4px 4px 12px rgba(0, 0, 0, 0.12);
+      0 4px 8px rgba(0, 0, 0, 0.24),
+      0 12px 24px rgba(0, 0, 0, 0.45),
+      -6px 6px 16px rgba(0, 0, 0, 0.24),
+      6px 6px 16px rgba(0, 0, 0, 0.24);
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -225,12 +225,12 @@ body.dark-mode.theme-mica {
   --shadow-lg: 0 22px 44px rgba(0, 0, 0, 0.28);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
-  --card-border: 1px solid rgba(255, 255, 255, 0.08);
+  --card-border-color: rgba(255, 255, 255, 0.15);
   --card-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.12),
-    0 6px 16px rgba(0, 0, 0, 0.24),
-    -4px 4px 12px rgba(0, 0, 0, 0.12),
-    4px 4px 12px rgba(0, 0, 0, 0.12);
+    0 4px 8px rgba(0, 0, 0, 0.24),
+    0 12px 24px rgba(0, 0, 0, 0.45),
+    -6px 6px 16px rgba(0, 0, 0, 0.24),
+    6px 6px 16px rgba(0, 0, 0, 0.24);
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -256,16 +256,23 @@ body.dark-mode.compact-preview.theme-mica #root {
 }
 
 .theme-mica .history-item {
+  border-left: 2px solid var(--card-border-color) !important;
+  border-right: 2px solid var(--card-border-color) !important;
+  border-bottom: 3px solid var(--card-border-color) !important;
+  border-top: none !important;
+  box-shadow: var(--card-shadow) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .theme-mica .history-item:hover {
   background: rgba(255, 255, 255, 0.65) !important;
+  border-color: var(--card-hover-border-color) !important;
 }
 
 body.theme-mica:not(.light-mode) .history-item:hover,
 :root.dark-mode.theme-mica .history-item:hover,
 body.dark-mode.theme-mica .history-item:hover {
   background: rgba(100, 100, 100, 0.45) !important;
+  border-color: var(--card-hover-border-color) !important;
 }
