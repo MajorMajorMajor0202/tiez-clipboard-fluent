@@ -93,10 +93,13 @@ pub fn apply_theme_to_window_internal(
     use windows::Win32::Foundation::HWND;
     #[cfg(target_os = "windows")]
     use windows::Win32::Graphics::Dwm::{
-        DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_USE_IMMERSIVE_DARK_MODE,
+        DwmExtendFrameIntoClientArea, DwmSetWindowAttribute,
+        DWMWA_BORDER_COLOR, DWMWA_USE_IMMERSIVE_DARK_MODE,
         DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND, DWM_WINDOW_CORNER_PREFERENCE,
         DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR,
     };
+    #[cfg(target_os = "windows")]
+    use windows::Win32::UI::Controls::MARGINS;
 
     #[cfg(target_os = "windows")]
     {
@@ -192,24 +195,39 @@ pub fn apply_theme_to_window_internal(
             "mica" if is_win11 => {
                 let _ = window_vibrancy::apply_mica(window, Some(is_dark));
                 let _ = window.set_shadow(show_border);
+                // Extend DWM frame into entire client area so Mica renders
+                // uniformly behind both the native titlebar and the webview.
+                unsafe {
+                    let m = MARGINS { cxLeftWidth: -1, cxRightWidth: -1, cyTopHeight: -1, cyBottomHeight: -1 };
+                    let _ = DwmExtendFrameIntoClientArea(hwnd, &m);
+                }
             }
             "acrylic" if is_win10_1803 && !is_win10 => {
                 let _ = window_vibrancy::apply_acrylic(
                     window,
-                    Some(if is_dark {
-                        (30, 30, 30, 40)
-                    } else {
-                        (240, 240, 240, 40)
-                    }),
+                    Some(if is_dark { (30, 30, 30, 40) } else { (240, 240, 240, 40) }),
                 );
                 let _ = window.set_shadow(show_border);
+                // Same frame-extension for Acrylic
+                unsafe {
+                    let m = MARGINS { cxLeftWidth: -1, cxRightWidth: -1, cyTopHeight: -1, cyBottomHeight: -1 };
+                    let _ = DwmExtendFrameIntoClientArea(hwnd, &m);
+                }
             }
             "acrylic" if is_win10 => {
                 let _ = window.set_shadow(false);
+                unsafe {
+                    let m = MARGINS { cxLeftWidth: 0, cxRightWidth: 0, cyTopHeight: 0, cyBottomHeight: 0 };
+                    let _ = DwmExtendFrameIntoClientArea(hwnd, &m);
+                }
             }
             _ => {
                 let _ = window
                     .set_shadow(show_border && is_win11 && theme != "mica" && theme != "acrylic");
+                unsafe {
+                    let m = MARGINS { cxLeftWidth: 0, cxRightWidth: 0, cyTopHeight: 0, cyBottomHeight: 0 };
+                    let _ = DwmExtendFrameIntoClientArea(hwnd, &m);
+                }
             }
         }
     }
