@@ -458,7 +458,7 @@ pub fn activate_window_focus(app_handle: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn hide_window_cmd(app_handle: AppHandle) -> Result<(), String> {
+pub fn hide_window_cmd(app_handle: AppHandle, restore_focus: Option<bool>) -> Result<(), String> {
     if let Some(window) = app_handle.get_webview_window("main") {
         #[cfg(target_os = "windows")]
         WindowExt::release_win_keys();
@@ -467,7 +467,9 @@ pub fn hide_window_cmd(app_handle: AppHandle) -> Result<(), String> {
         let _ = window.emit("window-hidden", ());
         NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
         NAVIGATION_MODE_ACTIVE.store(false, Ordering::SeqCst);
-        let _ = restore_last_focus(app_handle.clone());
+        if restore_focus.unwrap_or(true) {
+            let _ = restore_last_focus(app_handle.clone());
+        }
     }
     Ok(())
 }

@@ -453,7 +453,7 @@ pub unsafe extern "system" fn mouse_proc(n_code: i32, w_param: WPARAM, l_param: 
                                         // Pinned: Just reset focusable state to ensure we don't retain focus
                                         let _ = window.set_focusable(false);
                                     } else {
-                                        let _ = hide_window_cmd(handle.clone());
+                                        let _ = hide_window_cmd(handle.clone(), None);
                                     }
                                 }
                             }

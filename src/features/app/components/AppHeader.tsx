@@ -135,6 +135,7 @@ const AppHeader = ({
       const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
       const existing = await WebviewWindow.getByLabel("settings");
       if (existing) {
+        await invoke("hide_window_cmd", { restore_focus: false }).catch(console.error);
         await existing.setAlwaysOnTop(isWindowPinned);
         await existing.show();
         await existing.setFocus();
@@ -158,9 +159,10 @@ const AppHeader = ({
           alwaysOnTop: isWindowPinned,
         });
         win.once("tauri://created", () => {
-          win.show().then(() => {
-            win.setFocus();
-          }).catch(console.error);
+          invoke("hide_window_cmd", { restore_focus: false })
+            .then(() => win.show())
+            .then(() => win.setFocus())
+            .catch(console.error);
         });
       }
     } catch (err) {
