@@ -188,14 +188,14 @@
     z-index: 100001;
     border-radius: 4px 4px 0 0 !important;
     border: 1px solid rgba(128, 128, 128, 0.2) !important;
-    background: rgba(255, 255, 255, 0.75) !important;
+    background: #ffffff !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
 
 :root.dark-mode .theme-mica .search-input.dropdown-open,
 :root.dark-mode .theme-acrylic .search-input.dropdown-open {
-    background: rgba(255, 255, 255, 0.18) !important;
+    background: #202020 !important;
     border-top-color: rgba(255, 255, 255, 0.1) !important;
     border-left-color: rgba(255, 255, 255, 0.1) !important;
     border-right-color: rgba(255, 255, 255, 0.1) !important;
