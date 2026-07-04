@@ -5,10 +5,10 @@ body.theme-mica {
   --bg-window: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --bg-content: transparent;
   --bg-toolbar: transparent;
-  --bg-panel: rgba(255, 255, 255, 0.82);
+  --bg-panel: rgba(255, 255, 255, 0.72);
   --bg-input: #ffffff;
-  --bg-element: rgba(255, 255, 255, 0.85);
-  --bg-button: rgba(255, 255, 255, 0.7);
+  --bg-element: rgba(255, 255, 255, 0.72);
+  --bg-button: rgba(255, 255, 255, 0.52);
 
   --text-primary: #1a2435;
   --text-secondary: #607188;
@@ -145,10 +145,10 @@ body.theme-mica #root > * {
   :root.theme-mica:not(.light-mode),
   body.theme-mica:not(.light-mode) {
     --bg-window: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
-    --bg-panel: rgba(30, 30, 30, 0.82);
+    --bg-panel: rgba(30, 30, 30, 0.75);
     --bg-input: #202020;
-    --bg-element: rgba(45, 45, 45, 0.85);
-    --bg-button: rgba(255, 255, 255, 0.08);
+    --bg-element: rgba(45, 45, 45, 0.75);
+    --bg-button: rgba(255, 255, 255, 0.06);
 
     --text-primary: #e8e8e8;
     --text-secondary: #a8a8a8;
@@ -192,10 +192,10 @@ body.theme-mica #root > * {
 :root.dark-mode.theme-mica,
 body.dark-mode.theme-mica {
   --bg-window: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
-  --bg-panel: rgba(30, 30, 30, 0.82);
+  --bg-panel: rgba(30, 30, 30, 0.75);
   --bg-input: #202020;
-  --bg-element: rgba(45, 45, 45, 0.85);
-  --bg-button: rgba(255, 255, 255, 0.08);
+  --bg-element: rgba(45, 45, 45, 0.75);
+  --bg-button: rgba(255, 255, 255, 0.06);
 
   --text-primary: #e8e8e8;
   --text-secondary: #a8a8a8;
