@@ -26,10 +26,10 @@ body.theme-mica {
 
   --card-border-color: rgba(0, 0, 0, 0.12);
   --card-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    0 12px 24px rgba(0, 0, 0, 0.12),
-    -6px 6px 16px rgba(0, 0, 0, 0.06),
-    6px 6px 16px rgba(0, 0, 0, 0.06);
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 12px 28px rgba(0, 0, 0, 0.16),
+    -6px 6px 16px rgba(0, 0, 0, 0.08),
+    6px 6px 16px rgba(0, 0, 0, 0.08);
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.42);
@@ -173,10 +173,10 @@ body.theme-mica #root > * {
 
     --card-border-color: rgba(255, 255, 255, 0.15);
     --card-shadow: 
-      0 4px 8px rgba(0, 0, 0, 0.24),
-      0 12px 24px rgba(0, 0, 0, 0.45),
-      -6px 6px 16px rgba(0, 0, 0, 0.24),
-      6px 6px 16px rgba(0, 0, 0, 0.24);
+      0 2px 6px rgba(0, 0, 0, 0.32),
+      0 12px 28px rgba(0, 0, 0, 0.55),
+      -6px 6px 16px rgba(0, 0, 0, 0.32),
+      6px 6px 16px rgba(0, 0, 0, 0.32);
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -227,10 +227,10 @@ body.dark-mode.theme-mica {
 
   --card-border-color: rgba(255, 255, 255, 0.15);
   --card-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.24),
-    0 12px 24px rgba(0, 0, 0, 0.45),
-    -6px 6px 16px rgba(0, 0, 0, 0.24),
-    6px 6px 16px rgba(0, 0, 0, 0.24);
+    0 2px 6px rgba(0, 0, 0, 0.32),
+    0 12px 28px rgba(0, 0, 0, 0.55),
+    -6px 6px 16px rgba(0, 0, 0, 0.32),
+    6px 6px 16px rgba(0, 0, 0, 0.32);
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -256,10 +256,10 @@ body.dark-mode.compact-preview.theme-mica #root {
 }
 
 .theme-mica .history-item {
-  border-left: 2px solid var(--card-border-color) !important;
-  border-right: 2px solid var(--card-border-color) !important;
-  border-bottom: 3px solid var(--card-border-color) !important;
-  border-top: none !important;
+  border-top: 1px solid var(--card-border-color) !important;
+  border-left: 1px solid var(--card-border-color) !important;
+  border-right: 1px solid var(--card-border-color) !important;
+  border-bottom: 2px solid var(--card-border-color) !important;
   box-shadow: var(--card-shadow) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
