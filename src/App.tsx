@@ -706,8 +706,33 @@ const App = () => {
     setShowEmojiPanel,
     setShowSearchBox,
     setSearchIsFocused,
-    searchInputRef
   ]);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const hasOverlay = document.querySelector(".modal-overlay") !== null;
+      if (hasOverlay) {
+        document.documentElement.classList.add("has-modal");
+      } else {
+        document.documentElement.classList.remove("has-modal");
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    const hasOverlay = document.querySelector(".modal-overlay") !== null;
+    if (hasOverlay) {
+      document.documentElement.classList.add("has-modal");
+    }
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove("has-modal");
+    };
+  }, []);
 
   useEffect(() => {
     if (!emojiPanelEnabled && showEmojiPanel) {
