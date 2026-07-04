@@ -76,6 +76,13 @@ pub unsafe extern "system" fn tray_subclass_proc(
     _id: usize,
     _data: usize,
 ) -> LRESULT {
+    const WM_NCACTIVATE: u32 = 0x0086;
+    if msg == WM_NCACTIVATE {
+        // Force the non-client area to stay active (wparam = TRUE) so that Mica/vibrancy
+        // is always rendered as active, even when the window loses focus.
+        return DefSubclassProc(hwnd, msg, WPARAM(1), lparam);
+    }
+
     let taskbar_msg = TASKBAR_CREATED_MSG.load(Ordering::Relaxed);
     if msg != 0 && msg == taskbar_msg {
         if let Some(app_handle) = crate::GLOBAL_APP_HANDLE.get() {
