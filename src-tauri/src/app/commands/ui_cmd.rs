@@ -120,11 +120,18 @@ pub fn apply_theme_to_window_internal(
                 &dark_mode as *const _ as _,
                 std::mem::size_of::<BOOL>() as u32,
             );
-            // Toggle native DWM border visibility while preserving the window frame/corners.
             const DWMWA_COLOR_DEFAULT: u32 = 0xFFFFFFFF;
             const DWMWA_COLOR_NONE: u32 = 0xFFFFFFFE;
             let border_color: u32 = if show_border {
-                DWMWA_COLOR_DEFAULT
+                if theme == "mica" || theme == "acrylic" {
+                    if is_dark {
+                        0x002d2d2d // Dark grey border for dark Mica/Acrylic
+                    } else {
+                        0x00d5d5d5 // Light grey border for light Mica/Acrylic
+                    }
+                } else {
+                    DWMWA_COLOR_DEFAULT
+                }
             } else {
                 DWMWA_COLOR_NONE
             };
