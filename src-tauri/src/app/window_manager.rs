@@ -36,19 +36,38 @@ fn monitor_bounds(monitor: &tauri::Monitor) -> MonitorBounds {
 /// Re-applies the active window vibrancy/DWM theme to the main window.
 /// Called after every `window.show()` so that Windows DWM doesn't lose
 /// the Mica/Acrylic effect when the window was previously hidden.
+///
+/// Applied immediately, again after 150 ms, and also marked via
+/// VIBRANCY_NEEDS_REAPPLY so the next WindowEvent::Resized handler
+/// (which fires after DWM fully composes the window) can re-apply it too.
 pub(crate) fn reapply_vibrancy(app: &AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let settings = app.state::<SettingsState>();
-        let db_state = app.state::<DbState>();
-        let theme = settings.theme.lock().map(|g| g.clone()).unwrap_or_default();
-        let _ = crate::app::commands::ui_cmd::apply_theme_to_window_internal(
-            &window,
-            &db_state,
-            &theme,
-            None,
-            None,
-        );
-    }
+    // Mark for re-application on the next Resized event (most reliable timing)
+    VIBRANCY_NEEDS_REAPPLY.store(true, Ordering::Relaxed);
+
+    let app_clone = app.clone();
+    let do_apply = |handle: &AppHandle| {
+        if let Some(window) = handle.get_webview_window("main") {
+            let settings = handle.state::<SettingsState>();
+            let db_state = handle.state::<DbState>();
+            let theme = settings.theme.lock().map(|g| g.clone()).unwrap_or_default();
+            let _ = crate::app::commands::ui_cmd::apply_theme_to_window_internal(
+                &window,
+                &db_state,
+                &theme,
+                None,
+                None,
+            );
+        }
+    };
+
+    // Apply immediately
+    do_apply(app);
+
+    // Apply again after DWM has processed ShowWindow paint messages
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        do_apply(&app_clone);
+    });
 }
 
 fn same_monitor(a: &tauri::Monitor, b: &tauri::Monitor) -> bool {

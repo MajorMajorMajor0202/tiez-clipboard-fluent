@@ -1262,6 +1262,14 @@ pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             if window.is_minimized().unwrap_or(false) || window.is_maximized().unwrap_or(false) {
                 return;
             }
+            // Re-apply Mica/Acrylic when the flag is set (set by reapply_vibrancy after
+            // ShowWindow). This fires after DWM has fully composed the window, which is
+            // the most reliable moment to apply SYSTEMBACKDROP_TYPE.
+            if size.width > 0 && size.height > 0
+                && VIBRANCY_NEEDS_REAPPLY.swap(false, Ordering::Relaxed)
+            {
+                reapply_vibrancy(window.app_handle());
+            }
             persist_window_size(window, size.width, size.height);
         }
         tauri::WindowEvent::CloseRequested { api, .. } => {
