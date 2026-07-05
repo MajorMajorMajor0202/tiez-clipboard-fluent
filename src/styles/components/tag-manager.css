@@ -973,7 +973,7 @@
     gap: 4px !important;
   }
 
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item {
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -988,35 +988,35 @@
     flex-shrink: 0 !important;
   }
 
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item:hover {
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item:hover {
     background: rgba(0, 0, 0, 0.04) !important;
     border-color: transparent !important;
   }
 
-  .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item:hover {
+  .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item:hover {
     background: rgba(255, 255, 255, 0.04) !important;
     border-color: transparent !important;
   }
 
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item.active {
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item.active {
     background: rgba(0, 0, 0, 0.06) !important;
     border-color: transparent !important;
   }
 
-  .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item.active {
+  .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item.active {
     background: rgba(255, 255, 255, 0.08) !important;
     border-color: transparent !important;
   }
 
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item .tag-color-wrapper {
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-color-wrapper {
     width: 12px !important;
     height: 12px !important;
     margin: 0 !important;
   }
 
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item .tag-name-area,
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item .tag-name,
-  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-item .tag-badge {
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-name-area,
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-name,
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-badge {
     display: none !important;
   }
 

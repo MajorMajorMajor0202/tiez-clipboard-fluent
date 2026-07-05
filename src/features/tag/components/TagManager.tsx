@@ -289,7 +289,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         return tags.filter(t => t.name.toLowerCase().includes(suggestSearch.toLowerCase()));
     }, [tags, suggestSearch]);
 
-    const selectedIndex = tags.findIndex(tag => tag.name === selectedTag);
+    const currentMainTags = isStacked ? tags : filteredTags;
+    const selectedIndex = currentMainTags.findIndex(tag => tag.name === selectedTag);
 
     const normalizedTagSearch = tagSearch.trim().toLowerCase();
     const canCreateTag = normalizedTagSearch.length > 0
@@ -501,7 +502,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             <div key={selectedTag} className="tag-selection-indicator-inner" />
                         </div>
                     )}
-                    {tags.map(tag => {
+                    {currentMainTags.map(tag => {
                         const tagItemContent = (
                             <div
                                 className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${!isBuiltinSensitiveTag(tag.name) ? 'has-actions' : ''}`}
@@ -608,7 +609,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </span>
                         );
                     })}
-                    {tags.length === 0 && (
+                    {currentMainTags.length === 0 && (
                         <div className="sidebar-status">{t('no_tags')}</div>
                     )}
                 </div>
@@ -2597,10 +2598,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
-                    background: var(--bg-window, #fafafa);
-                    border: var(--flyout-border, 1px solid rgba(0,0,0,0.08));
+                    background: rgba(250, 250, 250, 0.75) !important;
+                    backdrop-filter: blur(20px) saturate(125%) !important;
+                    -webkit-backdrop-filter: blur(20px) saturate(125%) !important;
+                    border: 1px solid rgba(0,0,0,0.08) !important;
                     border-radius: 4px;
-                    box-shadow: var(--flyout-shadow, 0 8px 16px rgba(0,0,0,0.14));
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.14) !important;
                     padding: 4px;
                     z-index: 1000;
                     max-height: 240px;
@@ -2608,7 +2611,63 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     animation: suggestMenuIn 0.20s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .dark-mode .tag-suggestions-dropdown {
-                    background: var(--bg-window, #2d2d2d);
+                    background: rgba(45, 45, 45, 0.75) !important;
+                    border-color: rgba(255, 255, 255, 0.08) !important;
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+                }
+                .tag-suggestions-dropdown .tag-item {
+                    position: relative !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    width: auto !important;
+                    height: 32px !important;
+                    min-height: 32px !important;
+                    padding: 0 12px 0 16px !important;
+                    margin: 0 !important;
+                    border-radius: 4px !important;
+                    cursor: pointer !important;
+                    background: transparent !important;
+                    border: none !important;
+                    gap: 8px !important;
+                    box-sizing: border-box !important;
+                }
+                .tag-suggestions-dropdown .tag-item:hover {
+                    background: rgba(0, 0, 0, 0.04) !important;
+                }
+                .dark-mode .tag-suggestions-dropdown .tag-item:hover {
+                    background: rgba(255, 255, 255, 0.06) !important;
+                }
+                .tag-suggestions-dropdown .tag-item.active {
+                    background: rgba(0, 0, 0, 0.03) !important;
+                }
+                .dark-mode .tag-suggestions-dropdown .tag-item.active {
+                    background: rgba(255, 255, 255, 0.04) !important;
+                }
+                .tag-suggestions-dropdown .tag-item.active::before {
+                    content: "" !important;
+                    position: absolute !important;
+                    left: 6px !important;
+                    top: 50% !important;
+                    transform: translateY(-50%) !important;
+                    width: 3px !important;
+                    height: 16px !important;
+                    border-radius: 1.5px !important;
+                    background: var(--accent-color) !important;
+                }
+                .tag-suggestions-dropdown .tag-item .tag-color-wrapper {
+                    width: 12px !important;
+                    height: 12px !important;
+                    margin: 0 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .tag-suggestions-dropdown .tag-item .tag-name-area,
+                .tag-suggestions-dropdown .tag-item .tag-name {
+                    display: flex !important;
+                    align-items: center !important;
+                    font-size: 13px !important;
+                    color: var(--text-primary) !important;
                 }
                 @keyframes suggestMenuIn {
                     from { opacity: 0; transform: translateY(-4px); }
