@@ -672,7 +672,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             </button>
                                         </>
                                     ) : (
-                                        <button className="toolbar-btn neutral" onClick={() => setIsManageMode(true)}>
+                                        <button className="toolbar-btn ghost" onClick={() => setIsManageMode(true)}>
                                             <CheckSquare size={14} /> <span>{t('manage') || '管理'}</span>
                                         </button>
                                     )}
