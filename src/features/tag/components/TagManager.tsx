@@ -292,9 +292,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const currentMainTags = isStacked ? tags : filteredTags;
     const selectedIndex = currentMainTags.findIndex(tag => tag.name === selectedTag);
 
-    const normalizedTagSearch = tagSearch.trim().toLowerCase();
-    const canCreateTag = normalizedTagSearch.length > 0
-        && !tags.some(tag => tag.name.toLowerCase() === normalizedTagSearch);
 
     const normalizedSuggestSearch = suggestSearch.trim().toLowerCase();
     const canCreateSuggestTag = normalizedSuggestSearch.length > 0
