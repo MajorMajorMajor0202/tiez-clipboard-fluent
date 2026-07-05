@@ -363,15 +363,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             />
                             {(isStacked && effectiveIsCollapsed ? suggestSearch : tagSearch) ? (
                                 <div className="action-icons">
-                                    {(isStacked && effectiveIsCollapsed ? canCreateSuggestTag : canCreateTag) ? (
-                                        <span
-                                            title={t('create_new_tag_tooltip')}
-                                            className="action-icon create"
-                                            onClick={() => createTag(isStacked && effectiveIsCollapsed ? suggestSearch : tagSearch)}
-                                        >
-                                            <Plus size={12} />
-                                        </span>
-                                    ) : null}
                                     <X size={12} className="action-icon clear" onClick={() => {
                                         if (isStacked && effectiveIsCollapsed) {
                                             setSuggestSearch('');
