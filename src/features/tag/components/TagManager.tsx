@@ -59,6 +59,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [isResizing, setIsResizing] = useState(false);
     const [isStacked, setIsStacked] = useState(false);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [suggestSearch, setSuggestSearch] = useState('');
     const [isManageMode, setIsManageMode] = useState(false);
     const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
@@ -284,11 +285,19 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         return tags.filter(t => t.name.toLowerCase().includes(tagSearch.toLowerCase()));
     }, [tags, tagSearch]);
 
-    const selectedIndex = filteredTags.findIndex(tag => tag.name === selectedTag);
+    const filteredSuggestTags = useMemo(() => {
+        return tags.filter(t => t.name.toLowerCase().includes(suggestSearch.toLowerCase()));
+    }, [tags, suggestSearch]);
+
+    const selectedIndex = tags.findIndex(tag => tag.name === selectedTag);
 
     const normalizedTagSearch = tagSearch.trim().toLowerCase();
     const canCreateTag = normalizedTagSearch.length > 0
         && !tags.some(tag => tag.name.toLowerCase() === normalizedTagSearch);
+
+    const normalizedSuggestSearch = suggestSearch.trim().toLowerCase();
+    const canCreateSuggestTag = normalizedSuggestSearch.length > 0
+        && !tags.some(tag => tag.name.toLowerCase() === normalizedSuggestSearch);
 
     const sortedItems = [...tagItems].sort((a, b) => {
         if (sortBy === 'count') return (b.use_count || 0) - (a.use_count || 0);
@@ -320,7 +329,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             <Search size={12} className="search-icon-placeholder" />
                             <input
                                 placeholder={t('find_or_create')}
-                                value={tagSearch}
+                                value={isStacked && effectiveIsCollapsed ? suggestSearch : tagSearch}
                                 onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
                                 onFocus={() => {
                                     invoke('activate_window_focus').catch(console.error);
@@ -329,36 +338,52 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 onBlur={() => {
                                     setTimeout(() => setIsSearchFocused(false), 200);
                                 }}
-                                onChange={e => setTagSearch(e.target.value)}
+                                onChange={e => {
+                                    if (isStacked && effectiveIsCollapsed) {
+                                        setSuggestSearch(e.target.value);
+                                    } else {
+                                        setTagSearch(e.target.value);
+                                    }
+                                }}
                                 onKeyDown={async (e) => {
-                                    if (e.key === 'Enter' && tagSearch.trim()) {
-                                        const exactMatch = tags.find(t => t.name.toLowerCase() === normalizedTagSearch);
-                                        if (exactMatch) {
-                                            loadTagItems(exactMatch.name);
-                                        } else {
-                                            await createTag(tagSearch);
+                                    if (e.key === 'Enter') {
+                                        const currentVal = isStacked && effectiveIsCollapsed ? suggestSearch : tagSearch;
+                                        const currentValTrim = currentVal.trim();
+                                        if (currentValTrim) {
+                                            const exactMatch = tags.find(t => t.name.toLowerCase() === currentValTrim.toLowerCase());
+                                            if (exactMatch) {
+                                                loadTagItems(exactMatch.name);
+                                            } else {
+                                                await createTag(currentVal);
+                                            }
                                         }
                                     }
                                 }}
                             />
-                            {tagSearch ? (
+                            {(isStacked && effectiveIsCollapsed ? suggestSearch : tagSearch) ? (
                                 <div className="action-icons">
-                                    {canCreateTag ? (
+                                    {(isStacked && effectiveIsCollapsed ? canCreateSuggestTag : canCreateTag) ? (
                                         <span
                                             title={t('create_new_tag_tooltip')}
                                             className="action-icon create"
-                                            onClick={() => createTag(tagSearch)}
+                                            onClick={() => createTag(isStacked && effectiveIsCollapsed ? suggestSearch : tagSearch)}
                                         >
                                             <Plus size={12} />
                                         </span>
                                     ) : null}
-                                    <X size={12} className="action-icon clear" onClick={() => setTagSearch('')} />
+                                    <X size={12} className="action-icon clear" onClick={() => {
+                                        if (isStacked && effectiveIsCollapsed) {
+                                            setSuggestSearch('');
+                                        } else {
+                                            setTagSearch('');
+                                        }
+                                    }} />
                                 </div>
                             ) : null}
                         </div>
                         {isStacked && effectiveIsCollapsed && isSearchFocused && (
                             <div className="tag-suggestions-dropdown custom-scrollbar" onMouseDown={e => e.preventDefault()}>
-                                {filteredTags.map(tag => (
+                                {filteredSuggestTags.map(tag => (
                                     <div
                                         key={tag.name}
                                         className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${!isBuiltinSensitiveTag(tag.name) ? 'has-actions' : ''}`}
@@ -448,13 +473,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                         )}
                                     </div>
                                 ))}
-                                {filteredTags.length === 0 && !tagSearch.trim() && (
+                                {filteredSuggestTags.length === 0 && !suggestSearch.trim() && (
                                     <div className="sidebar-status">{t('no_tags')}</div>
                                 )}
-                                {canCreateTag && filteredTags.length === 0 && (
-                                    <div className="tag-item create-hint" onClick={() => createTag(tagSearch)}>
+                                {canCreateSuggestTag && filteredSuggestTags.length === 0 && (
+                                    <div className="tag-item create-hint" onClick={() => createTag(suggestSearch)}>
                                         <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
-                                        <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', tagSearch.trim())}</span>
+                                        <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', suggestSearch.trim())}</span>
                                         <Plus size={10} />
                                     </div>
                                 )}
@@ -476,7 +501,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             <div key={selectedTag} className="tag-selection-indicator-inner" />
                         </div>
                     )}
-                    {filteredTags.map(tag => {
+                    {tags.map(tag => {
                         const tagItemContent = (
                             <div
                                 className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${!isBuiltinSensitiveTag(tag.name) ? 'has-actions' : ''}`}
@@ -583,15 +608,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </span>
                         );
                     })}
-                    {filteredTags.length === 0 && !tagSearch.trim() && (
+                    {tags.length === 0 && (
                         <div className="sidebar-status">{t('no_tags')}</div>
-                    )}
-                    {!effectiveIsCollapsed && canCreateTag && filteredTags.length === 0 && (
-                        <div className="tag-item create-hint" onClick={() => createTag(tagSearch)}>
-                            <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
-                            <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', tagSearch.trim())}</span>
-                            <Plus size={10} />
-                        </div>
                     )}
                 </div>
 
@@ -997,7 +1015,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: transparent;
                     border-radius: 0;
                     box-shadow: none;
-                    overflow: hidden;
+                    overflow: visible;
                     border: none;
                 }
                 .sidebar-collapsed .tag-sidebar { width: 50px; }
@@ -1947,7 +1965,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-radius: 0;
                     background: transparent;
                     box-shadow: none;
-                    overflow: hidden;
+                    overflow: visible;
                 }
 
                 .theme-mica.sidebar-collapsed .tag-sidebar,
@@ -2564,6 +2582,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-bottom: 2px solid var(--accent-color) !important;
                     padding-bottom: 8px !important;
                     box-shadow: 0 0 0 1px var(--accent-color) !important;
+                }
+
+                .tag-search-box {
+                    overflow: visible !important;
                 }
 
                 .tag-suggestions-dropdown {
