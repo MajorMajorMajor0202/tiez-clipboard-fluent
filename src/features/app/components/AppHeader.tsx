@@ -362,7 +362,7 @@ const AppHeader = ({
                   position: 'relative',
                   display: 'flex',
                   gap: '8px',
-                  padding: '8px 0 16px 0',
+                  padding: '8px 0 12px 0',
                   overflowX: 'auto',
                   overflowY: 'clip',
                   scrollbarWidth: 'none',

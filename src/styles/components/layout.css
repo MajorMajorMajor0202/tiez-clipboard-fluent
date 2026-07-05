@@ -1,5 +1,5 @@
 header {
-  padding: 6px 0;
+  padding: 6px 0 2px 0;
   background: var(--bg-toolbar);
   border-bottom: var(--toolbar-border);
   box-shadow: var(--toolbar-shadow);
@@ -141,7 +141,7 @@ header.subpage-header {
 /* Accent underline indicator — 16×3px, shared element animated with horizontal stretch */
 .type-filter-indicator {
   position: absolute;
-  bottom: 8px;
+  bottom: 4px;
   left: 0;
   width: 16px;
   height: 3px;
@@ -261,7 +261,7 @@ select.search-input option {
 .main-content {
   flex: 1;
   overflow-y: hidden;
-  padding: 6px 0 12px 0;
+  padding: 2px 0 12px 0;
   display: flex;
   flex-direction: column;
   background: var(--bg-content);
