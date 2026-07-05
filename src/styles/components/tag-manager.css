@@ -27,10 +27,10 @@
 
 .themed-tag-manager .tag-sidebar,
 .themed-tag-manager .tag-content {
-  border: var(--panel-border) !important;
-  border-radius: 4px !important;
-  background: var(--bg-panel) !important;
-  box-shadow: var(--panel-shadow) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .themed-tag-manager .tag-sidebar {
@@ -50,8 +50,8 @@
 .theme-mica .tag-content,
 .theme-acrylic .tag-sidebar,
 .theme-acrylic .tag-content {
-  backdrop-filter: blur(18px) saturate(115%);
-  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .themed-tag-manager .sidebar-header {
@@ -63,7 +63,7 @@
   justify-content: flex-end !important;
   border-top: 1px solid var(--panel-divider-color) !important;
   border-bottom: none !important;
-  background: var(--panel-header-background) !important;
+  background: transparent !important;
   color: var(--text-secondary) !important;
 }
 
@@ -482,7 +482,7 @@
   flex-direction: column !important;
   gap: 8px !important;
   border-bottom: 1px solid var(--panel-divider-color) !important;
-  background: var(--panel-header-background) !important;
+  background: transparent !important;
   flex-shrink: 0 !important;
 }
 

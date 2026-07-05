@@ -876,11 +876,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     flex-shrink: 0;
                     display: flex;
                     flex-direction: column;
-                    background: var(--bg-panel);
-                    border-radius: 4px;
+                    background: transparent;
+                    border-radius: 0;
                     box-shadow: none;
                     overflow: hidden;
-                    border: var(--panel-border);
+                    border: none;
                 }
                 .sidebar-collapsed .tag-sidebar { width: 50px; }
                 
@@ -1156,7 +1156,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     flex-direction: column;
                     gap: 8px;
                     border-bottom: 1px solid var(--panel-divider-color);
-                    background: var(--bg-panel);
+                    background: transparent;
                     padding: 8px 8px;
                     flex-shrink: 0;
                 }
@@ -1825,10 +1825,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .tag-sidebar,
                 .theme-acrylic .tag-sidebar {
                     width: clamp(196px, 24%, 248px);
-                    border: var(--panel-border);
-                    border-radius: 4px;
-                    background: var(--bg-panel);
-                    box-shadow: var(--panel-shadow);
+                    border: none;
+                    border-radius: 0;
+                    background: transparent;
+                    box-shadow: none;
                     overflow: hidden;
                 }
 
@@ -2019,10 +2019,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-mica .tag-content,
                 .theme-acrylic .tag-content {
                     min-width: 180px;
-                    border: var(--panel-border);
-                    border-radius: 4px;
-                    background: var(--bg-panel);
-                    box-shadow: var(--panel-shadow);
+                    border: none;
+                    border-radius: 0;
+                    background: transparent;
+                    box-shadow: none;
                 }
 
                 .theme-mica .content-toolbar,
