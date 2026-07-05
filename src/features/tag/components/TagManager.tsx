@@ -2613,31 +2613,35 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     width: auto !important;
                     height: 32px !important;
                     min-height: 32px !important;
-                    padding: 0 12px 0 16px !important;
+                    padding: 0 10px !important;
                     margin: 0 !important;
                     border-radius: 4px !important;
                     cursor: pointer !important;
                     background: transparent !important;
-                    border: none !important;
-                    gap: 8px !important;
+                    border: 1px solid transparent !important;
+                    gap: 10px !important;
                     box-sizing: border-box !important;
+                    transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease !important;
                 }
                 .tag-suggestions-dropdown .tag-item:hover {
-                    background: rgba(0, 0, 0, 0.04) !important;
+                    background: rgba(0, 0, 0, 0.06) !important;
+                    border-color: transparent !important;
                 }
                 .dark-mode .tag-suggestions-dropdown .tag-item:hover {
-                    background: rgba(255, 255, 255, 0.06) !important;
+                    background: rgba(255, 255, 255, 0.08) !important;
                 }
                 .tag-suggestions-dropdown .tag-item.active {
-                    background: rgba(0, 0, 0, 0.03) !important;
+                    background: rgba(0, 0, 0, 0.06) !important;
+                    border-color: transparent !important;
+                    box-shadow: none !important;
                 }
                 .dark-mode .tag-suggestions-dropdown .tag-item.active {
-                    background: rgba(255, 255, 255, 0.06) !important;
+                    background: rgba(255, 255, 255, 0.08) !important;
                 }
                 .tag-suggestions-dropdown .tag-item.active::before {
                     content: "" !important;
                     position: absolute !important;
-                    left: 6px !important;
+                    left: 0 !important;
                     top: 50% !important;
                     transform: translateY(-50%) !important;
                     width: 3px !important;
