@@ -325,7 +325,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         >
             <div className="tag-sidebar">
                 {(!effectiveIsCollapsed || isStacked) && (
-                    <div className="tag-search-box">
+                    <div className={`tag-search-box ${isStacked && effectiveIsCollapsed && isSearchFocused ? 'suggestions-open' : ''}`}>
                         <div className="search-input-wrapper">
                             <Search size={12} className="search-icon-placeholder" />
                             <input
@@ -2587,6 +2587,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .tag-search-box {
                     overflow: visible !important;
+                }
+                .tag-search-box.suggestions-open {
+                    border-bottom-left-radius: 0 !important;
+                    border-bottom-right-radius: 0 !important;
                 }
 
                 .tag-suggestions-dropdown {
