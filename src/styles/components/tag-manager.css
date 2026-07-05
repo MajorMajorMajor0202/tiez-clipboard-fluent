@@ -540,6 +540,16 @@
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+
+.themed-tag-manager .item-count {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  margin-left: 6px !important;
 }
 
 .themed-tag-manager .toolbar-divider {
