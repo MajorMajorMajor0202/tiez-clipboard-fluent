@@ -2591,18 +2591,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .tag-suggestions-dropdown {
                     position: absolute;
-                    top: 100%;
-                    left: 0;
-                    right: 0;
-                    margin-top: 4px;
+                    top: 100% !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    margin-top: 0 !important;
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
-                    background: rgba(250, 250, 250, 0.96) !important;
-                    backdrop-filter: blur(30px) saturate(125%) !important;
-                    -webkit-backdrop-filter: blur(30px) saturate(125%) !important;
+                    background: rgba(250, 250, 250, 0.99) !important;
                     border: 1px solid rgba(0,0,0,0.08) !important;
-                    border-radius: 4px;
+                    border-top: none !important;
+                    border-radius: 0 0 4px 4px !important;
                     box-shadow: 0 8px 16px rgba(0,0,0,0.14) !important;
                     padding: 4px;
                     z-index: 1000;
@@ -2611,7 +2610,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     animation: suggestMenuIn 0.20s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .dark-mode .tag-suggestions-dropdown {
-                    background: rgba(45, 45, 45, 0.96) !important;
+                    background: rgba(45, 45, 45, 0.99) !important;
                     border-color: rgba(255, 255, 255, 0.08) !important;
                     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
                 }
