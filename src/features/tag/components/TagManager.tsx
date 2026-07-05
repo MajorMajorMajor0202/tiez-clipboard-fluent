@@ -1698,6 +1698,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     transition: all 0.15s ease;
                 }
                 .themed-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px var(--shadow); border-color: var(--accent-color); }
+                .dark-mode .themed-card:hover { border-color: var(--line-strong, rgba(255, 255, 255, 0.16)) !important; }
 
                 .del-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; opacity: 0.4; transition: opacity 0.15s; }
                 .del-btn:hover { opacity: 1; color: #ff4d4f; }
@@ -2226,6 +2227,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-color: rgba(var(--accent-color-rgb), 0.14);
                     box-shadow: 0 18px 34px rgba(15, 23, 42, 0.1);
                     background: var(--bg-input);
+                }
+                .dark-mode.theme-mica .themed-card:hover,
+                .dark-mode.theme-acrylic .themed-card:hover {
+                    border-color: rgba(255, 255, 255, 0.12) !important;
                 }
 
                 .theme-mica .items-list .themed-card,
