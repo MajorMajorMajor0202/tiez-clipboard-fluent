@@ -770,7 +770,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 <button className="confirm-dialog-button" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
                                     {t('cancel')}
                                 </button>
-                                <button className="confirm-dialog-button primary danger" onClick={async () => {
+                                <button className="confirm-dialog-button primary" onClick={async () => {
                                     if (itemDeleteConfirmation.id === -1) {
                                         // Bulk delete
                                         try {
