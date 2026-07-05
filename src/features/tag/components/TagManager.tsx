@@ -62,6 +62,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [isManageMode, setIsManageMode] = useState(false);
     const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
+    const effectiveIsCollapsed = isStacked ? true : isCollapsed;
 
     const selectedTagRef = useRef<string | null>(null);
     useEffect(() => { selectedTagRef.current = selectedTag; }, [selectedTag]);
@@ -158,7 +159,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             document.body.style.cursor = "";
             document.body.style.userSelect = "";
         };
-    }, [isResizing, isCollapsed]);
+    }, [isResizing, effectiveIsCollapsed]);
 
     const fetchTags = async () => {
         try {
@@ -305,15 +306,15 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     return (
         <div
             ref={containerRef}
-            className={`themed-tag-manager theme-${theme} ${isCollapsed ? 'sidebar-collapsed' : ''} ${isStacked ? 'stacked-layout' : ''}`}
+            className={`themed-tag-manager theme-${theme} ${effectiveIsCollapsed ? 'sidebar-collapsed' : ''} ${isStacked ? 'stacked-layout' : ''}`}
             style={{ 
-                ["--tm-sidebar-width" as any]: isCollapsed ? '50px' : `${sidebarWidth}px`,
+                ["--tm-sidebar-width" as any]: effectiveIsCollapsed ? '50px' : `${sidebarWidth}px`,
                 ["--tm-sidebar-height" as any]: `${sidebarHeight}px`
             } as any}
             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
         >
             <div className="tag-sidebar">
-                {(!isCollapsed || isStacked) && (
+                {(!effectiveIsCollapsed || isStacked) && (
                     <div className="tag-search-box">
                         <div className="search-input-wrapper">
                             <Search size={12} className="search-icon-placeholder" />
@@ -355,7 +356,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 </div>
                             ) : null}
                         </div>
-                        {isStacked && isCollapsed && isSearchFocused && (
+                        {isStacked && effectiveIsCollapsed && isSearchFocused && (
                             <div className="tag-suggestions-dropdown custom-scrollbar" onMouseDown={e => e.preventDefault()}>
                                 {filteredTags.map(tag => (
                                     <div
@@ -462,13 +463,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     </div>
                 )}
 
-                {!(isStacked && isCollapsed) && (
-                    <div className="tag-scroll custom-scrollbar">
+                <div className="tag-scroll custom-scrollbar">
                     {selectedIndex !== -1 && (
                         <div
                             className="tag-selection-indicator"
                             style={{
-                                transform: isStacked && isCollapsed
+                                transform: isStacked && effectiveIsCollapsed
                                     ? `translateX(${selectedIndex * 36}px)`
                                     : `translateY(${16 + selectedIndex * 36}px)`,
                             }}
@@ -504,7 +504,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                         }}
                                     />
                                 </div>
-                                {!isCollapsed && (
+                                {!effectiveIsCollapsed && (
                                     editingTag === tag.name ? (
                                         <input
                                             className="inline-tag-edit"
@@ -566,7 +566,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             </div>
                         );
 
-                        return isCollapsed ? (
+                        return effectiveIsCollapsed ? (
                             <FluentTooltip
                                 key={tag.name}
                                 text={tag.name.toLowerCase() === "sensitive"
@@ -586,23 +586,22 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {filteredTags.length === 0 && !tagSearch.trim() && (
                         <div className="sidebar-status">{t('no_tags')}</div>
                     )}
-                    {!isCollapsed && canCreateTag && filteredTags.length === 0 && (
+                    {!effectiveIsCollapsed && canCreateTag && filteredTags.length === 0 && (
                         <div className="tag-item create-hint" onClick={() => createTag(tagSearch)}>
                             <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
                             <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', tagSearch.trim())}</span>
                             <Plus size={10} />
                         </div>
                     )}
-                    </div>
-                )}
+                </div>
 
                 {!isStacked && (
                     <div className="sidebar-header">
-                        <FluentTooltip text={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}>
+                        <FluentTooltip text={effectiveIsCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}>
                             <button
                                 className="collapse-toggle"
                                 onClick={() => {
-                                    const newCollapsed = !isCollapsed;
+                                    const newCollapsed = !effectiveIsCollapsed;
                                     setIsCollapsed(newCollapsed);
                                     if (!newCollapsed && sidebarWidth < 108) {
                                         setSidebarWidth(160);
@@ -610,9 +609,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 }}
                             >
                                 {isStacked ? (
-                                    isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
+                                    effectiveIsCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
                                 ) : (
-                                    isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
+                                    effectiveIsCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
                                 )}
                             </button>
                         </FluentTooltip>
@@ -620,7 +619,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 )}
             </div>
 
-            {!isCollapsed && (
+            {!effectiveIsCollapsed && (
                 <div 
                     className={`tag-divider ${isResizing ? 'active' : ''} ${isStacked ? 'stacked-divider' : ''}`}
                     onMouseDown={(e) => {
