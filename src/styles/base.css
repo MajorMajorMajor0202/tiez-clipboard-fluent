@@ -369,8 +369,6 @@ body {
   box-shadow: var(--shell-shadow);
   backdrop-filter: var(--shell-backdrop-filter);
   -webkit-backdrop-filter: var(--shell-backdrop-filter);
-  clip-path: inset(0 round var(--shell-radius));
-  -webkit-clip-path: inset(0 round var(--shell-radius));
 }
 
 :root.hide-app-border #root,
@@ -389,8 +387,6 @@ body.hide-app-border #root {
   height: 100%;
   border-radius: inherit;
   overflow: hidden;
-  -webkit-clip-path: inset(0 round var(--shell-radius));
-  clip-path: inset(0 round var(--shell-radius));
 
   /* Content Transition: slide down and fade out by default (closing/closed state) */
   opacity: 0;
