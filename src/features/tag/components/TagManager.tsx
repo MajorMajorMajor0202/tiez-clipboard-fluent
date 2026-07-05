@@ -672,7 +672,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             </button>
                                         </>
                                     ) : (
-                                        <button className="toolbar-btn neutral" onClick={() => setIsManageMode(true)}>
+                                        <button className="toolbar-btn neutral manage-trigger-btn" onClick={() => setIsManageMode(true)}>
                                             <CheckSquare size={14} /> <span>{t('manage') || '管理'}</span>
                                         </button>
                                     )}
@@ -1410,6 +1410,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-color: var(--line-strong) !important;
                 }
                 .dark-mode .toolbar-btn.neutral.manage-btn:active:not(:disabled) {
+                    background: #202020 !important;
+                }
+                .toolbar-btn.neutral.manage-trigger-btn {
+                    background: #ffffff !important;
+                    border-color: var(--line-soft) !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.015), inset 0 -1px 0 rgba(0, 0, 0, 0.05) !important;
+                }
+                .toolbar-btn.neutral.manage-trigger-btn:hover:not(:disabled) {
+                    background: #fafafa !important;
+                    border-color: var(--line-strong) !important;
+                }
+                .toolbar-btn.neutral.manage-trigger-btn:active:not(:disabled) {
+                    background: #f0f0f0 !important;
+                }
+                .dark-mode .toolbar-btn.neutral.manage-trigger-btn {
+                    background: #2d2d2d !important;
+                    border-color: var(--line-soft) !important;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(255, 255, 255, 0.02) !important;
+                }
+                .dark-mode .toolbar-btn.neutral.manage-trigger-btn:hover:not(:disabled) {
+                    background: #323232 !important;
+                    border-color: var(--line-strong) !important;
+                }
+                .dark-mode .toolbar-btn.neutral.manage-trigger-btn:active:not(:disabled) {
                     background: #202020 !important;
                 }
                 .dark-mode .toolbar-btn.neutral {
