@@ -2598,9 +2598,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
-                    background: rgba(250, 250, 250, 0.96) !important;
-                    backdrop-filter: blur(30px) saturate(125%) !important;
-                    -webkit-backdrop-filter: blur(30px) saturate(125%) !important;
+                    background: rgba(246, 246, 246, 0.82) !important;
+                    backdrop-filter: blur(40px) saturate(160%) !important;
+                    -webkit-backdrop-filter: blur(40px) saturate(160%) !important;
                     border: 1px solid rgba(0,0,0,0.08) !important;
                     border-radius: 4px;
                     box-shadow: 0 8px 16px rgba(0,0,0,0.14) !important;
@@ -2611,7 +2611,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     animation: suggestMenuIn 0.20s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .dark-mode .tag-suggestions-dropdown {
-                    background: rgba(45, 45, 45, 0.96) !important;
+                    background: rgba(32, 32, 32, 0.82) !important;
                     border-color: rgba(255, 255, 255, 0.08) !important;
                     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
                 }
