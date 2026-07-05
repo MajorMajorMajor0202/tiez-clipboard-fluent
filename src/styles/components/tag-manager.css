@@ -688,6 +688,15 @@
   transform: var(--card-hover-transform) !important;
 }
 
+.dark-mode .themed-tag-manager .themed-card:hover {
+  border-color: var(--line-strong, rgba(255, 255, 255, 0.16)) !important;
+}
+
+.dark-mode.theme-mica .themed-tag-manager .themed-card:hover,
+.dark-mode.theme-acrylic .themed-tag-manager .themed-card:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
 .themed-tag-manager .items-list .themed-card {
   min-height: 84px !important;
 }
