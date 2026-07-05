@@ -263,6 +263,8 @@ body.dark-mode.compact-preview.theme-mica #root {
   box-shadow: var(--card-shadow) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  clip-path: inset(0px -40px -40px -40px);
+  -webkit-clip-path: inset(0px -40px -40px -40px);
 }
 
 .theme-mica .history-item:hover {
