@@ -421,9 +421,14 @@ const SettingsWindow = () => {
     updateIndicator();
   }, [updateIndicator]);
 
+  // Re-measure on resize
   useEffect(() => {
-    window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
+    if (!sidebarRef.current) return;
+    const observer = new ResizeObserver(() => {
+      updateIndicator();
+    });
+    observer.observe(sidebarRef.current);
+    return () => observer.disconnect();
   }, [updateIndicator]);
 
   useEffect(() => {

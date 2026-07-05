@@ -126,8 +126,12 @@ const AppHeader = ({
 
   // Re-measure on resize
   useEffect(() => {
-    window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
+    if (!filterBarRef.current) return;
+    const observer = new ResizeObserver(() => {
+      updateIndicator();
+    });
+    observer.observe(filterBarRef.current);
+    return () => observer.disconnect();
   }, [updateIndicator]);
 
   const handleOpenSettings = useCallback(async () => {

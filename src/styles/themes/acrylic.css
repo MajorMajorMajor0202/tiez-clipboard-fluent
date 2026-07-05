@@ -30,7 +30,7 @@ body.theme-acrylic {
   --shell-border: 1px solid rgba(255, 255, 255, 0.32);
   --shell-shadow: 0 10px 38px rgba(0, 0, 0, 0.16);
   --shell-radius: 10px;
-  --shell-backdrop-filter: blur(28px) saturate(180%);
+  --shell-backdrop-filter: none;
 
   --toolbar-border: 1px solid rgba(255, 255, 255, 0.24);
 
@@ -161,7 +161,7 @@ body.theme-acrylic #root > * {
 
     --shell-background: rgba(20, 20, 20, calc(0.52 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.12);
-    --shell-backdrop-filter: blur(30px) saturate(145%);
+    --shell-backdrop-filter: none;
     --toolbar-border: 1px solid rgba(255, 255, 255, 0.08);
     --panel-border: 1px solid rgba(255, 255, 255, 0.1);
     --menu-border: 1px solid rgba(255, 255, 255, 0.1);
@@ -203,7 +203,7 @@ body.dark-mode.theme-acrylic {
 
   --shell-background: rgba(20, 20, 20, calc(0.52 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.12);
-  --shell-backdrop-filter: blur(30px) saturate(145%);
+  --shell-backdrop-filter: none;
   --toolbar-border: 1px solid rgba(255, 255, 255, 0.08);
   --panel-border: 1px solid rgba(255, 255, 255, 0.1);
   --menu-border: 1px solid rgba(255, 255, 255, 0.1);

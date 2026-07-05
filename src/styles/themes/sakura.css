@@ -48,7 +48,7 @@ body.theme-sakura {
     rgba(255, 250, 252, calc(0.7 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.6);
   --shell-shadow: 0 16px 48px rgba(255, 133, 161, 0.15);
-  --shell-backdrop-filter: blur(16px) saturate(160%);
+  --shell-backdrop-filter: none;
   --shell-radius: 14px;
 
   --toolbar-border: 1px solid rgba(212, 96, 122, 0.12);
