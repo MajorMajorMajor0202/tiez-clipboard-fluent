@@ -728,8 +728,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 <div className="modal-overlay" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
-                            <h3>要删除标签吗？</h3>
-                            <p>
+                            <h3 className="confirm-dialog-title">要删除标签吗？</h3>
+                            <p className="confirm-dialog-message">
                                 此操作将永久删除该标签及其下的所有条目。
                                 <br />
                                 <span className="tag-highlight" style={{ marginTop: '8px', display: 'inline-block' }}>
@@ -762,8 +762,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 <div className="modal-overlay" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
-                            <h3>要删除记录吗？</h3>
-                            <p>此操作无法撤回。</p>
+                            <h3 className="confirm-dialog-title">要删除记录吗？</h3>
+                            <p className="confirm-dialog-message">此操作无法撤回。</p>
                         </div>
                         <div className="confirm-dialog-lower">
                             <div className="confirm-dialog-buttons">
@@ -803,7 +803,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 <div className="modal-overlay" onClick={() => setIsCreatingItem(false)}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
-                            <h3>{t('add_item')}</h3>
+                            <h3 className="confirm-dialog-title">{t('add_item')}</h3>
                             <div className="modal-input-field" style={{ marginTop: '12px' }}>
                                 <textarea
                                     className="tag-manager-textarea"
@@ -834,7 +834,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 <div className="modal-overlay" onClick={() => setEditingItem(null)}>
                     <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
                         <div className="confirm-dialog-upper">
-                            <h3>{t('edit_item')}</h3>
+                            <h3 className="confirm-dialog-title">{t('edit_item')}</h3>
                             <div className="modal-input-field" style={{ marginTop: '12px' }}>
                                 <textarea
                                     className="tag-manager-textarea"
