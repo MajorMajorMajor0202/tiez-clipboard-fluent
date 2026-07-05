@@ -2,7 +2,6 @@
   --tm-gap: 12px;
   --tm-sidebar-width: clamp(184px, 25%, 216px);
   --tm-sidebar-collapsed-width: 50px;
-  position: relative !important;
   display: flex !important;
   height: 100% !important;
   min-height: 0 !important;
