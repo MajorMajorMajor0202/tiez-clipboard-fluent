@@ -26,7 +26,7 @@ body.theme-mica {
 
   --card-border-color: rgba(0, 0, 0, 0.12);
   --card-shadow: 
-    0 2px 3px rgba(0, 0, 0, 0.1);
+    0 2px 3px rgba(0, 0, 0, 1.0);
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.42);
@@ -170,7 +170,7 @@ body.theme-mica #root > * {
 
     --card-border-color: rgba(255, 255, 255, 0.15);
     --card-shadow: 
-      0 2px 3px rgba(0, 0, 0, 0.5);
+      0 2px 3px rgba(0, 0, 0, 1.0);
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -221,7 +221,7 @@ body.dark-mode.theme-mica {
 
   --card-border-color: rgba(255, 255, 255, 0.15);
   --card-shadow: 
-    0 2px 3px rgba(0, 0, 0, 0.5);
+    0 2px 3px rgba(0, 0, 0, 1.0);
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
