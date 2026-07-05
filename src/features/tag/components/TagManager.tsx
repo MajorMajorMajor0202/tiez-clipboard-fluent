@@ -58,6 +58,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [sidebarHeight, setSidebarHeight] = useState(180);
     const [isResizing, setIsResizing] = useState(false);
     const [isStacked, setIsStacked] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [isManageMode, setIsManageMode] = useState(false);
     const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
@@ -95,7 +96,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     useEffect(() => {
         const mediaQuery = window.matchMedia("(max-width: 480px)");
         const updateLayoutMode = () => {
-            setIsStacked(mediaQuery.matches);
+            const matches = mediaQuery.matches;
+            setIsStacked(matches);
+            if (matches) {
+                setIsCollapsed(true);
+            }
         };
 
         updateLayoutMode();
@@ -308,7 +313,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
         >
             <div className="tag-sidebar">
-                {!isCollapsed && (
+                {(!isCollapsed || isStacked) && (
                     <div className="tag-search-box">
                         <div className="search-input-wrapper">
                             <Search size={12} className="search-icon-placeholder" />
@@ -316,7 +321,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 placeholder={t('find_or_create')}
                                 value={tagSearch}
                                 onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
-                                onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                onFocus={() => {
+                                    invoke('activate_window_focus').catch(console.error);
+                                    setIsSearchFocused(true);
+                                }}
+                                onBlur={() => {
+                                    setTimeout(() => setIsSearchFocused(false), 200);
+                                }}
                                 onChange={e => setTagSearch(e.target.value)}
                                 onKeyDown={async (e) => {
                                     if (e.key === 'Enter' && tagSearch.trim()) {
@@ -344,10 +355,115 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 </div>
                             ) : null}
                         </div>
+                        {isStacked && isCollapsed && isSearchFocused && (
+                            <div className="tag-suggestions-dropdown custom-scrollbar" onMouseDown={e => e.preventDefault()}>
+                                {filteredTags.map(tag => (
+                                    <div
+                                        key={tag.name}
+                                        className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${!isBuiltinSensitiveTag(tag.name) ? 'has-actions' : ''}`}
+                                        onClick={() => {
+                                            loadTagItems(tag.name);
+                                            setIsSearchFocused(false);
+                                        }}
+                                    >
+                                        <div className="tag-color-wrapper">
+                                            <div
+                                                className="tag-color-dot"
+                                                style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    document.getElementById(`color-picker-suggest-${tag.name}`)?.click();
+                                                }}
+                                            />
+                                            <input
+                                                type="color"
+                                                id={`color-picker-suggest-${tag.name}`}
+                                                style={{ display: 'none' }}
+                                                value={tagColors[tag.name] || '#888888'}
+                                                onChange={async (e) => {
+                                                    const newColor = e.target.value;
+                                                    setTagColors(prev => ({ ...prev, [tag.name]: newColor }));
+                                                    await invoke('set_tag_color', { name: tag.name, color: newColor });
+                                                    await emit('tag-colors-updated');
+                                                }}
+                                            />
+                                        </div>
+                                        {editingTag === tag.name ? (
+                                            <input
+                                                className="inline-tag-edit"
+                                                value={newTagName}
+                                                onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                                                onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                                onChange={(e) => setNewTagName(e.target.value)}
+                                                autoFocus
+                                                onKeyDown={async (e) => {
+                                                    if (e.key === 'Enter') {
+                                                        await handleRenameTag(tag.name);
+                                                    } else if (e.key === 'Escape') {
+                                                        setEditingTag(null);
+                                                    }
+                                                }}
+                                                onBlur={() => setEditingTag(null)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        ) : (
+                                            <div className="tag-name-area">
+                                                <span className="tag-name">
+                                                    {tag.name.toLowerCase() === "sensitive"
+                                                        ? t("tag_builtin_sensitive")
+                                                        : (tag.name.toLowerCase() === "password" || tag.name === "密码" || tag.name === "密碼")
+                                                        ? t("tag_builtin_password")
+                                                        : tag.name}
+                                                </span>
+                                                {!isBuiltinSensitiveTag(tag.name) && (
+                                                    <div className="tag-hover-actions">
+                                                        <FluentTooltip text={t('rename') || '重命名'}>
+                                                            <span
+                                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setEditingTag(tag.name);
+                                                                    setNewTagName(tag.name);
+                                                                }}
+                                                            >
+                                                                <Edit2 size={13} />
+                                                            </span>
+                                                        </FluentTooltip>
+                                                        <FluentTooltip text={t('delete') || '删除'}>
+                                                            <span
+                                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    e.preventDefault();
+                                                                    setDeleteConfirmation({ show: true, tagName: tag.name });
+                                                                }}
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </span>
+                                                        </FluentTooltip>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                {filteredTags.length === 0 && !tagSearch.trim() && (
+                                    <div className="sidebar-status">{t('no_tags')}</div>
+                                )}
+                                {canCreateTag && filteredTags.length === 0 && (
+                                    <div className="tag-item create-hint" onClick={() => createTag(tagSearch)}>
+                                        <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
+                                        <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', tagSearch.trim())}</span>
+                                        <Plus size={10} />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
-                <div className="tag-scroll custom-scrollbar">
+                {!(isStacked && isCollapsed) && (
+                    <div className="tag-scroll custom-scrollbar">
                     {selectedIndex !== -1 && (
                         <div
                             className="tag-selection-indicator"
@@ -477,28 +593,31 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                             <Plus size={10} />
                         </div>
                     )}
-                </div>
+                    </div>
+                )}
 
-                <div className="sidebar-header">
-                    <FluentTooltip text={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}>
-                        <button
-                            className="collapse-toggle"
-                            onClick={() => {
-                                const newCollapsed = !isCollapsed;
-                                setIsCollapsed(newCollapsed);
-                                if (!newCollapsed && sidebarWidth < 108) {
-                                    setSidebarWidth(160);
-                                }
-                            }}
-                        >
-                            {isStacked ? (
-                                isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
-                            ) : (
-                                isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
-                            )}
-                        </button>
-                    </FluentTooltip>
-                </div>
+                {!isStacked && (
+                    <div className="sidebar-header">
+                        <FluentTooltip text={isCollapsed ? (t('open') || '展开') : (t('collapse') || '收起')}>
+                            <button
+                                className="collapse-toggle"
+                                onClick={() => {
+                                    const newCollapsed = !isCollapsed;
+                                    setIsCollapsed(newCollapsed);
+                                    if (!newCollapsed && sidebarWidth < 108) {
+                                        setSidebarWidth(160);
+                                    }
+                                }}
+                            >
+                                {isStacked ? (
+                                    isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
+                                ) : (
+                                    isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />
+                                )}
+                            </button>
+                        </FluentTooltip>
+                    </div>
+                )}
             </div>
 
             {!isCollapsed && (
@@ -1060,11 +1179,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .tag-item.create-hint { border: 1px dashed var(--border); opacity: 0.8; }
                 .tag-item.create-hint:hover { background: var(--bg-main); border-style: solid; }
 
-                .sidebar-collapsed .tag-item { justify-content: center; align-items: center; height: 32px; min-height: 32px; width: 32px; padding: 0; margin-left: auto; margin-right: auto; gap: 0; }
-                .sidebar-collapsed .tag-name,
-                .sidebar-collapsed .tag-name-area,
-                .sidebar-collapsed .tag-hover-actions { display: none !important; }
-                .sidebar-collapsed .tag-color-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; margin: 0; }
+                .sidebar-collapsed .tag-scroll .tag-item { justify-content: center; align-items: center; height: 32px; min-height: 32px; width: 32px; padding: 0; margin-left: auto; margin-right: auto; gap: 0; }
+                .sidebar-collapsed .tag-scroll .tag-name,
+                .sidebar-collapsed .tag-scroll .tag-name-area,
+                .sidebar-collapsed .tag-scroll .tag-hover-actions { display: none !important; }
+                .sidebar-collapsed .tag-scroll .tag-color-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; margin: 0; }
                 .tag-color-wrapper { display: flex; align-items: center; justify-content: center; }
                 .tag-color-dot { 
                     width: 10px; 
@@ -2446,6 +2565,33 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     border-bottom: 2px solid var(--accent-color) !important;
                     padding-bottom: 8px !important;
                     box-shadow: 0 0 0 1px var(--accent-color) !important;
+                }
+
+                .tag-suggestions-dropdown {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    margin-top: 4px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    background: var(--bg-window, #fafafa);
+                    border: var(--flyout-border, 1px solid rgba(0,0,0,0.08));
+                    border-radius: 4px;
+                    box-shadow: var(--flyout-shadow, 0 8px 16px rgba(0,0,0,0.14));
+                    padding: 4px;
+                    z-index: 1000;
+                    max-height: 240px;
+                    overflow-y: auto;
+                    animation: suggestMenuIn 0.20s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .dark-mode .tag-suggestions-dropdown {
+                    background: var(--bg-window, #2d2d2d);
+                }
+                @keyframes suggestMenuIn {
+                    from { opacity: 0; transform: translateY(-4px); }
+                    to   { opacity: 1; transform: translateY(0); }
                 }
             `}</style>
         </div >

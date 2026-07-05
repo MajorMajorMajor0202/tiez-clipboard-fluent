@@ -432,7 +432,7 @@
   padding-inline: 8px !important;
 }
 
-.themed-tag-manager.sidebar-collapsed .tag-item {
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-item {
   justify-content: center !important;
   align-items: center !important;
   height: 32px !important;
@@ -444,15 +444,15 @@
   gap: 0 !important;
 }
 
-.themed-tag-manager.sidebar-collapsed .tag-name-area,
-.themed-tag-manager.sidebar-collapsed .tag-name,
-.themed-tag-manager.sidebar-collapsed .tag-badge,
-.themed-tag-manager.sidebar-collapsed .tag-hover-actions,
-.themed-tag-manager.sidebar-collapsed .sidebar-status {
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-name-area,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-name,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-badge,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-hover-actions,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .sidebar-status {
   display: none !important;
 }
 
-.themed-tag-manager.sidebar-collapsed .tag-color-wrapper {
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-color-wrapper {
   width: 100% !important;
   height: 100% !important;
   display: flex !important;
@@ -461,7 +461,7 @@
   margin: 0 !important;
 }
 
-.themed-tag-manager.sidebar-collapsed .tag-item.active::before {
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-item.active::before {
   display: none !important;
 }
 
@@ -940,7 +940,7 @@
     width: 100% !important;
     height: var(--tm-sidebar-height, 180px) !important;
     max-height: none !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 8px !important;
   }
 
   .themed-tag-manager.sidebar-collapsed .tag-sidebar {
@@ -1062,7 +1062,7 @@
   .themed-tag-manager .tag-content {
     flex: 1 !important;
     min-height: 0 !important;
-    margin-top: 6px !important;
+    margin-top: 8px !important;
   }
 
   .themed-tag-manager .tag-divider-handle {
