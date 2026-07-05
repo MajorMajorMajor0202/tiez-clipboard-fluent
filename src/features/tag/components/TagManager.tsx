@@ -1273,6 +1273,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(var(--accent-color-rgb), 0.12);
                     color: var(--accent-color);
                 }
+                .dark-mode .tag-hover-actions > span:hover {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    color: var(--text-primary) !important;
+                }
 
                 /* Content Area */
                 .tag-content { flex: 1; min-width: 320px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
@@ -1890,14 +1894,14 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     -webkit-backdrop-filter: none !important;
                     border-color: rgba(255,255,255,0.1) !important;
                 }
-                .dark-mode.theme-mica .confirm-dialog-upper,
-                .dark-mode.theme-acrylic .confirm-dialog-upper {
+                .dark-mode .theme-mica .confirm-dialog-upper,
+                .dark-mode .theme-acrylic .confirm-dialog-upper {
                     background: #2c2c2c !important;
                     border-top-left-radius: 8px !important;
                     border-top-right-radius: 8px !important;
                 }
-                .dark-mode.theme-mica .confirm-dialog-lower,
-                .dark-mode.theme-acrylic .confirm-dialog-lower {
+                .dark-mode .theme-mica .confirm-dialog-lower,
+                .dark-mode .theme-acrylic .confirm-dialog-lower {
                     background: #202020 !important;
                     border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
                     border-bottom-left-radius: 8px !important;
@@ -2141,6 +2145,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(var(--accent-color-rgb), 0.14);
                     color: var(--accent-color);
                 }
+                .dark-mode .theme-mica .tag-item.active .tag-hover-actions > span:hover,
+                .dark-mode .theme-acrylic .tag-item.active .tag-hover-actions > span:hover {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    color: var(--text-primary) !important;
+                }
 
                 .theme-mica .tag-content,
                 .theme-acrylic .tag-content {
@@ -2228,8 +2237,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     box-shadow: 0 18px 34px rgba(15, 23, 42, 0.1);
                     background: var(--bg-input);
                 }
-                .dark-mode.theme-mica .themed-card:hover,
-                .dark-mode.theme-acrylic .themed-card:hover {
+                .dark-mode .theme-mica .themed-card:hover,
+                .dark-mode .theme-acrylic .themed-card:hover {
                     border-color: rgba(255, 255, 255, 0.12) !important;
                 }
 

@@ -400,6 +400,11 @@
   color: var(--accent-color) !important;
 }
 
+.dark-mode .themed-tag-manager .tag-hover-actions > span:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
 .themed-tag-manager .tag-badge {
   margin-left: auto !important;
   flex-shrink: 0 !important;
