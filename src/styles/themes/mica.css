@@ -167,11 +167,11 @@ body.theme-mica #root > * {
     --shadow-lg: 0 22px 44px rgba(0, 0, 0, 0.28);
     --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
-    --card-border-color: rgba(255, 255, 255, 0.15);
+    --card-border-color: rgba(45, 45, 45, 0.9);
     --card-shadow: 
-      0 2px 3px rgba(0, 0, 0, 0.4);
+      0 2px 3px rgba(25, 25, 25, 0.9);
     --card-hover-shadow: 
-      0 3px 5px rgba(0, 0, 0, 0.4);
+      0 3px 5px rgba(25, 25, 25, 0.9);
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -220,11 +220,11 @@ body.dark-mode.theme-mica {
   --shadow-lg: 0 22px 44px rgba(0, 0, 0, 0.28);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
-  --card-border-color: rgba(255, 255, 255, 0.15);
+  --card-border-color: rgba(45, 45, 45, 0.9);
   --card-shadow: 
-    0 2px 3px rgba(0, 0, 0, 0.4);
+    0 2px 3px rgba(25, 25, 25, 0.9);
   --card-hover-shadow: 
-    0 3px 5px rgba(0, 0, 0, 0.4);
+    0 3px 5px rgba(25, 25, 25, 0.9);
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
