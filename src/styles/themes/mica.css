@@ -26,10 +26,8 @@ body.theme-mica {
 
   --card-border-color: rgba(0, 0, 0, 0.12);
   --card-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    0 12px 28px rgba(0, 0, 0, 0.16),
-    -6px 6px 16px rgba(0, 0, 0, 0.08),
-    6px 6px 16px rgba(0, 0, 0, 0.08);
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 4px 10px rgba(0, 0, 0, 0.16);
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.42);
@@ -173,10 +171,8 @@ body.theme-mica #root > * {
 
     --card-border-color: rgba(255, 255, 255, 0.15);
     --card-shadow: 
-      0 2px 6px rgba(0, 0, 0, 0.32),
-      0 12px 28px rgba(0, 0, 0, 0.55),
-      -6px 6px 16px rgba(0, 0, 0, 0.32),
-      6px 6px 16px rgba(0, 0, 0, 0.32);
+      0 1px 3px rgba(0, 0, 0, 0.35),
+      0 4px 10px rgba(0, 0, 0, 0.45);
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -227,10 +223,8 @@ body.dark-mode.theme-mica {
 
   --card-border-color: rgba(255, 255, 255, 0.15);
   --card-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.32),
-    0 12px 28px rgba(0, 0, 0, 0.55),
-    -6px 6px 16px rgba(0, 0, 0, 0.32),
-    6px 6px 16px rgba(0, 0, 0, 0.32);
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 4px 10px rgba(0, 0, 0, 0.45);
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -263,8 +257,8 @@ body.dark-mode.compact-preview.theme-mica #root {
   box-shadow: var(--card-shadow) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  clip-path: inset(0px -40px -40px -40px);
-  -webkit-clip-path: inset(0px -40px -40px -40px);
+  clip-path: inset(0px -15px -15px -15px);
+  -webkit-clip-path: inset(0px -15px -15px -15px);
 }
 
 .theme-mica .history-item:hover {
