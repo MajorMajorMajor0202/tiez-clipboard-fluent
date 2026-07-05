@@ -2632,7 +2632,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(0, 0, 0, 0.03) !important;
                 }
                 .dark-mode .tag-suggestions-dropdown .tag-item.active {
-                    background: rgba(255, 255, 255, 0.04) !important;
+                    background: rgba(255, 255, 255, 0.06) !important;
                 }
                 .tag-suggestions-dropdown .tag-item.active::before {
                     content: "" !important;

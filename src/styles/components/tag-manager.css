@@ -1014,7 +1014,7 @@
   }
 
   .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item.active {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
     border-color: transparent !important;
   }
 
