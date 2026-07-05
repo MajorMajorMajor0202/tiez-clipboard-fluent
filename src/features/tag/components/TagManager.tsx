@@ -382,6 +382,110 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 </div>
                             ) : null}
                         </div>
+                        {isStacked && effectiveIsCollapsed && isSearchFocused && (
+                            <div className="tag-suggestions-dropdown custom-scrollbar" onMouseDown={e => e.preventDefault()}>
+                                {filteredSuggestTags.map(tag => (
+                                    <div
+                                        key={tag.name}
+                                        className={`tag-item ${selectedTag === tag.name ? 'active' : ''} ${!isBuiltinSensitiveTag(tag.name) ? 'has-actions' : ''}`}
+                                        onClick={() => {
+                                            loadTagItems(tag.name);
+                                            setIsSearchFocused(false);
+                                        }}
+                                    >
+                                        <div className="tag-color-wrapper">
+                                            <div
+                                                className="tag-color-dot"
+                                                style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    document.getElementById(`color-picker-suggest-${tag.name}`)?.click();
+                                                }}
+                                            />
+                                            <input
+                                                type="color"
+                                                id={`color-picker-suggest-${tag.name}`}
+                                                style={{ display: 'none' }}
+                                                value={tagColors[tag.name] || '#888888'}
+                                                onChange={async (e) => {
+                                                    const newColor = e.target.value;
+                                                    setTagColors(prev => ({ ...prev, [tag.name]: newColor }));
+                                                    await invoke('set_tag_color', { name: tag.name, color: newColor });
+                                                    await emit('tag-colors-updated');
+                                                }}
+                                            />
+                                        </div>
+                                        {editingTag === tag.name ? (
+                                            <input
+                                                className="inline-tag-edit"
+                                                value={newTagName}
+                                                onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                                                onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                                onChange={(e) => setNewTagName(e.target.value)}
+                                                autoFocus
+                                                onKeyDown={async (e) => {
+                                                    if (e.key === 'Enter') {
+                                                        await handleRenameTag(tag.name);
+                                                    } else if (e.key === 'Escape') {
+                                                        setEditingTag(null);
+                                                    }
+                                                }}
+                                                onBlur={() => setEditingTag(null)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        ) : (
+                                            <div className="tag-name-area">
+                                                <span className="tag-name">
+                                                    {tag.name.toLowerCase() === "sensitive"
+                                                        ? t("tag_builtin_sensitive")
+                                                        : (tag.name.toLowerCase() === "password" || tag.name === "密码" || tag.name === "密碼")
+                                                        ? t("tag_builtin_password")
+                                                        : tag.name}
+                                                </span>
+                                                {!isBuiltinSensitiveTag(tag.name) && (
+                                                    <div className="tag-hover-actions">
+                                                        <FluentTooltip text={t('rename') || '重命名'}>
+                                                            <span
+                                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setEditingTag(tag.name);
+                                                                    setNewTagName(tag.name);
+                                                                }}
+                                                            >
+                                                                <Edit2 size={13} />
+                                                            </span>
+                                                        </FluentTooltip>
+                                                        <FluentTooltip text={t('delete') || '删除'}>
+                                                            <span
+                                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    e.preventDefault();
+                                                                    setDeleteConfirmation({ show: true, tagName: tag.name });
+                                                                }}
+                                                            >
+                                                                <Trash2 size={13} />
+                                                            </span>
+                                                        </FluentTooltip>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                {filteredSuggestTags.length === 0 && !suggestSearch.trim() && (
+                                    <div className="sidebar-status">{t('no_tags')}</div>
+                                )}
+                                {canCreateSuggestTag && filteredSuggestTags.length === 0 && (
+                                    <div className="tag-item create-hint" onClick={() => createTag(suggestSearch)}>
+                                        <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
+                                        <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', suggestSearch.trim())}</span>
+                                        <Plus size={10} />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -986,15 +1090,6 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {filteredSuggestTags.length === 0 && !suggestSearch.trim() && (
                         <div className="sidebar-status">{t('no_tags')}</div>
                     )}
-                    {canCreateSuggestTag && filteredSuggestTags.length === 0 && (
-                        <div className="tag-item create-hint" onClick={() => createTag(suggestSearch)}>
-                            <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
-                            <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', suggestSearch.trim())}</span>
-                            <Plus size={10} />
-                        </div>
-                    )}
-                </div>
-            )}
             <style>{`
                 .themed-tag-manager {
                     position: relative !important;
@@ -2591,11 +2686,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 .tag-suggestions-dropdown {
-                    position: absolute !important;
-                    top: 44px !important;
-                    left: 16px !important;
-                    right: 16px !important;
-                    margin-top: 0 !important;
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    margin-top: 4px;
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
