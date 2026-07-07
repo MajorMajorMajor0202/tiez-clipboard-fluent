@@ -1287,7 +1287,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 /* Content Area */
-                .tag-content { flex: 1; min-width: 320px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+                .tag-content { flex: 1; min-width: 320px; display: flex; flex-direction: column; overflow: visible; position: relative; }
                 .content-toolbar {
                     display: flex;
                     flex-direction: column;
@@ -1708,6 +1708,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .themed-tag-manager .fluent-scrollbar {
                     top: -12px !important;
+                    right: -10px !important;
                     bottom: -12px !important;
                 }
 
