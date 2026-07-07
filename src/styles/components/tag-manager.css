@@ -108,8 +108,9 @@
   align-items: center !important;
   border: var(--input-border) !important;
   border-radius: 4px !important;
-  background: var(--bg-input) !important;
+  background: var(--bg-element) !important;
   box-shadow: var(--input-shadow) !important;
+  transition: background 0.18s ease !important;
 }
 
 .themed-tag-manager .tag-search-box::after {
@@ -133,6 +134,7 @@
 .themed-tag-manager .tag-search-box:focus-within {
   border-color: var(--line-strong) !important;
   box-shadow: none !important;
+  background: var(--bg-input) !important;
 }
 
 .themed-tag-manager .tag-search-box .search-icon-placeholder {

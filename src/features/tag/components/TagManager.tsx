@@ -2021,8 +2021,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 12px;
                     border: var(--input-border);
                     border-radius: 4px;
-                    background: var(--bg-input);
+                    background: transparent;
                     box-shadow: var(--input-shadow);
+                    transition: background 0.18s ease;
+                }
+                .theme-mica .tag-search-box:focus-within,
+                .theme-acrylic .tag-search-box:focus-within {
+                    background: var(--bg-input);
                 }
 
                 .theme-mica .tag-search-box .search-icon-placeholder,
