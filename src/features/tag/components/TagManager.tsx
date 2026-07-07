@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { listen, emit } from '@tauri-apps/api/event';
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { getTagColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
+import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import type { ClipboardEntry } from "../../../shared/types";
 
 interface TagManagerProps {
@@ -33,6 +34,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
     const [tagItems, setTagItems] = useState<ClipboardEntry[]>([]);
     const [tagColors, setTagColors] = useState<Record<string, string>>({});
+    const [itemsAreaEl, setItemsAreaEl] = useState<HTMLDivElement | null>(null);
+    const itemsAreaRef = useCallback((el: HTMLDivElement | null) => {
+        setItemsAreaEl(el);
+    }, []);
     const [editingTag, setEditingTag] = useState<string | null>(null);
     const [newTagName, setNewTagName] = useState('');
     const [loading, setLoading] = useState(false);
@@ -750,98 +755,101 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     </div>
                 </div>
 
-                <div className="items-area custom-scrollbar">
-                    {loading ? <div className="status-msg">{t('processing')}</div> : sortedItems.length === 0 ? (
-                        <div className="status-msg">{selectedTag ? t('no_items') : t('select_tag_to_begin')}</div>
-                    ) : (
-                        <div className={`items-${viewMode} ${isManageMode ? 'manage-mode' : ''}`}>
-                            {sortedItems.map(item => (
-                                <div
-                                    key={item.id}
-                                    className={`themed-card ${selectedItemIds.has(item.id) ? 'selected' : ''}`}
-                                    onClick={() => {
-                                        if (isManageMode) {
-                                            setSelectedItemIds(prev => {
-                                                const next = new Set(prev);
-                                                if (next.has(item.id)) next.delete(item.id);
-                                                else next.add(item.id);
-                                                return next;
-                                            });
-                                        } else {
-                                            copyToClipboard(item.id, item.content, item.content_type);
-                                        }
-                                    }}
-                                >
-                                    <div className="card-top-row">
-                                        <div className="card-actions-left">
-                                            {isManageMode ? (
-                                                <div className={`selection-indicator ${selectedItemIds.has(item.id) ? 'checked' : ''}`}>
-                                                    <div className="inner-check" />
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    {(item.content_type === 'text' || item.content_type === 'code') && (
-                                                        <FluentTooltip text={t('edit') || '编辑'}>
-                                                            <button className="card-action-btn" onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setEditingItem({ id: item.id, content: item.content });
-                                                            }}>
-                                                                <Edit2 size={10} />
+                <div className="items-area-wrapper">
+                    <div className="items-area custom-scrollbar fluent-scrollbar-host" ref={itemsAreaRef}>
+                        {loading ? <div className="status-msg">{t('processing')}</div> : sortedItems.length === 0 ? (
+                            <div className="status-msg">{selectedTag ? t('no_items') : t('select_tag_to_begin')}</div>
+                        ) : (
+                            <div className={`items-${viewMode} ${isManageMode ? 'manage-mode' : ''}`}>
+                                {sortedItems.map(item => (
+                                    <div
+                                        key={item.id}
+                                        className={`themed-card ${selectedItemIds.has(item.id) ? 'selected' : ''}`}
+                                        onClick={() => {
+                                            if (isManageMode) {
+                                                setSelectedItemIds(prev => {
+                                                    const next = new Set(prev);
+                                                    if (next.has(item.id)) next.delete(item.id);
+                                                    else next.add(item.id);
+                                                    return next;
+                                                });
+                                            } else {
+                                                copyToClipboard(item.id, item.content, item.content_type);
+                                            }
+                                        }}
+                                    >
+                                        <div className="card-top-row">
+                                            <div className="card-actions-left">
+                                                {isManageMode ? (
+                                                    <div className={`selection-indicator ${selectedItemIds.has(item.id) ? 'checked' : ''}`}>
+                                                        <div className="inner-check" />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {(item.content_type === 'text' || item.content_type === 'code') && (
+                                                            <FluentTooltip text={t('edit') || '编辑'}>
+                                                                <button className="card-action-btn" onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setEditingItem({ id: item.id, content: item.content });
+                                                                }}>
+                                                                    <Edit2 size={10} />
+                                                                </button>
+                                                            </FluentTooltip>
+                                                        )}
+                                                        <FluentTooltip text={t('open') || '打开'}>
+                                                            <button
+                                                                className="card-action-btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    invoke('open_content', {
+                                                                        id: item.id,
+                                                                        content: item.content,
+                                                                        contentType: item.content_type
+                                                                    });
+                                                                }}
+                                                            >
+                                                                    <ExternalLink size={10} />
                                                             </button>
                                                         </FluentTooltip>
-                                                    )}
-                                                    <FluentTooltip text={t('open') || '打开'}>
-                                                        <button
-                                                            className="card-action-btn"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                invoke('open_content', {
-                                                                    id: item.id,
-                                                                    content: item.content,
-                                                                    contentType: item.content_type
-                                                                });
-                                                            }}
-                                                        >
-                                                            <ExternalLink size={10} />
-                                                        </button>
-                                                    </FluentTooltip>
-                                                </>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {!isManageMode && (
+                                                <FluentTooltip text={t('delete') || '删除'}>
+                                                    <button className="del-btn" onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setItemDeleteConfirmation({ show: true, id: item.id });
+                                                    }}>
+                                                        <X size={10} />
+                                                    </button>
+                                                </FluentTooltip>
                                             )}
                                         </div>
-                                        {!isManageMode && (
-                                            <FluentTooltip text={t('delete') || '删除'}>
-                                                <button className="del-btn" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setItemDeleteConfirmation({ show: true, id: item.id });
-                                                }}>
-                                                    <X size={10} />
-                                                </button>
-                                            </FluentTooltip>
+
+                                        {item.content_type === 'image' ? (
+                                            <div className="card-media">
+                                                <img
+                                                    src={item.content.startsWith('data:') ? item.content : convertFileSrc(item.content)}
+                                                    alt=""
+                                                    className="image-preview"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="card-body-text">{item.preview || item.content}</div>
                                         )}
-                                    </div>
 
-                                    {item.content_type === 'image' ? (
-                                        <div className="card-media">
-                                            <img
-                                                src={item.content.startsWith('data:') ? item.content : convertFileSrc(item.content)}
-                                                alt=""
-                                                className="image-preview"
-                                                loading="lazy"
-                                            />
+                                        <div className="card-divider" />
+                                        <div className="card-footer">
+                                            <span className="meta-time">{formatItemDate(item.timestamp)}</span>
+                                            <div className="meta-usage"><MousePointer2 size={8} /> {item.use_count || 0}</div>
                                         </div>
-                                    ) : (
-                                        <div className="card-body-text">{item.preview || item.content}</div>
-                                    )}
-
-                                    <div className="card-divider" />
-                                    <div className="card-footer">
-                                        <span className="meta-time">{formatItemDate(item.timestamp)}</span>
-                                        <div className="meta-usage"><MousePointer2 size={8} /> {item.use_count || 0}</div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <FluentScrollbar scrollContainer={itemsAreaEl} arrowsOutside={true} />
                 </div>
             </div>
 
@@ -1681,13 +1689,26 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: rgba(255, 255, 255, 0.12);
                 }
 
+                .items-area-wrapper {
+                    position: relative;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: visible;
+                    min-height: 0;
+                }
                 .items-area { 
                     flex: 1; 
                     overflow-y: auto; 
-                    padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px; 
-                    scrollbar-gutter: stable;
+                    padding: 8px 8px 80px 8px; 
+                    scrollbar-width: none !important;
+                    scrollbar-gutter: auto;
                     background: var(--bg-content); 
                     position: relative;
+                }
+                .themed-tag-manager .fluent-scrollbar {
+                    top: -12px !important;
+                    bottom: -12px !important;
                 }
 
                 .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -2190,8 +2211,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .items-area,
                 .theme-acrylic .items-area {
-                    padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px;
-                    scrollbar-gutter: stable;
+                    padding: 8px 8px 80px 8px;
+                    scrollbar-gutter: auto;
                     background: transparent;
                 }
 

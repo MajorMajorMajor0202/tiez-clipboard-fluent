@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 interface FluentScrollbarProps {
   scrollContainer: HTMLElement | null;
+  arrowsOutside?: boolean;
 }
 
 /**
@@ -10,7 +11,7 @@ interface FluentScrollbarProps {
  * Rest:  Track is transparent. Thumb is a 2px pill hugging the right edge.
  * Hover: Thumb expands left to 6px. Track background fades in. Arrow buttons appear.
  */
-const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) => {
+const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arrowsOutside = false }) => {
   const [thumbTop, setThumbTop] = useState(0);
   const [thumbHeight, setThumbHeight] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -20,6 +21,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
   const dragStartScrollTop = useRef(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const ARROW_H = 12;
+  const arrowSpacing = arrowsOutside ? 0 : ARROW_H;
 
   const update = useCallback(() => {
     const el = scrollContainer;
@@ -30,7 +32,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
       return;
     }
     setVisible(true);
-    const trackH = clientHeight - ARROW_H * 2;
+    const trackH = clientHeight - arrowSpacing * 2;
     const ratio = clientHeight / scrollHeight;
     const th = Math.max(30, trackH * ratio);
     const maxTop = trackH - th;
@@ -38,7 +40,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
     const tp = scrollRatio * maxTop;
     setThumbHeight(th);
     setThumbTop(tp);
-  }, [scrollContainer]);
+  }, [scrollContainer, arrowSpacing]);
 
   useEffect(() => {
     const el = scrollContainer;
@@ -70,7 +72,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
     const onMove = (me: MouseEvent) => {
       const el = scrollContainer;
       if (!el) return;
-      const trackH = el.clientHeight - ARROW_H * 2;
+      const trackH = el.clientHeight - arrowSpacing * 2;
       const th = Math.max(30, trackH * (el.clientHeight / el.scrollHeight));
       const maxTop = trackH - th;
       const dy = me.clientY - dragStartY.current;
@@ -93,11 +95,11 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
   const handleTrackClick = useCallback((e: React.MouseEvent) => {
     if (!trackRef.current || !scrollContainer) return;
     const trackRect = trackRef.current.getBoundingClientRect();
-    const trackH = scrollContainer.clientHeight - ARROW_H * 2;
+    const trackH = scrollContainer.clientHeight - arrowSpacing * 2;
     const clickY = e.clientY - trackRect.top - ARROW_H;
     const ratio = trackH > 0 ? clickY / trackH : 0;
     scrollContainer.scrollTop = ratio * (scrollContainer.scrollHeight - scrollContainer.clientHeight);
-  }, [scrollContainer]);
+  }, [scrollContainer, arrowSpacing]);
 
   const handleArrowUp = useCallback(() => {
     scrollContainer?.scrollBy({ top: -60, behavior: 'smooth' });
@@ -113,7 +115,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
 
   return (
     <div
-      className={`fluent-scrollbar${isActive ? ' fluent-scrollbar--active' : ''}`}
+      className={`fluent-scrollbar${isActive ? ' fluent-scrollbar--active' : ''}${arrowsOutside ? ' fluent-scrollbar--arrows-outside' : ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -147,7 +149,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer }) =>
         {/* Thumb */}
         <div
           className="fluent-scrollbar__thumb"
-          style={{ top: thumbTop + ARROW_H, height: thumbHeight }}
+          style={{ top: thumbTop + arrowSpacing, height: thumbHeight }}
           onMouseDown={handleThumbMouseDown}
         />
 

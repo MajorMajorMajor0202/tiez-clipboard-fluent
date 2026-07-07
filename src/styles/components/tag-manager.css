@@ -626,13 +626,28 @@
   display: inline-block !important;
 }
 
+.themed-tag-manager .items-area-wrapper {
+  position: relative !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: visible !important;
+  min-height: 0 !important;
+}
+
 .themed-tag-manager .items-area {
   flex: 1 !important;
   min-height: 0 !important;
   overflow-y: auto !important;
-  padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px !important;
-  scrollbar-gutter: stable !important;
+  padding: 8px 8px 80px 8px !important;
+  scrollbar-width: none !important;
+  scrollbar-gutter: auto !important;
   background: transparent !important;
+}
+
+.themed-tag-manager .fluent-scrollbar {
+  top: -12px !important;
+  bottom: -12px !important;
 }
 
 .themed-tag-manager .status-msg {
@@ -790,8 +805,8 @@
 }
 
 .themed-tag-manager.stacked-layout .items-area {
-  padding: 8px calc(8px - var(--scrollbar-size-thin)) 80px 8px !important;
-  scrollbar-gutter: stable !important;
+  padding: 8px 8px 80px 8px !important;
+  scrollbar-gutter: auto !important;
 }
 
 .themed-tag-manager.stacked-layout .items-grid {

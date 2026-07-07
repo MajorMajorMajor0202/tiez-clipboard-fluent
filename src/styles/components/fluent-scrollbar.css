@@ -171,3 +171,16 @@
 .theme-acrylic.dark-mode .fluent-scrollbar--active .fluent-scrollbar__thumb {
   background: rgba(160, 180, 210, 0.55);
 }
+
+/* ── Arrows Outside mode ── */
+.fluent-scrollbar--arrows-outside {
+  overflow: visible !important;
+}
+
+.fluent-scrollbar--arrows-outside .fluent-scrollbar__arrow--up {
+  top: -12px !important;
+}
+
+.fluent-scrollbar--arrows-outside .fluent-scrollbar__arrow--down {
+  bottom: -12px !important;
+}
