@@ -486,7 +486,7 @@
   display: flex !important;
   flex-direction: column !important;
   gap: 8px !important;
-  border-bottom: 1px solid var(--panel-divider-color) !important;
+  border-bottom: none !important;
   background: transparent !important;
   flex-shrink: 0 !important;
 }
@@ -646,9 +646,7 @@
 }
 
 .themed-tag-manager .fluent-scrollbar {
-  top: -12px !important;
   right: -10px !important;
-  bottom: -12px !important;
 }
 
 .themed-tag-manager .status-msg {

@@ -1292,7 +1292,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
-                    border-bottom: 1px solid var(--panel-divider-color);
+                    border-bottom: none;
                     background: transparent;
                     padding: 8px 8px;
                     flex-shrink: 0;
@@ -1707,9 +1707,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                 }
                 .themed-tag-manager .fluent-scrollbar {
-                    top: -12px !important;
                     right: -10px !important;
-                    bottom: -12px !important;
                 }
 
                 .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -2186,7 +2184,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .content-toolbar {
                     padding: 8px 8px;
                     gap: 8px;
-                    border-bottom: 1px solid var(--panel-divider-color);
+                    border-bottom: none;
                     background: transparent;
                     flex-shrink: 0;
                 }
