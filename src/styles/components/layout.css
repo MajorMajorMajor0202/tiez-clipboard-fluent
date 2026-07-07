@@ -264,6 +264,8 @@ select.search-input option {
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
+  z-index: 10;
+  pointer-events: none;
 }
 
 .main-content {
