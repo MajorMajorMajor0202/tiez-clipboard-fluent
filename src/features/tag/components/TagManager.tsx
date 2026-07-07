@@ -1709,7 +1709,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .themed-tag-manager .fluent-scrollbar {
                     top: 8px !important;
                     right: -10px !important;
-                    bottom: 8px !important;
+                    bottom: 4px !important;
                 }
 
                 .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
