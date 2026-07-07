@@ -646,7 +646,9 @@
 }
 
 .themed-tag-manager .fluent-scrollbar {
+  top: 0 !important;
   right: -10px !important;
+  bottom: 0 !important;
 }
 
 .themed-tag-manager .status-msg {
