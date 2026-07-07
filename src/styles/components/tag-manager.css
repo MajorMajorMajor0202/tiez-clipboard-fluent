@@ -843,7 +843,7 @@
   min-height: 68px !important;
   padding: 8px 10px !important;
   border-radius: calc(var(--card-radius) - 2px) !important;
-  background: rgba(var(--bg-panel-rgb), 0.72) !important;
+  background: var(--bg-element) !important;
 }
 
 .themed-tag-manager.stacked-layout .items-list .card-top-row {
