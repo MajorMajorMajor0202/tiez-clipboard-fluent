@@ -1707,7 +1707,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                 }
                 .themed-tag-manager .fluent-scrollbar {
-                    top: 0 !important;
+                    top: 8px !important;
                     right: -10px !important;
                     bottom: 0 !important;
                 }
