@@ -81,7 +81,7 @@ body.theme-mica {
   --reset-button-border: 1px solid rgba(255, 99, 99, 0.2);
 
   /* Fluent Flyout — Mica light */
-  --flyout-background: rgba(252, 252, 252, 0.92);
+  --flyout-background: rgba(252, 252, 252, 0.99);
   --flyout-border: 1px solid rgba(128, 128, 128, 0.14);
   --flyout-radius: 8px;
   --flyout-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
@@ -181,7 +181,7 @@ body.theme-mica #root > * {
     --menu-border: 1px solid rgba(255, 255, 255, 0.08);
 
     /* Fluent Flyout — Mica dark (auto) */
-    --flyout-background: rgba(36, 36, 36, 0.90);
+    --flyout-background: rgba(36, 36, 36, 0.99);
     --flyout-border: 1px solid rgba(255, 255, 255, 0.08);
     --flyout-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
     --flyout-backdrop-filter: blur(30px);
@@ -234,7 +234,7 @@ body.dark-mode.theme-mica {
   --menu-border: 1px solid rgba(255, 255, 255, 0.08);
 
   /* Fluent Flyout — Mica dark (explicit) */
-  --flyout-background: rgba(36, 36, 36, 0.90);
+  --flyout-background: rgba(36, 36, 36, 0.99);
   --flyout-border: 1px solid rgba(255, 255, 255, 0.08);
   --flyout-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
   --flyout-backdrop-filter: blur(30px);
