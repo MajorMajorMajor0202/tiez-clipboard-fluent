@@ -1700,7 +1700,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .items-area { 
                     flex: 1; 
                     overflow-y: auto; 
-                    padding: 8px 8px 80px 8px; 
+                    padding: 8px 8px 8px 8px; 
                     scrollbar-width: none !important;
                     scrollbar-gutter: auto;
                     background: var(--bg-content); 
@@ -1709,11 +1709,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .themed-tag-manager .fluent-scrollbar {
                     top: 8px !important;
                     right: -10px !important;
-                    bottom: 0 !important;
+                    bottom: 8px !important;
                 }
 
                 .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-                .items-list { display: flex; flex-direction: column; gap: 8px; }
+                .items-list { display: flex; flex-direction: column; gap: 12px; }
 
                 .themed-card {
                     background: var(--bg-element);
@@ -2212,7 +2212,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .items-area,
                 .theme-acrylic .items-area {
-                    padding: 8px 8px 80px 8px;
+                    padding: 8px 8px 8px 8px;
                     scrollbar-gutter: auto;
                     background: transparent;
                 }
