@@ -222,6 +222,14 @@ select.search-input option {
   box-shadow: none;
 }
 
+.search-container .search-input {
+  background: var(--bg-element);
+}
+
+.search-container .search-input:focus {
+  background: var(--bg-input);
+}
+
 .home-search-wrapper {
   position: relative;
   width: 100%;
