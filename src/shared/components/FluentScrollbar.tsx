@@ -21,7 +21,6 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
   const dragStartScrollTop = useRef(0);
   const trackRef = useRef<HTMLDivElement>(null);
   const ARROW_H = 12;
-  const arrowSpacing = arrowsOutside ? 0 : ARROW_H;
 
   const update = useCallback(() => {
     const el = scrollContainer;
@@ -32,7 +31,8 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
       return;
     }
     setVisible(true);
-    const trackH = clientHeight - arrowSpacing * 2;
+    const trackElement = trackRef.current;
+    const trackH = trackElement ? trackElement.clientHeight : (clientHeight - (arrowsOutside ? 16 : 0));
     const ratio = clientHeight / scrollHeight;
     const th = Math.max(30, trackH * ratio);
     const maxTop = trackH - th;
@@ -40,7 +40,7 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
     const tp = scrollRatio * maxTop;
     setThumbHeight(th);
     setThumbTop(tp);
-  }, [scrollContainer, arrowSpacing]);
+  }, [scrollContainer, arrowsOutside]);
 
   useEffect(() => {
     const el = scrollContainer;
@@ -72,7 +72,8 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
     const onMove = (me: MouseEvent) => {
       const el = scrollContainer;
       if (!el) return;
-      const trackH = el.clientHeight - arrowSpacing * 2;
+      const trackElement = trackRef.current;
+      const trackH = trackElement ? trackElement.clientHeight : (el.clientHeight - (arrowsOutside ? 16 : 0));
       const th = Math.max(30, trackH * (el.clientHeight / el.scrollHeight));
       const maxTop = trackH - th;
       const dy = me.clientY - dragStartY.current;
@@ -90,16 +91,17 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
 
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
-  }, [scrollContainer]);
+  }, [scrollContainer, arrowsOutside]);
 
   const handleTrackClick = useCallback((e: React.MouseEvent) => {
     if (!trackRef.current || !scrollContainer) return;
-    const trackRect = trackRef.current.getBoundingClientRect();
-    const trackH = scrollContainer.clientHeight - arrowSpacing * 2;
-    const clickY = e.clientY - trackRect.top - ARROW_H;
-    const ratio = trackH > 0 ? clickY / trackH : 0;
+    const trackElement = trackRef.current;
+    const trackH = trackElement.clientHeight;
+    const clickY = e.clientY - trackElement.getBoundingClientRect().top - (arrowsOutside ? 0 : ARROW_H);
+    const useTrackH = arrowsOutside ? trackH : (trackH - ARROW_H * 2);
+    const ratio = useTrackH > 0 ? clickY / useTrackH : 0;
     scrollContainer.scrollTop = ratio * (scrollContainer.scrollHeight - scrollContainer.clientHeight);
-  }, [scrollContainer, arrowSpacing]);
+  }, [scrollContainer, arrowsOutside]);
 
   const handleArrowUp = useCallback(() => {
     scrollContainer?.scrollBy({ top: -60, behavior: 'smooth' });
@@ -119,13 +121,11 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Track fills all vertical space; arrows sit inside it */}
       <div
         ref={trackRef}
         className="fluent-scrollbar__track"
         onClick={handleTrackClick}
       >
-        {/* Up arrow — 4px inset from track top rounded corner */}
         <button
           className="fluent-scrollbar__arrow fluent-scrollbar__arrow--up"
           onClick={(e) => { e.stopPropagation(); handleArrowUp(); }}
@@ -133,7 +133,6 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
           tabIndex={-1}
           onMouseDown={(e) => e.preventDefault()}
         >
-          {/* Solid filled triangle with rounded corners via stroke linejoin */}
           <svg width="8" height="6" viewBox="0 0 8 6" aria-hidden="true">
             <polygon
               points="4,0.8 7.2,5.5 0.8,5.5"
@@ -146,10 +145,9 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
           </svg>
         </button>
 
-        {/* Thumb */}
         <div
           className="fluent-scrollbar__thumb"
-          style={{ top: thumbTop + arrowSpacing, height: thumbHeight }}
+          style={{ top: thumbTop + (arrowsOutside ? 0 : ARROW_H), height: thumbHeight }}
           onMouseDown={handleThumbMouseDown}
         />
 
