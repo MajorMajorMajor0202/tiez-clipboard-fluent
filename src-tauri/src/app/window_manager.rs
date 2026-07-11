@@ -481,27 +481,30 @@ pub fn toggle_window_cmd(app_handle: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn focus_clipboard_window(app_handle: AppHandle) -> Result<(), String> {
-    if let Some(window) = app_handle.get_webview_window("main") {
-        let _ = window.set_focusable(true);
-        let _ = window.show();
-        let _ = window.emit("window-shown", ());
+pub fn focus_clipboard_window(window: tauri::WebviewWindow, app_handle: AppHandle) -> Result<(), String> {
+    if window.label() == "settings" || window.label() == "advanced-settings" {
+        return Ok(());
+    }
+    if let Some(main_win) = app_handle.get_webview_window("main") {
+        let _ = main_win.set_focusable(true);
+        let _ = main_win.show();
+        let _ = main_win.emit("window-shown", ());
         reapply_vibrancy(&app_handle);
 
         #[cfg(windows)]
         {
-            if let Ok(hwnd_raw) = window.hwnd() {
+            if let Ok(hwnd_raw) = main_win.hwnd() {
                 unsafe {
                     let ex_style = GetWindowLongPtrW(HWND(hwnd_raw.0), GWL_EXSTYLE);
                     let next = ex_style & !(WS_EX_NOACTIVATE.0 as isize);
                     let _ = SetWindowLongPtrW(HWND(hwnd_raw.0), GWL_EXSTYLE, next);
                 }
-                let _ = window.set_focus();
+                let _ = main_win.set_focus();
                 WindowExt::force_focus_window(HWND(hwnd_raw.0));
                 return Ok(());
             }
         }
-        let _ = window.set_focus();
+        let _ = main_win.set_focus();
         Ok(())
     } else {
         Err("Main window not found".to_string())
