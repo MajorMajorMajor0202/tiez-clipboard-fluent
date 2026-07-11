@@ -56,7 +56,9 @@
   --spacing-md: 16px;
   --spacing-sm: 8px;
   --surface-opacity-scale: 1;
-  --shell-inset-border: inset 0 0 0 1px rgba(255, 255, 255, 0.40);
+  --shell-inset-border:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.50),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.25);
 
   --font-main: var(--fluent-font-family);
   --font-mono: "Cascadia Code", "Consolas", monospace;
@@ -348,18 +350,27 @@ body.dark-mode {
 body {
   background-color: transparent;
   color: var(--text-primary);
-  height: 100vh;
   overflow: hidden;
 }
 
 html,
 body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   background-color: transparent;
+  box-sizing: border-box;
+}
+
+body:not(.is-settings-window):not(.compact-preview) {
+  padding: 1.5px;
 }
 
 #root {
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--shell-background);
@@ -368,9 +379,8 @@ body {
   overflow: hidden;
   /*
    * 边框线条用 inset box-shadow 实现（而非 ::after border），
-   * 原因：overflow:hidden 会裁剪绝对定位子元素的 border，
-   * 导致右边和下边的线条消失；inset shadow 在内容盒内绘制，
-   * 不受 overflow 裁剪影响，在全部四边都能可靠显示。
+   * 结合 body 增加的 1.5px padding，使 #root 整体向内收缩，
+   * 彻底避免了 Windows DWM 圆角裁剪导致右边和下边边框线丢失的问题。
    * 双层：外层 1px 主线 + 内层 1px 柔和阴影线，线条更清晰。
    */
   box-shadow: var(--shell-inset-border), var(--shell-shadow);
