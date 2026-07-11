@@ -57,8 +57,8 @@
   --spacing-sm: 8px;
   --surface-opacity-scale: 1;
   --shell-inset-border:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.50),
-    inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 0 4px rgba(255, 255, 255, 0.20);
 
   --font-main: var(--fluent-font-family);
   --font-mono: "Cascadia Code", "Consolas", monospace;
