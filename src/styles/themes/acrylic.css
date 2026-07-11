@@ -28,6 +28,9 @@ body.theme-acrylic {
 
   --shell-background: rgba(252, 252, 252, calc(0.56 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.32);
+  --shell-inset-border:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.14);
   --shell-shadow: 0 10px 38px rgba(0, 0, 0, 0.16);
   --shell-radius: 8px;
   --shell-backdrop-filter: none;
@@ -161,6 +164,9 @@ body.theme-acrylic #root > * {
 
     --shell-background: rgba(20, 20, 20, calc(0.52 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.12);
+    --shell-inset-border:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.07);
     --shell-backdrop-filter: none;
     --toolbar-border: 1px solid rgba(255, 255, 255, 0.08);
     --panel-border: 1px solid rgba(255, 255, 255, 0.1);
@@ -203,6 +209,9 @@ body.dark-mode.theme-acrylic {
 
   --shell-background: rgba(20, 20, 20, calc(0.52 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.12);
+  --shell-inset-border:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.07);
   --shell-backdrop-filter: none;
   --toolbar-border: 1px solid rgba(255, 255, 255, 0.08);
   --panel-border: 1px solid rgba(255, 255, 255, 0.1);
