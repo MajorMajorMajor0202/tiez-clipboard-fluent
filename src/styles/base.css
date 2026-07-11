@@ -351,15 +351,18 @@ body {
   overflow: hidden;
 }
 
+body:not(.is-settings-window):not(.compact-preview) {
+  padding: 1px;
+}
+
 html,
 body {
-  border-radius: var(--shell-radius);
   overflow: hidden;
   background-color: transparent;
 }
 
 #root {
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--shell-background);
