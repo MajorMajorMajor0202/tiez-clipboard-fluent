@@ -30,9 +30,8 @@ body.theme-mica {
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.42);
-  --shell-inset-border: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
   --shell-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
-  --shell-radius: 8px;
+  --shell-radius: 10px;
 
   --toolbar-border: none;
 
@@ -108,9 +107,9 @@ body.theme-mica::before {
   z-index: 0;
   opacity: 0.18;
   pointer-events: none;
-  border-radius: var(--shell-radius);
-  clip-path: inset(0 round var(--shell-radius));
-  -webkit-clip-path: inset(0 round var(--shell-radius));
+  border-radius: calc(var(--shell-radius) + 1px);
+  clip-path: inset(1px round var(--shell-radius));
+  -webkit-clip-path: inset(1px round var(--shell-radius));
 }
 
 body.has-custom-bg.theme-mica::before {
@@ -176,8 +175,7 @@ body.theme-mica #root > * {
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
-    --shell-inset-border: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-    --shell-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    --shell-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
     --toolbar-border: none;
     --panel-border: 1px solid rgba(255, 255, 255, 0.08);
     --menu-border: 1px solid rgba(255, 255, 255, 0.08);
@@ -230,8 +228,7 @@ body.dark-mode.theme-mica {
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
-  --shell-inset-border: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-  --shell-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  --shell-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
   --toolbar-border: none;
   --panel-border: 1px solid rgba(255, 255, 255, 0.08);
   --menu-border: 1px solid rgba(255, 255, 255, 0.08);

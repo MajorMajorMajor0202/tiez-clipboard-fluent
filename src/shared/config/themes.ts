@@ -22,16 +22,6 @@ export const THEMES: ThemeDefinition[] = [
     },
     supportsCustomBackground: true,
     supportsSurfaceOpacity: true
-  },
-  {
-    id: "acrylic",
-    labels: {
-      zh: "毛玻璃",
-      en: "Acrylic",
-      tw: "毛玻璃"
-    },
-    supportsCustomBackground: true,
-    supportsSurfaceOpacity: true
   }
 ];
 
