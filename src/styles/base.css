@@ -48,7 +48,7 @@
   --accent-soft: rgba(var(--accent-color-rgb), 0.12);
 
   /* ── Corner radius, mapped to Fluent tokens ── */
-  --radius-window: 22px;
+  --radius-window: 8px;
   --radius-panel: var(--fluent-corner-overlay);
   --radius-card: var(--fluent-corner-overlay);
   --radius-control: var(--fluent-corner-control);
@@ -69,6 +69,7 @@
 
   --shell-background: var(--bg-window);
   --shell-border: 1px solid var(--line-soft);
+  --shell-inset-border: inset 0 0 0 1px var(--line-soft);
   --shell-shadow: var(--shadow-lg);
   --shell-radius: var(--radius-window);
   --shell-backdrop-filter: none;
@@ -351,10 +352,6 @@ body {
   overflow: hidden;
 }
 
-body:not(.is-settings-window):not(.compact-preview) {
-  padding: 1px;
-}
-
 html,
 body {
   overflow: hidden;
@@ -362,22 +359,38 @@ body {
 }
 
 #root {
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--shell-background);
-  border: var(--shell-border);
+  border: none;
   border-radius: var(--shell-radius);
   overflow: hidden;
   box-shadow: var(--shell-shadow);
   backdrop-filter: var(--shell-backdrop-filter);
   -webkit-backdrop-filter: var(--shell-backdrop-filter);
+  position: relative; /* Position context for ::after border line */
 }
 
-:root.hide-app-border #root,
-body.hide-app-border #root {
-  border-color: transparent !important;
-  box-shadow: none !important;
+/* 
+ * 绘制主窗口的 1px 描边线条。
+ * 保持 #root 填满整个窗口以保证背景（云母/亚克力等）无缝覆盖，
+ * 通过 ::after 伪元素在内缩 1px 处使用 DWM 同心圆角绘制描边，
+ * 解决 175% DPI 下的边缘裁剪问题，同时保证圆角与窗口物理边缘完全一致。
+ */
+body:not(.is-settings-window):not(.compact-preview) #root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: var(--shell-border);
+  border-radius: var(--shell-radius);
+  pointer-events: none;
+  z-index: 999999;
+}
+
+:root.hide-app-border #root::after,
+body.hide-app-border #root::after {
+  display: none !important;
 }
 
 #root::before {
