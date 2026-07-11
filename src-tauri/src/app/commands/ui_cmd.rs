@@ -191,11 +191,9 @@ pub fn apply_theme_to_window_internal(
         match theme {
             "mica" if is_win11 => {
                 let _ = window_vibrancy::apply_mica(window, Some(is_dark));
-                let _ = window.set_shadow(show_border);
-                // Extend DWM frame into entire client area so Mica renders
-                // uniformly behind both the native titlebar and the webview.
+                let _ = window.set_shadow(false);
                 unsafe {
-                    let m = MARGINS { cxLeftWidth: -1, cxRightWidth: -1, cyTopHeight: -1, cyBottomHeight: -1 };
+                    let m = MARGINS { cxLeftWidth: 0, cxRightWidth: 0, cyTopHeight: 0, cyBottomHeight: 0 };
                     let _ = DwmExtendFrameIntoClientArea(hwnd, &m);
                 }
             }
@@ -204,10 +202,9 @@ pub fn apply_theme_to_window_internal(
                     window,
                     Some(if is_dark { (30, 30, 30, 40) } else { (240, 240, 240, 40) }),
                 );
-                let _ = window.set_shadow(show_border);
-                // Same frame-extension for Acrylic
+                let _ = window.set_shadow(false);
                 unsafe {
-                    let m = MARGINS { cxLeftWidth: -1, cxRightWidth: -1, cyTopHeight: -1, cyBottomHeight: -1 };
+                    let m = MARGINS { cxLeftWidth: 0, cxRightWidth: 0, cyTopHeight: 0, cyBottomHeight: 0 };
                     let _ = DwmExtendFrameIntoClientArea(hwnd, &m);
                 }
             }
