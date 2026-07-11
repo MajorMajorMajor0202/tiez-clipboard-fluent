@@ -201,14 +201,25 @@ pub fn set_window_pinned(app_handle: AppHandle, state: State<'_, DbState>, pinne
             use windows::Win32::Foundation::HWND;
             use windows::Win32::UI::WindowsAndMessaging::{
                 GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_NOACTIVATE,
+                SetWindowPos, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_NOACTIVATE, SWP_FRAMECHANGED,
             };
             if let Ok(hwnd) = window.hwnd() {
                 unsafe {
                     let ex_style = GetWindowLongPtrW(HWND(hwnd.0), GWL_EXSTYLE);
-                    let _ = SetWindowLongPtrW(
+                    let next = if pinned {
+                        ex_style | WS_EX_NOACTIVATE.0 as isize
+                    } else {
+                        ex_style & !(WS_EX_NOACTIVATE.0 as isize)
+                    };
+                    let _ = SetWindowLongPtrW(HWND(hwnd.0), GWL_EXSTYLE, next);
+                    let _ = SetWindowPos(
                         HWND(hwnd.0),
-                        GWL_EXSTYLE,
-                        ex_style | WS_EX_NOACTIVATE.0 as isize,
+                        None,
+                        0,
+                        0,
+                        0,
+                        0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
                     );
                 }
             }

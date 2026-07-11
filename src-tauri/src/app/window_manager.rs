@@ -11,6 +11,7 @@ use windows::Win32::Foundation::{HWND, POINT};
 #[cfg(windows)]
 use windows::Win32::UI::WindowsAndMessaging::{
     GetCursorPos, GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_NOACTIVATE,
+    SetWindowPos, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_NOACTIVATE, SWP_FRAMECHANGED,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -397,6 +398,15 @@ pub fn toggle_window(app: &AppHandle) {
                         GWL_EXSTYLE,
                         ex_style | WS_EX_NOACTIVATE.0 as isize,
                     );
+                    let _ = SetWindowPos(
+                        HWND(hwnd_raw.0),
+                        None,
+                        0,
+                        0,
+                        0,
+                        0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                    );
                 }
                 let _ = window.show();
                 if pinned {
@@ -446,6 +456,15 @@ pub fn activate_window_focus(app_handle: AppHandle) -> Result<(), String> {
                     let ex_style = GetWindowLongPtrW(HWND(hwnd_raw.0), GWL_EXSTYLE);
                     let next = ex_style & !(WS_EX_NOACTIVATE.0 as isize);
                     let _ = SetWindowLongPtrW(HWND(hwnd_raw.0), GWL_EXSTYLE, next);
+                    let _ = SetWindowPos(
+                        HWND(hwnd_raw.0),
+                        None,
+                        0,
+                        0,
+                        0,
+                        0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                    );
                 }
                 let _ = window.set_focus();
                 WindowExt::force_focus_window(HWND(hwnd_raw.0));
@@ -498,6 +517,15 @@ pub fn focus_clipboard_window(window: tauri::WebviewWindow, app_handle: AppHandl
                     let ex_style = GetWindowLongPtrW(HWND(hwnd_raw.0), GWL_EXSTYLE);
                     let next = ex_style & !(WS_EX_NOACTIVATE.0 as isize);
                     let _ = SetWindowLongPtrW(HWND(hwnd_raw.0), GWL_EXSTYLE, next);
+                    let _ = SetWindowPos(
+                        HWND(hwnd_raw.0),
+                        None,
+                        0,
+                        0,
+                        0,
+                        0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                    );
                 }
                 let _ = main_win.set_focus();
                 WindowExt::force_focus_window(HWND(hwnd_raw.0));

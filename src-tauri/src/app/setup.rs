@@ -32,6 +32,7 @@ use windows::Win32::UI::Shell::SetWindowSubclass;
 #[cfg(target_os = "windows")]
 use windows::Win32::UI::WindowsAndMessaging::{
     GetCursorPos, GetWindowRect, RegisterWindowMessageW, GWL_EXSTYLE, WS_EX_NOACTIVATE,
+    SetWindowPos, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_NOACTIVATE, SWP_FRAMECHANGED,
 };
 
 static WINDOW_SIZE_SAVE_PENDING: AtomicBool = AtomicBool::new(false);
@@ -454,6 +455,15 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
                         ex_style & !(WS_EX_NOACTIVATE.0 as isize),
                     );
                 }
+                let _ = SetWindowPos(
+                    HWND(hwnd.0),
+                    None,
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                );
             }
         }
 
@@ -887,6 +897,15 @@ fn start_edge_docking_monitor(app_handle: AppHandle) {
                                             GWL_EXSTYLE,
                                             ex_style | WS_EX_NOACTIVATE.0 as isize,
                                         );
+                                    let _ = SetWindowPos(
+                                        HWND(hwnd.0),
+                                        None,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+                                    );
                                 }
                             }
                             let _ = app_handle.emit("window-pinned-changed", true);
@@ -953,6 +972,15 @@ fn start_edge_docking_monitor(app_handle: AppHandle) {
                                     HWND(hwnd.0),
                                     GWL_EXSTYLE,
                                     next,
+                                );
+                                let _ = SetWindowPos(
+                                    HWND(hwnd.0),
+                                    None,
+                                    0,
+                                    0,
+                                    0,
+                                    0,
+                                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
                                 );
                             }
                         }
