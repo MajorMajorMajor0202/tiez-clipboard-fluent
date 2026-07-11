@@ -162,17 +162,4 @@ export const useSettingsApply = ({
     const scale = Math.min(2, Math.max(0, surfaceOpacity / 50));
     root.style.setProperty("--surface-opacity-scale", scale.toString());
   }, [clipboardItemFontSize, clipboardTagFontSize, surfaceOpacity, settingsLoaded]);
-
-  useEffect(() => {
-    if (!settingsLoaded) return;
-    const root = document.documentElement;
-    const body = document.body;
-    if (_showAppBorder) {
-      root.classList.remove("hide-app-border");
-      body.classList.remove("hide-app-border");
-    } else {
-      root.classList.add("hide-app-border");
-      body.classList.add("hide-app-border");
-    }
-  }, [_showAppBorder, settingsLoaded]);
 };
