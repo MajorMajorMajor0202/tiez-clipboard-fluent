@@ -469,11 +469,15 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
     let args: Vec<String> = std::env::args().collect();
     let is_autostart =
         args.contains(&"--autostart".to_string()) || args.contains(&"--minimized".to_string());
-    if !is_autostart && !s.silent_start {
+    if !is_autostart || !s.silent_start {
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
             let _ = window.emit("window-shown", ());
             reapply_vibrancy(app.handle());
+        }
+    } else {
+        if let Some(window) = app.get_webview_window("main") {
+            let _ = window.hide();
         }
     }
 }

@@ -33,9 +33,10 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
     setVisible(true);
     const trackElement = trackRef.current;
     const trackH = trackElement ? trackElement.clientHeight : (clientHeight - (arrowsOutside ? 16 : 0));
+    const visibleTrackH = arrowsOutside ? trackH : (trackH - ARROW_H * 2);
     const ratio = clientHeight / scrollHeight;
-    const th = Math.max(30, trackH * ratio);
-    const maxTop = trackH - th;
+    const th = Math.max(30, visibleTrackH * ratio);
+    const maxTop = visibleTrackH - th;
     const scrollRatio = scrollHeight > clientHeight ? scrollTop / (scrollHeight - clientHeight) : 0;
     const tp = scrollRatio * maxTop;
     setThumbHeight(th);
@@ -74,8 +75,9 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
       if (!el) return;
       const trackElement = trackRef.current;
       const trackH = trackElement ? trackElement.clientHeight : (el.clientHeight - (arrowsOutside ? 16 : 0));
-      const th = Math.max(30, trackH * (el.clientHeight / el.scrollHeight));
-      const maxTop = trackH - th;
+      const visibleTrackH = arrowsOutside ? trackH : (trackH - ARROW_H * 2);
+      const th = Math.max(30, visibleTrackH * (el.clientHeight / el.scrollHeight));
+      const maxTop = visibleTrackH - th;
       const dy = me.clientY - dragStartY.current;
       const scrollRatio = maxTop > 0 ? dy / maxTop : 0;
       const maxScroll = el.scrollHeight - el.clientHeight;

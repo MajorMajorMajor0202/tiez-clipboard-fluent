@@ -760,6 +760,7 @@ const SettingsWindow = () => {
                   checked={autoStart}
                   onChange={(e) => {
                     const enabled = e.target.checked;
+                    setAutoStart(enabled);
                     invoke("toggle_autostart", { enabled }).catch(console.error);
                   }}
                 />

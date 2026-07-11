@@ -301,7 +301,7 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .fluent-button:hover {
@@ -310,16 +310,22 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 
 .fluent-button:active {
   background-color: var(--bg-subtle-active);
+  transform: scale(0.97);
 }
 
 .fluent-button-primary {
   background-color: var(--accent-color);
   color: #ffffff;
   border-color: var(--accent-color);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .fluent-button-primary:hover {
   background-color: var(--accent-hover);
+}
+
+.fluent-button-primary:active {
+  transform: scale(0.97);
 }
 
 .fluent-textarea {
@@ -359,9 +365,9 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: transparent;
+  background-color: rgba(120, 120, 120, 0.12);
   border: 1px solid var(--text-secondary);
-  transition: .15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 10px;
 }
 
@@ -373,8 +379,9 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   left: 3px;
   bottom: 3px;
   background-color: var(--text-primary);
-  transition: .15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .fluent-switch input:checked + .fluent-slider {
@@ -385,6 +392,16 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 .fluent-switch input:checked + .fluent-slider:before {
   transform: translateX(20px);
   background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.fluent-switch input:active + .fluent-slider:before {
+  width: 16px;
+}
+
+.fluent-switch input:checked:active + .fluent-slider:before {
+  width: 16px;
+  transform: translateX(16px);
 }
 
 /* Custom range slider */
