@@ -703,7 +703,7 @@ const SettingsWindow = () => {
     { id: "general", label: t("general_settings") || "常规与系统", icon: <Settings size={16} /> },
     { id: "clipboard", label: t("clipboard_settings") || "剪贴板与热键", icon: <Sliders size={16} /> },
     { id: "privacy", label: t("privacy_protection") || "隐私与过滤", icon: <Shield size={16} /> },
-    { id: "sync", label: t("sync_settings") || "同步与传输", icon: <Wifi size={16} /> },
+    { id: "sync", label: t("sync_and_transfer") || "同步与传输", icon: <Wifi size={16} /> },
     { id: "ai", label: t("ai_settings") || "AI 智能助手", icon: <Cpu size={16} /> },
     { id: "appearance", label: t("appearance_settings") || "个性化外观", icon: <Palette size={16} /> },
     { id: "advanced", label: t("advanced_settings") || "高级设置", icon: <Sliders size={16} /> }
