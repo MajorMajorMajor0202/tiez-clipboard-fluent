@@ -29,10 +29,10 @@ body.theme-mica {
     0 2px 3px rgba(0, 0, 0, 0.1);
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
-  --shell-border: 1px solid rgba(255, 255, 255, 0.42);
+  --shell-border: 1px solid rgba(0, 0, 0, 0.15);
   --shell-inset-border:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.75),
-    0 0 4px rgba(255, 255, 255, 0.35);
+    inset 0 0 0 1px rgba(0, 0, 0, 0.16),
+    0 0 4px rgba(0, 0, 0, 0.08);
   --shell-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
   --shell-radius: 8px;
 
