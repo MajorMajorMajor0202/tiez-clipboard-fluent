@@ -4,6 +4,7 @@ import App from "./App";
 import CompactPreviewWindow from "./features/clipboard/components/CompactPreviewWindow";
 import AdvancedSettingsWindow from "./features/settings/components/AdvancedSettingsWindow";
 import SettingsWindow from "./features/settings/components/SettingsWindow";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import "./index.css";
 import "./styles/components/index.css";
 import "./styles/themes/load";
@@ -54,22 +55,18 @@ if (isSettingsWindow || isAdvancedSettingsWindow) {
 }
 
 // ── Canvas 边框叠加层 ─────────────────────────────────────────────────
-// 历史上所有 CSS 方案都失败的根本原因（最终诊断）：
+// 针对 Windows OS 在无边框 resizable 状态下的裁剪特性进行的终极物理像素级适配方案：
 //
-//   CSS 边框渲染在非整数 DPR（125%/150%/175%）下存在亚像素取整问题：
-//   position:fixed; inset:0; border:1px solid 的右/下边框的外边缘恰好落在
-//   viewport 的物理像素边界外，Chromium 把超出部分裁掉，右/下边框消失。
+// 1. 真实物理尺寸：
+//    放弃使用 window.innerWidth (容易受 Chromium 四舍五入取整影响导致 1px 误差)，
+//    直接调用 Tauri 的 getCurrentWindow().innerSize() 获取 OS 底层无误差的真实窗口物理像素宽 w 和高 h。
 //
-//   PROOF（以 175% DPR，窗口 615 物理像素宽为例）：
-//     window.innerWidth = floor(615/1.75) = 351 CSS px
-//     右边框外边缘 = 351 * 1.75 = 614.25 物理像素
-//     但窗口只有 615 物理像素（0-614），614.25 落在最后一个像素的外侧，被裁切！
-//
-//   Canvas 方案：直接在物理像素坐标系绘制，绕过所有 CSS 亚像素计算：
-//     canvas.width = Math.round(innerWidth * dpr)   ← 精确物理像素数
-//     strokeRect(0.5, 0.5, w-1, h-1)               ← 1px 笔触始终在 canvas 内
-//     左边框：物理像素 0（100% 在界内），右边框：物理像素 w-1（同上）
-//     四边完全一致，无任何 CSS 数学计算参与。
+// 2. 物理像素内缩 (Padding Offset)：
+//    Windows DWM 边框和大小调整管理器会无情裁剪掉最外侧的第 0 像素(左/上)和第 w-1/h-1 像素(右/下)。
+//    我们将边框矩形的所有绘制路径统一向内平移 1 个物理像素：
+//      - 起始位置设为 x=1.5, y=1.5 (线宽 1px 刚好覆盖物理像素 index 1)
+//      - 宽度设为 w - 3, 高度设为 h - 3 (右/下边界落在 index w-2 / h-2)
+//    这样，边框线处于 100% 不会被系统裁剪的内部安全区，且在四边表现出完美的物理对称。
 // ─────────────────────────────────────────────────────────────────────
 if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
   const canvas = document.createElement("canvas");
@@ -82,17 +79,27 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
     height: "100vh",
     pointerEvents: "none",
     zIndex: "2147483647",
-    // 防止 canvas 元素自身被拉伸变形
     imageRendering: "pixelated",
   });
 
-  const draw = () => {
+  const draw = async () => {
     const dpr = window.devicePixelRatio || 1;
-    // 用 Math.round 而非 floor/ceil，尽量接近真实物理像素数
-    const w = Math.round(window.innerWidth * dpr);
-    const h = Math.round(window.innerHeight * dpr);
+    let w = 0;
+    let h = 0;
 
-    // 仅在尺寸变化时重置 canvas 像素缓冲（避免闪烁）
+    try {
+      const size = await getCurrentWindow().innerSize();
+      w = size.width;
+      h = size.height;
+    } catch (e) {
+      // 容错回退机制
+      w = Math.round(window.innerWidth * dpr);
+      h = Math.round(window.innerHeight * dpr);
+    }
+
+    if (w <= 0 || h <= 0) return;
+
+    // 仅在尺寸变化时重置 canvas 像素缓冲，防止画面闪烁
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
@@ -109,41 +116,41 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
 
     if (!color) return;
 
-    // 将 CSS px 圆角转换为物理像素圆角，再减去 0.5（因为笔触从 0.5 开始）
-    const radius = Math.max(radiusCss * dpr - 0.5, 0);
+    // 物理像素圆角转换为适配内缩后的值，再减去 1.5（因为从 1.5 坐标开始绘制）
+    const radius = Math.max(radiusCss * dpr - 1.5, 0);
 
     ctx.strokeStyle = color;
     ctx.lineWidth = 1; // 1 物理像素
 
-    // strokeRect(0.5, 0.5, w-1, h-1) 确保：
-    //   - 左边框笔触中心 x=0.5 → 覆盖物理像素 [0, 1)，完全在界内 ✓
-    //   - 右边框笔触中心 x=w-0.5 → 覆盖物理像素 [w-1, w)，canvas 裁切到 w-1 ✓
-    //   四边均为完整的 1 物理像素，无任何边被裁切
+    // 绘制内缩 1 物理像素的边框线：
+    //   - 起始点 (1.5, 1.5)：刚好着色 index 1 像素
+    //   - 尺寸 (w - 3, h - 3)：终点 (w - 1.5, h - 1.5) 刚好着色 index w - 2 像素
+    // 留下 index 0 和 index w-1 作为外部保护边，从而免疫 DWM 裁剪
     ctx.beginPath();
     if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(0.5, 0.5, w - 1, h - 1, radius);
+      ctx.roundRect(1.5, 1.5, w - 3, h - 3, radius);
     } else {
-      ctx.rect(0.5, 0.5, w - 1, h - 1);
+      ctx.rect(1.5, 1.5, w - 3, h - 3);
     }
     ctx.stroke();
   };
 
   document.body.appendChild(canvas);
 
-  // 首帧绘制（requestAnimationFrame 确保 CSS 变量已计算完毕）
+  // 首帧绘制
   requestAnimationFrame(draw);
 
-  // 窗口大小变化时重绘（Tauri 窗口 resize）
+  // 窗口大小变化时重绘
   window.addEventListener("resize", () => requestAnimationFrame(draw));
 
-  // DPI 变化时重绘（窗口移到不同 DPI 的显示器）
+  // DPI 变化时重绘
   const listenDpi = () => {
     const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
     mq.addEventListener("change", () => { requestAnimationFrame(draw); listenDpi(); }, { once: true });
   };
   listenDpi();
 
-  // 主题切换时重绘（:root class/style 变化意味着颜色变量改变）
+  // 主题切换时重绘
   new MutationObserver(() => requestAnimationFrame(draw)).observe(
     document.documentElement,
     { attributes: true, attributeFilter: ["class", "style"] }
