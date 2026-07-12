@@ -29,8 +29,8 @@ body.theme-mica {
     0 2px 3px rgba(0, 0, 0, 0.1);
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
-  --shell-border: 1px solid rgba(0, 0, 0, 0.15);
-  --shell-border-color: rgba(0, 0, 0, 0.15);
+  --shell-border: 1px solid rgba(0, 0, 0, 0.30);
+  --shell-border-color: rgba(0, 0, 0, 0.30);
   --shell-inset-border:
     inset 0 0 0 1px rgba(0, 0, 0, 0.16),
     0 0 4px rgba(0, 0, 0, 0.08);

@@ -388,37 +388,34 @@ body:not(.is-settings-window):not(.compact-preview) {
 }
 
 /*
- * ─── 精确 1 物理像素描边 ───────────────────────────────────────────────
- * 方案：transform: scale 技术（业界公认的 DPI 无关精确像素渲染方案）
+ * ─── 窗口边框叠加层 #window-border-overlay ────────────────────────────
  *
- * 原理：
- *   1. 将 ::after 的宽高扩大 devicePixelRatio 倍（实际物理像素大小）。
- *   2. 应用 border: 1px solid，此时 1px 就等于 1 个物理像素。
- *   3. 用 transform: scale(1/dpr) 将其缩小回原始尺寸。
- *   4. 结果：无论缩放比例是 125%/150%/175%/200%，边框始终精确为 1 个物理像素。
+ * 历史方案失败原因：
+ *   • inset box-shadow 在 #root：被右侧子元素（scrollbar）覆盖
+ *   • #root::after position:absolute：被 overflow:hidden 裁掉右/下
+ *   • #root::after position:fixed：#root 有 backdrop-filter，
+ *     backdrop-filter 让 #root 成为 fixed 的 containing block，
+ *     fixed 无法逃出 #root，仍被 overflow:hidden 裁剪
  *
- * --device-pixel-ratio 由 main.tsx 在启动时注入，并在跨显示器时动态更新。
- * z-index: 999999 确保边框绘制在滚动条/列表内容所有子元素之上。
+ * 正确方案（本方案）：
+ *   在 main.tsx 里向 body 直接追加一个 div#window-border-overlay，
+ *   body 没有 backdrop-filter/transform/filter，
+ *   所以 position:fixed 真正以 viewport 为 containing block，
+ *   不被任何 overflow:hidden 裁剪，四边完全一致。
  * ─────────────────────────────────────────────────────────────────────
  */
-body:not(.is-settings-window):not(.compact-preview) #root::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: calc(100% * var(--device-pixel-ratio, 1));
-  height: calc(100% * var(--device-pixel-ratio, 1));
+#window-border-overlay {
+  position: fixed;
+  inset: 0;
   border: 1px solid var(--shell-border-color);
-  border-radius: calc(var(--shell-radius) * var(--device-pixel-ratio, 1));
-  transform-origin: 0 0;
-  transform: scale(calc(1 / var(--device-pixel-ratio, 1)));
+  border-radius: var(--shell-radius);
   pointer-events: none;
-  z-index: 999999;
+  z-index: 2147483647;
   box-sizing: border-box;
 }
 
-:root.hide-app-border #root::after,
-body.hide-app-border #root::after {
+body.hide-app-border #window-border-overlay,
+:root.hide-app-border #window-border-overlay {
   display: none !important;
 }
 

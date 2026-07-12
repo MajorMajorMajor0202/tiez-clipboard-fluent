@@ -27,8 +27,8 @@ body.theme-acrylic {
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.36);
 
   --shell-background: rgba(252, 252, 252, calc(0.56 * var(--surface-opacity-scale, 1)));
-  --shell-border: 1px solid rgba(0, 0, 0, 0.15);
-  --shell-border-color: rgba(0, 0, 0, 0.15);
+  --shell-border: 1px solid rgba(0, 0, 0, 0.30);
+  --shell-border-color: rgba(0, 0, 0, 0.30);
   --shell-inset-border:
     inset 0 0 0 1px rgba(0, 0, 0, 0.16),
     0 0 4px rgba(0, 0, 0, 0.08);

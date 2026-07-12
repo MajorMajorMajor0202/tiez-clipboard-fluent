@@ -53,6 +53,21 @@ if (isSettingsWindow || isAdvancedSettingsWindow) {
   document.body.classList.add("is-settings-window");
 }
 
+// ── 注入窗口边框叠加层 #window-border-overlay ─────────────────────────
+// 这个 div 直接追加到 body（#root 的兄弟节点），而非 #root 的子节点。
+// 关键原因：
+//   • #root 有 backdrop-filter，会成为 position:fixed 子元素的 containing block，
+//     导致 fixed 子元素被 #root 的 overflow:hidden 裁剪（右/下边消失）。
+//   • 作为 body 的直接子节点，body 无 backdrop-filter/transform，
+//     position:fixed 真正以 viewport 为 containing block，四边完全一致渲染。
+//   • z-index:2147483647 确保始终在最顶层，不被任何内容覆盖。
+if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
+  const borderOverlay = document.createElement("div");
+  borderOverlay.id = "window-border-overlay";
+  document.body.appendChild(borderOverlay);
+}
+// ─────────────────────────────────────────────────────────────────────
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     {isCompactPreview
