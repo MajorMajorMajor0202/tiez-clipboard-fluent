@@ -133,17 +133,7 @@ body.theme-mica #root {
   background-clip: padding-box;
 }
 
-body.theme-mica #root::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
-  pointer-events: none;
-  border-radius: inherit;
-  opacity: 0.2;
-}
+
 
 body.theme-mica #root > * {
   position: relative;
@@ -196,11 +186,7 @@ body.theme-mica #root > * {
     --flyout-label-opacity: 0.6;
   }
 
-  body.theme-mica:not(.light-mode) #root::before {
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 2px, rgba(255, 255, 255, 0.02) 4px),
-      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 2px, rgba(255, 255, 255, 0.02) 4px);
-  }
+
 
   body.theme-mica:not(.light-mode):not(.has-custom-bg)::before {
     background-image: linear-gradient(150deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%);
