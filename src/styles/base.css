@@ -365,7 +365,7 @@ body {
 }
 
 body:not(.is-settings-window):not(.compact-preview) {
-  padding: 0.5px;
+  padding: 0.8px;
 }
 
 #root {
@@ -377,15 +377,30 @@ body:not(.is-settings-window):not(.compact-preview) {
   border: none;
   border-radius: var(--shell-radius);
   overflow: hidden;
-  /*
-   * 边框线条用 inset box-shadow 实现（而非 ::after border），
-   * 结合 body 增加的 1.5px padding，使 #root 整体向内收缩，
-   * 彻底避免了 Windows DWM 圆角裁剪导致右边和下边边框线丢失的问题。
-   * 双层：外层 1px 主线 + 内层 1px 柔和阴影线，线条更清晰。
-   */
-  box-shadow: var(--shell-inset-border), var(--shell-shadow);
+  box-shadow: var(--shell-shadow);
   backdrop-filter: var(--shell-backdrop-filter);
   -webkit-backdrop-filter: var(--shell-backdrop-filter);
+  position: relative; /* Position context for ::after border line */
+}
+
+/* 
+ * 绘制主窗口的 1px 描边与外扩微光。
+ * 通过 ::after 伪元素加上 z-index: 999999 置于最顶层，
+ * 确保永远不会被内部的滚动条、列表项等子内容遮挡，彻底解决右边变细的问题。
+ */
+body:not(.is-settings-window):not(.compact-preview) #root::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 999999;
+  box-shadow: var(--shell-inset-border);
+}
+
+:root.hide-app-border #root::after,
+body.hide-app-border #root::after {
+  display: none !important;
 }
 
 :root.hide-app-border #root,
