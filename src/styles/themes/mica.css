@@ -30,6 +30,7 @@ body.theme-mica {
 
   --shell-background: rgba(248, 248, 248, calc(0.18 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(0, 0, 0, 0.15);
+  --shell-border-color: rgba(0, 0, 0, 0.15);
   --shell-inset-border:
     inset 0 0 0 1px rgba(0, 0, 0, 0.16),
     0 0 4px rgba(0, 0, 0, 0.08);
@@ -178,6 +179,7 @@ body.theme-mica #root > * {
 
     --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
     --shell-border: 1px solid rgba(255, 255, 255, 0.08);
+    --shell-border-color: rgba(255, 255, 255, 0.24);
     --shell-inset-border:
       inset 0 0 0 1px rgba(255, 255, 255, 0.24),
       0 0 4px rgba(255, 255, 255, 0.12);
@@ -234,6 +236,7 @@ body.dark-mode.theme-mica {
 
   --shell-background: rgba(24, 24, 24, calc(0.15 * var(--surface-opacity-scale, 1)));
   --shell-border: 1px solid rgba(255, 255, 255, 0.08);
+  --shell-border-color: rgba(255, 255, 255, 0.24);
   --shell-inset-border:
     inset 0 0 0 1px rgba(255, 255, 255, 0.24),
     0 0 4px rgba(255, 255, 255, 0.12);
