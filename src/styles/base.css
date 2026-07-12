@@ -365,7 +365,7 @@ body {
 }
 
 body:not(.is-settings-window):not(.compact-preview) {
-  padding: 1.5px;
+  padding: 0.5px;
 }
 
 #root {
