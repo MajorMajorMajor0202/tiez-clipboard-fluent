@@ -388,30 +388,23 @@ body:not(.is-settings-window):not(.compact-preview) {
 }
 
 /*
- * ─── 窗口边框叠加层 #window-border-overlay ────────────────────────────
- *
- * 历史方案失败原因：
- *   • inset box-shadow 在 #root：被右侧子元素（scrollbar）覆盖
- *   • #root::after position:absolute：被 overflow:hidden 裁掉右/下
- *   • #root::after position:fixed：#root 有 backdrop-filter，
- *     backdrop-filter 让 #root 成为 fixed 的 containing block，
- *     fixed 无法逃出 #root，仍被 overflow:hidden 裁剪
- *
- * 正确方案（本方案）：
- *   在 main.tsx 里向 body 直接追加一个 div#window-border-overlay，
- *   body 没有 backdrop-filter/transform/filter，
- *   所以 position:fixed 真正以 viewport 为 containing block，
- *   不被任何 overflow:hidden 裁剪，四边完全一致。
+ * ─── Canvas 窗口边框叠加层 ─────────────────────────────────────────────
+ * 这是一个 <canvas> 元素，由 main.tsx 注入为 body 的直接子节点。
+ * CSS 只负责定位，边框由 Canvas 2D API 在物理像素坐标系中绘制。
+ * 参见 main.tsx 中的详细注释说明。
  * ─────────────────────────────────────────────────────────────────────
  */
 #window-border-overlay {
-  position: fixed;
-  inset: 0;
-  border: 1px solid var(--shell-border-color);
-  border-radius: var(--shell-radius);
-  pointer-events: none;
-  z-index: 2147483647;
-  box-sizing: border-box;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 2147483647 !important;
+  /* canvas 的边框由 JS 绘制，无需 CSS border */
+  border: none !important;
+  background: transparent !important;
 }
 
 body.hide-app-border #window-border-overlay,
