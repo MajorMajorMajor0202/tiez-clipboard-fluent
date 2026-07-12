@@ -75,34 +75,34 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
     position: "fixed",
     top: "0",
     left: "0",
-    width: "100vw",
-    height: "100vh",
     pointerEvents: "none",
     zIndex: "2147483647",
     imageRendering: "pixelated",
   });
 
-  const draw = async () => {
-    const dpr = window.devicePixelRatio || 1;
-    let w = 0;
-    let h = 0;
+  const appWindow = getCurrentWindow();
+  let physicalWidth = Math.round(window.innerWidth * (window.devicePixelRatio || 1));
+  let physicalHeight = Math.round(window.innerHeight * (window.devicePixelRatio || 1));
+  let currentDpr = window.devicePixelRatio || 1;
 
-    try {
-      const size = await getCurrentWindow().innerSize();
-      w = size.width;
-      h = size.height;
-    } catch (e) {
-      // 容错回退机制
-      w = Math.round(window.innerWidth * dpr);
-      h = Math.round(window.innerHeight * dpr);
-    }
+  const draw = () => {
+    const w = physicalWidth;
+    const h = physicalHeight;
+    const dpr = currentDpr;
 
     if (w <= 0 || h <= 0) return;
 
-    // 仅在尺寸变化时重置 canvas 像素缓冲，防止画面闪烁
+    // 动态调整 canvas 像素大小和 CSS 显示大小，保证 1:1 无形变映射
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
+    }
+
+    const cssW = w / dpr;
+    const cssH = h / dpr;
+    if (canvas.style.width !== `${cssW}px` || canvas.style.height !== `${cssH}px`) {
+      canvas.style.width = `${cssW}px`;
+      canvas.style.height = `${cssH}px`;
     }
 
     const ctx = canvas.getContext("2d");
@@ -137,24 +137,46 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
 
   document.body.appendChild(canvas);
 
-  // 首帧绘制
-  requestAnimationFrame(draw);
+  // 初始化获取精确 OS 尺寸
+  appWindow.innerSize().then((size) => {
+    if (size.width > 0 && size.height > 0) {
+      physicalWidth = size.width;
+      physicalHeight = size.height;
+      draw();
+    }
+  });
 
-  // 窗口大小变化时重绘
-  window.addEventListener("resize", () => requestAnimationFrame(draw));
+  appWindow.scaleFactor().then((factor) => {
+    if (factor > 0) {
+      currentDpr = factor;
+      draw();
+    }
+  });
 
-  // DPI 变化时重绘
-  const listenDpi = () => {
-    const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-    mq.addEventListener("change", () => { requestAnimationFrame(draw); listenDpi(); }, { once: true });
-  };
-  listenDpi();
+  // 监听 Tauri 窗口原生 resize 和 DPI 改变事件，确保尺寸完全同步
+  appWindow.onResized(({ payload: size }) => {
+    if (size.width > 0 && size.height > 0) {
+      physicalWidth = size.width;
+      physicalHeight = size.height;
+      draw();
+    }
+  });
+
+  appWindow.onScaleChanged(({ payload }) => {
+    if (payload.scaleFactor > 0) {
+      currentDpr = payload.scaleFactor;
+      draw();
+    }
+  });
 
   // 主题切换时重绘
-  new MutationObserver(() => requestAnimationFrame(draw)).observe(
+  new MutationObserver(() => draw()).observe(
     document.documentElement,
     { attributes: true, attributeFilter: ["class", "style"] }
   );
+
+  // 默认首帧同步绘制
+  draw();
 }
 // ─────────────────────────────────────────────────────────────────────
 
