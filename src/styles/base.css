@@ -48,7 +48,7 @@
   --accent-soft: rgba(var(--accent-color-rgb), 0.12);
 
   /* ── Corner radius, mapped to Fluent tokens ── */
-  --radius-window: 8px;
+  --radius-window: 12px;
   --radius-panel: var(--fluent-corner-overlay);
   --radius-card: var(--fluent-corner-overlay);
   --radius-control: var(--fluent-corner-control);

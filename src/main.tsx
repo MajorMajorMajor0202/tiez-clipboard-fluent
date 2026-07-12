@@ -116,23 +116,43 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
 
     if (!color) return;
 
-    // 物理像素圆角转换为适配内缩后的值，再减去 1.5（因为从 1.5 坐标开始绘制）
-    const radius = Math.max(radiusCss * dpr - 1.5, 0);
-
+    // 1. 绘制外侧 1px 阴影（线宽 1px，位于 index 0，半透明度 0.45）
+    const radiusOuter = Math.max(radiusCss * dpr - 0.5, 0);
     ctx.strokeStyle = color;
-    ctx.lineWidth = 1; // 1 物理像素
-
-    // 绘制内缩 1 物理像素的边框线：
-    //   - 起始点 (1.5, 1.5)：刚好着色 index 1 像素
-    //   - 尺寸 (w - 3, h - 3)：终点 (w - 1.5, h - 1.5) 刚好着色 index w - 2 像素
-    // 留下 index 0 和 index w-1 作为外部保护边，从而免疫 DWM 裁剪
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.45;
     ctx.beginPath();
     if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(1.5, 1.5, w - 3, h - 3, radius);
+      ctx.roundRect(0.5, 0.5, w - 1, h - 1, radiusOuter);
+    } else {
+      ctx.rect(0.5, 0.5, w - 1, h - 1);
+    }
+    ctx.stroke();
+
+    // 2. 绘制主 1px 边框线（线宽 1px，位于 index 1，全透明度）
+    const radiusMain = Math.max(radiusCss * dpr - 1.5, 0);
+    ctx.globalAlpha = 1.0;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(1.5, 1.5, w - 3, h - 3, radiusMain);
     } else {
       ctx.rect(1.5, 1.5, w - 3, h - 3);
     }
     ctx.stroke();
+
+    // 3. 绘制内侧 1px 阴影（线宽 1px，位于 index 2，半透明度 0.45）
+    const radiusInner = Math.max(radiusCss * dpr - 2.5, 0);
+    ctx.globalAlpha = 0.45;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(2.5, 2.5, w - 5, h - 5, radiusInner);
+    } else {
+      ctx.rect(2.5, 2.5, w - 5, h - 5);
+    }
+    ctx.stroke();
+
+    // 恢复画布全局透明度设置
+    ctx.globalAlpha = 1.0;
   };
 
   document.body.appendChild(canvas);

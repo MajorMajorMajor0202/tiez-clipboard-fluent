@@ -95,7 +95,7 @@ pub fn apply_theme_to_window_internal(
     use windows::Win32::Graphics::Dwm::{
         DwmExtendFrameIntoClientArea, DwmSetWindowAttribute,
         DWMWA_BORDER_COLOR, DWMWA_USE_IMMERSIVE_DARK_MODE,
-        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUNDSMALL, DWM_WINDOW_CORNER_PREFERENCE,
+        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND, DWM_WINDOW_CORNER_PREFERENCE,
         DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR,
     };
     #[cfg(target_os = "windows")]
@@ -142,7 +142,7 @@ pub fn apply_theme_to_window_internal(
                 std::mem::size_of::<u32>() as u32,
             );
             // Keep rounded corners even when border/shadow are disabled.
-            let corner_pref = DWM_WINDOW_CORNER_PREFERENCE(DWMWCP_ROUNDSMALL.0);
+            let corner_pref = DWM_WINDOW_CORNER_PREFERENCE(DWMWCP_ROUND.0);
             let _ = DwmSetWindowAttribute(
                 hwnd,
                 DWMWA_WINDOW_CORNER_PREFERENCE,
