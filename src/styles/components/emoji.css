@@ -106,7 +106,7 @@
 /* Skin Tone Selector */
 .emoji-skin-tone-bar {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   padding: 4px 8px;
   align-items: center;
 }
