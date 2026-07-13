@@ -223,30 +223,40 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 }
 
 .fluent-setting-expander-content {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: var(--bg-panel);
   border: 1px solid var(--line-soft);
   border-top: none;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
-  padding: 8px 16px 8px 24px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.fluent-setting-expander-content:has(.fluent-setting-card) {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 /* Ensure controls in expander content look nested and clean */
 .fluent-setting-expander-content .fluent-setting-card {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--line-soft);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
   border-radius: 0;
   margin-bottom: 0;
-  padding: 10px 0;
-  box-shadow: none;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .fluent-setting-expander-content .fluent-setting-card:last-child {
-  border-bottom: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 /* Custom backgrounds / values style */

@@ -2244,7 +2244,7 @@ const SettingsWindow = () => {
                           <div
                             key={profile.id}
                             className="fluent-setting-card"
-                            style={{ padding: "8px 12px", marginBottom: "0", background: "rgba(0,0,0,0.01)" }}
+                            style={{ padding: "8px 12px", marginBottom: "0" }}
                           >
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: 0 }}>
                               <span
