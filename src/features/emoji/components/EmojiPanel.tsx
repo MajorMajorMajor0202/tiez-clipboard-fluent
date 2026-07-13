@@ -303,11 +303,9 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
     return () => clearTimeout(timer);
   }, []);
 
-  const flatEmoji = useMemo(() => emojiGroups.flatMap((g) => g.emojis), [emojiGroups]);
   const hasFavorites = favorites.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
 
   useEffect(() => {
     setSearchQuery("");
@@ -746,11 +744,6 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
             className="emoji-search-input"
             placeholder={t("search") || "搜索..."}
             value={searchQuery}
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={(e) => {
-              setIsComposing(false);
-              setSearchQuery((e.target as HTMLInputElement).value);
-            }}
             onChange={(e) => {
               setSearchQuery(e.target.value);
             }}
