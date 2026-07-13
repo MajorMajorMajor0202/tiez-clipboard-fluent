@@ -48,11 +48,27 @@ const FluentScrollbar: React.FC<FluentScrollbarProps> = ({ scrollContainer, arro
     if (!el) return;
     update();
     el.addEventListener('scroll', update, { passive: true });
+    
     const ro = new ResizeObserver(update);
     ro.observe(el);
+    
+    const observeChildren = () => {
+      Array.from(el.children).forEach(child => {
+        ro.observe(child);
+      });
+    };
+    observeChildren();
+
+    const mo = new MutationObserver(() => {
+      update();
+      observeChildren();
+    });
+    mo.observe(el, { childList: true, subtree: true });
+
     return () => {
       el.removeEventListener('scroll', update);
       ro.disconnect();
+      mo.disconnect();
     };
   }, [scrollContainer, update]);
 
