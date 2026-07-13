@@ -290,13 +290,14 @@
 
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  grid-template-columns: repeat(auto-fill, 40px);
   gap: 0px;
+  justify-content: center;
 }
 
 .emoji-btn {
   height: 40px;
-  width: 100%;
+  width: 40px;
   background: transparent;
   border: 2px solid transparent;
   border-radius: 4px;
