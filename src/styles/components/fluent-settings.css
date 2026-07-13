@@ -91,7 +91,7 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 /* Content area */
 .fluent-settings-content {
   flex: 1;
-  padding: 24px 8px 24px 24px;
+  padding: 24px 16px 24px 24px;
   margin-right: 8px;
   overflow-y: auto;
   scrollbar-gutter: stable;
