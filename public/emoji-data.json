@@ -90,7 +90,35 @@
         "😇",
         "😈",
         "👿",
-        "🤡"
+        "🤡",
+        "🥰",
+        "🥲",
+        "☺️",
+        "🫨",
+        "🫥",
+        "😏",
+        "😒",
+        "🤥",
+        "🤤",
+        "🤠",
+        "🥸",
+        "🤓",
+        "🧐",
+        "🫤",
+        "🙁",
+        "☹️",
+        "🥹",
+        "😦",
+        "😧",
+        "😨",
+        "😰",
+        "💀",
+        "☠️",
+        "💩",
+        "👻",
+        "👽",
+        "👾",
+        "🤖"
       ]
     },
     {
@@ -133,7 +161,34 @@
         "👩‍🦰",
         "👩‍🦱",
         "👩‍🦳",
-        "👩‍🦲"
+        "👩‍🦲",
+        "👮",
+        "🕵️",
+        "👷",
+        "🤴",
+        "👸",
+        "💂",
+        "👳",
+        "👲",
+        "🧕",
+        "🦸",
+        "🦹",
+        "🧙",
+        "🧚",
+        "🧛",
+        "🧜",
+        "🧝",
+        "🧞",
+        "🧟",
+        "🧘",
+        "🧗",
+        "🏌️",
+        "🏄",
+        "🏊",
+        "🏋️",
+        "🚴",
+        "🤸",
+        "🤹"
       ]
     },
     {
@@ -168,7 +223,15 @@
         "👎",
         "✍️",
         "👏",
-        "🤳"
+        "🤳",
+        "🫱",
+        "🫲",
+        "🫳",
+        "🫴",
+        "💅",
+        "💪",
+        "👂",
+        "👃"
       ]
     },
     {
@@ -422,6 +485,75 @@
         "➗",
         "✔️",
         "♻️"
+      ]
+    },
+    {
+      "name": "自然",
+      "emojis": [
+        "🌿",
+        "🍀",
+        "🍁",
+        "🍂",
+        "🍃",
+        "🍄",
+        "🌰",
+        "🌍",
+        "🌎",
+        "🌏",
+        "🌐",
+        "🌑",
+        "🌕",
+        "🌙",
+        "☀️",
+        "⭐",
+        "🌟",
+        "🌌",
+        "☁️",
+        "⛅",
+        "⛈️",
+        "🌧️",
+        "🌨️",
+        "🌩️",
+        "🌪️",
+        "🌫️",
+        "🌈",
+        "⚡",
+        "❄️",
+        "🔥",
+        "💧",
+        "🌊",
+        "✨"
+      ]
+    },
+    {
+      "name": "旗帜",
+      "emojis": [
+        "🏁",
+        "🚩",
+        "🎌",
+        "🏴",
+        "🏳️",
+        "🏳️‍🌈",
+        "🏳️‍⚧️",
+        "🏴‍☠️",
+        "🇨🇳",
+        "🇭🇰",
+        "🇲🇴",
+        "🇹🇼",
+        "🇺🇸",
+        "🇬🇧",
+        "🇯🇵",
+        "🇩🇪",
+        "🇫🇷",
+        "🇰🇷",
+        "🇷🇺",
+        "🇨🇦",
+        "🇦🇺",
+        "🇮🇹",
+        "🇪🇸",
+        "🇪🇺",
+        "🇧🇷",
+        "🇮🇳"
       ]
     }
   ],
@@ -870,27 +1002,27 @@
     },
     "🔥": {
       "zh": {
-        "name": "火",
+        "name": "火焰",
         "keywords": [
-          "热门",
-          "牛逼",
-          "火爆"
+          "火",
+          "热度",
+          "热门"
         ]
       },
       "en": {
         "name": "fire",
         "keywords": [
+          "fire",
           "hot",
-          "lit",
           "burn"
         ]
       },
       "tc": {
-        "name": "火",
+        "name": "火焰",
         "keywords": [
-          "热门",
-          "牛逼",
-          "火爆"
+          "火",
+          "熱度",
+          "熱門"
         ]
       }
     },
@@ -920,25 +1052,26 @@
     },
     "✨": {
       "zh": {
-        "name": "闪烁星光",
+        "name": "闪烁/亮晶晶",
         "keywords": [
           "星星",
-          "发光"
+          "发光",
+          "好评"
         ]
       },
       "en": {
         "name": "sparkles",
         "keywords": [
-          "shiny",
-          "magic",
-          "pretty"
+          "sparkle",
+          "shiny"
         ]
       },
       "tc": {
-        "name": "闪烁星光",
+        "name": "閃爍/亮晶晶",
         "keywords": [
           "星星",
-          "发光"
+          "發光",
+          "好評"
         ]
       }
     },
@@ -1490,25 +1623,24 @@
       "zh": {
         "name": "融化",
         "keywords": [
-          "热融化",
-          "心化了",
+          "热",
+          "融化",
           "无奈"
         ]
       },
       "en": {
         "name": "melting face",
         "keywords": [
-          "hot",
           "melt",
-          "disappear"
+          "hot"
         ]
       },
       "tc": {
         "name": "融化",
         "keywords": [
-          "热融化",
-          "心化了",
-          "无奈"
+          "熱",
+          "融化",
+          "無奈"
         ]
       }
     },
@@ -1516,25 +1648,24 @@
       "zh": {
         "name": "敬礼",
         "keywords": [
-          "收到",
+          "遵命",
           "致敬",
-          "遵命"
+          "警察"
         ]
       },
       "en": {
         "name": "saluting face",
         "keywords": [
-          "respect",
-          "yes",
-          "sir"
+          "salute",
+          "respect"
         ]
       },
       "tc": {
-        "name": "敬礼",
+        "name": "敬禮",
         "keywords": [
-          "收到",
+          "遵命",
           "致敬",
-          "遵命"
+          "警察"
         ]
       }
     },
@@ -1542,25 +1673,24 @@
       "zh": {
         "name": "偷看",
         "keywords": [
-          "不敢看",
-          "害羞",
-          "遮眼"
+          "遮眼",
+          "害怕",
+          "窥视"
         ]
       },
       "en": {
         "name": "face with peeking eye",
         "keywords": [
           "peek",
-          "shy",
           "scared"
         ]
       },
       "tc": {
         "name": "偷看",
         "keywords": [
-          "不敢看",
-          "害羞",
-          "遮眼"
+          "遮眼",
+          "害怕",
+          "窺視"
         ]
       }
     },
@@ -2322,25 +2452,22 @@
       "zh": {
         "name": "婴儿",
         "keywords": [
-          "宝宝",
-          "小孩子",
-          "可爱"
+          "孩子",
+          "宝宝"
         ]
       },
       "en": {
         "name": "baby",
         "keywords": [
           "child",
-          "cute",
-          "kid"
+          "baby"
         ]
       },
       "tc": {
-        "name": "婴儿",
+        "name": "嬰兒",
         "keywords": [
-          "宝宝",
-          "小孩子",
-          "可爱"
+          "孩子",
+          "寶寶"
         ]
       }
     },
@@ -2372,22 +2499,22 @@
       "zh": {
         "name": "男孩",
         "keywords": [
-          "男生",
-          "少年"
+          "孩子",
+          "男生"
         ]
       },
       "en": {
         "name": "boy",
         "keywords": [
-          "kid",
-          "male"
+          "child",
+          "boy"
         ]
       },
       "tc": {
         "name": "男孩",
         "keywords": [
-          "男生",
-          "少年"
+          "孩子",
+          "男生"
         ]
       }
     },
@@ -2395,22 +2522,22 @@
       "zh": {
         "name": "女孩",
         "keywords": [
-          "女生",
-          "少女"
+          "孩子",
+          "女生"
         ]
       },
       "en": {
         "name": "girl",
         "keywords": [
-          "kid",
-          "female"
+          "child",
+          "girl"
         ]
       },
       "tc": {
         "name": "女孩",
         "keywords": [
-          "女生",
-          "少女"
+          "孩子",
+          "女生"
         ]
       }
     },
@@ -2418,22 +2545,22 @@
       "zh": {
         "name": "人",
         "keywords": [
-          "成年人",
-          "人类"
+          "人类",
+          "中性"
         ]
       },
       "en": {
         "name": "person",
         "keywords": [
-          "human",
-          "adult"
+          "person",
+          "human"
         ]
       },
       "tc": {
         "name": "人",
         "keywords": [
-          "成年人",
-          "人类"
+          "人類",
+          "中性"
         ]
       }
     },
@@ -2465,24 +2592,23 @@
         "name": "老爷爷",
         "keywords": [
           "老人",
-          "男性",
-          "爷爷"
+          "爷爷",
+          "祖父"
         ]
       },
       "en": {
         "name": "old man",
         "keywords": [
-          "grandpa",
-          "elderly",
-          "male"
+          "old",
+          "grandpa"
         ]
       },
       "tc": {
-        "name": "老爷爷",
+        "name": "老爺爺",
         "keywords": [
           "老人",
-          "男性",
-          "爷爷"
+          "爺爺",
+          "祖父"
         ]
       }
     },
@@ -2491,47 +2617,46 @@
         "name": "老奶奶",
         "keywords": [
           "老人",
-          "女性",
-          "奶奶"
+          "奶奶",
+          "祖母"
         ]
       },
       "en": {
         "name": "old woman",
         "keywords": [
-          "grandma",
-          "elderly",
-          "female"
+          "old",
+          "grandma"
         ]
       },
       "tc": {
         "name": "老奶奶",
         "keywords": [
           "老人",
-          "女性",
-          "奶奶"
+          "奶奶",
+          "祖母"
         ]
       }
     },
     "🧓": {
       "zh": {
-        "name": "长辈",
+        "name": "老年人",
         "keywords": [
           "老人",
-          "长者"
+          "中性"
         ]
       },
       "en": {
         "name": "older person",
         "keywords": [
-          "elderly",
-          "senior"
+          "old",
+          "adult"
         ]
       },
       "tc": {
-        "name": "长辈",
+        "name": "老年人",
         "keywords": [
           "老人",
-          "长者"
+          "中性"
         ]
       }
     },
@@ -2539,22 +2664,22 @@
       "zh": {
         "name": "男人",
         "keywords": [
-          "男性",
-          "成年男子"
+          "男生",
+          "成人"
         ]
       },
       "en": {
         "name": "man",
         "keywords": [
-          "male",
+          "man",
           "adult"
         ]
       },
       "tc": {
         "name": "男人",
         "keywords": [
-          "男性",
-          "成年男子"
+          "男生",
+          "成人"
         ]
       }
     },
@@ -2562,22 +2687,22 @@
       "zh": {
         "name": "女人",
         "keywords": [
-          "女性",
-          "成年女子"
+          "女生",
+          "成人"
         ]
       },
       "en": {
         "name": "woman",
         "keywords": [
-          "female",
+          "woman",
           "adult"
         ]
       },
       "tc": {
         "name": "女人",
         "keywords": [
-          "女性",
-          "成年女子"
+          "女生",
+          "成人"
         ]
       }
     },
@@ -3684,25 +3809,27 @@
     },
     "🫵": {
       "zh": {
-        "name": "指向你",
+        "name": "食指指向你",
         "keywords": [
-          "就是你",
-          "看你"
+          "手势",
+          "指",
+          "你"
         ]
       },
       "en": {
         "name": "index pointing at the viewer",
         "keywords": [
+          "hand",
           "you",
-          "pointing",
-          "viewer"
+          "point"
         ]
       },
       "tc": {
-        "name": "指向你",
+        "name": "食指指向你",
         "keywords": [
-          "就是你",
-          "看你"
+          "手勢",
+          "指",
+          "你"
         ]
       }
     },
@@ -3782,27 +3909,27 @@
     },
     "🫰": {
       "zh": {
-        "name": "捏手指比心",
+        "name": "比心手势",
         "keywords": [
-          "比心",
           "手势",
+          "比心",
           "钱"
         ]
       },
       "en": {
         "name": "hand with index finger and thumb crossed",
         "keywords": [
+          "hand",
           "heart",
-          "snap",
           "money"
         ]
       },
       "tc": {
-        "name": "捏手指比心",
+        "name": "比心手勢",
         "keywords": [
+          "手勢",
           "比心",
-          "手势",
-          "钱"
+          "錢"
         ]
       }
     },
@@ -3836,25 +3963,25 @@
       "zh": {
         "name": "写字",
         "keywords": [
-          "铅笔",
-          "做笔记",
-          "写文章"
+          "手",
+          "笔",
+          "写"
         ]
       },
       "en": {
         "name": "writing hand",
         "keywords": [
+          "hand",
           "write",
-          "pen",
-          "pencil"
+          "pen"
         ]
       },
       "tc": {
         "name": "寫字",
         "keywords": [
-          "铅笔",
-          "做笔记",
-          "寫文章"
+          "手",
+          "筆",
+          "寫"
         ]
       }
     },
@@ -3862,15 +3989,15 @@
       "zh": {
         "name": "自拍",
         "keywords": [
-          "照相",
+          "手",
           "手机",
-          "自拍"
+          "拍照"
         ]
       },
       "en": {
         "name": "selfie",
         "keywords": [
-          "camera",
+          "hand",
           "phone",
           "photo"
         ]
@@ -3878,9 +4005,9 @@
       "tc": {
         "name": "自拍",
         "keywords": [
-          "照相",
-          "手机",
-          "自拍"
+          "手",
+          "手機",
+          "拍照"
         ]
       }
     },
@@ -6555,49 +6682,49 @@
     },
     "🚴": {
       "zh": {
-        "name": "骑自行车",
+        "name": "骑自行车的人",
         "keywords": [
-          "骑车",
-          "自行车运动"
+          "自行车",
+          "单车",
+          "运动"
         ]
       },
       "en": {
-        "name": "person biking",
+        "name": "cyclist",
         "keywords": [
           "bike",
-          "cycling",
-          "ride"
+          "cycling"
         ]
       },
       "tc": {
-        "name": "骑自行車",
+        "name": "騎自行車的人",
         "keywords": [
-          "骑車",
-          "自行車运动"
+          "自行車",
+          "單車",
+          "運動"
         ]
       }
     },
     "🏋️": {
       "zh": {
-        "name": "举重",
+        "name": "举重的人",
         "keywords": [
-          "举重的人",
+          "举重",
           "健身",
           "力量"
         ]
       },
       "en": {
-        "name": "person lifting weights",
+        "name": "weightlifter",
         "keywords": [
-          "weights",
-          "gym",
+          "weight",
           "strong"
         ]
       },
       "tc": {
-        "name": "举重",
+        "name": "舉重的人",
         "keywords": [
-          "举重的人",
+          "舉重",
           "健身",
           "力量"
         ]
@@ -8805,47 +8932,47 @@
       "zh": {
         "name": "星星",
         "keywords": [
-          "黄色星星",
-          "收藏"
+          "五角星",
+          "黄色"
         ]
       },
       "en": {
         "name": "star",
         "keywords": [
           "star",
-          "gold",
-          "favorite"
+          "yellow"
         ]
       },
       "tc": {
         "name": "星星",
         "keywords": [
-          "黄色星星",
-          "收藏"
+          "五角星",
+          "黃色"
         ]
       }
     },
     "🌟": {
       "zh": {
-        "name": "闪烁星星",
+        "name": "闪耀的星星",
         "keywords": [
-          "亮闪闪",
-          "星光"
+          "星星",
+          "发光",
+          "闪光"
         ]
       },
       "en": {
         "name": "glowing star",
         "keywords": [
           "star",
-          "shiny",
-          "light"
+          "shiny"
         ]
       },
       "tc": {
-        "name": "闪烁星星",
+        "name": "閃耀的星星",
         "keywords": [
-          "亮闪闪",
-          "星光"
+          "星星",
+          "發光",
+          "閃光"
         ]
       }
     },
@@ -9358,6 +9485,2456 @@
           "环保",
           "回收",
           "循环"
+        ]
+      }
+    },
+    "🥰": {
+      "zh": {
+        "name": "带心的微笑",
+        "keywords": [
+          "喜悦",
+          "幸福",
+          "爱"
+        ]
+      },
+      "en": {
+        "name": "smiling face with hearts",
+        "keywords": [
+          "love",
+          "happy"
+        ]
+      },
+      "tc": {
+        "name": "帶心的微笑",
+        "keywords": [
+          "喜悅",
+          "幸福",
+          "愛"
+        ]
+      }
+    },
+    "🥲": {
+      "zh": {
+        "name": "含泪的微笑",
+        "keywords": [
+          "感动",
+          "强颜欢笑",
+          "哭笑"
+        ]
+      },
+      "en": {
+        "name": "smiling face with tear",
+        "keywords": [
+          "cry",
+          "sad-happy"
+        ]
+      },
+      "tc": {
+        "name": "含淚的微笑",
+        "keywords": [
+          "感動",
+          "強顏歡笑",
+          "哭笑"
+        ]
+      }
+    },
+    "☺️": {
+      "zh": {
+        "name": "红晕微笑",
+        "keywords": [
+          "微笑",
+          "害羞"
+        ]
+      },
+      "en": {
+        "name": "smiling face",
+        "keywords": [
+          "smile",
+          "happy"
+        ]
+      },
+      "tc": {
+        "name": "紅暈微笑",
+        "keywords": [
+          "微笑",
+          "害羞"
+        ]
+      }
+    },
+    "🫨": {
+      "zh": {
+        "name": "颤抖",
+        "keywords": [
+          "发抖",
+          "震惊",
+          "害怕"
+        ]
+      },
+      "en": {
+        "name": "shaking face",
+        "keywords": [
+          "shake",
+          "shock"
+        ]
+      },
+      "tc": {
+        "name": "顫抖",
+        "keywords": [
+          "發抖",
+          "震驚",
+          "害怕"
+        ]
+      }
+    },
+    "🫥": {
+      "zh": {
+        "name": "虚线脸",
+        "keywords": [
+          "隐形",
+          "消失",
+          "无语"
+        ]
+      },
+      "en": {
+        "name": "dotted line face",
+        "keywords": [
+          "invisible",
+          "hide"
+        ]
+      },
+      "tc": {
+        "name": "虛線臉",
+        "keywords": [
+          "隱形",
+          "消失",
+          "無語"
+        ]
+      }
+    },
+    "😏": {
+      "zh": {
+        "name": "得意",
+        "keywords": [
+          "坏笑",
+          "傲慢"
+        ]
+      },
+      "en": {
+        "name": "smirking face",
+        "keywords": [
+          "smirk",
+          "silly"
+        ]
+      },
+      "tc": {
+        "name": "得意",
+        "keywords": [
+          "壞笑",
+          "傲慢"
+        ]
+      }
+    },
+    "😒": {
+      "zh": {
+        "name": "不高兴",
+        "keywords": [
+          "郁闷",
+          "斜眼"
+        ]
+      },
+      "en": {
+        "name": "unamused face",
+        "keywords": [
+          "unamused",
+          "boring"
+        ]
+      },
+      "tc": {
+        "name": "不高興",
+        "keywords": [
+          "鬱悶",
+          "斜眼"
+        ]
+      }
+    },
+    "🤥": {
+      "zh": {
+        "name": "说谎",
+        "keywords": [
+          "皮诺曹",
+          "鼻子变长"
+        ]
+      },
+      "en": {
+        "name": "lying face",
+        "keywords": [
+          "liar",
+          "nose"
+        ]
+      },
+      "tc": {
+        "name": "說謊",
+        "keywords": [
+          "皮諾曹",
+          "鼻子變長"
+        ]
+      }
+    },
+    "🤤": {
+      "zh": {
+        "name": "流口水",
+        "keywords": [
+          "馋",
+          "渴望"
+        ]
+      },
+      "en": {
+        "name": "drooling face",
+        "keywords": [
+          "drool",
+          "hungry"
+        ]
+      },
+      "tc": {
+        "name": "流口水",
+        "keywords": [
+          "饞",
+          "渴望"
+        ]
+      }
+    },
+    "🤠": {
+      "zh": {
+        "name": "牛仔",
+        "keywords": [
+          "帽子",
+          "牛仔帽"
+        ]
+      },
+      "en": {
+        "name": "cowboy hat face",
+        "keywords": [
+          "cowboy",
+          "hat"
+        ]
+      },
+      "tc": {
+        "name": "牛仔",
+        "keywords": [
+          "帽子",
+          "牛仔帽"
+        ]
+      }
+    },
+    "🥸": {
+      "zh": {
+        "name": "伪装",
+        "keywords": [
+          "面具",
+          "眼镜胡子"
+        ]
+      },
+      "en": {
+        "name": "disguised face",
+        "keywords": [
+          "disguise",
+          "mask"
+        ]
+      },
+      "tc": {
+        "name": "偽裝",
+        "keywords": [
+          "面具",
+          "眼鏡鬍子"
+        ]
+      }
+    },
+    "🤓": {
+      "zh": {
+        "name": "书呆子",
+        "keywords": [
+          "眼镜",
+          "极客",
+          "聪明"
+        ]
+      },
+      "en": {
+        "name": "nerd face",
+        "keywords": [
+          "nerd",
+          "geek",
+          "smart"
+        ]
+      },
+      "tc": {
+        "name": "書呆子",
+        "keywords": [
+          "眼鏡",
+          "極客",
+          "聰明"
+        ]
+      }
+    },
+    "🧐": {
+      "zh": {
+        "name": "单片眼镜",
+        "keywords": [
+          "观察",
+          "怀疑"
+        ]
+      },
+      "en": {
+        "name": "face with monocle",
+        "keywords": [
+          "monocle",
+          "smart"
+        ]
+      },
+      "tc": {
+        "name": "單片眼鏡",
+        "keywords": [
+          "觀察",
+          "懷疑"
+        ]
+      }
+    },
+    "🫤": {
+      "zh": {
+        "name": "撇嘴",
+        "keywords": [
+          "斜嘴",
+          "纠结"
+        ]
+      },
+      "en": {
+        "name": "face with diagonal mouth",
+        "keywords": [
+          "undecided",
+          "confused"
+        ]
+      },
+      "tc": {
+        "name": "撇嘴",
+        "keywords": [
+          "斜嘴",
+          "糾結"
+        ]
+      }
+    },
+    "🙁": {
+      "zh": {
+        "name": "微微不高兴",
+        "keywords": [
+          "难过"
+        ]
+      },
+      "en": {
+        "name": "slightly frowning face",
+        "keywords": [
+          "sad",
+          "frown"
+        ]
+      },
+      "tc": {
+        "name": "微微不高興",
+        "keywords": [
+          "難過"
+        ]
+      }
+    },
+    "☹️": {
+      "zh": {
+        "name": "难过",
+        "keywords": [
+          "悲伤",
+          "大哭"
+        ]
+      },
+      "en": {
+        "name": "frowning face",
+        "keywords": [
+          "sad",
+          "frown"
+        ]
+      },
+      "tc": {
+        "name": "難過",
+        "keywords": [
+          "悲傷",
+          "大哭"
+        ]
+      }
+    },
+    "🥹": {
+      "zh": {
+        "name": "忍住眼泪",
+        "keywords": [
+          "感动",
+          "渴望",
+          "欣慰"
+        ]
+      },
+      "en": {
+        "name": "face holding back tears",
+        "keywords": [
+          "tears",
+          "emotional"
+        ]
+      },
+      "tc": {
+        "name": "忍住眼淚",
+        "keywords": [
+          "感動",
+          "渴望",
+          "欣慰"
+        ]
+      }
+    },
+    "😦": {
+      "zh": {
+        "name": "张嘴",
+        "keywords": [
+          "惊讶",
+          "吃惊"
+        ]
+      },
+      "en": {
+        "name": "frowning face with open mouth",
+        "keywords": [
+          "shock",
+          "surprised"
+        ]
+      },
+      "tc": {
+        "name": "張嘴",
+        "keywords": [
+          "驚訝",
+          "吃驚"
+        ]
+      }
+    },
+    "😧": {
+      "zh": {
+        "name": "痛苦吃惊",
+        "keywords": [
+          "害怕",
+          "震惊"
+        ]
+      },
+      "en": {
+        "name": "anguished face",
+        "keywords": [
+          "anguish",
+          "fear"
+        ]
+      },
+      "tc": {
+        "name": "痛苦吃驚",
+        "keywords": [
+          "害怕",
+          "震驚"
+        ]
+      }
+    },
+    "😨": {
+      "zh": {
+        "name": "害怕",
+        "keywords": [
+          "恐惧",
+          "震惊"
+        ]
+      },
+      "en": {
+        "name": "fearful face",
+        "keywords": [
+          "fear",
+          "scared"
+        ]
+      },
+      "tc": {
+        "name": "害怕",
+        "keywords": [
+          "恐懼",
+          "震驚"
+        ]
+      }
+    },
+    "😰": {
+      "zh": {
+        "name": "冷汗张嘴",
+        "keywords": [
+          "焦虑",
+          "紧张"
+        ]
+      },
+      "en": {
+        "name": "anxious face with sweat",
+        "keywords": [
+          "sweat",
+          "anxious"
+        ]
+      },
+      "tc": {
+        "name": "冷汗張嘴",
+        "keywords": [
+          "焦慮",
+          "緊張"
+        ]
+      }
+    },
+    "💀": {
+      "zh": {
+        "name": "骷髅",
+        "keywords": [
+          "死亡",
+          "危险",
+          "骨头"
+        ]
+      },
+      "en": {
+        "name": "skull",
+        "keywords": [
+          "dead",
+          "danger"
+        ]
+      },
+      "tc": {
+        "name": "骷髏",
+        "keywords": [
+          "死亡",
+          "危險",
+          "骨頭"
+        ]
+      }
+    },
+    "☠️": {
+      "zh": {
+        "name": "骷髅交叉骨",
+        "keywords": [
+          "有毒",
+          "危险"
+        ]
+      },
+      "en": {
+        "name": "skull and crossbones",
+        "keywords": [
+          "toxic",
+          "danger"
+        ]
+      },
+      "tc": {
+        "name": "骷髏交叉骨",
+        "keywords": [
+          "有毒",
+          "危險"
+        ]
+      }
+    },
+    "💩": {
+      "zh": {
+        "name": "大便",
+        "keywords": [
+          "粑粑",
+          "便便",
+          "幽默"
+        ]
+      },
+      "en": {
+        "name": "pile of poo",
+        "keywords": [
+          "poop",
+          "dung"
+        ]
+      },
+      "tc": {
+        "name": "大便",
+        "keywords": [
+          "粑粑",
+          "便便",
+          "幽默"
+        ]
+      }
+    },
+    "👻": {
+      "zh": {
+        "name": "幽灵",
+        "keywords": [
+          "鬼",
+          "万圣节"
+        ]
+      },
+      "en": {
+        "name": "ghost",
+        "keywords": [
+          "ghost",
+          "spooky"
+        ]
+      },
+      "tc": {
+        "name": "幽靈",
+        "keywords": [
+          "鬼",
+          "萬聖節"
+        ]
+      }
+    },
+    "👽": {
+      "zh": {
+        "name": "外星人",
+        "keywords": [
+          "外星",
+          "宇宙",
+          "幽浮"
+        ]
+      },
+      "en": {
+        "name": "alien",
+        "keywords": [
+          "alien",
+          "space"
+        ]
+      },
+      "tc": {
+        "name": "外星人",
+        "keywords": [
+          "外星",
+          "宇宙",
+          "幽浮"
+        ]
+      }
+    },
+    "👾": {
+      "zh": {
+        "name": "外星怪物",
+        "keywords": [
+          "游戏",
+          "像素",
+          "复古"
+        ]
+      },
+      "en": {
+        "name": "alien monster",
+        "keywords": [
+          "game",
+          "pixel",
+          "retro"
+        ]
+      },
+      "tc": {
+        "name": "外星怪物",
+        "keywords": [
+          "遊戲",
+          "像素",
+          "復古"
+        ]
+      }
+    },
+    "🤖": {
+      "zh": {
+        "name": "机器人",
+        "keywords": [
+          "电脑",
+          "人工智能",
+          "科技"
+        ]
+      },
+      "en": {
+        "name": "robot",
+        "keywords": [
+          "robot",
+          "science"
+        ]
+      },
+      "tc": {
+        "name": "機器人",
+        "keywords": [
+          "電腦",
+          "人工智慧",
+          "科技"
+        ]
+      }
+    },
+    "🫱": {
+      "zh": {
+        "name": "向右的手",
+        "keywords": [
+          "手",
+          "右"
+        ]
+      },
+      "en": {
+        "name": "rightward hand",
+        "keywords": [
+          "hand",
+          "right"
+        ]
+      },
+      "tc": {
+        "name": "向右的手",
+        "keywords": [
+          "手",
+          "右"
+        ]
+      }
+    },
+    "🫲": {
+      "zh": {
+        "name": "向左的手",
+        "keywords": [
+          "手",
+          "左"
+        ]
+      },
+      "en": {
+        "name": "leftward hand",
+        "keywords": [
+          "hand",
+          "left"
+        ]
+      },
+      "tc": {
+        "name": "向左的手",
+        "keywords": [
+          "手",
+          "左"
+        ]
+      }
+    },
+    "🫳": {
+      "zh": {
+        "name": "手心向下",
+        "keywords": [
+          "手",
+          "手心",
+          "下"
+        ]
+      },
+      "en": {
+        "name": "palm down hand",
+        "keywords": [
+          "hand",
+          "down"
+        ]
+      },
+      "tc": {
+        "name": "手心向下",
+        "keywords": [
+          "手",
+          "手心",
+          "下"
+        ]
+      }
+    },
+    "🫴": {
+      "zh": {
+        "name": "手心向上",
+        "keywords": [
+          "手",
+          "手心",
+          "上"
+        ]
+      },
+      "en": {
+        "name": "palm up hand",
+        "keywords": [
+          "hand",
+          "up"
+        ]
+      },
+      "tc": {
+        "name": "手心向上",
+        "keywords": [
+          "手",
+          "手心",
+          "上"
+        ]
+      }
+    },
+    "💅": {
+      "zh": {
+        "name": "美甲",
+        "keywords": [
+          "手",
+          "指甲油",
+          "美容"
+        ]
+      },
+      "en": {
+        "name": "nail polish",
+        "keywords": [
+          "nail",
+          "makeup",
+          "beauty"
+        ]
+      },
+      "tc": {
+        "name": "美甲",
+        "keywords": [
+          "手",
+          "指甲油",
+          "美容"
+        ]
+      }
+    },
+    "💪": {
+      "zh": {
+        "name": "肌肉",
+        "keywords": [
+          "力量",
+          "强壮",
+          "健身"
+        ]
+      },
+      "en": {
+        "name": "flexed biceps",
+        "keywords": [
+          "muscle",
+          "strong",
+          "power"
+        ]
+      },
+      "tc": {
+        "name": "肌肉",
+        "keywords": [
+          "力量",
+          "強壯",
+          "健身"
+        ]
+      }
+    },
+    "👂": {
+      "zh": {
+        "name": "耳朵",
+        "keywords": [
+          "听",
+          "听觉"
+        ]
+      },
+      "en": {
+        "name": "ear",
+        "keywords": [
+          "ear",
+          "hear",
+          "listen"
+        ]
+      },
+      "tc": {
+        "name": "耳朵",
+        "keywords": [
+          "聽",
+          "聽覺"
+        ]
+      }
+    },
+    "👃": {
+      "zh": {
+        "name": "鼻子",
+        "keywords": [
+          "闻",
+          "嗅觉"
+        ]
+      },
+      "en": {
+        "name": "nose",
+        "keywords": [
+          "nose",
+          "smell"
+        ]
+      },
+      "tc": {
+        "name": "鼻子",
+        "keywords": [
+          "聞",
+          "嗅覺"
+        ]
+      }
+    },
+    "👮": {
+      "zh": {
+        "name": "警察",
+        "keywords": [
+          "警官",
+          "保安",
+          "制服"
+        ]
+      },
+      "en": {
+        "name": "police officer",
+        "keywords": [
+          "police",
+          "cop",
+          "uniform"
+        ]
+      },
+      "tc": {
+        "name": "警察",
+        "keywords": [
+          "警官",
+          "保安",
+          "制服"
+        ]
+      }
+    },
+    "🕵️": {
+      "zh": {
+        "name": "侦探",
+        "keywords": [
+          "特工",
+          "间谍",
+          "调查"
+        ]
+      },
+      "en": {
+        "name": "detective",
+        "keywords": [
+          "spy",
+          "detective"
+        ]
+      },
+      "tc": {
+        "name": "偵探",
+        "keywords": [
+          "特工",
+          "間諜",
+          "調查"
+        ]
+      }
+    },
+    "👷": {
+      "zh": {
+        "name": "工人",
+        "keywords": [
+          "建筑",
+          "安全帽",
+          "劳动"
+        ]
+      },
+      "en": {
+        "name": "construction worker",
+        "keywords": [
+          "builder",
+          "hardhat"
+        ]
+      },
+      "tc": {
+        "name": "工人",
+        "keywords": [
+          "建築",
+          "安全帽",
+          "勞動"
+        ]
+      }
+    },
+    "🤴": {
+      "zh": {
+        "name": "王子",
+        "keywords": [
+          "皇室",
+          "王冠"
+        ]
+      },
+      "en": {
+        "name": "prince",
+        "keywords": [
+          "royal",
+          "crown"
+        ]
+      },
+      "tc": {
+        "name": "王子",
+        "keywords": [
+          "皇室",
+          "王冠"
+        ]
+      }
+    },
+    "👸": {
+      "zh": {
+        "name": "公主",
+        "keywords": [
+          "皇室",
+          "王冠",
+          "选美"
+        ]
+      },
+      "en": {
+        "name": "princess",
+        "keywords": [
+          "royal",
+          "crown"
+        ]
+      },
+      "tc": {
+        "name": "公主",
+        "keywords": [
+          "皇室",
+          "王冠",
+          "選美"
+        ]
+      }
+    },
+    "💂": {
+      "zh": {
+        "name": "卫兵",
+        "keywords": [
+          "皇家卫兵",
+          "英国",
+          "高帽"
+        ]
+      },
+      "en": {
+        "name": "guard",
+        "keywords": [
+          "guard",
+          "uniform"
+        ]
+      },
+      "tc": {
+        "name": "衛兵",
+        "keywords": [
+          "皇家衛兵",
+          "英國",
+          "高帽"
+        ]
+      }
+    },
+    "👳": {
+      "zh": {
+        "name": "戴头巾的人",
+        "keywords": [
+          "头巾",
+          "印度"
+        ]
+      },
+      "en": {
+        "name": "person wearing turban",
+        "keywords": [
+          "turban",
+          "india"
+        ]
+      },
+      "tc": {
+        "name": "戴頭巾的人",
+        "keywords": [
+          "頭巾",
+          "印度"
+        ]
+      }
+    },
+    "👲": {
+      "zh": {
+        "name": "戴瓜皮帽的男人",
+        "keywords": [
+          "帽子",
+          "中国风"
+        ]
+      },
+      "en": {
+        "name": "man with Chinese cap",
+        "keywords": [
+          "cap",
+          "chinese"
+        ]
+      },
+      "tc": {
+        "name": "戴瓜皮帽的男人",
+        "keywords": [
+          "帽子",
+          "中國風"
+        ]
+      }
+    },
+    "🧕": {
+      "zh": {
+        "name": "戴头巾的女人",
+        "keywords": [
+          "穆斯林",
+          "希贾布"
+        ]
+      },
+      "en": {
+        "name": "woman with headscarf",
+        "keywords": [
+          "hijab",
+          "headscarf"
+        ]
+      },
+      "tc": {
+        "name": "戴頭巾的女人",
+        "keywords": [
+          "穆斯林",
+          "希賈布"
+        ]
+      }
+    },
+    "🦸": {
+      "zh": {
+        "name": "超级英雄",
+        "keywords": [
+          "英雄",
+          "披风",
+          "超人"
+        ]
+      },
+      "en": {
+        "name": "superhero",
+        "keywords": [
+          "hero",
+          "super"
+        ]
+      },
+      "tc": {
+        "name": "超級英雄",
+        "keywords": [
+          "英雄",
+          "披風",
+          "超人"
+        ]
+      }
+    },
+    "🦹": {
+      "zh": {
+        "name": "超级反派",
+        "keywords": [
+          "反派",
+          "反面人物",
+          "坏人"
+        ]
+      },
+      "en": {
+        "name": "supervillain",
+        "keywords": [
+          "villain",
+          "evil"
+        ]
+      },
+      "tc": {
+        "name": "超級反派",
+        "keywords": [
+          "反派",
+          "反面人物",
+          "壞人"
+        ]
+      }
+    },
+    "🧙": {
+      "zh": {
+        "name": "法师",
+        "keywords": [
+          "巫师",
+          "魔法",
+          "甘道夫"
+        ]
+      },
+      "en": {
+        "name": "mage",
+        "keywords": [
+          "wizard",
+          "magic"
+        ]
+      },
+      "tc": {
+        "name": "法師",
+        "keywords": [
+          "巫師",
+          "魔法",
+          "甘道夫"
+        ]
+      }
+    },
+    "🧚": {
+      "zh": {
+        "name": "仙子",
+        "keywords": [
+          "精灵",
+          "翅膀",
+          "童话"
+        ]
+      },
+      "en": {
+        "name": "fairy",
+        "keywords": [
+          "fairy",
+          "wings"
+        ]
+      },
+      "tc": {
+        "name": "仙子",
+        "keywords": [
+          "精靈",
+          "翅膀",
+          "童話"
+        ]
+      }
+    },
+    "🧛": {
+      "zh": {
+        "name": "吸血鬼",
+        "keywords": [
+          "德古拉",
+          "蝙蝠",
+          "尖牙"
+        ]
+      },
+      "en": {
+        "name": "vampire",
+        "keywords": [
+          "vampire",
+          "dracula"
+        ]
+      },
+      "tc": {
+        "name": "吸血鬼",
+        "keywords": [
+          "德古拉",
+          "蝙蝠",
+          "尖牙"
+        ]
+      }
+    },
+    "🧜": {
+      "zh": {
+        "name": "美人鱼",
+        "keywords": [
+          "人鱼",
+          "海洋",
+          "传说"
+        ]
+      },
+      "en": {
+        "name": "merperson",
+        "keywords": [
+          "mermaid",
+          "sea"
+        ]
+      },
+      "tc": {
+        "name": "美人魚",
+        "keywords": [
+          "人魚",
+          "海洋",
+          "傳說"
+        ]
+      }
+    },
+    "🧝": {
+      "zh": {
+        "name": "精灵",
+        "keywords": [
+          "魔戒",
+          "尖耳朵"
+        ]
+      },
+      "en": {
+        "name": "elf",
+        "keywords": [
+          "elf",
+          "ears"
+        ]
+      },
+      "tc": {
+        "name": "精靈",
+        "keywords": [
+          "魔戒",
+          "尖耳朵"
+        ]
+      }
+    },
+    "🧞": {
+      "zh": {
+        "name": "神灯精灵",
+        "keywords": [
+          "阿拉丁",
+          "神灯",
+          "许愿"
+        ]
+      },
+      "en": {
+        "name": "genie",
+        "keywords": [
+          "genie",
+          "lamp"
+        ]
+      },
+      "tc": {
+        "name": "神燈精靈",
+        "keywords": [
+          "阿拉丁",
+          "神燈",
+          "許願"
+        ]
+      }
+    },
+    "🧟": {
+      "zh": {
+        "name": "丧尸",
+        "keywords": [
+          "僵尸",
+          "活死人",
+          "生化"
+        ]
+      },
+      "en": {
+        "name": "zombie",
+        "keywords": [
+          "zombie",
+          "undead"
+        ]
+      },
+      "tc": {
+        "name": "喪屍",
+        "keywords": [
+          "殭屍",
+          "活死人",
+          "生化"
+        ]
+      }
+    },
+    "🧘": {
+      "zh": {
+        "name": "打坐的人",
+        "keywords": [
+          "瑜伽",
+          "冥想",
+          "放松"
+        ]
+      },
+      "en": {
+        "name": "person in lotus position",
+        "keywords": [
+          "yoga",
+          "meditate"
+        ]
+      },
+      "tc": {
+        "name": "打坐的人",
+        "keywords": [
+          "瑜伽",
+          "冥想",
+          "放鬆"
+        ]
+      }
+    },
+    "🧗": {
+      "zh": {
+        "name": "攀岩的人",
+        "keywords": [
+          "爬山",
+          "运动",
+          "攀登"
+        ]
+      },
+      "en": {
+        "name": "person climbing",
+        "keywords": [
+          "climb",
+          "sport"
+        ]
+      },
+      "tc": {
+        "name": "攀岩的人",
+        "keywords": [
+          "爬山",
+          "運動",
+          "攀登"
+        ]
+      }
+    },
+    "🏌️": {
+      "zh": {
+        "name": "高尔夫球手",
+        "keywords": [
+          "运动",
+          "高尔夫"
+        ]
+      },
+      "en": {
+        "name": "golfer",
+        "keywords": [
+          "golf",
+          "sport"
+        ]
+      },
+      "tc": {
+        "name": "高爾夫球手",
+        "keywords": [
+          "運動",
+          "高爾夫"
+        ]
+      }
+    },
+    "🏄": {
+      "zh": {
+        "name": "冲浪的人",
+        "keywords": [
+          "冲浪",
+          "沙滩",
+          "海浪"
+        ]
+      },
+      "en": {
+        "name": "surfer",
+        "keywords": [
+          "surf",
+          "ocean"
+        ]
+      },
+      "tc": {
+        "name": "衝浪的人",
+        "keywords": [
+          "衝浪",
+          "沙灘",
+          "海浪"
+        ]
+      }
+    },
+    "🏊": {
+      "zh": {
+        "name": "游泳的人",
+        "keywords": [
+          "游泳",
+          "泳池",
+          "运动"
+        ]
+      },
+      "en": {
+        "name": "swimmer",
+        "keywords": [
+          "swim",
+          "sport"
+        ]
+      },
+      "tc": {
+        "name": "游泳的人",
+        "keywords": [
+          "游泳",
+          "泳池",
+          "運動"
+        ]
+      }
+    },
+    "🤸": {
+      "zh": {
+        "name": "侧手翻的人",
+        "keywords": [
+          "体操",
+          "侧翻",
+          "运动"
+        ]
+      },
+      "en": {
+        "name": "person cartwheeling",
+        "keywords": [
+          "gymnast",
+          "sport"
+        ]
+      },
+      "tc": {
+        "name": "側手翻的人",
+        "keywords": [
+          "體操",
+          "側翻",
+          "運動"
+        ]
+      }
+    },
+    "🤹": {
+      "zh": {
+        "name": "杂耍的人",
+        "keywords": [
+          "小丑",
+          "杂技",
+          "抛球"
+        ]
+      },
+      "en": {
+        "name": "juggler",
+        "keywords": [
+          "juggle",
+          "circus"
+        ]
+      },
+      "tc": {
+        "name": "雜耍的人",
+        "keywords": [
+          "小丑",
+          "雜技",
+          "拋球"
+        ]
+      }
+    },
+    "🌿": {
+      "zh": {
+        "name": "草药",
+        "keywords": [
+          "叶子",
+          "植物",
+          "绿色"
+        ]
+      },
+      "en": {
+        "name": "herb",
+        "keywords": [
+          "leaf",
+          "plant"
+        ]
+      },
+      "tc": {
+        "name": "草藥",
+        "keywords": [
+          "葉子",
+          "植物",
+          "綠色"
+        ]
+      }
+    },
+    "🍀": {
+      "zh": {
+        "name": "四叶草",
+        "keywords": [
+          "幸运",
+          "三叶草",
+          "植物"
+        ]
+      },
+      "en": {
+        "name": "four leaf clover",
+        "keywords": [
+          "clover",
+          "lucky"
+        ]
+      },
+      "tc": {
+        "name": "四葉草",
+        "keywords": [
+          "幸運",
+          "三葉草",
+          "植物"
+        ]
+      }
+    },
+    "🍁": {
+      "zh": {
+        "name": "枫叶",
+        "keywords": [
+          "加拿大",
+          "秋天",
+          "红色"
+        ]
+      },
+      "en": {
+        "name": "maple leaf",
+        "keywords": [
+          "maple",
+          "fall",
+          "autumn"
+        ]
+      },
+      "tc": {
+        "name": "楓葉",
+        "keywords": [
+          "加拿大",
+          "秋天",
+          "紅色"
+        ]
+      }
+    },
+    "🍂": {
+      "zh": {
+        "name": "落叶",
+        "keywords": [
+          "秋天",
+          "落叶",
+          "植物"
+        ]
+      },
+      "en": {
+        "name": "fallen leaf",
+        "keywords": [
+          "leaf",
+          "fall",
+          "autumn"
+        ]
+      },
+      "tc": {
+        "name": "落葉",
+        "keywords": [
+          "秋天",
+          "落葉",
+          "植物"
+        ]
+      }
+    },
+    "🍃": {
+      "zh": {
+        "name": "随风飘散的叶子",
+        "keywords": [
+          "风",
+          "绿叶"
+        ]
+      },
+      "en": {
+        "name": "leaf fluttering in wind",
+        "keywords": [
+          "leaf",
+          "wind"
+        ]
+      },
+      "tc": {
+        "name": "隨風飄散的葉子",
+        "keywords": [
+          "風",
+          "綠葉"
+        ]
+      }
+    },
+    "🍄": {
+      "zh": {
+        "name": "蘑菇",
+        "keywords": [
+          "菌类",
+          "毒蘑菇"
+        ]
+      },
+      "en": {
+        "name": "mushroom",
+        "keywords": [
+          "mushroom",
+          "fungus"
+        ]
+      },
+      "tc": {
+        "name": "蘑菇",
+        "keywords": [
+          "菌類",
+          "毒蘑菇"
+        ]
+      }
+    },
+    "🌰": {
+      "zh": {
+        "name": "栗子",
+        "keywords": [
+          "坚果",
+          "秋天"
+        ]
+      },
+      "en": {
+        "name": "chestnut",
+        "keywords": [
+          "chestnut",
+          "nut"
+        ]
+      },
+      "tc": {
+        "name": "栗子",
+        "keywords": [
+          "堅果",
+          "秋天"
+        ]
+      }
+    },
+    "🌍": {
+      "zh": {
+        "name": "地球(欧洲/非洲)",
+        "keywords": [
+          "世界",
+          "地球",
+          "地图"
+        ]
+      },
+      "en": {
+        "name": "globe showing Europe-Africa",
+        "keywords": [
+          "world",
+          "earth"
+        ]
+      },
+      "tc": {
+        "name": "地球(歐洲/非洲)",
+        "keywords": [
+          "世界",
+          "地球",
+          "地圖"
+        ]
+      }
+    },
+    "🌎": {
+      "zh": {
+        "name": "地球(美洲)",
+        "keywords": [
+          "世界",
+          "地球",
+          "地图"
+        ]
+      },
+      "en": {
+        "name": "globe showing Americas",
+        "keywords": [
+          "world",
+          "earth"
+        ]
+      },
+      "tc": {
+        "name": "地球(美洲)",
+        "keywords": [
+          "世界",
+          "地球",
+          "地圖"
+        ]
+      }
+    },
+    "🌏": {
+      "zh": {
+        "name": "地球(亚洲/澳洲)",
+        "keywords": [
+          "世界",
+          "地球",
+          "地图",
+          "中国"
+        ]
+      },
+      "en": {
+        "name": "globe showing Asia-Australia",
+        "keywords": [
+          "world",
+          "earth"
+        ]
+      },
+      "tc": {
+        "name": "地球(亞洲/澳洲)",
+        "keywords": [
+          "世界",
+          "地球",
+          "地圖",
+          "中國"
+        ]
+      }
+    },
+    "🌐": {
+      "zh": {
+        "name": "带经纬线的地球",
+        "keywords": [
+          "互联网",
+          "全球",
+          "经纬度"
+        ]
+      },
+      "en": {
+        "name": "globe with meridians",
+        "keywords": [
+          "internet",
+          "world"
+        ]
+      },
+      "tc": {
+        "name": "帶經緯線的地球",
+        "keywords": [
+          "互聯網",
+          "全球",
+          "經緯度"
+        ]
+      }
+    },
+    "🌑": {
+      "zh": {
+        "name": "新月/朔日",
+        "keywords": [
+          "月亮",
+          "月相",
+          "黑月"
+        ]
+      },
+      "en": {
+        "name": "new moon",
+        "keywords": [
+          "moon",
+          "dark"
+        ]
+      },
+      "tc": {
+        "name": "新月/朔日",
+        "keywords": [
+          "月亮",
+          "月相",
+          "黑月"
+        ]
+      }
+    },
+    "🌕": {
+      "zh": {
+        "name": "满月",
+        "keywords": [
+          "月亮",
+          "月相",
+          "中秋"
+        ]
+      },
+      "en": {
+        "name": "full moon",
+        "keywords": [
+          "moon",
+          "light"
+        ]
+      },
+      "tc": {
+        "name": "滿月",
+        "keywords": [
+          "月亮",
+          "月相",
+          "中秋"
+        ]
+      }
+    },
+    "🌙": {
+      "zh": {
+        "name": "弯月",
+        "keywords": [
+          "月相",
+          "月亮",
+          "夜晚"
+        ]
+      },
+      "en": {
+        "name": "crescent moon",
+        "keywords": [
+          "moon",
+          "night"
+        ]
+      },
+      "tc": {
+        "name": "彎月",
+        "keywords": [
+          "月相",
+          "月亮",
+          "夜晚"
+        ]
+      }
+    },
+    "☀️": {
+      "zh": {
+        "name": "太阳",
+        "keywords": [
+          "晴天",
+          "天气",
+          "明亮"
+        ]
+      },
+      "en": {
+        "name": "sun",
+        "keywords": [
+          "sun",
+          "sunny",
+          "weather"
+        ]
+      },
+      "tc": {
+        "name": "太陽",
+        "keywords": [
+          "晴天",
+          "天氣",
+          "明亮"
+        ]
+      }
+    },
+    "🌌": {
+      "zh": {
+        "name": "银河",
+        "keywords": [
+          "太空",
+          "星星",
+          "宇宙"
+        ]
+      },
+      "en": {
+        "name": "milky way",
+        "keywords": [
+          "space",
+          "stars"
+        ]
+      },
+      "tc": {
+        "name": "銀河",
+        "keywords": [
+          "太空",
+          "星星",
+          "宇宙"
+        ]
+      }
+    },
+    "☁️": {
+      "zh": {
+        "name": "云",
+        "keywords": [
+          "阴天",
+          "天气"
+        ]
+      },
+      "en": {
+        "name": "cloud",
+        "keywords": [
+          "cloud",
+          "cloudy"
+        ]
+      },
+      "tc": {
+        "name": "雲",
+        "keywords": [
+          "陰天",
+          "天氣"
+        ]
+      }
+    },
+    "⛅": {
+      "zh": {
+        "name": "多云",
+        "keywords": [
+          "太阳",
+          "云",
+          "阴晴"
+        ]
+      },
+      "en": {
+        "name": "sun behind cloud",
+        "keywords": [
+          "sun",
+          "cloudy"
+        ]
+      },
+      "tc": {
+        "name": "多雲",
+        "keywords": [
+          "太陽",
+          "雲",
+          "陰晴"
+        ]
+      }
+    },
+    "⛈️": {
+      "zh": {
+        "name": "雷阵雨",
+        "keywords": [
+          "下雨",
+          "闪电",
+          "天气"
+        ]
+      },
+      "en": {
+        "name": "cloud with lightning and rain",
+        "keywords": [
+          "rain",
+          "storm"
+        ]
+      },
+      "tc": {
+        "name": "雷陣雨",
+        "keywords": [
+          "下雨",
+          "閃電",
+          "天氣"
+        ]
+      }
+    },
+    "🌧️": {
+      "zh": {
+        "name": "下雨",
+        "keywords": [
+          "雨天",
+          "天气",
+          "雨伞"
+        ]
+      },
+      "en": {
+        "name": "cloud with rain",
+        "keywords": [
+          "rain",
+          "wet"
+        ]
+      },
+      "tc": {
+        "name": "下雨",
+        "keywords": [
+          "雨天",
+          "天氣",
+          "雨傘"
+        ]
+      }
+    },
+    "🌨️": {
+      "zh": {
+        "name": "下雪",
+        "keywords": [
+          "雪天",
+          "天气",
+          "冬天"
+        ]
+      },
+      "en": {
+        "name": "cloud with snow",
+        "keywords": [
+          "snow",
+          "cold"
+        ]
+      },
+      "tc": {
+        "name": "下雪",
+        "keywords": [
+          "雪天",
+          "天氣",
+          "冬天"
+        ]
+      }
+    },
+    "🌩️": {
+      "zh": {
+        "name": "打雷",
+        "keywords": [
+          "闪电",
+          "云",
+          "暴风雨"
+        ]
+      },
+      "en": {
+        "name": "cloud with lightning",
+        "keywords": [
+          "storm",
+          "lightning"
+        ]
+      },
+      "tc": {
+        "name": "打雷",
+        "keywords": [
+          "閃電",
+          "雲",
+          "暴風雨"
+        ]
+      }
+    },
+    "🌪️": {
+      "zh": {
+        "name": "龙卷风",
+        "keywords": [
+          "风",
+          "天气",
+          "灾害"
+        ]
+      },
+      "en": {
+        "name": "tornado",
+        "keywords": [
+          "wind",
+          "storm"
+        ]
+      },
+      "tc": {
+        "name": "龍捲風",
+        "keywords": [
+          "風",
+          "天氣",
+          "災害"
+        ]
+      }
+    },
+    "🌫️": {
+      "zh": {
+        "name": "雾",
+        "keywords": [
+          "雾霾",
+          "天气"
+        ]
+      },
+      "en": {
+        "name": "fog",
+        "keywords": [
+          "fog",
+          "haze"
+        ]
+      },
+      "tc": {
+        "name": "霧",
+        "keywords": [
+          "霧霾",
+          "天氣"
+        ]
+      }
+    },
+    "🌈": {
+      "zh": {
+        "name": "彩虹",
+        "keywords": [
+          "天空",
+          "七彩",
+          "雨过天晴"
+        ]
+      },
+      "en": {
+        "name": "rainbow",
+        "keywords": [
+          "rainbow",
+          "sky"
+        ]
+      },
+      "tc": {
+        "name": "彩虹",
+        "keywords": [
+          "天空",
+          "七彩",
+          "雨過天晴"
+        ]
+      }
+    },
+    "⚡": {
+      "zh": {
+        "name": "高压电/闪电",
+        "keywords": [
+          "电",
+          "闪电",
+          "充电"
+        ]
+      },
+      "en": {
+        "name": "high voltage",
+        "keywords": [
+          "electricity",
+          "voltage"
+        ]
+      },
+      "tc": {
+        "name": "高壓電/閃電",
+        "keywords": [
+          "電",
+          "閃電",
+          "充電"
+        ]
+      }
+    },
+    "❄️": {
+      "zh": {
+        "name": "雪花",
+        "keywords": [
+          "雪",
+          "冬天",
+          "寒冷"
+        ]
+      },
+      "en": {
+        "name": "snowflake",
+        "keywords": [
+          "snow",
+          "cold",
+          "winter"
+        ]
+      },
+      "tc": {
+        "name": "雪花",
+        "keywords": [
+          "雪",
+          "冬天",
+          "寒冷"
+        ]
+      }
+    },
+    "💧": {
+      "zh": {
+        "name": "水滴",
+        "keywords": [
+          "水",
+          "汗水",
+          "泪水"
+        ]
+      },
+      "en": {
+        "name": "droplet",
+        "keywords": [
+          "water",
+          "drip"
+        ]
+      },
+      "tc": {
+        "name": "水滴",
+        "keywords": [
+          "水",
+          "汗水",
+          "淚水"
+        ]
+      }
+    },
+    "🌊": {
+      "zh": {
+        "name": "海浪",
+        "keywords": [
+          "水",
+          "波浪",
+          "海洋"
+        ]
+      },
+      "en": {
+        "name": "water wave",
+        "keywords": [
+          "wave",
+          "ocean",
+          "sea"
+        ]
+      },
+      "tc": {
+        "name": "海浪",
+        "keywords": [
+          "水",
+          "波浪",
+          "海洋"
+        ]
+      }
+    },
+    "🇨🇳": {
+      "zh": {
+        "name": "中国国旗",
+        "keywords": [
+          "中国",
+          "国旗",
+          "五星红旗"
+        ]
+      },
+      "en": {
+        "name": "China flag",
+        "keywords": [
+          "china",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "中國國旗",
+        "keywords": [
+          "中國",
+          "國旗",
+          "五星紅旗"
+        ]
+      }
+    },
+    "🇭🇰": {
+      "zh": {
+        "name": "中国香港区旗",
+        "keywords": [
+          "香港",
+          "紫荆花"
+        ]
+      },
+      "en": {
+        "name": "Hong Kong flag",
+        "keywords": [
+          "hong kong",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "中國香港區旗",
+        "keywords": [
+          "香港",
+          "紫荊花"
+        ]
+      }
+    },
+    "🇲🇴": {
+      "zh": {
+        "name": "中国澳门区旗",
+        "keywords": [
+          "澳门",
+          "荷花"
+        ]
+      },
+      "en": {
+        "name": "Macau flag",
+        "keywords": [
+          "macau",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "中國澳門區旗",
+        "keywords": [
+          "澳門",
+          "荷花"
+        ]
+      }
+    },
+    "🇹🇼": {
+      "zh": {
+        "name": "台湾旗帜",
+        "keywords": [
+          "台湾",
+          "旗帜"
+        ]
+      },
+      "en": {
+        "name": "Taiwan flag",
+        "keywords": [
+          "taiwan",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "台灣旗幟",
+        "keywords": [
+          "台灣",
+          "旗幟"
+        ]
+      }
+    },
+    "🇺🇸": {
+      "zh": {
+        "name": "美国国旗",
+        "keywords": [
+          "美国",
+          "星条旗"
+        ]
+      },
+      "en": {
+        "name": "US flag",
+        "keywords": [
+          "usa",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "美國國旗",
+        "keywords": [
+          "美國",
+          "星條旗"
+        ]
+      }
+    },
+    "🇬🇧": {
+      "zh": {
+        "name": "英国国旗",
+        "keywords": [
+          "英国",
+          "米字旗"
+        ]
+      },
+      "en": {
+        "name": "UK flag",
+        "keywords": [
+          "uk",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "英國國旗",
+        "keywords": [
+          "英國",
+          "米字旗"
+        ]
+      }
+    },
+    "🇯🇵": {
+      "zh": {
+        "name": "日本国旗",
+        "keywords": [
+          "日本",
+          "太阳旗"
+        ]
+      },
+      "en": {
+        "name": "Japan flag",
+        "keywords": [
+          "japan",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "日本國旗",
+        "keywords": [
+          "日本",
+          "太陽旗"
+        ]
+      }
+    },
+    "🇩🇪": {
+      "zh": {
+        "name": "德国国旗",
+        "keywords": [
+          "德国",
+          "三色旗"
+        ]
+      },
+      "en": {
+        "name": "Germany flag",
+        "keywords": [
+          "germany",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "德國國旗",
+        "keywords": [
+          "德國",
+          "三色旗"
+        ]
+      }
+    },
+    "🇫🇷": {
+      "zh": {
+        "name": "法国国旗",
+        "keywords": [
+          "法国",
+          "三色旗"
+        ]
+      },
+      "en": {
+        "name": "France flag",
+        "keywords": [
+          "france",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "法國國旗",
+        "keywords": [
+          "法國",
+          "三色旗"
+        ]
+      }
+    },
+    "🇰🇷": {
+      "zh": {
+        "name": "韩国国旗",
+        "keywords": [
+          "韩国",
+          "太极旗"
+        ]
+      },
+      "en": {
+        "name": "South Korea flag",
+        "keywords": [
+          "korea",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "韓國國旗",
+        "keywords": [
+          "韓國",
+          "太極旗"
+        ]
+      }
+    },
+    "🇷🇺": {
+      "zh": {
+        "name": "俄罗斯国旗",
+        "keywords": [
+          "俄罗斯"
+        ]
+      },
+      "en": {
+        "name": "Russia flag",
+        "keywords": [
+          "russia",
+          "flag"
+        ]
+      },
+      "tc": {
+        "name": "俄羅斯國旗",
+        "keywords": [
+          "俄羅斯"
         ]
       }
     }

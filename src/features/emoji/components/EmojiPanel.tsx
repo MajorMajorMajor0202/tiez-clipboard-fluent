@@ -189,6 +189,63 @@ const getPreloadedEmojis = () => {
   return (window as any).__EMOJI_CACHE__ as EmojiGroup[] | undefined;
 };
 
+const SKIN_TONE_SUPPORTED_BASE = new Set([
+  // Hands & Gestures
+  "👍", "👎", "👌", "✌️", "🤞", "🤟", "🤘", "🤙", "👊", "✊", "🤚", "🖐️", "✋", "👋", "👉", "👈", "👇", "👆", "🫵", "🤝", "🙌", "🤲", "🤜", "🤛", "🫰", "🤌", "✍️", "💅", "🤳", "💪", "👂", "👃",
+  // People, Roles, Fantasy, Sports
+  "👶", "👦", "👧", "👨", "👩", "🧑", "👱", "👴", "👵", "🧔", "🤵", "👰", "🤰", "🤱", "👼", "🎅", "🤶", "🧙", "🧚", "🧛", "🧜", "🧝", "🧞", "🧟", "🕴️", "🏃", "🚶", "🕺", "💃", "🧘", "🧗", "🏌️", "🏄", "🏊", "🏋️", "🚴", "🚵", "🤸", "🤼", "🤽", "🤾", "🤹",
+  "👮", "🕵️", "💂", "👷", "🤴", "👸", "👳", "👲", "🧕", "🦸", "🦹", "💆", "💇", "🏇", "兵", "🏂", "🚣", "⛹️"
+]);
+
+const SKIN_TONES = [
+  { value: "", color: "#FFC83B" },      // Default Yellow
+  { value: "🏻", color: "#F9DEC9" },    // Light
+  { value: "🏼", color: "#E1B899" },    // Medium-Light
+  { value: "🏽", color: "#C09374" },    // Medium
+  { value: "🏾", color: "#98684D" },    // Medium-Dark
+  { value: "🏿", color: "#5B3C2A" }     // Dark
+];
+
+const isSkinToneSupported = (emojiChar: string): boolean => {
+  const base = Array.from(emojiChar)[0];
+  return SKIN_TONE_SUPPORTED_BASE.has(base);
+};
+
+const applySkinTone = (emojiChar: string, toneModifier: string): string => {
+  if (!toneModifier) return emojiChar;
+  
+  const base = Array.from(emojiChar)[0];
+  if (SKIN_TONE_SUPPORTED_BASE.has(base)) {
+    if (emojiChar.includes("\u200D")) {
+      const parts = emojiChar.split("\u200D");
+      parts[0] = parts[0].replace(/\uFE0F/g, "") + toneModifier;
+      return parts.join("\u200D");
+    }
+    return emojiChar.replace(/\uFE0F/g, "") + toneModifier;
+  }
+  return emojiChar;
+};
+
+const SkinToneSelector = ({ selected, onChange }: { selected: string; onChange: (val: string) => void }) => (
+  <div className="emoji-skin-tone-bar">
+    {SKIN_TONES.map((tone) => (
+      <button
+        key={tone.value}
+        style={{ backgroundColor: tone.color }}
+        className={`skin-tone-dot ${selected === tone.value ? "active" : ""}`}
+        onClick={() => onChange(tone.value)}
+        title={
+          tone.value === "" ? "默认" :
+          tone.value === "🏻" ? "浅肤色" :
+          tone.value === "🏼" ? "中浅肤色" :
+          tone.value === "🏽" ? "中等肤色" :
+          tone.value === "🏾" ? "中深肤色" : "深肤色"
+        }
+      />
+    ))}
+  </div>
+);
+
 const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveSetting, language }: EmojiPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -198,6 +255,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   const [isSwitching, setIsSwitching] = useState(false);
   const [favNames, setFavNames] = useState<Record<string, string>>({});
   const [renameTarget, setRenameTarget] = useState<{ path: string; rect: DOMRect } | null>(null);
+
+  const [selectedSkinTone, setSelectedSkinTone] = useState("");
 
   // Fetch favorite names on mount
   useEffect(() => {
@@ -210,9 +269,17 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
             console.error("Failed to parse emoji favorite names", e);
           }
         }
+        if (settings["app.emoji_selected_skin_tone"]) {
+          setSelectedSkinTone(settings["app.emoji_selected_skin_tone"]);
+        }
       })
       .catch(console.error);
   }, []);
+
+  const handleSkinToneChange = (tone: string) => {
+    setSelectedSkinTone(tone);
+    saveSetting("app.emoji_selected_skin_tone", tone);
+  };
 
   const handleRenameFavorite = (path: string, newName: string) => {
     const updated = { ...favNames, [path]: newName.trim() };
@@ -266,6 +333,13 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       return customName.toLowerCase().includes(q);
     });
   }, [favorites, searchQuery, favNames]);
+
+  const searchResultHasToneSupported = useMemo(() => {
+    if (!searchQuery.trim()) return false;
+    return filteredEmojiGroups.some((group) =>
+      group.emojis.some((emoji) => isSkinToneSupported(emoji))
+    );
+  }, [filteredEmojiGroups, searchQuery]);
 
   const persistFavorites = (updater: string[] | ((prev: string[]) => string[])) => {
     setFavorites((prev) => {
@@ -685,6 +759,9 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
             }}
           />
         </div>
+        {searchResultHasToneSupported && (
+          <SkinToneSelector selected={selectedSkinTone} onChange={handleSkinToneChange} />
+        )}
       </div>
 
       {/* Sliding track — both panels always in DOM, shifted with translateX */}
@@ -697,17 +774,23 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               {filteredEmojiGroups.map((group) => (
                 <div key={group.name} className="emoji-group">
                   <div className="emoji-group-title">{group.name}</div>
+                  {!searchQuery && (group.name === "人物" || group.name === "手势") && (
+                    <SkinToneSelector selected={selectedSkinTone} onChange={handleSkinToneChange} />
+                  )}
                   <div className="emoji-grid">
-                    {group.emojis.map((emoji) => (
-                      <FluentTooltip key={`${group.name}-${emoji}`} text={getEmojiName(emoji)}>
-                        <button
-                          className="emoji-btn"
-                          onClick={() => handleSend(emoji, "text")}
-                        >
-                          {emoji}
-                        </button>
-                      </FluentTooltip>
-                    ))}
+                    {group.emojis.map((emoji) => {
+                      const finalEmoji = applySkinTone(emoji, selectedSkinTone);
+                      return (
+                        <FluentTooltip key={`${group.name}-${emoji}`} text={getEmojiName(emoji)}>
+                          <button
+                            className="emoji-btn"
+                            onClick={() => handleSend(finalEmoji, "text")}
+                          >
+                            {finalEmoji}
+                          </button>
+                        </FluentTooltip>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

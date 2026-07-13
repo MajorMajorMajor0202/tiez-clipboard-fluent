@@ -103,6 +103,48 @@
   pointer-events: none;
 }
 
+/* Skin Tone Selector */
+.emoji-skin-tone-bar {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+  align-items: center;
+}
+
+.emoji-search-container .emoji-skin-tone-bar {
+  margin-top: 8px;
+}
+
+.emoji-group .emoji-skin-tone-bar {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.skin-tone-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--line-soft);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.skin-tone-dot:hover {
+  transform: scale(1.15);
+}
+
+.skin-tone-dot.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1.5px var(--bg-content), 0 0 0 2.5px var(--accent-color);
+  transform: scale(1.1);
+}
+
 .emoji-tab {
   flex: 1;
   height: 32px;
