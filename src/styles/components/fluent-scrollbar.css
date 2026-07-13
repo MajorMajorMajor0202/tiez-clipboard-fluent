@@ -83,8 +83,8 @@
 /* ── Thumb ── */
 .fluent-scrollbar__thumb {
   position: absolute;
-  /* Hug the rightmost edge in the rest state */
-  right: 0;
+  /* Shifted left by 2px in the rest state */
+  right: 2px;
   width: 2px;
   border-radius: 999px;
   z-index: 1;
