@@ -290,14 +290,14 @@
 
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 40px);
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
   gap: 0px;
-  justify-content: center;
 }
 
 .emoji-btn {
-  height: 40px;
-  width: 40px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   background: transparent;
   border: 2px solid transparent;
   border-radius: 4px;
@@ -307,6 +307,8 @@
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.1s ease, border-color 0.1s ease;
+  line-height: 1;
+  padding: 0;
 }
 
 .emoji-btn:hover {
