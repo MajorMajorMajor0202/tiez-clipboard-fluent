@@ -752,7 +752,14 @@ const SettingsWindow = () => {
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
                 <span className="fluent-setting-title">开机自启动</span>
-                <span className="fluent-setting-description">允许程序随操作系统一同启动</span>
+                <span className="fluent-setting-description">
+                  允许程序随操作系统一同启动
+                  {import.meta.env.DEV && (
+                    <span style={{ display: 'block', color: 'var(--accent-color, #ff9800)', fontSize: '11px', marginTop: '4px', lineHeight: '1.4' }}>
+                      ⚠️ 调试版提示：当前处于开发调试模式。开机自启动将运行调试版二进制，由于此时本地 Vite 开发服务（Port 1420）未运行，会导致黑框命令行窗口弹出并显示网页连接错误（ERR_CONNECTION_REFUSED）。该现象在打包为正式 Release 版后会自动消失（Release 版无命令行黑框且离线加载内置资源）。
+                    </span>
+                  )}
+                </span>
               </div>
               <label className="fluent-switch">
                 <input
