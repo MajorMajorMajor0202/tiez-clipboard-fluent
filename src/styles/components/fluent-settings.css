@@ -91,31 +91,18 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 /* Content area */
 .fluent-settings-content {
   flex: 1;
-  padding: 24px 16px 24px 24px;
-  margin-right: 8px;
+  padding: 24px 32px 24px 24px;
   overflow-y: auto;
-  scrollbar-gutter: stable;
+  scrollbar-width: none; /* Firefox */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
 }
 
 .fluent-settings-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.fluent-settings-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.fluent-settings-content::-webkit-scrollbar-thumb {
-  background: var(--line-strong);
-  border-radius: 4px;
-}
-
-.fluent-settings-content::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  display: none; /* Safari / Chrome / WebView2 */
 }
 
 .fluent-page-header {

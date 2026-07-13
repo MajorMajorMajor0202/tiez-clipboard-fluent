@@ -34,6 +34,7 @@ import AppSelectorModal from "./AppSelectorModal";
 import AiProfileModal from "./AiProfileModal";
 import ThemeStorePanel from "../../theme-store/components/ThemeStorePanel";
 import AdvancedSettingsGroup from "./groups/AdvancedSettingsGroup";
+import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 
 const SettingsWindow = () => {
   const appState = useAppState();
@@ -395,6 +396,13 @@ const SettingsWindow = () => {
     theme
   });
 
+  const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
+  const contentRef = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      setContentEl(node);
+    }
+  }, []);
+
   // Accent color loader and active tab indicator vertical slider
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [indicatorRect, setIndicatorRect] = useState<{ top: number; height: number } | null>(null);
@@ -740,8 +748,9 @@ const SettingsWindow = () => {
         </div>
       </div>
 
-      {/* Main Settings Panel */}
-      <div className="fluent-settings-content">
+      {/* Main Settings Panel Wrapper */}
+      <div style={{ flex: 1, position: "relative", height: "100%", overflow: "hidden" }}>
+        <div className="fluent-settings-content" ref={contentRef}>
         {toast && <div className="fluent-toast">{toast}</div>}
 
         {/* Tab 1: General & System */}
@@ -2664,6 +2673,8 @@ const SettingsWindow = () => {
             </div>
           </div>
         )}
+        </div>
+        <FluentScrollbar scrollContainer={contentEl} />
       </div>
 
       {/* Selector Modals */}
