@@ -107,7 +107,7 @@
 .emoji-skin-tone-bar {
   display: flex;
   gap: 8px;
-  padding: 4px 0;
+  padding: 4px 8px;
   align-items: center;
 }
 
@@ -121,8 +121,8 @@
 }
 
 .skin-tone-dot {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 9999px;
   border: 1px solid var(--line-soft);
   cursor: pointer;
