@@ -3,7 +3,7 @@ import type { DragEvent } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Plus, X, Pencil } from "lucide-react";
+import { Plus, X, Pencil, Search } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
 import { createPortal } from "react-dom";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
@@ -238,6 +238,34 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
 
   const flatEmoji = useMemo(() => emojiGroups.flatMap((g) => g.emojis), [emojiGroups]);
   const hasFavorites = favorites.length > 0;
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isComposing, setIsComposing] = useState(false);
+
+  useEffect(() => {
+    setSearchQuery("");
+  }, [activeTab]);
+
+  const filteredEmojiGroups = useMemo(() => {
+    if (!searchQuery.trim()) return emojiGroups;
+    const q = searchQuery.trim().toLowerCase();
+    return emojiGroups
+      .map((group) => ({
+        ...group,
+        emojis: group.emojis.filter((emoji) => getEmojiName(emoji).toLowerCase().includes(q)),
+      }))
+      .filter((group) => group.emojis.length > 0);
+  }, [emojiGroups, searchQuery, emojiDict, currentLang]);
+
+  const filteredFavorites = useMemo(() => {
+    if (!searchQuery.trim()) return favorites;
+    const q = searchQuery.trim().toLowerCase();
+    return favorites.filter((path) => {
+      const name = path.split(/[/\\]/).pop() || path;
+      const customName = favNames[path] || name;
+      return customName.toLowerCase().includes(q);
+    });
+  }, [favorites, searchQuery, favNames]);
 
   const persistFavorites = (updater: string[] | ((prev: string[]) => string[])) => {
     setFavorites((prev) => {
@@ -636,6 +664,29 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
         </div>
       </LayoutGroup>
 
+      <div className="emoji-search-container">
+        <div className="emoji-search-wrapper">
+          <Search size={14} className="emoji-search-icon" />
+          <input
+            type="text"
+            className="emoji-search-input"
+            placeholder={t("search") || "搜索..."}
+            value={searchQuery}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={(e) => {
+              setIsComposing(false);
+              setSearchQuery((e.target as HTMLInputElement).value);
+            }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            onMouseDown={() => {
+              invoke("activate_window_focus").catch(console.error);
+            }}
+          />
+        </div>
+      </div>
+
       {/* Sliding track — both panels always in DOM, shifted with translateX */}
       <div className="emoji-content-wrapper">
         {animationCompleted && (
@@ -643,7 +694,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
             
             {/* Panel 0 — Emoji grid */}
             <div className="emoji-content">
-              {emojiGroups.map((group) => (
+              {filteredEmojiGroups.map((group) => (
                 <div key={group.name} className="emoji-group">
                   <div className="emoji-group-title">{group.name}</div>
                   <div className="emoji-grid">
@@ -660,7 +711,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                   </div>
                 </div>
               ))}
-              {flatEmoji.length === 0 && (
+              {filteredEmojiGroups.length === 0 && (
                 <div className="emoji-empty">{t("emoji_empty") || "暂无表情"}</div>
               )}
             </div>
@@ -688,7 +739,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
               }}
             >
               <div className="emoji-fav-grid">
-                {favorites.map((path) => {
+                {filteredFavorites.map((path) => {
                   const name = path.split(/[/\\]/).pop() || path;
                   const isDeleteVisible = deleteTarget === path;
                   return (
@@ -750,29 +801,35 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                   );
                 })}
 
-                <div className="emoji-fav-card emoji-fav-add">
-                  <FluentTooltip text={t("emoji_add_files") || "添加表情"}>
-                    <button
-                      className="emoji-fav-add-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        void handleSelectFiles();
-                      }}
-                    >
-                      <div className="add-icon-wrapper">
-                        <Plus size={22} strokeWidth={2.5} />
-                      </div>
-                    </button>
-                  </FluentTooltip>
-                </div>
+                {!searchQuery && (
+                  <div className="emoji-fav-card emoji-fav-add">
+                    <FluentTooltip text={t("emoji_add_files") || "添加表情"}>
+                      <button
+                        className="emoji-fav-add-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void handleSelectFiles();
+                        }}
+                      >
+                        <div className="add-icon-wrapper">
+                          <Plus size={22} strokeWidth={2.5} />
+                        </div>
+                      </button>
+                    </FluentTooltip>
+                  </div>
+                )}
               </div>
 
-              {!hasFavorites && (
+              {filteredFavorites.length === 0 && (
                 <div className="emoji-fav-empty">
-                  <span>{t("emoji_fav_hint") || "点击添加按钮、或拖拽图片到这里"}</span>
+                  <span>
+                    {searchQuery
+                      ? (t("no_records") || "无匹配记录")
+                      : (t("emoji_fav_hint") || "点击添加按钮、或拖拽图片到这里")}
+                  </span>
                 </div>
               )}
-              {hasFavorites && (
+              {hasFavorites && !searchQuery && (
                 <div className="emoji-fav-tip">{t("emoji_fav_tip") || "可直接拖拽图片添加"}</div>
               )}
 
