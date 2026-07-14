@@ -714,7 +714,7 @@ const SettingsWindow = () => {
     { id: "sync", label: t("sync_and_transfer") || "同步与传输", icon: <Wifi size={16} /> },
     { id: "ai", label: t("ai_settings") || "AI 智能助手", icon: <Cpu size={16} /> },
     { id: "appearance", label: t("appearance_settings") || "个性化外观", icon: <Palette size={16} /> },
-    { id: "advanced", label: t("advanced_settings") || "高级设置", icon: <Sliders size={16} /> }
+    { id: "advanced", label: t("advanced_settings") || "高级设置与策略", icon: <Sliders size={16} /> }
   ];
 
   return (
@@ -756,7 +756,7 @@ const SettingsWindow = () => {
         {/* Tab 1: General & System */}
         {activeTab === "general" && (
           <div>
-            <h2 className="fluent-page-header">常规与系统</h2>
+            <h2 className="fluent-page-header">{t("general_settings") || "常规与系统"}</h2>
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
@@ -1119,7 +1119,7 @@ const SettingsWindow = () => {
         {/* Tab 2: Clipboard & Hotkeys */}
         {activeTab === "clipboard" && (
           <div>
-            <h2 className="fluent-page-header">剪贴板与热键</h2>
+            <h2 className="fluent-page-header">{t("clipboard_settings") || "剪贴板与热键"}</h2>
 
             {/* Hotkey Recorders expander */}
             <div className="fluent-setting-expander">
@@ -1500,7 +1500,7 @@ const SettingsWindow = () => {
         {/* Tab 3: Privacy & Masking */}
         {activeTab === "privacy" && (
           <div>
-            <h2 className="fluent-page-header">隐私与过滤</h2>
+            <h2 className="fluent-page-header">{t("privacy_protection") || "隐私与过滤"}</h2>
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
@@ -1677,7 +1677,7 @@ const SettingsWindow = () => {
         {/* Tab 4: Sync & Transfer */}
         {activeTab === "sync" && (
           <div>
-            <h2 className="fluent-page-header">同步与传输</h2>
+            <h2 className="fluent-page-header">{t("sync_and_transfer") || "同步与传输"}</h2>
 
             {/* LAN File Server Expander */}
             {/* LAN File Server Expander */}
@@ -2201,7 +2201,7 @@ const SettingsWindow = () => {
         {/* Tab 5: AI Assistant */}
         {activeTab === "ai" && (
           <div>
-            <h2 className="fluent-page-header">AI 智能助手</h2>
+            <h2 className="fluent-page-header">{t("ai_settings") || "AI 智能助手"}</h2>
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
@@ -2374,7 +2374,7 @@ const SettingsWindow = () => {
         {/* Tab 6: Appearance */}
         {activeTab === "appearance" && (
           <div>
-            <h2 className="fluent-page-header">个性化外观</h2>
+            <h2 className="fluent-page-header">{t("appearance_settings") || "个性化外观"}</h2>
 
             {/* Visual theme cards */}
             <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px" }}>
@@ -2659,7 +2659,7 @@ const SettingsWindow = () => {
         {/* Tab 7: Advanced Rules */}
         {activeTab === "advanced" && (
           <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-            <h2 className="fluent-page-header">高级设置与策略</h2>
+            <h2 className="fluent-page-header">{t("advanced_settings") || "高级设置与策略"}</h2>
             <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
               <AdvancedSettingsGroup
                 t={t}
