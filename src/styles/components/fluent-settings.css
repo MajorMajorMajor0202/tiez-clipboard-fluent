@@ -39,10 +39,10 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   position: relative;
   border: none;
-  background: transparent;
+  background-color: transparent;
   width: 100%;
   text-align: left;
 }
