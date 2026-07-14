@@ -9,7 +9,8 @@ import {
   Wifi,
   Cpu,
   Palette,
-  Settings
+  Settings,
+  Edit3
 } from "lucide-react";
 import { translations } from "../../../locales";
 import { useAppState } from "../../app/hooks/useAppState";
@@ -685,9 +686,26 @@ const SettingsWindow = () => {
   };
 
   const renderHotkeyCaps = (hk: string) => {
-    const tokens = getHotkeyDisplayTokens(hk, { preferMacSymbols: true });
-    if (tokens.length === 0) return <span style={{ opacity: 0.5 }}>{t('not_set')}</span>;
-    return <span className="fluent-value-display">{tokens.map(t => t.label).join("")}</span>;
+    const tokens = getHotkeyDisplayTokens(hk, { preferMacSymbols: false });
+    if (tokens.length === 0) {
+      return <span className="fluent-hotkey-not-set">{t('not_set') || "未设置"}</span>;
+    }
+    const elements: React.ReactNode[] = [];
+    tokens.forEach((token, index) => {
+      if (index > 0) {
+        elements.push(
+          <span key={`plus-${index}`} className="fluent-hotkey-plus">
+            +
+          </span>
+        );
+      }
+      elements.push(
+        <span key={`cap-${index}`} className="fluent-hotkey-cap">
+          {token.label}
+        </span>
+      );
+    });
+    return <div className="fluent-hotkey-caps-list">{elements}</div>;
   };
 
   // Return Theme Store subpage if open
@@ -1144,8 +1162,7 @@ const SettingsWindow = () => {
                       </span>
                     </div>
                     <div
-                      className={`fluent-value-display ${isRecording ? 'recording' : ''}`}
-                      style={{ cursor: "pointer", border: isRecording ? "1px solid var(--accent-color)" : undefined }}
+                      className={`fluent-hotkey-recorder ${isRecording ? 'recording' : ''}`}
                       onClick={() => setIsRecording(true)}
                       tabIndex={0}
                       onKeyDown={(e) => {
@@ -1163,7 +1180,14 @@ const SettingsWindow = () => {
                         updateHotkey([...modifiers, key].join('+'));
                       }}
                     >
-                      {isRecording ? "等待按键..." : renderHotkeyCaps(hotkey)}
+                      {isRecording ? (
+                        <span className="fluent-hotkey-recording-text">等待按键...</span>
+                      ) : (
+                        <>
+                          {renderHotkeyCaps(hotkey)}
+                          <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -1174,8 +1198,7 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-description">激活后主窗口立即进入搜索状态</span>
                     </div>
                     <div
-                      className={`fluent-value-display ${isRecordingSearch ? 'recording' : ''}`}
-                      style={{ cursor: "pointer", border: isRecordingSearch ? "1px solid var(--accent-color)" : undefined }}
+                      className={`fluent-hotkey-recorder ${isRecordingSearch ? 'recording' : ''}`}
                       onClick={() => setIsRecordingSearch(true)}
                       tabIndex={0}
                       onKeyDown={(e) => {
@@ -1193,7 +1216,14 @@ const SettingsWindow = () => {
                         updateSearchHotkey([...modifiers, key].join('+'));
                       }}
                     >
-                      {isRecordingSearch ? "等待按键..." : renderHotkeyCaps(searchHotkey)}
+                      {isRecordingSearch ? (
+                        <span className="fluent-hotkey-recording-text">等待按键...</span>
+                      ) : (
+                        <>
+                          {renderHotkeyCaps(searchHotkey)}
+                          <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -1204,8 +1234,7 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-description">双击条目时模拟带格式粘贴的按键</span>
                     </div>
                     <div
-                      className={`fluent-value-display ${isRecordingRich ? 'recording' : ''}`}
-                      style={{ cursor: "pointer", border: isRecordingRich ? "1px solid var(--accent-color)" : undefined }}
+                      className={`fluent-hotkey-recorder ${isRecordingRich ? 'recording' : ''}`}
                       onClick={() => setIsRecordingRich(true)}
                       tabIndex={0}
                       onKeyDown={(e) => {
@@ -1223,7 +1252,14 @@ const SettingsWindow = () => {
                         updateRichPasteHotkey([...modifiers, key].join('+'));
                       }}
                     >
-                      {isRecordingRich ? "等待按键..." : renderHotkeyCaps(richPasteHotkey)}
+                      {isRecordingRich ? (
+                        <span className="fluent-hotkey-recording-text">等待按键...</span>
+                      ) : (
+                        <>
+                          {renderHotkeyCaps(richPasteHotkey)}
+                          <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1468,8 +1504,7 @@ const SettingsWindow = () => {
                         </span>
                       </div>
                       <div
-                        className={`fluent-value-display ${isRecordingSequential ? 'recording' : ''}`}
-                        style={{ cursor: "pointer", border: isRecordingSequential ? "1px solid var(--accent-color)" : undefined }}
+                        className={`fluent-hotkey-recorder ${isRecordingSequential ? 'recording' : ''}`}
                         onClick={() => setIsRecordingSequential(true)}
                         tabIndex={0}
                         onKeyDown={(e) => {
@@ -1487,7 +1522,14 @@ const SettingsWindow = () => {
                           updateSequentialHotkey([...modifiers, key].join('+'));
                         }}
                       >
-                        {isRecordingSequential ? "等待按键..." : renderHotkeyCaps(sequentialHotkey)}
+                        {isRecordingSequential ? (
+                          <span className="fluent-hotkey-recording-text">等待按键...</span>
+                        ) : (
+                          <>
+                            {renderHotkeyCaps(sequentialHotkey)}
+                            <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
