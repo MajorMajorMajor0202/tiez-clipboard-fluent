@@ -319,7 +319,7 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                                 if (e.ctrlKey) modifiers.push('Ctrl');
                                 if (e.shiftKey) modifiers.push('Shift');
                                 if (e.altKey) modifiers.push('Alt');
-                                if (e.metaKey) modifiers.push('Command');
+                                if (e.metaKey) modifiers.push('Win');
 
                                 const key = e.key.toUpperCase();
                                 if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
@@ -364,7 +364,7 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                                 if (e.ctrlKey) modifiers.push('Ctrl');
                                 if (e.shiftKey) modifiers.push('Shift');
                                 if (e.altKey) modifiers.push('Alt');
-                                if (e.metaKey) modifiers.push('Command');
+                                if (e.metaKey) modifiers.push('Win');
 
                                 const key = e.key.toUpperCase();
                                 if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
@@ -507,7 +507,7 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                                     if (e.ctrlKey) modifiers.push('Ctrl');
                                     if (e.shiftKey) modifiers.push('Shift');
                                     if (e.altKey) modifiers.push('Alt');
-                                    if (e.metaKey) modifiers.push('Command');
+                                    if (e.metaKey) modifiers.push('Win');
 
                                     const key = e.key.toUpperCase();
                                     if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
@@ -727,7 +727,7 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                                 if (e.ctrlKey) modifiers.push('Ctrl');
                                 if (e.shiftKey) modifiers.push('Shift');
                                 if (e.altKey) modifiers.push('Alt');
-                                if (e.metaKey) modifiers.push('Command');
+                                if (e.metaKey) modifiers.push('Win');
 
                                 const key = e.key.toUpperCase();
                                 if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;

@@ -13,7 +13,7 @@ fn register_shortcut(app_handle: &AppHandle, hotkey: &str) {
         return;
     }
 
-    let normalized = hotkey.replace("Win", "Super");
+    let normalized = hotkey.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super");
     if let Ok(shortcut) = normalized.parse::<Shortcut>() {
         let _ = app_handle.global_shortcut().register(shortcut);
     }
@@ -68,7 +68,7 @@ pub fn test_hotkey_available(app_handle: AppHandle, hotkey: String) -> AppResult
         return Ok(true);
     }
 
-    let normalized = hotkey.replace("Win", "Super");
+    let normalized = hotkey.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super");
     let shortcut = normalized
         .parse::<Shortcut>()
         .map_err(|_| AppError::Validation("快捷键格式无效".to_string()))?;

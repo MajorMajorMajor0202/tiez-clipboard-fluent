@@ -1167,7 +1167,7 @@ const SettingsWindow = () => {
                         if (e.ctrlKey) modifiers.push('Ctrl');
                         if (e.shiftKey) modifiers.push('Shift');
                         if (e.altKey) modifiers.push('Alt');
-                        if (e.metaKey) modifiers.push('Command');
+                        if (e.metaKey) modifiers.push('Win');
                         const key = e.key.toUpperCase();
                         if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
                         updateHotkey([...modifiers, key].join('+'));
@@ -1203,7 +1203,7 @@ const SettingsWindow = () => {
                         if (e.ctrlKey) modifiers.push('Ctrl');
                         if (e.shiftKey) modifiers.push('Shift');
                         if (e.altKey) modifiers.push('Alt');
-                        if (e.metaKey) modifiers.push('Command');
+                        if (e.metaKey) modifiers.push('Win');
                         const key = e.key.toUpperCase();
                         if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
                         updateSearchHotkey([...modifiers, key].join('+'));
@@ -1239,7 +1239,7 @@ const SettingsWindow = () => {
                         if (e.ctrlKey) modifiers.push('Ctrl');
                         if (e.shiftKey) modifiers.push('Shift');
                         if (e.altKey) modifiers.push('Alt');
-                        if (e.metaKey) modifiers.push('Command');
+                        if (e.metaKey) modifiers.push('Win');
                         const key = e.key.toUpperCase();
                         if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
                         updateRichPasteHotkey([...modifiers, key].join('+'));
@@ -1509,7 +1509,7 @@ const SettingsWindow = () => {
                           if (e.ctrlKey) modifiers.push('Ctrl');
                           if (e.shiftKey) modifiers.push('Shift');
                           if (e.altKey) modifiers.push('Alt');
-                          if (e.metaKey) modifiers.push('Command');
+                          if (e.metaKey) modifiers.push('Win');
                           const key = e.key.toUpperCase();
                           if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
                           updateSequentialHotkey([...modifiers, key].join('+'));

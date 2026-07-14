@@ -1215,7 +1215,7 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
 
     if let Ok(main_s) = {
         let val = settings.main_hotkey.lock().unwrap().clone();
-        val.replace("Win", "Super").parse::<Shortcut>()
+        val.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super").parse::<Shortcut>()
     } {
         if shortcut == &main_s {
             toggle_window(app);
@@ -1225,7 +1225,7 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
 
     if let Ok(seq_s) = {
         let val = settings.sequential_paste_hotkey.lock().unwrap().clone();
-        val.replace("Win", "Super").parse::<Shortcut>()
+        val.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super").parse::<Shortcut>()
     } {
         if shortcut == &seq_s {
             let is_seq = settings.sequential_mode.load(Ordering::Relaxed);
@@ -1246,7 +1246,7 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
 
     if let Ok(rich_s) = {
         let val = settings.rich_paste_hotkey.lock().unwrap().clone();
-        val.replace("Win", "Super").parse::<Shortcut>()
+        val.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super").parse::<Shortcut>()
     } {
         if shortcut == &rich_s {
             crate::services::clipboard_ops::paste_latest_rich(app.clone());
@@ -1255,7 +1255,7 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
 
     if let Ok(search_s) = {
         let val = settings.search_hotkey.lock().unwrap().clone();
-        val.replace("Win", "Super").parse::<Shortcut>()
+        val.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super").parse::<Shortcut>()
     } {
         if shortcut == &search_s {
             toggle_window(app);
