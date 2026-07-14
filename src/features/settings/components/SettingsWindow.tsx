@@ -690,22 +690,15 @@ const SettingsWindow = () => {
     if (tokens.length === 0) {
       return <span className="fluent-hotkey-not-set">{t('not_set') || "未设置"}</span>;
     }
-    const elements: React.ReactNode[] = [];
-    tokens.forEach((token, index) => {
-      if (index > 0) {
-        elements.push(
-          <span key={`plus-${index}`} className="fluent-hotkey-plus">
-            +
+    return (
+      <div className="fluent-hotkey-caps-list">
+        {tokens.map((token, index) => (
+          <span key={`cap-${index}`} className="fluent-hotkey-cap">
+            {token.label}
           </span>
-        );
-      }
-      elements.push(
-        <span key={`cap-${index}`} className="fluent-hotkey-cap">
-          {token.label}
-        </span>
-      );
-    });
-    return <div className="fluent-hotkey-caps-list">{elements}</div>;
+        ))}
+      </div>
+    );
   };
 
   // Return Theme Store subpage if open

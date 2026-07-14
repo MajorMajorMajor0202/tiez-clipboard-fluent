@@ -261,8 +261,8 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 .fluent-hotkey-recorder {
   display: inline-flex;
   align-items: center;
-  height: 32px; /* multiple of 4 */
-  padding: 0 8px; /* multiple of 4 */
+  height: 40px; /* multiple of 4 */
+  padding: 0 12px; /* multiple of 4 */
   gap: 8px; /* multiple of 4 */
   border-radius: 4px; /* multiple of 4 */
   cursor: pointer;
@@ -277,19 +277,19 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 }
 
 .fluent-hotkey-recorder:hover {
-  background-color: var(--bg-subtle-hover, rgba(128, 128, 128, 0.08));
-  border-color: var(--line-soft, rgba(128, 128, 128, 0.12));
+  background-color: var(--bg-subtle-hover, rgba(128, 128, 128, 0.06));
+  border-color: rgba(128, 128, 128, 0.05); /* extremely thin and subtle border line */
 }
 
 .fluent-hotkey-recorder.recording {
-  background-color: var(--bg-subtle-active, rgba(128, 128, 128, 0.16));
+  background-color: var(--bg-subtle-active, rgba(128, 128, 128, 0.12));
   border-color: var(--accent-color);
 }
 
 .fluent-hotkey-caps-list {
   display: flex;
   align-items: center;
-  gap: 4px; /* multiple of 4 */
+  gap: 4px; /* multiple of 4, very small spacing */
   height: 100%;
 }
 
@@ -297,13 +297,13 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 24px; /* multiple of 4, exactly 75% of container height */
-  min-width: 24px; /* multiple of 4 */
-  padding: 0 8px; /* multiple of 4 */
+  height: 32px; /* multiple of 4, exactly 80% of container height */
+  min-width: 32px; /* multiple of 4 */
+  padding: 0 12px; /* multiple of 4 */
   border-radius: 4px; /* multiple of 4 */
   background-color: var(--accent-color);
   color: #ffffff !important;
-  font-size: 11px;
+  font-size: 13px; /* enlarged font size */
   font-weight: 600;
   font-family: var(--fluent-font-family);
   box-sizing: border-box;
@@ -312,11 +312,7 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 }
 
 .fluent-hotkey-plus {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  padding: 0 2px;
-  user-select: none;
+  display: none; /* Removed completely */
 }
 
 .fluent-hotkey-not-set {
