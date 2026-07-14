@@ -227,6 +227,8 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   display: flex;
   flex-direction: column;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: fluent-expander-reveal 0.22s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+  transform-origin: top;
 }
 
 .fluent-setting-expander-content:has(.fluent-setting-card) {
@@ -582,5 +584,16 @@ body.is-settings-window.theme-acrylic #root {
 body.is-settings-window.theme-mica .fluent-settings-layout,
 body.is-settings-window.theme-acrylic .fluent-settings-layout {
   background-color: transparent !important;
+}
+
+@keyframes fluent-expander-reveal {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
 }
 
