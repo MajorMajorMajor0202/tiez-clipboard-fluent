@@ -45,19 +45,24 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   background-color: transparent;
   width: 100%;
   text-align: left;
+  will-change: background-color; /* Force GPU compositing layer to prevent Chromium rendering bug on transparent backdrop */
 }
 
 .fluent-sidebar-item:hover {
-  background-color: var(--bg-subtle-hover);
+  background-color: rgba(128, 128, 128, 0.12);
 }
 
 .fluent-sidebar-item:active {
-  background-color: var(--bg-subtle-active);
+  background-color: rgba(128, 128, 128, 0.22);
 }
 
 .fluent-sidebar-item.active {
-  background-color: var(--bg-subtle-active);
+  background-color: rgba(128, 128, 128, 0.18);
   font-weight: 600;
+}
+
+.fluent-sidebar-item.active:hover {
+  background-color: rgba(128, 128, 128, 0.24);
 }
 
 /* Active indicator bar - vertical sliding wrapper */
@@ -183,10 +188,11 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: background-color 0.15s ease;
   box-sizing: border-box;
+  will-change: background-color; /* Force GPU compositing layer to prevent Chromium rendering bug on transparent backdrop */
 }
 
 .fluent-setting-expander-header:hover {
-  background-color: var(--bg-subtle-hover);
+  background-color: var(--bg-hover, rgba(128, 128, 128, 0.08));
 }
 
 .fluent-setting-expander-header.expanded {
