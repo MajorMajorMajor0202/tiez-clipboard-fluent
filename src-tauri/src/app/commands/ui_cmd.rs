@@ -125,8 +125,9 @@ pub fn apply_theme_to_window_internal(
             );
             const DWMWA_COLOR_DEFAULT: u32 = 0xFFFFFFFF;
             const DWMWA_COLOR_NONE: u32 = 0xFFFFFFFE;
-            let border_color: u32 = if theme == "mica" || theme == "acrylic" {
-                // For Mica/Acrylic, always suppress the DWM border — the 1px grey
+            let is_settings = window.label() == "settings" || window.label() == "advanced-settings";
+            let border_color: u32 = if (theme == "mica" || theme == "acrylic") && !is_settings {
+                // For Mica/Acrylic on the main window, always suppress the DWM border — the 1px grey
                 // separator line it draws creates a visible seam between the native
                 // title bar and the WebView2 client area.
                 DWMWA_COLOR_NONE
