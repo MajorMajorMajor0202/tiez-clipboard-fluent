@@ -552,6 +552,18 @@ body.is-settings-window::before {
   display: none !important;
 }
 
+body.is-settings-window::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: inset 0 0 0 1px var(--shell-border-color);
+  pointer-events: none;
+  z-index: 2147483647;
+}
+
 body.is-settings-window #root {
   clip-path: none !important;
   -webkit-clip-path: none !important;
