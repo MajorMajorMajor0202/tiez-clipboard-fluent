@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { open } from "@tauri-apps/plugin-dialog";
-import { X } from "lucide-react";
 import AppSelector from "./AppSelector";
 import type { InstalledAppOption } from "../../app/types";
 
@@ -25,27 +24,7 @@ const AppSelectorModal = ({ show, installedApps, t, onClose, onSave }: AppSelect
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="confirm-dialog-upper" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div className="confirm-dialog-title" style={{ margin: 0 }}>{t('select_app_title') || "选择程序"}</div>
-                            <button
-                                className="fluent-sidebar-item"
-                                onClick={onClose}
-                                style={{
-                                    border: 'none',
-                                    background: 'transparent',
-                                    boxShadow: 'none',
-                                    padding: '4px',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'var(--text-secondary)'
-                                }}
-                            >
-                                <X size={16} />
-                            </button>
-                        </div>
+                        <div className="confirm-dialog-title" style={{ margin: 0 }}>{t('select_app_title') || "选择程序"}</div>
 
                         <div className="selector-container" style={{ margin: 0, padding: 0, border: 'none', background: 'transparent' }}>
                             <AppSelector
