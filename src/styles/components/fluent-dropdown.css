@@ -1,0 +1,135 @@
+/* Fluent Dropdown General Styles */
+.fluent-dropdown-container {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.fluent-dropdown-trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 32px;
+    min-height: 32px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    cursor: pointer;
+    background: #ffffff;
+    color: var(--text-primary);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.015), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.fluent-dropdown-trigger-btn:hover {
+    background: #fafafa;
+    border-color: var(--line-strong);
+}
+
+.fluent-dropdown-trigger-btn:active {
+    background: #f0f0f0;
+}
+
+.dark-mode .fluent-dropdown-trigger-btn {
+    background: #2d2d2d;
+    border-color: var(--line-soft);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.dark-mode .fluent-dropdown-trigger-btn:hover {
+    background: #323232;
+    border-color: var(--line-strong);
+}
+
+.dark-mode .fluent-dropdown-trigger-btn:active {
+    background: #202020;
+}
+
+.fluent-dropdown-trigger-btn .chevron-icon {
+    margin-left: 12px;
+    transform: rotate(90deg);
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.fluent-dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: -4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #fafafa;
+    border: var(--flyout-border);
+    border-radius: 4px;
+    box-shadow: var(--flyout-shadow);
+    padding: 4px;
+    z-index: 100;
+    animation: fluentDropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark-mode .fluent-dropdown-menu {
+    background: #2d2d2d;
+}
+
+@keyframes fluentDropdownIn {
+    from { opacity: 0; transform: scale(1, 0.85); }
+    to   { opacity: 1; transform: scale(1, 1); }
+}
+
+.fluent-dropdown-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    height: 32px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fluent-dropdown-item:hover {
+    background: #f0f0f0;
+}
+
+.dark-mode .fluent-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.fluent-dropdown-item.active {
+    color: var(--text-primary);
+    background: #f0f0f0;
+}
+
+.dark-mode .fluent-dropdown-item.active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.fluent-dropdown-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 16px;
+    border-radius: 0 1.5px 1.5px 0;
+    background: var(--accent-color);
+}
+
+/* Mica / Acrylic specific overrides */
+.theme-mica .fluent-dropdown-item,
+.theme-acrylic .fluent-dropdown-item {
+    backdrop-filter: none;
+}
