@@ -153,7 +153,6 @@ const SettingsWindow = () => {
     setFileTransferAutoCopy,
     fileTransferPath,
     setFileTransferPath,
-    actualPort,
     setActualPort,
     localIp,
     setLocalIp,
@@ -1750,24 +1749,18 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">服务局域网 IP</span>
                       <span className="fluent-setting-description">在浏览器里访问的地址，同局域网设备可用</span>
                     </div>
-                    <div className="fluent-value-display">
-                      {availableIps && availableIps.length > 1 && setLocalIp ? (
-                        <select
-                          className="fluent-select"
-                          style={{ border: "none", background: "transparent", minWidth: "0", padding: "0" }}
-                          value={localIp}
-                          onChange={(e) => {
-                            setLocalIp(e.target.value);
-                            invoke("set_display_ip", { ip: e.target.value }).catch(console.error);
-                          }}
-                        >
-                          {availableIps.map(ip => <option key={ip} value={ip}>{ip}</option>)}
-                        </select>
-                      ) : (
-                        <span>{localIp}</span>
-                      )}
-                      <span>:{actualPort || fileServerPort}</span>
-                    </div>
+                    {availableIps && availableIps.length > 1 && setLocalIp ? (
+                      <FluentDropdown
+                        options={availableIps.map(ip => ({ id: ip, label: ip }))}
+                        value={localIp}
+                        onChange={(val) => {
+                          setLocalIp(val);
+                          invoke("set_display_ip", { ip: val }).catch(console.error);
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 }}>{localIp}</span>
+                    )}
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1894,11 +1887,16 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">连接协议</span>
                       <span className="fluent-setting-description">mqtt:// 默认(1883), mqtts:// 安全加密(8883), ws:// websocket(8083)</span>
                     </div>
-                    <select
-                      className="fluent-select"
+                    <FluentDropdown
+                      options={[
+                        { id: "mqtt://", label: "mqtt://" },
+                        { id: "mqtts://", label: "mqtts://" },
+                        { id: "ws://", label: "ws://" },
+                        { id: "wss://", label: "wss://" }
+                      ]}
                       value={mqttProtocol}
-                      onChange={(e) => {
-                        const protocol = e.target.value;
+                      onChange={(val) => {
+                        const protocol = val;
                         setMqttProtocol(protocol);
                         saveMqtt('mqtt_protocol', protocol);
                         invoke('save_setting', { key: 'mqtt_ssl', value: String(protocol === 'mqtts://' || protocol === 'wss://') }).catch(console.error);
@@ -1909,12 +1907,7 @@ const SettingsWindow = () => {
                         setMqttPort(defaultPort);
                         saveMqtt('mqtt_port', defaultPort);
                       }}
-                    >
-                      <option value="mqtt://">mqtt://</option>
-                      <option value="mqtts://">mqtts://</option>
-                      <option value="ws://">ws://</option>
-                      <option value="wss://">wss://</option>
-                    </select>
+                    />
                   </div>
 
                   { (mqttProtocol === 'ws://' || mqttProtocol === 'wss://') && (
