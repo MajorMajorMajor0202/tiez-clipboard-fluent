@@ -22,6 +22,7 @@ import { useCustomBackground } from "../../../shared/hooks/useCustomBackground";
 import { useHotkeyConfig } from "../../../shared/hooks/useHotkeyConfig";
 import { getHotkeyDisplayTokens } from "../../../shared/lib/hotkeyDisplay";
 import { isMacPlatform } from "../../../shared/lib/platform";
+import FluentDropdown from "../../../shared/components/FluentDropdown";
 import { CLOUD_SYNC_ENABLED } from "../../../shared/config/edition";
 import { THEMES, getThemeLabel, supportsCustomBackground, supportsSurfaceOpacity } from "../../../shared/config/themes";
 
@@ -1417,21 +1418,21 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">双击条目后自动模拟回车/粘贴</span>
                       <span className="fluent-setting-description">在主界面双击内容后，自动退回原焦点输入框并模拟快捷键粘贴</span>
                     </div>
-                    <select
-                      className="fluent-select"
+                    <FluentDropdown
+                      options={[
+                        { id: "disabled", label: t("quick_paste_modifier_disabled") || "已禁用" },
+                        { id: "ctrl", label: "Ctrl" },
+                        { id: "alt", label: "Alt" },
+                        { id: "shift", label: "Shift" },
+                        { id: "win", label: "Win" }
+                      ]}
                       value={quickPasteModifier}
-                      onChange={(e) => {
-                        const val = e.target.value as QuickPasteModifier;
-                        setQuickPasteModifier(val);
-                        invoke("set_quick_paste_modifier", { modifier: val }).catch(console.error);
+                      onChange={(val) => {
+                        const castVal = val as QuickPasteModifier;
+                        setQuickPasteModifier(castVal);
+                        invoke("set_quick_paste_modifier", { modifier: castVal }).catch(console.error);
                       }}
-                    >
-                      <option value="disabled">{t("quick_paste_modifier_disabled")}</option>
-                      <option value="ctrl">Control (⌃)</option>
-                      <option value="alt">Option (⌥)</option>
-                      <option value="shift">Shift (⇧)</option>
-                      <option value="win">Command (⌘)</option>
-                    </select>
+                    />
                   </div>
 
                   <div className="fluent-setting-card">
