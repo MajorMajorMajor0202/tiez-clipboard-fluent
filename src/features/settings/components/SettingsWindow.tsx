@@ -34,7 +34,6 @@ import type { CloudSyncStatusPayload } from "./groups/CloudSyncSettingsGroup";
 // Modals & Panels
 import AppSelectorModal from "./AppSelectorModal";
 import AiProfileModal from "./AiProfileModal";
-import ThemeStorePanel from "../../theme-store/components/ThemeStorePanel";
 import AdvancedSettingsGroup from "./groups/AdvancedSettingsGroup";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 
@@ -234,7 +233,6 @@ const SettingsWindow = () => {
 
   // Local state for UI navigation and overlays
   const [activeTab, setActiveTab] = useState<string>("general");
-  const [settingsSubpage, setSettingsSubpage] = useState<"home" | "theme-store" | "advanced">("home");
   const [toast, setToast] = useState<string | null>(null);
   const [appVersion, setAppVersion] = useState("0.3.0");
   const [mqttStatus, setMqttStatus] = useState<"connected" | "disconnected" | "connecting">("disconnected");
@@ -702,21 +700,7 @@ const SettingsWindow = () => {
     );
   };
 
-  // Return Theme Store subpage if open
-  if (settingsSubpage === "theme-store") {
-    return (
-      <div style={{ height: "100vh", overflow: "auto", background: "var(--bg-body)", padding: "16px" }}>
-        <ThemeStorePanel
-          t={t}
-          theme={theme}
-          setTheme={setTheme}
-          saveAppSetting={saveAppSetting}
-          language={language}
-          onBack={() => setSettingsSubpage("home")}
-        />
-      </div>
-    );
-  }
+
 
   // Sidebar items
   const menuItems = [
@@ -739,7 +723,6 @@ const SettingsWindow = () => {
             key={item.id}
             onClick={() => {
               setActiveTab(item.id);
-              setSettingsSubpage("home");
             }}
             className={`fluent-sidebar-item ${activeTab === item.id ? "active" : ""}`}
           >
@@ -2412,33 +2395,23 @@ const SettingsWindow = () => {
           <div>
             <h2 className="fluent-page-header">{t("appearance_settings") || "个性化外观"}</h2>
 
-            {/* Visual theme cards */}
-            <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px" }}>
+            {/* Visual theme dropdown */}
+            <div className="fluent-setting-card">
               <div className="fluent-setting-info">
                 <span className="fluent-setting-title">视觉设计主题风格</span>
                 <span className="fluent-setting-description">切换界面预设的主题和底板配色</span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
-                {THEMES.map(tOption => (
-                  <button
-                    key={tOption.id}
-                    className={`fluent-button ${theme === tOption.id ? 'fluent-button-primary' : ''}`}
-                    onClick={() => {
-                      setTheme(tOption.id);
-                      saveAppSetting('theme', tOption.id);
-                    }}
-                  >
-                    {getThemeLabel(tOption.id, language)}
-                  </button>
-                ))}
-              </div>
-              <button
-                className="fluent-button"
-                style={{ width: "100%", fontSize: "12px", borderStyle: "dashed" }}
-                onClick={() => setSettingsSubpage("theme-store")}
-              >
-                🎨 主题商店 (获取更多设计风格)
-              </button>
+              <FluentDropdown
+                options={THEMES.map(tOption => ({
+                  id: tOption.id,
+                  label: getThemeLabel(tOption.id, language)
+                }))}
+                value={theme}
+                onChange={(val) => {
+                  setTheme(val);
+                  saveAppSetting('theme', val);
+                }}
+              />
             </div>
 
             <div className="fluent-setting-card">
@@ -2446,24 +2419,18 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">色彩显示模式</span>
                 <span className="fluent-setting-description">支持暗黑、明亮或自动跟随操作系统变化</span>
               </div>
-              <div style={{ display: "flex", gap: "4px" }}>
-                {[
-                  { id: 'system', name: '系统默认' },
-                  { id: 'light', name: '浅色明亮' },
-                  { id: 'dark', name: '深色暗黑' }
-                ].map(modeItem => (
-                  <button
-                    key={modeItem.id}
-                    className={`fluent-button ${colorMode === modeItem.id ? 'fluent-button-primary' : ''}`}
-                    onClick={() => {
-                      setColorMode(modeItem.id);
-                      saveAppSetting('color_mode', modeItem.id);
-                    }}
-                  >
-                    {modeItem.name}
-                  </button>
-                ))}
-              </div>
+              <FluentDropdown
+                options={[
+                  { id: 'system', label: '系统默认' },
+                  { id: 'light', label: '浅色明亮' },
+                  { id: 'dark', label: '深色暗黑' }
+                ]}
+                value={colorMode}
+                onChange={(val) => {
+                  setColorMode(val);
+                  saveAppSetting('color_mode', val);
+                }}
+              />
             </div>
 
             <div className="fluent-setting-card">
@@ -2471,24 +2438,18 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">应用显示界面语言</span>
                 <span className="fluent-setting-description">更改所有菜单的文案显示语种</span>
               </div>
-              <div style={{ display: "flex", gap: "4px" }}>
-                {[
-                  { id: 'zh', name: '简体中文' },
-                  { id: 'tw', name: '繁體中文' },
-                  { id: 'en', name: 'English' }
-                ].map(langItem => (
-                  <button
-                    key={langItem.id}
-                    className={`fluent-button ${language === langItem.id ? 'fluent-button-primary' : ''}`}
-                    onClick={() => {
-                      setLanguage(langItem.id as Locale);
-                      saveAppSetting('language', langItem.id);
-                    }}
-                  >
-                    {langItem.name}
-                  </button>
-                ))}
-              </div>
+              <FluentDropdown
+                options={[
+                  { id: 'zh', label: '简体中文' },
+                  { id: 'tw', label: '繁體中文' },
+                  { id: 'en', label: 'English' }
+                ]}
+                value={language}
+                onChange={(val) => {
+                  setLanguage(val as Locale);
+                  saveAppSetting('language', val);
+                }}
+              />
             </div>
 
             <div className="fluent-setting-card">
