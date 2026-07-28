@@ -298,7 +298,7 @@
 }
 
 .themed-tag-manager .tag-color-wrapper {
-  width: 12px !important;
+  width: 18px !important;
   flex-shrink: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -306,17 +306,17 @@
 }
 
 .themed-tag-manager .tag-color-dot {
-  width: 10px !important;
-  height: 10px !important;
+  width: 18px !important;
+  height: 18px !important;
   border: none !important;
-  border-radius: 50% !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
   cursor: pointer !important;
   transition: transform 0.16s ease !important;
 }
 
 .themed-tag-manager .tag-color-dot:hover {
-  transform: scale(1.1) !important;
+  transform: scale(1.15) !important;
 }
 
 .themed-tag-manager .tag-name {
@@ -1051,8 +1051,8 @@
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-color-wrapper {
-    width: 12px !important;
-    height: 12px !important;
+    width: 18px !important;
+    height: 18px !important;
     margin: 0 !important;
   }
 

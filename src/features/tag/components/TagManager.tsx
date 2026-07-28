@@ -387,14 +387,18 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                         }}
                                     >
                                         <div className="tag-color-wrapper">
-                                            <div
-                                                className="tag-color-dot"
-                                                style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
-                                                onClick={(e) => {
+                                            <svg
+                                                className="tag-color-dot tag-color-icon"
+                                                style={{ color: tagColors[tag.name] || getTagColor(tag.name, theme) }}
+                                                onContextMenu={(e) => {
                                                     e.stopPropagation();
+                                                    e.preventDefault();
                                                     document.getElementById(`color-picker-suggest-${tag.name}`)?.click();
                                                 }}
-                                            />
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path fill="currentColor" d="M18.007 4.033a2 2 0 0 0-1.987-1.997l-4.89-.032a2 2 0 0 0-1.426.584L3.022 9.252a2 2 0 0 0-.002 2.83l4.949 4.95a2 2 0 0 0 2.828 0l6.631-6.63a2 2 0 0 0 .586-1.417zM14 7a1 1 0 1 1 0-2a1 1 0 0 1 0 2" />
+                                            </svg>
                                             <input
                                                 type="color"
                                                 id={`color-picker-suggest-${tag.name}`}
@@ -472,7 +476,13 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 )}
                                 {canCreateSuggestTag && filteredSuggestTags.length === 0 && (
                                     <div className="tag-item create-hint" onClick={() => createTag(suggestSearch)}>
-                                        <div className="tag-color-dot" style={{ border: '1px dashed currentColor', background: 'transparent' }} />
+                                        <svg
+                                            className="tag-color-dot tag-color-icon create-hint-icon"
+                                            style={{ color: 'currentColor', opacity: 0.6 }}
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path fill="currentColor" d="M14 7a1 1 0 1 0 0-2a1 1 0 0 0 0 2m-2.87-5a2 2 0 0 0-1.426.584L3.022 9.249a2 2 0 0 0-.002 2.83l4.949 4.948a2 2 0 0 0 2.828 0l6.631-6.63a2 2 0 0 0 .586-1.418l-.008-4.95a2 2 0 0 0-1.986-1.997zm-.72 1.292A1 1 0 0 1 11.123 3l4.89.032a1 1 0 0 1 .993.999l.008 4.95a1 1 0 0 1-.293.708l-6.63 6.631a1 1 0 0 1-1.415 0l-4.949-4.948a1 1 0 0 1 .001-1.415z" />
+                                        </svg>
                                         <span className="tag-name" style={{ opacity: 0.7 }}>{t('create_tag_hint').replace('{tag}', suggestSearch.trim())}</span>
                                         <Plus size={10} />
                                     </div>
@@ -502,14 +512,18 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                 onClick={() => loadTagItems(tag.name)}
                             >
                                 <div className="tag-color-wrapper">
-                                    <div
-                                        className="tag-color-dot"
-                                        style={{ background: tagColors[tag.name] || getTagColor(tag.name, theme) }}
-                                        onClick={(e) => {
+                                    <svg
+                                        className="tag-color-dot tag-color-icon"
+                                        style={{ color: tagColors[tag.name] || getTagColor(tag.name, theme) }}
+                                        onContextMenu={(e) => {
                                             e.stopPropagation();
+                                            e.preventDefault();
                                             document.getElementById(`color-picker-${tag.name}`)?.click();
                                         }}
-                                    />
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path fill="currentColor" d="M18.007 4.033a2 2 0 0 0-1.987-1.997l-4.89-.032a2 2 0 0 0-1.426.584L3.022 9.252a2 2 0 0 0-.002 2.83l4.949 4.95a2 2 0 0 0 2.828 0l6.631-6.63a2 2 0 0 0 .586-1.417zM14 7a1 1 0 1 1 0-2a1 1 0 0 1 0 2" />
+                                    </svg>
                                     <input
                                         type="color"
                                         id={`color-picker-${tag.name}`}
@@ -1198,17 +1212,16 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .sidebar-collapsed .tag-scroll .tag-name-area,
                 .sidebar-collapsed .tag-scroll .tag-hover-actions { display: none !important; }
                 .sidebar-collapsed .tag-scroll .tag-color-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; margin: 0; }
-                .tag-color-wrapper { display: flex; align-items: center; justify-content: center; }
+                .tag-color-wrapper { display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; }
                 .tag-color-dot { 
-                    width: 10px; 
-                    height: 10px; 
-                    border-radius: 50%; 
+                    width: 18px; 
+                    height: 18px; 
                     flex-shrink: 0; 
                     cursor: pointer; 
                     border: none;
                     transition: transform 0.2s; 
                 }
-                .tag-color-dot:hover { transform: scale(1.2); }
+                .tag-color-dot:hover { transform: scale(1.15); }
                 /* Tag name area — relative container for overlay hover */
                 .tag-name-area {
                     flex: 1;
@@ -2125,8 +2138,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
                 .theme-mica .tag-color-dot,
                 .theme-acrylic .tag-color-dot {
-                    width: 10px;
-                    height: 10px;
+                    width: 18px;
+                    height: 18px;
                     border: none;
                     box-shadow: none;
                 }
@@ -2690,8 +2703,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     background: var(--accent-color) !important;
                 }
                 .tag-suggestions-dropdown .tag-item .tag-color-wrapper {
-                    width: 12px !important;
-                    height: 12px !important;
+                    width: 18px !important;
+                    height: 18px !important;
                     margin: 0 !important;
                     display: flex !important;
                     align-items: center !important;
