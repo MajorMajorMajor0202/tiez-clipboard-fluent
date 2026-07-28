@@ -272,11 +272,11 @@
 
 /* Spacing and overrides */
 .app-selector-dialog .confirm-dialog-buttons {
-    gap: 12px !important;
+    gap: 24px !important;
 }
 
 .app-selector-dropdown > div:not(:first-child) {
-    margin-top: 8px;
+    margin-top: 24px;
     border-top: 1px solid var(--line-soft);
     padding-top: 4px;
 }
