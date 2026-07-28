@@ -271,6 +271,11 @@
 }
 
 /* Spacing and overrides */
+.app-selector-dialog .confirm-dialog-upper {
+    position: relative;
+    z-index: 10;
+}
+
 .app-selector-dialog .confirm-dialog-buttons {
     gap: 24px !important;
 }
