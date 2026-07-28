@@ -166,7 +166,7 @@ const AppSelector = ({
             </div>
 
             {isOpen && (hasRecommended || hasOthers) && (
-                <div className="app-selector-dropdown fluent-scrollbar">
+                <div className="app-selector-dropdown">
                     {hasRecommended && (
                         <div>
                             <div className="app-selector-group-heading">{t('system_recommended')}</div>
