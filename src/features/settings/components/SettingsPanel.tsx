@@ -483,8 +483,6 @@ const SettingsPanel = (props: SettingsPanelProps) => {
                     <AppSelectorModal
                         show={showAppSelector}
                         installedApps={installedApps}
-                        theme={theme}
-                        colorMode={colorMode}
                         t={t}
                         onClose={() => setShowAppSelector(null)}
                         onSave={saveAppSetting}
@@ -795,8 +793,6 @@ const SettingsPanel = (props: SettingsPanelProps) => {
             <AppSelectorModal
                 show={showAppSelector}
                 installedApps={installedApps}
-                theme={theme}
-                colorMode={colorMode}
                 t={t}
                 onClose={() => setShowAppSelector(null)}
                 onSave={saveAppSetting}

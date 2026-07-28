@@ -2671,8 +2671,6 @@ const SettingsWindow = () => {
       <AppSelectorModal
         show={showAppSelector}
         installedApps={installedApps}
-        theme={theme}
-        colorMode={colorMode}
         t={t}
         onClose={() => setShowAppSelector(null)}
         onSave={saveAppSetting}

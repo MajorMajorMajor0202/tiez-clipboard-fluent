@@ -1,12 +1,25 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import Select from "react-select";
-import type { SingleValue } from "react-select";
+import { Search } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { InstalledAppOption } from "../../app/types";
 
-const AppSelector = ({ type, installedApps, onSelect, theme, t, colorMode }: { type: string | null, installedApps: InstalledAppOption[], onSelect: (val: string) => void, theme: string, t: (key: string) => string, colorMode: string }) => {
+const AppSelector = ({
+    type,
+    installedApps,
+    onSelect,
+    t
+}: {
+    type: string | null;
+    installedApps: InstalledAppOption[];
+    onSelect: (val: string) => void;
+    t: (key: string) => string;
+}) => {
     const [recommended, setRecommended] = useState<InstalledAppOption[]>([]);
     const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!type) {
@@ -49,45 +62,42 @@ const AppSelector = ({ type, installedApps, onSelect, theme, t, colorMode }: { t
 
                 let recApps: InstalledAppOption[] = [];
 
-                // 1. Fetch from System Registry (Backend)
                 if (ext) {
                     try {
                         const rec = await invoke<{ name: string; path: string }[]>("get_associated_apps", { extension: ext });
                         recApps = rec.map((app) => ({ label: app.name, value: app.path }));
                     } catch (e) {
-                        // Silent fail for feature recommendations
+                        // Silent fail
                     }
                 }
 
-                // 2. Client-side Keyword Match (Augmentation)
-                // Find installed apps that match keywords but aren't in registry list
                 const localMatches = installedApps.filter(app => {
                     const lower = app.label.toLowerCase();
                     const isMatch = keywords.some(k => lower.includes(k));
-                    // Avoid duplicates
                     const alreadyIn = recApps.some(r => r.value === app.value);
                     return isMatch && !alreadyIn;
                 });
 
-                // Merge: Registry first, then Keywords
                 setRecommended([...recApps, ...localMatches]);
 
             } catch (e) {
-                // Silent fail for feature recommendations
+                // Silent fail
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchRecommended();
+        const timer = setTimeout(() => {
+            fetchRecommended();
+        }, 50);
+
+        return () => clearTimeout(timer);
     }, [type, installedApps]);
 
-    // Filter "Other Apps"
+    // Filter other apps
     const otherApps = useMemo(() => {
-        // 1. Remove if present in recommended
         let others = installedApps.filter(app => !recommended.some(r => r.value === app.value));
 
-        // 2. Apply Soft Filter (Blacklist) to clean up noise
         if (type) {
             const n_type = type;
             others = others.filter(app => {
@@ -106,86 +116,105 @@ const AppSelector = ({ type, installedApps, onSelect, theme, t, colorMode }: { t
         return others;
     }, [installedApps, recommended, type]);
 
-    const options = [
-        { label: t('system_recommended'), options: recommended },
-        { label: t('all_apps'), options: otherApps }
-    ];
+    // Filter recommended and other apps based on search keyword
+    const filteredRecommended = useMemo(() => {
+        if (!search.trim()) return recommended;
+        return recommended.filter(app =>
+            app.label.toLowerCase().includes(search.toLowerCase()) ||
+            app.value.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [recommended, search]);
 
-    const isModern = theme !== 'retro';
-    const isDarkMode = colorMode === 'dark' || (colorMode === 'system' && document.documentElement.classList.contains('dark-mode'));
+    const filteredOtherApps = useMemo(() => {
+        if (!search.trim()) return otherApps;
+        return otherApps.filter(app =>
+            app.label.toLowerCase().includes(search.toLowerCase()) ||
+            app.value.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [otherApps, search]);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    const hasRecommended = filteredRecommended.length > 0;
+    const hasOthers = filteredOtherApps.length > 0;
 
     return (
-        <Select
-            options={options}
-            isLoading={loading}
-            onFocus={() => invoke("focus_clipboard_window").catch(console.error)}
-            placeholder={loading ? t('searching_apps') : t('search_apps_placeholder')}
-            menuPortalTarget={document.body}
-            menuPosition="fixed"
-            onChange={(option: SingleValue<InstalledAppOption>) => {
-                if (option) onSelect(option.value);
-            }}
-            styles={{
-                control: (base) => ({
-                    ...base,
-                    background: isModern
-                        ? (isDarkMode ? 'rgba(30,30,30,0.75)' : 'rgba(255,255,255,0.6)')
-                        : (isDarkMode ? '#202020' : '#fff'),
-                    border: isModern ? '1px solid rgba(128,128,128,0.2)' : 'none',
-                    borderRadius: isModern ? '8px' : 0,
-                    boxShadow: 'none',
-                    minHeight: '32px',
-                }),
-                menuPortal: (base) => ({
-                    ...base,
-                    zIndex: 99999,
-                }),
-                menu: (base) => ({
-                    ...base,
-                    background: isModern
-                        ? (isDarkMode ? 'rgba(25,25,25,0.95)' : 'rgba(255,255,255,0.95)')
-                        : (isDarkMode ? '#1f1f1f' : '#fff'),
-                    borderRadius: isModern ? '8px' : 0,
-                    border: isModern
-                        ? (isDarkMode ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(128,128,128,0.2)')
-                        : (isDarkMode ? '2px solid #111' : '2px solid #373737'),
-                    backdropFilter: isModern ? 'blur(12px)' : 'none',
-                    marginTop: '4px',
-                    zIndex: 99999,
-                    boxShadow: isModern
-                        ? (isDarkMode ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.15)')
-                        : (isDarkMode ? '4px 4px 0 #000' : '4px 4px 0 #1a1a1a'),
-                    maxHeight: '300px',
-                }),
-                menuList: (base) => ({
-                    ...base,
-                    maxHeight: '280px',
-                    overflowY: 'auto',
-                }),
-                option: (base, state) => ({
-                    ...base,
-                    background: state.isFocused
-                        ? (isModern ? 'var(--accent-color)' : '#373737')
-                        : 'transparent',
-                    color: state.isFocused ? '#fff' : (isDarkMode ? '#eaeaea' : 'var(--text-primary)'),
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    fontSize: '12px'
-                }),
-                groupHeading: (base) => ({
-                    ...base,
-                    color: isDarkMode ? '#b0b0b0' : 'var(--text-secondary)',
-                    fontWeight: 'bold',
-                    fontSize: '11px',
-                    textTransform: 'uppercase',
-                    borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(128,128,128,0.1)',
-                    marginBottom: '4px'
-                }),
-                placeholder: (base) => ({ ...base, fontSize: '12px', color: isDarkMode ? '#cfcfcf' : base.color }),
-                input: (base) => ({ ...base, color: isDarkMode ? '#eaeaea' : 'var(--text-primary)' }),
-                singleValue: (base) => ({ ...base, color: isDarkMode ? '#eaeaea' : 'var(--text-primary)' })
-            }}
-        />
+        <div ref={containerRef} className="app-selector-wrapper">
+            <div className={`app-selector-input-wrapper ${isOpen ? 'dropdown-open' : ''}`}>
+                <Search size={14} className="search-icon" />
+                <input
+                    type="text"
+                    className="app-selector-input"
+                    placeholder={loading ? t('searching_apps') : t('search_apps_placeholder')}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onFocus={() => {
+                        setIsOpen(true);
+                        invoke("focus_clipboard_window").catch(console.error);
+                    }}
+                />
+            </div>
+
+            <AnimatePresence>
+                {isOpen && (hasRecommended || hasOthers) && (
+                    <motion.div
+                        className="app-selector-dropdown fluent-scrollbar"
+                        initial={{ opacity: 0, y: -8, scaleY: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                        exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
+                        transition={{ duration: 0.2, ease: [0.1, 0.9, 0.2, 1] }}
+                        style={{ transformOrigin: 'top center' }}
+                    >
+                        {hasRecommended && (
+                            <div>
+                                <div className="app-selector-group-heading">{t('system_recommended')}</div>
+                                {filteredRecommended.map(app => (
+                                    <button
+                                        key={app.value}
+                                        className="app-selector-option"
+                                        onClick={() => {
+                                            onSelect(app.value);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        {app.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {hasOthers && (
+                            <div>
+                                <div className="app-selector-group-heading">{t('all_apps')}</div>
+                                {filteredOtherApps.map(app => (
+                                    <button
+                                        key={app.value}
+                                        className="app-selector-option"
+                                        onClick={() => {
+                                            onSelect(app.value);
+                                            setIsOpen(false);
+                                        }}
+                                    >
+                                        {app.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 
