@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Search } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import type { InstalledAppOption } from "../../app/types";
 
 const AppSelector = ({
@@ -166,54 +165,45 @@ const AppSelector = ({
                 />
             </div>
 
-            <AnimatePresence>
-                {isOpen && (hasRecommended || hasOthers) && (
-                    <motion.div
-                        className="app-selector-dropdown fluent-scrollbar"
-                        initial={{ opacity: 0, y: -8, scaleY: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                        exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
-                        transition={{ duration: 0.2, ease: [0.1, 0.9, 0.2, 1] }}
-                        style={{ transformOrigin: 'top center' }}
-                    >
-                        {hasRecommended && (
-                            <div>
-                                <div className="app-selector-group-heading">{t('system_recommended')}</div>
-                                {filteredRecommended.map(app => (
-                                    <button
-                                        key={app.value}
-                                        className="app-selector-option"
-                                        onClick={() => {
-                                            onSelect(app.value);
-                                            setIsOpen(false);
-                                        }}
-                                    >
-                                        {app.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+            {isOpen && (hasRecommended || hasOthers) && (
+                <div className="app-selector-dropdown fluent-scrollbar">
+                    {hasRecommended && (
+                        <div>
+                            <div className="app-selector-group-heading">{t('system_recommended')}</div>
+                            {filteredRecommended.map(app => (
+                                <button
+                                    key={app.value}
+                                    className="app-selector-option"
+                                    onClick={() => {
+                                        onSelect(app.value);
+                                        setIsOpen(false);
+                                    }}
+                                >
+                                    {app.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
-                        {hasOthers && (
-                            <div>
-                                <div className="app-selector-group-heading">{t('all_apps')}</div>
-                                {filteredOtherApps.map(app => (
-                                    <button
-                                        key={app.value}
-                                        className="app-selector-option"
-                                        onClick={() => {
-                                            onSelect(app.value);
-                                            setIsOpen(false);
-                                        }}
-                                    >
-                                        {app.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    {hasOthers && (
+                        <div>
+                            <div className="app-selector-group-heading">{t('all_apps')}</div>
+                            {filteredOtherApps.map(app => (
+                                <button
+                                    key={app.value}
+                                    className="app-selector-option"
+                                    onClick={() => {
+                                        onSelect(app.value);
+                                        setIsOpen(false);
+                                    }}
+                                >
+                                    {app.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
