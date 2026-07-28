@@ -269,3 +269,14 @@
     background: var(--accent-color);
     color: #ffffff;
 }
+
+/* Spacing and overrides */
+.app-selector-dialog .confirm-dialog-buttons {
+    gap: 12px !important;
+}
+
+.app-selector-dropdown > div:not(:first-child) {
+    margin-top: 8px;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 4px;
+}
