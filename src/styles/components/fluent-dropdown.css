@@ -291,8 +291,20 @@
     z-index: 10;
 }
 
+.app-selector-dialog .confirm-dialog-lower {
+    padding: 16px 16px !important;
+}
+
 .app-selector-dialog .confirm-dialog-buttons {
-    gap: 24px !important;
+    gap: 4px !important;
+    width: 100% !important;
+    display: flex !important;
+}
+
+.app-selector-dialog .confirm-dialog-button {
+    flex: 1 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
 }
 
 .app-selector-dropdown > div:not(:first-child) {

@@ -39,8 +39,8 @@ const AppSelectorModal = ({ show, installedApps, t, onClose, onSave }: AppSelect
                         </div>
                     </div>
 
-                    <div className="confirm-dialog-lower" style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px' }}>
-                        <div className="confirm-dialog-buttons" style={{ justifyContent: 'flex-end', gap: '8px' }}>
+                    <div className="confirm-dialog-lower" style={{ display: 'flex', padding: '16px 16px' }}>
+                        <div className="confirm-dialog-buttons" style={{ display: 'flex', width: '100%', gap: '4px' }}>
                             <button
                                 className="confirm-dialog-button"
                                 onClick={onClose}
