@@ -143,7 +143,7 @@ const HotkeySelectorModal = ({
                                     gap: "12px",
                                     padding: "24px",
                                     minHeight: "120px",
-                                    border: "1px solid var(--line-soft)",
+                                    border: "none",
                                     borderRadius: "8px",
                                     background: "var(--bg-input)",
                                     outline: "none",

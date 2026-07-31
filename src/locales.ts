@@ -319,6 +319,8 @@ export const translations = {
         cancel: "取消",
         confirm: "确认",
         tags: "标签",
+        edit_hotkey_title: "修改快捷键",
+        hotkey_recording_tip: "请直接按下组合键，Esc键取消",
 
         // Content Types
         type_code: "代码",
@@ -832,6 +834,8 @@ export const translations = {
         cancel: "Cancel",
         confirm: "Confirm",
         tags: "Tags",
+        edit_hotkey_title: "Edit Shortcut",
+        hotkey_recording_tip: "Press key combination directly, Esc to cancel",
 
 
         // Content Types
@@ -1328,6 +1332,8 @@ export const translations = {
         cancel: "取消",
         confirm: "確認",
         tags: "標籤",
+        edit_hotkey_title: "修改快捷鍵",
+        hotkey_recording_tip: "請直接按下組合鍵，Esc鍵取消",
 
         // Content Types
         type_code: "程式碼",
