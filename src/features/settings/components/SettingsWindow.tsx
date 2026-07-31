@@ -34,6 +34,7 @@ import type { CloudSyncStatusPayload } from "./groups/CloudSyncSettingsGroup";
 // Modals & Panels
 import AppSelectorModal from "./AppSelectorModal";
 import AiProfileModal from "./AiProfileModal";
+import HotkeySelectorModal from "./HotkeySelectorModal";
 import AdvancedSettingsGroup from "./groups/AdvancedSettingsGroup";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 
@@ -247,6 +248,7 @@ const SettingsWindow = () => {
   const [editingProfile, setEditingProfile] = useState<EditableAiProfile | null>(null);
   const [profileStatuses, setProfileStatuses] = useState<AiProfileStatusMap>({});
   const [showAppSelector, setShowAppSelector] = useState<string | null>(null);
+  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
   const tagManagerSizeRef = useRef<{ width: number; height: number } | null>(null);
@@ -1133,37 +1135,15 @@ const SettingsWindow = () => {
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
                       <span className="fluent-setting-title">主程序全局呼出快捷键</span>
-                      <span className="fluent-setting-description">
-                        {isRecording ? "等待输入... 请直接按下键盘组合键，Esc键取消，退格键清空" : "全局任意地方快速调出主界面的快捷键"}
-                      </span>
+                      <span className="fluent-setting-description">全局任意地方快速调出主界面的快捷键</span>
                     </div>
                     <div
-                      className={`fluent-hotkey-recorder ${isRecording ? 'recording' : ''}`}
-                      onClick={() => setIsRecording(true)}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (!isRecording) return;
-                        e.preventDefault(); e.stopPropagation();
-                        if (e.key === 'Escape') { setIsRecording(false); return; }
-                        if (e.key === 'Backspace' || e.key === 'Delete') { updateHotkey(''); setIsRecording(false); return; }
-                        const modifiers = [];
-                        if (e.ctrlKey) modifiers.push('Ctrl');
-                        if (e.shiftKey) modifiers.push('Shift');
-                        if (e.altKey) modifiers.push('Alt');
-                        if (e.metaKey) modifiers.push('Win');
-                        const key = e.key.toUpperCase();
-                        if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
-                        updateHotkey([...modifiers, key].join('+'));
-                      }}
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('main')}
+                      style={{ cursor: 'pointer' }}
                     >
-                      {isRecording ? (
-                        <span className="fluent-hotkey-recording-text">等待按键...</span>
-                      ) : (
-                        <>
-                          {renderHotkeyCaps(hotkey)}
-                          <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                        </>
-                      )}
+                      {renderHotkeyCaps(hotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
                     </div>
                   </div>
 
@@ -1174,32 +1154,12 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-description">激活后主窗口立即进入搜索状态</span>
                     </div>
                     <div
-                      className={`fluent-hotkey-recorder ${isRecordingSearch ? 'recording' : ''}`}
-                      onClick={() => setIsRecordingSearch(true)}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (!isRecordingSearch) return;
-                        e.preventDefault(); e.stopPropagation();
-                        if (e.key === 'Escape') { setIsRecordingSearch(false); return; }
-                        if (e.key === 'Backspace' || e.key === 'Delete') { updateSearchHotkey(''); setIsRecordingSearch(false); return; }
-                        const modifiers = [];
-                        if (e.ctrlKey) modifiers.push('Ctrl');
-                        if (e.shiftKey) modifiers.push('Shift');
-                        if (e.altKey) modifiers.push('Alt');
-                        if (e.metaKey) modifiers.push('Win');
-                        const key = e.key.toUpperCase();
-                        if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
-                        updateSearchHotkey([...modifiers, key].join('+'));
-                      }}
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('search')}
+                      style={{ cursor: 'pointer' }}
                     >
-                      {isRecordingSearch ? (
-                        <span className="fluent-hotkey-recording-text">等待按键...</span>
-                      ) : (
-                        <>
-                          {renderHotkeyCaps(searchHotkey)}
-                          <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                        </>
-                      )}
+                      {renderHotkeyCaps(searchHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
                     </div>
                   </div>
 
@@ -1210,32 +1170,12 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-description">双击条目时模拟带格式粘贴的按键</span>
                     </div>
                     <div
-                      className={`fluent-hotkey-recorder ${isRecordingRich ? 'recording' : ''}`}
-                      onClick={() => setIsRecordingRich(true)}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (!isRecordingRich) return;
-                        e.preventDefault(); e.stopPropagation();
-                        if (e.key === 'Escape') { setIsRecordingRich(false); return; }
-                        if (e.key === 'Backspace' || e.key === 'Delete') { updateRichPasteHotkey(''); setIsRecordingRich(false); return; }
-                        const modifiers = [];
-                        if (e.ctrlKey) modifiers.push('Ctrl');
-                        if (e.shiftKey) modifiers.push('Shift');
-                        if (e.altKey) modifiers.push('Alt');
-                        if (e.metaKey) modifiers.push('Win');
-                        const key = e.key.toUpperCase();
-                        if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
-                        updateRichPasteHotkey([...modifiers, key].join('+'));
-                      }}
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('rich')}
+                      style={{ cursor: 'pointer' }}
                     >
-                      {isRecordingRich ? (
-                        <span className="fluent-hotkey-recording-text">等待按键...</span>
-                      ) : (
-                        <>
-                          {renderHotkeyCaps(richPasteHotkey)}
-                          <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                        </>
-                      )}
+                      {renderHotkeyCaps(richPasteHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
                     </div>
                   </div>
                 </div>
@@ -1475,37 +1415,15 @@ const SettingsWindow = () => {
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
                         <span className="fluent-setting-title">顺次粘贴专属快捷键</span>
-                        <span className="fluent-setting-description">
-                          {isRecordingSequential ? "等待输入..." : "专门触发下一顺位粘贴组合键"}
-                        </span>
+                        <span className="fluent-setting-description">专门触发下一顺位粘贴组合键</span>
                       </div>
                       <div
-                        className={`fluent-hotkey-recorder ${isRecordingSequential ? 'recording' : ''}`}
-                        onClick={() => setIsRecordingSequential(true)}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (!isRecordingSequential) return;
-                          e.preventDefault(); e.stopPropagation();
-                          if (e.key === 'Escape') { setIsRecordingSequential(false); return; }
-                          if (e.key === 'Backspace' || e.key === 'Delete') { updateSequentialHotkey(''); setIsRecordingSequential(false); return; }
-                          const modifiers = [];
-                          if (e.ctrlKey) modifiers.push('Ctrl');
-                          if (e.shiftKey) modifiers.push('Shift');
-                          if (e.altKey) modifiers.push('Alt');
-                          if (e.metaKey) modifiers.push('Win');
-                          const key = e.key.toUpperCase();
-                          if (['CONTROL', 'SHIFT', 'ALT', 'META'].includes(key)) return;
-                          updateSequentialHotkey([...modifiers, key].join('+'));
-                        }}
+                        className="fluent-hotkey-recorder"
+                        onClick={() => setShowHotkeyModal('sequential')}
+                        style={{ cursor: 'pointer' }}
                       >
-                        {isRecordingSequential ? (
-                          <span className="fluent-hotkey-recording-text">等待按键...</span>
-                        ) : (
-                          <>
-                            {renderHotkeyCaps(sequentialHotkey)}
-                            <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                          </>
-                        )}
+                        {renderHotkeyCaps(sequentialHotkey)}
+                        <Edit3 size={14} className="fluent-hotkey-edit-icon" />
                       </div>
                     </div>
                   )}
@@ -2674,6 +2592,30 @@ const SettingsWindow = () => {
         t={t}
         onClose={() => setShowAppSelector(null)}
         onSave={saveAppSetting}
+      />
+
+      <HotkeySelectorModal
+        show={showHotkeyModal}
+        currentValue={
+          showHotkeyModal === 'main' ? hotkey :
+          showHotkeyModal === 'search' ? searchHotkey :
+          showHotkeyModal === 'rich' ? richPasteHotkey :
+          showHotkeyModal === 'sequential' ? sequentialHotkey : ""
+        }
+        defaultValue={
+          showHotkeyModal === 'main' ? "Alt+C" :
+          showHotkeyModal === 'search' ? "Alt+F" :
+          showHotkeyModal === 'rich' ? "Ctrl+Shift+Z" :
+          showHotkeyModal === 'sequential' ? "Alt+V" : ""
+        }
+        t={t}
+        onClose={() => setShowHotkeyModal(null)}
+        onSave={(val) => {
+          if (showHotkeyModal === 'main') updateHotkey(val);
+          if (showHotkeyModal === 'search') updateSearchHotkey(val);
+          if (showHotkeyModal === 'rich') updateRichPasteHotkey(val);
+          if (showHotkeyModal === 'sequential') updateSequentialHotkey(val);
+        }}
       />
 
       <AiProfileModal

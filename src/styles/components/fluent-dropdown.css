@@ -312,3 +312,26 @@
     border-top: 1px solid var(--line-soft);
     padding-top: 4px;
 }
+
+.fluent-hotkey-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: var(--accent-color);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s ease;
+}
+
+.fluent-hotkey-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .fluent-hotkey-action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
