@@ -128,6 +128,9 @@ const HotkeySelectorModal = ({
                             <div className="confirm-dialog-title" style={{ margin: 0 }}>
                                 {t("edit_hotkey_title") || "修改快捷键"}
                             </div>
+                            <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "-8px", lineHeight: "1.4" }}>
+                                {t("hotkey_recording_tip") || "请直接按下组合键，Esc键取消"}
+                            </div>
 
                             {/* Display Area */}
                             <div
@@ -153,9 +156,6 @@ const HotkeySelectorModal = ({
                                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
                                     {renderHotkeyCaps(tempHotkey)}
                                 </div>
-                                <span style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
-                                    {t("hotkey_recording_tip") || "请直接按下组合键，Esc键取消"}
-                                </span>
                             </div>
 
                             {/* Reset & Clear buttonless links */}
