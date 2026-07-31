@@ -124,7 +124,7 @@ const HotkeySelectorModal = ({
                         className="confirm-dialog app-selector-dialog"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="confirm-dialog-upper" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <div className="confirm-dialog-upper" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                             <div className="confirm-dialog-title" style={{ margin: 0 }}>
                                 {t("edit_hotkey_title") || "修改快捷键"}
                             </div>
@@ -143,11 +143,11 @@ const HotkeySelectorModal = ({
                                     flexDirection: "column",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    gap: "12px",
-                                    padding: "24px",
-                                    minHeight: "120px",
+                                    gap: "8px",
+                                    padding: "16px",
+                                    minHeight: "64px",
                                     border: "none",
-                                    borderRadius: "8px",
+                                    borderRadius: "4px",
                                     background: "var(--bg-input)",
                                     outline: "none",
                                     cursor: "pointer"
