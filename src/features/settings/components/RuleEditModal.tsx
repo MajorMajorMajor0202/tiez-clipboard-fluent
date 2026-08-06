@@ -65,7 +65,7 @@ const RuleEditModal = ({ show, rule, isNew, onClose, onSave }: RuleEditModalProp
                         exit={{ scale: 0.95, opacity: 0 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="confirm-dialog"
-                        style={{ width: "360px", maxWidth: "90%", display: "flex", flexDirection: "column" }}
+                        style={{ width: "420px", maxWidth: "90%", display: "flex", flexDirection: "column" }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="confirm-dialog-upper" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -83,17 +83,15 @@ const RuleEditModal = ({ show, rule, isNew, onClose, onSave }: RuleEditModalProp
                             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                                     <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)" }}>规则名称</span>
-                                    <div className="fluent-input-wrapper">
-                                        <input
-                                            type="text"
-                                            className="fluent-input"
-                                            style={{ width: "100%" }}
-                                            value={label}
-                                            placeholder="例如：过滤手机号"
-                                            onFocus={focusEditorWindow}
-                                            onChange={(e) => setLabel(e.target.value)}
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        className="fluent-dialog-input"
+                                        style={{ width: "100%" }}
+                                        value={label}
+                                        placeholder="例如：过滤手机号"
+                                        onFocus={focusEditorWindow}
+                                        onChange={(e) => setLabel(e.target.value)}
+                                    />
                                 </div>
 
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 0" }}>
@@ -118,31 +116,27 @@ const RuleEditModal = ({ show, rule, isNew, onClose, onSave }: RuleEditModalProp
 
                                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                                     <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)" }}>匹配正则表达式</span>
-                                    <div className="fluent-input-wrapper">
-                                        <textarea
-                                            className="fluent-textarea"
-                                            style={{ width: "100%", minHeight: "56px" }}
-                                            value={match}
-                                            placeholder="输入匹配的正则表达式..."
-                                            onFocus={focusEditorWindow}
-                                            onChange={(e) => setMatch(e.target.value)}
-                                        />
-                                    </div>
+                                    <textarea
+                                        className="fluent-dialog-textarea"
+                                        style={{ width: "100%", minHeight: "56px" }}
+                                        value={match}
+                                        placeholder="输入匹配的正则表达式..."
+                                        onFocus={focusEditorWindow}
+                                        onChange={(e) => setMatch(e.target.value)}
+                                    />
                                 </div>
 
                                 {actionType === "replace" && (
                                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                                         <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)" }}>替换为</span>
-                                        <div className="fluent-input-wrapper">
-                                            <textarea
-                                                className="fluent-textarea"
-                                                style={{ width: "100%", minHeight: "56px" }}
-                                                value={replace}
-                                                placeholder="输入替换的文本..."
-                                                onFocus={focusEditorWindow}
-                                                onChange={(e) => setReplace(e.target.value)}
-                                            />
-                                        </div>
+                                        <textarea
+                                            className="fluent-dialog-textarea"
+                                            style={{ width: "100%", minHeight: "56px" }}
+                                            value={replace}
+                                            placeholder="输入替换的文本..."
+                                            onFocus={focusEditorWindow}
+                                            onChange={(e) => setReplace(e.target.value)}
+                                        />
                                     </div>
                                 )}
                             </div>
