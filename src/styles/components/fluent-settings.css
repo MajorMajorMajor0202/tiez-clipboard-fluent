@@ -711,9 +711,9 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   background: transparent !important;
   color: var(--text-primary) !important;
   font-size: 13px !important;
-  text-align: center !important;
+  text-align: left !important;
   outline: none !important;
-  padding: 0 24px 0 8px !important; /* Extra right padding for spinners */
+  padding: 0 24px 0 10px !important; /* Extra right padding for spinners, 10px left padding */
   box-sizing: border-box !important;
 }
 
