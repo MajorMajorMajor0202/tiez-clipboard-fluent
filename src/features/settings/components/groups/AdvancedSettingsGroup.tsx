@@ -282,24 +282,8 @@ const AdvancedSettingsGroup = ({
         const rules = getRulesForTarget(target);
 
         return (
-            <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px", border: "none", boxShadow: "none", background: "transparent", padding: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span className="fluent-setting-title" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>过滤和清洗规则</span>
-                    <button type="button" className="fluent-button fluent-button-primary" style={{ padding: "4px 12px", fontSize: "12px" }} onClick={() => addRule(target)}>
-                        <Plus size={14} style={{ marginRight: "4px", verticalAlign: "middle" }} />
-                        <span style={{ verticalAlign: "middle" }}>{t("advanced_add_rule")}</span>
-                    </button>
-                </div>
-
-                {rules.length === 0 ? (
-                    <div className="fluent-setting-card" style={{ justifyContent: "center", padding: "20px", borderStyle: "dashed" }}>
-                        <span className="fluent-setting-description" style={{ textAlign: "center" }}>
-                            {target.kind === "global"
-                                ? t("advanced_empty_rules_global")
-                                : t("advanced_empty_rules_app")}
-                        </span>
-                    </div>
-                ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {rules.length > 0 && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         {rules.map((rule, idx) => {
                             return (
@@ -311,7 +295,7 @@ const AdvancedSettingsGroup = ({
                                                 className="fluent-input"
                                                 style={{ fontWeight: 600, border: "none", background: "transparent", padding: "2px 4px", fontSize: "13px" }}
                                                 value={rule.label ?? ""}
-                                                placeholder={`${t("advanced_rule_label")} ${idx + 1}`}
+                                                placeholder={`规则 ${idx + 1}`}
                                                 onFocus={focusEditorWindow}
                                                 onChange={(e) => updateRule(target, idx, { label: e.target.value })}
                                             />
@@ -322,21 +306,22 @@ const AdvancedSettingsGroup = ({
                                                 className={`fluent-segmented-button ${rule.actionType === "replace" ? "active" : ""}`}
                                                 onClick={() => updateRule(target, idx, { actionType: "replace" })}
                                             >
-                                                {t("advanced_replace_label")}
+                                                替换
                                             </button>
                                             <button
                                                 type="button"
                                                 className={`fluent-segmented-button ${rule.actionType === "ignore" ? "active" : ""}`}
                                                 onClick={() => updateRule(target, idx, { actionType: "ignore" })}
                                             >
-                                                {t("app_cleanup_policy_ignore")}
+                                                忽略
                                             </button>
                                         </div>
                                         <button
                                             type="button"
                                             className="fluent-button"
-                                            style={{ padding: "6px", color: "#ef4444" }}
+                                            style={{ padding: "6px", color: "#ef4444", border: "none", background: "transparent" }}
                                             onClick={() => deleteRule(target, idx)}
+                                            title="删除规则"
                                         >
                                             <Trash2 size={14} />
                                         </button>
@@ -344,12 +329,12 @@ const AdvancedSettingsGroup = ({
                                     
                                     <div className={`rule-fields-grid ${rule.actionType === "replace" ? "two-cols" : ""}`}>
                                         <div className="rule-field">
-                                            <span className="rule-field-label">{t("advanced_match_label")}</span>
+                                            <span className="rule-field-label">匹配正则表达式</span>
                                             <textarea
                                                 className="fluent-textarea"
                                                 style={{ minHeight: "56px" }}
                                                 value={rule.match}
-                                                placeholder={t("advanced_match_placeholder")}
+                                                placeholder="输入正则表达式..."
                                                 onFocus={focusEditorWindow}
                                                 onChange={(e) => updateRule(target, idx, { match: e.target.value })}
                                             />
@@ -357,12 +342,12 @@ const AdvancedSettingsGroup = ({
 
                                         {rule.actionType === "replace" && (
                                             <div className="rule-field">
-                                                <span className="rule-field-label">{t("advanced_replace_label")}</span>
+                                                <span className="rule-field-label">替换为</span>
                                                 <textarea
                                                     className="fluent-textarea"
                                                     style={{ minHeight: "56px" }}
                                                     value={rule.replace}
-                                                    placeholder={t("advanced_replace_placeholder")}
+                                                    placeholder="输入替换文本..."
                                                     onFocus={focusEditorWindow}
                                                     onChange={(e) => updateRule(target, idx, { replace: e.target.value })}
                                                 />
@@ -374,6 +359,27 @@ const AdvancedSettingsGroup = ({
                         })}
                     </div>
                 )}
+
+                <button
+                    type="button"
+                    className="fluent-setting-card"
+                    style={{
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        borderStyle: "dashed",
+                        width: "100%",
+                        background: "rgba(128, 128, 128, 0.02)",
+                        color: "var(--accent-color)",
+                        borderColor: "rgba(var(--accent-color-rgb), 0.2)",
+                        padding: "10px",
+                        margin: 0,
+                        height: "40px"
+                    }}
+                    onClick={() => addRule(target)}
+                >
+                    <Plus size={14} style={{ marginRight: "6px" }} />
+                    <span style={{ fontWeight: 600, fontSize: "13px" }}>添加清洗规则</span>
+                </button>
             </div>
         );
     };
@@ -385,10 +391,10 @@ const AdvancedSettingsGroup = ({
     return (
         <div className="fluent-settings-content" style={{ padding: 0 }}>
             {/* 添加特定应用策略 */}
-            <div className="fluent-setting-card" style={{ marginBottom: "16px" }}>
+            <div className="fluent-setting-card" style={{ marginBottom: "12px" }}>
                 <div className="fluent-setting-info">
-                    <span className="fluent-setting-title">添加应用专属策略</span>
-                    <span className="fluent-setting-description">搜索并选择一个已安装的应用，为其添加专属的剪贴板策略</span>
+                    <span className="fluent-setting-title">应用专属策略</span>
+                    <span className="fluent-setting-description">为特定应用定制独立的剪贴板清洗或忽略规则</span>
                 </div>
                 <div style={{ position: "relative", flexShrink: 0 }}>
                     <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
@@ -396,8 +402,8 @@ const AdvancedSettingsGroup = ({
                         <input
                             type="text"
                             className="fluent-input"
-                            style={{ width: "200px", paddingLeft: "28px" }}
-                            placeholder={t("search_apps_placeholder")}
+                            style={{ width: "180px", paddingLeft: "28px" }}
+                            placeholder="搜索并选择应用..."
                             value={searchText}
                             onFocus={focusEditorWindow}
                             onChange={(e) => setSearchText(e.target.value)}
@@ -430,7 +436,7 @@ const AdvancedSettingsGroup = ({
                 </div>
             </div>
 
-            <div className="fluent-section-title">全局策略</div>
+            <div className="fluent-section-title" style={{ margin: "12px 0 6px 0" }}>全局策略</div>
 
             {/* 全局折叠卡片 */}
             <div className="fluent-setting-expander">
@@ -440,7 +446,7 @@ const AdvancedSettingsGroup = ({
                 >
                     <div className="fluent-setting-info">
                         <span className="fluent-setting-title">全局清洗规则</span>
-                        <span className="fluent-setting-description">对所有应用复制的内容生效（特定应用策略优先）</span>
+                        <span className="fluent-setting-description">对所有未配置专属策略的应用生效</span>
                     </div>
                     <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
                         {globalTarget.ruleCount > 0 && (
@@ -465,7 +471,7 @@ const AdvancedSettingsGroup = ({
 
             {appTargets.length > 0 && (
                 <>
-                    <div className="fluent-section-title">特定应用策略</div>
+                    <div className="fluent-section-title" style={{ margin: "16px 0 6px 0" }}>特定应用策略</div>
                     {appTargets.map((target) => {
                         const isExpanded = !!expandedCards[target.id];
                         const policy = appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath);
@@ -495,7 +501,7 @@ const AdvancedSettingsGroup = ({
                                     </div>
                                     <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
                                         {!isRecordEnabled ? (
-                                            <span className="fluent-setting-badge ignore">{t("app_cleanup_policy_ignore")}</span>
+                                            <span className="fluent-setting-badge ignore">忽略记录</span>
                                         ) : target.ruleCount > 0 ? (
                                             <span className="fluent-setting-badge">{target.ruleCount} 条规则</span>
                                         ) : null}
@@ -510,7 +516,7 @@ const AdvancedSettingsGroup = ({
                                         <button
                                             type="button"
                                             className="fluent-button"
-                                            style={{ padding: "6px 8px", color: "#ef4444", height: "32px" }}
+                                            style={{ padding: "6px 8px", color: "#ef4444", height: "32px", border: "none", background: "transparent" }}
                                             onClick={(e) => handleDeleteTarget(e, target)}
                                         >
                                             <Trash2 size={14} />
@@ -522,11 +528,11 @@ const AdvancedSettingsGroup = ({
                                     <div className="fluent-setting-expander-content" style={{ gap: "12px" }}>
                                         <div className="fluent-setting-card" style={{ border: "none", boxShadow: "none", background: "transparent", padding: "4px 0", marginBottom: 0 }}>
                                             <div className="fluent-setting-info">
-                                                <span className="fluent-setting-title" style={{ fontSize: "13px" }}>记录此应用的内容？</span>
+                                                <span className="fluent-setting-title" style={{ fontSize: "13px" }}>启用剪贴板记录</span>
                                                 <span className="fluent-setting-description">
                                                     {isRecordEnabled
-                                                        ? "当前已开启记录，可以添加该应用专属的正则清洗规则"
-                                                        : "当前已关闭记录，来自该应用的内容将被完全忽略，不保存到剪贴板中"
+                                                        ? "启用后可为此应用配置专属的正则清洗规则"
+                                                        : "禁用后将忽略该应用复制的内容，不录入剪贴板"
                                                     }
                                                 </span>
                                             </div>
