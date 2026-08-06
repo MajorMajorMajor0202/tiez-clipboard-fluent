@@ -37,6 +37,7 @@ import AiProfileModal from "./AiProfileModal";
 import HotkeySelectorModal from "./HotkeySelectorModal";
 import AdvancedSettingsGroup from "./groups/AdvancedSettingsGroup";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
+import FluentNumberBox from "../../../shared/components/FluentNumberBox";
 
 const SettingsWindow = () => {
   const appState = useAppState();
@@ -1237,13 +1238,11 @@ const SettingsWindow = () => {
                             <span className="fluent-setting-title">存储最大记录数限制</span>
                             <span className="fluent-setting-description">历史超出此上限后会自动清理最旧的历史（范围：50-99999）</span>
                           </div>
-                          <input
-                            type="number"
-                            className="fluent-input"
-                            style={{ width: "90px", textAlign: "right" }}
+                          <FluentNumberBox
                             value={persistentLimit}
-                            onChange={(e) => {
-                              const v = Math.max(50, Math.min(99999, parseInt(e.target.value) || 50));
+                            min={50}
+                            max={99999}
+                            onChange={(v) => {
                               setPersistentLimit(v);
                               saveAppSetting('persistent_limit', v.toString());
                             }}
@@ -1523,14 +1522,11 @@ const SettingsWindow = () => {
                           <span className="fluent-setting-title">前部显露字符数</span>
                           <span className="fluent-setting-description">敏感字符串开头不遮盖的字符位数 (0-20)</span>
                         </div>
-                        <input
-                          type="number"
-                          className="fluent-input"
-                          style={{ width: "60px", textAlign: "center" }}
-                          min={0} max={20}
+                        <FluentNumberBox
                           value={sensitiveMaskPrefixVisible}
-                          onChange={(e) => {
-                            const val = Math.min(20, Math.max(0, parseInt(e.target.value) || 0));
+                          min={0}
+                          max={20}
+                          onChange={(val) => {
                             setSensitiveMaskPrefixVisible(val);
                             invoke('save_setting', { key: 'app.sensitive_mask_prefix_visible', value: val.toString() }).catch(console.error);
                           }}
@@ -1542,14 +1538,11 @@ const SettingsWindow = () => {
                           <span className="fluent-setting-title">后部显露字符数</span>
                           <span className="fluent-setting-description">敏感字符串结尾不遮盖的字符位数 (0-20)</span>
                         </div>
-                        <input
-                          type="number"
-                          className="fluent-input"
-                          style={{ width: "60px", textAlign: "center" }}
-                          min={0} max={20}
+                        <FluentNumberBox
                           value={sensitiveMaskSuffixVisible}
-                          onChange={(e) => {
-                            const val = Math.min(20, Math.max(0, parseInt(e.target.value) || 0));
+                          min={0}
+                          max={20}
+                          onChange={(val) => {
                             setSensitiveMaskSuffixVisible(val);
                             invoke('save_setting', { key: 'app.sensitive_mask_suffix_visible', value: val.toString() }).catch(console.error);
                           }}
@@ -1997,14 +1990,11 @@ const SettingsWindow = () => {
                             <span className="fluent-setting-title">同步扫描周期 (秒)</span>
                             <span className="fluent-setting-description">检查同步内容变化的频率 (5 - 3600)</span>
                           </div>
-                          <input
-                            type="number"
-                            className="fluent-input"
-                            style={{ width: "70px", textAlign: "right" }}
+                          <FluentNumberBox
                             value={cloudSyncIntervalSec}
-                            onChange={e => setCloudSyncIntervalSec(e.target.value)}
-                            onBlur={() => {
-                              const v = Math.min(3600, Math.max(5, parseInt(cloudSyncIntervalSec) || 120));
+                            min={5}
+                            max={3600}
+                            onChange={(v) => {
                               setCloudSyncIntervalSec(v.toString());
                               saveCloudSync('cloud_sync_interval_sec', v.toString());
                             }}
@@ -2016,14 +2006,11 @@ const SettingsWindow = () => {
                             <span className="fluent-setting-title">全量物理快照间隔 (分钟)</span>
                             <span className="fluent-setting-description">执行强力校准合并与垃圾清理的间隔</span>
                           </div>
-                          <input
-                            type="number"
-                            className="fluent-input"
-                            style={{ width: "70px", textAlign: "right" }}
+                          <FluentNumberBox
                             value={cloudSyncSnapshotIntervalMin}
-                            onChange={e => setCloudSyncSnapshotIntervalMin(e.target.value)}
-                            onBlur={() => {
-                              const v = Math.min(1440, Math.max(5, parseInt(cloudSyncSnapshotIntervalMin) || 720));
+                            min={5}
+                            max={1440}
+                            onChange={(v) => {
                               setCloudSyncSnapshotIntervalMin(v.toString());
                               saveCloudSync('cloud_sync_snapshot_interval_min', v.toString());
                             }}
@@ -2284,15 +2271,13 @@ const SettingsWindow = () => {
                     <span className="fluent-setting-title">AI 模型深度思考 Token 限制</span>
                     <span className="fluent-setting-description">允许推理模型执行思考链条的最大上限 Token 数</span>
                   </div>
-                  <input
-                    type="number"
-                    className="fluent-input"
-                    style={{ width: "90px", textAlign: "right" }}
-                    min="1024" max="10000"
+                  <FluentNumberBox
                     value={aiThinkingBudget}
-                    onChange={(e) => {
-                      setAiThinkingBudget(e.target.value);
-                      saveSetting('ai_thinking_budget', e.target.value);
+                    min={1024}
+                    max={10000}
+                    onChange={(v) => {
+                      setAiThinkingBudget(v.toString());
+                      saveSetting('ai_thinking_budget', v.toString());
                     }}
                   />
                 </div>

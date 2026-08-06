@@ -1,6 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
 import { ChevronDown, ChevronUp, Edit2, RotateCcw, Trash2 } from "lucide-react";
 import type { AiProfile, AiProfileStatusMap, EditableAiProfile } from "../../types";
+import FluentNumberBox from "../../../../shared/components/FluentNumberBox";
 
 interface AiSettingsGroupProps {
     t: (key: string) => string;
@@ -210,17 +210,13 @@ const AiSettingsGroup = ({
                             <div className="item-label-group">
                                 <span className="item-label">{t('ai_thinking_budget')}</span>
                             </div>
-                            <input
-                                className="search-input"
-                                style={{ borderRadius: '0', padding: '6px', width: '160px' }}
-                                type="number"
-                                min="1024"
-                                max="10000"
+                            <FluentNumberBox
                                 value={aiThinkingBudget}
-                                onFocus={() => invoke("focus_clipboard_window").catch(console.error)}
-                                onChange={e => {
-                                    setAiThinkingBudget(e.target.value);
-                                    saveSetting('ai_thinking_budget', e.target.value);
+                                min={1024}
+                                max={10000}
+                                onChange={(v) => {
+                                    setAiThinkingBudget(v.toString());
+                                    saveSetting('ai_thinking_budget', v.toString());
                                 }}
                             />
                         </div>

@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { getHotkeyDisplayTokens } from "../../../../shared/lib/hotkeyDisplay";
 import { isMacPlatform } from "../../../../shared/lib/platform";
 import type { QuickPasteModifier } from "../../../app/types";
+import FluentNumberBox from "../../../../shared/components/FluentNumberBox";
 
 interface LabelWithHintProps {
     label: string;
@@ -104,20 +105,7 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
         setPersistentLimitDraft(props.persistentLimit.toString());
     }, [props.persistentLimit, props.persistentLimitEnabled]);
 
-    const commitPersistentLimit = (rawValue?: string) => {
-        const source = rawValue ?? persistentLimitDraft;
-        const parsed = parseInt(source, 10);
-        if (!Number.isFinite(parsed)) {
-            setPersistentLimitDraft(props.persistentLimit.toString());
-            return;
-        }
-        const clamped = Math.max(50, Math.min(99999, parsed));
-        props.setPersistentLimit(clamped);
-        props.saveAppSetting('persistent_limit', clamped.toString());
-        if (clamped.toString() !== source) {
-            setPersistentLimitDraft(clamped.toString());
-        }
-    };
+
 
     const renderHotkeyCaps = (hotkey: string) => {
         const tokens = getHotkeyDisplayTokens(hotkey, { preferMacSymbols: true });
@@ -180,39 +168,14 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                                         hint={props.t('persistent_limit_hint')}
                                         hintKey="persistent_limit"
                                     />
-                                    <input
-                                        type="number"
+                                    <FluentNumberBox
                                         value={persistentLimitDraft}
-                                        onFocus={(e) => {
-                                            e.target.select();
-                                            invoke("focus_clipboard_window").catch(console.error);
-                                        }}
-                                        onChange={(e) => {
-                                            const next = e.target.value;
-                                            if (next === "") {
-                                                setPersistentLimitDraft("");
-                                                return;
-                                            }
-                                            if (!/^\d+$/.test(next)) return;
-                                            setPersistentLimitDraft(next);
-                                        }}
-                                        onBlur={() => {
-                                            commitPersistentLimit();
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                commitPersistentLimit(e.currentTarget.value);
-                                                e.currentTarget.blur();
-                                            }
-                                        }}
-                                        style={{
-                                            width: '90px',
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            border: '1px solid var(--border-color)',
-                                            background: 'var(--input-bg)',
-                                            color: 'var(--text-color)',
-                                            fontSize: '14px'
+                                        min={50}
+                                        max={99999}
+                                        onChange={(v) => {
+                                            setPersistentLimitDraft(v.toString());
+                                            props.setPersistentLimit(v);
+                                            props.saveAppSetting('persistent_limit', v.toString());
                                         }}
                                     />
                                 </div>
@@ -643,15 +606,11 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                             <div style={{ width: 'calc(100% - 30px)', marginLeft: '30px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div className="setting-item" style={{ padding: 0, borderBottom: 'none' }}>
                                     <span className="item-label">{props.t('sensitive_mask_prefix_visible')}</span>
-                                    <input
-                                        type="number"
-                                        className="search-input"
-                                        style={{ width: '60px', padding: '4px 8px', textAlign: 'center' }}
+                                    <FluentNumberBox
+                                        value={props.sensitiveMaskPrefixVisible}
                                         min={0}
                                         max={20}
-                                        value={props.sensitiveMaskPrefixVisible}
-                                        onChange={(e) => {
-                                            const val = Math.min(20, Math.max(0, parseInt(e.target.value) || 0));
+                                        onChange={(val) => {
                                             props.setSensitiveMaskPrefixVisible(val);
                                             invoke('save_setting', { key: 'app.sensitive_mask_prefix_visible', value: val.toString() }).catch(console.error);
                                         }}
@@ -659,15 +618,11 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                                 </div>
                                 <div className="setting-item" style={{ padding: 0, borderBottom: 'none' }}>
                                     <span className="item-label">{props.t('sensitive_mask_suffix_visible')}</span>
-                                    <input
-                                        type="number"
-                                        className="search-input"
-                                        style={{ width: '60px', padding: '4px 8px', textAlign: 'center' }}
+                                    <FluentNumberBox
+                                        value={props.sensitiveMaskSuffixVisible}
                                         min={0}
                                         max={20}
-                                        value={props.sensitiveMaskSuffixVisible}
-                                        onChange={(e) => {
-                                            const val = Math.min(20, Math.max(0, parseInt(e.target.value) || 0));
+                                        onChange={(val) => {
                                             props.setSensitiveMaskSuffixVisible(val);
                                             invoke('save_setting', { key: 'app.sensitive_mask_suffix_visible', value: val.toString() }).catch(console.error);
                                         }}

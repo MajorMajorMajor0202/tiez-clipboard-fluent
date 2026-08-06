@@ -677,3 +677,67 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   }
 }
 
+/* Fluent NumberBox styles with horizontal 1/3 layout */
+.fluent-number-box {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background-color: var(--bg-input);
+  overflow: hidden;
+  height: 32px !important;
+  width: 96px !important;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fluent-number-box:hover {
+  border-color: var(--line-strong);
+  background-color: var(--bg-subtle-hover);
+}
+
+.fluent-number-box:focus-within {
+  border-color: var(--line-strong);
+  background-color: var(--bg-input);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fluent-number-box-input {
+  width: 33.333% !important;
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  text-align: center !important;
+  outline: none !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.fluent-number-box-btn {
+  width: 33.333% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  border-left: 1px solid var(--line-soft) !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.fluent-number-box-btn:hover {
+  background: var(--bg-subtle-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.fluent-number-box-btn:active {
+  background: var(--bg-subtle-active) !important;
+}
+
