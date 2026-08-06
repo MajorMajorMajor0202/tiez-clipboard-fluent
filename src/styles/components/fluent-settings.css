@@ -748,10 +748,10 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   gap: 2px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
   position: absolute;
-  right: -8px; /* Pops out slightly on the right */
-  top: -12px;  /* Centered vertically: (56 - 32)/2 = 12px */
-  width: 32px;
-  height: 56px;
+  right: -6px; /* Centered horizontally with static spinners: 14 - 40/2 = -6px */
+  top: -18px;  /* Centered vertically: (32 - 68)/2 = -18px */
+  width: 40px;
+  height: 68px;
   box-sizing: border-box;
   z-index: 999; /* Float on top of everything */
   animation: fluent-popup-fade-in 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
