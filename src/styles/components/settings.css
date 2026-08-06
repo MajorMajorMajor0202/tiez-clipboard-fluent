@@ -968,15 +968,14 @@ body.theme-acrylic .settings-view select.search-input option {
   max-width: 90% !important;
 }
 
-/* Unified dialog button layout (centered for all dialogs) */
+/* Unified dialog button layout (stretched/filled for all wide dialogs) */
 .app-selector-dialog .confirm-dialog-lower,
 .rule-edit-dialog .confirm-dialog-lower {
-  padding: 16px 24px !important;
+  padding: 16px 16px !important;
 }
 
 .app-selector-dialog .confirm-dialog-buttons,
 .rule-edit-dialog .confirm-dialog-buttons {
-  justify-content: center !important;
   gap: 8px !important;
   display: flex !important;
   width: 100% !important;
@@ -984,9 +983,9 @@ body.theme-acrylic .settings-view select.search-input option {
 
 .app-selector-dialog .confirm-dialog-button,
 .rule-edit-dialog .confirm-dialog-button {
-  flex: none !important;
-  min-width: 96px !important;
-  width: auto !important;
+  flex: 1 !important;
+  min-width: 0 !important;
   margin: 0 !important;
+  width: auto !important;
 }
 
