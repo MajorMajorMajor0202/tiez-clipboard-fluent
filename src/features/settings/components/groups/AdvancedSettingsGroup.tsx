@@ -397,12 +397,11 @@ const AdvancedSettingsGroup = ({
                     <span className="fluent-setting-description">为特定应用定制独立的剪贴板清洗或忽略规则</span>
                 </div>
                 <div style={{ position: "relative", flexShrink: 0 }}>
-                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                        <Search size={14} style={{ position: "absolute", left: "10px", color: "var(--text-secondary)", opacity: 0.6 }} />
+                    <div className="fluent-search-box" style={{ width: "180px" }}>
+                        <Search size={14} className="fluent-search-icon" />
                         <input
                             type="text"
-                            className="fluent-input"
-                            style={{ width: "180px", paddingLeft: "28px" }}
+                            className="fluent-search-input"
                             placeholder="搜索并选择应用..."
                             value={searchText}
                             onFocus={focusEditorWindow}
@@ -411,7 +410,7 @@ const AdvancedSettingsGroup = ({
                         {searchText && (
                             <X
                                 size={14}
-                                style={{ position: "absolute", right: 8, cursor: "pointer", opacity: 0.6 }}
+                                style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", cursor: "pointer", opacity: 0.6, zIndex: 3 }}
                                 onClick={() => setSearchText("")}
                             />
                         )}
