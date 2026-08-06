@@ -687,7 +687,7 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   background-color: var(--bg-input);
   overflow: hidden;
   height: 32px !important;
-  width: 96px !important;
+  width: 72px !important; /* Designed compact, 24px per section */
   box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -723,8 +723,7 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   align-items: center !important;
   justify-content: center !important;
   background: transparent !important;
-  border: none !important;
-  border-left: 1px solid var(--line-soft) !important;
+  border: none !important; /* No vertical separator line! */
   color: var(--text-secondary) !important;
   cursor: pointer !important;
   padding: 0 !important;
@@ -733,11 +732,19 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
 }
 
 .fluent-number-box-btn:hover {
-  background: var(--bg-subtle-hover) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
   color: var(--text-primary) !important;
 }
 
+.dark-mode .fluent-number-box-btn:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
 .fluent-number-box-btn:active {
-  background: var(--bg-subtle-active) !important;
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+.dark-mode .fluent-number-box-btn:active {
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
