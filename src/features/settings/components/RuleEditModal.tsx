@@ -64,8 +64,8 @@ const RuleEditModal = ({ show, rule, isNew, onClose, onSave }: RuleEditModalProp
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.95, opacity: 0 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="confirm-dialog"
-                        style={{ width: "420px", maxWidth: "90%", display: "flex", flexDirection: "column" }}
+                        className="confirm-dialog rule-edit-dialog"
+                        style={{ display: "flex", flexDirection: "column" }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="confirm-dialog-upper" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
