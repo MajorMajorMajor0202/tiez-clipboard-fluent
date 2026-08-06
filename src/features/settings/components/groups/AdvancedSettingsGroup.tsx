@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2, Search, X } from "lucide-react";
 import type { InstalledAppOption } from "../../../app/types";
 import type { AppCleanupPolicy } from "../../types";
 import { getTagColor } from "../../../../shared/lib/utils";
+import RuleEditModal from "../RuleEditModal";
 
 interface AdvancedSettingsGroupProps {
     t: (key: string) => string;
@@ -99,7 +100,10 @@ const AdvancedSettingsGroup = ({
     const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
         global: true
     });
-    const [editingRules, setEditingRules] = useState<Record<string, EditableRule[]>>({});
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingTarget, setEditingTarget] = useState<SourceTarget | null>(null);
+    const [editingRuleIndex, setEditingRuleIndex] = useState<number | null>(null);
+    const [editingRuleData, setEditingRuleData] = useState<EditableRule | null>(null);
 
     const configuredAppPolicies = appCleanupPolicies;
 
@@ -213,34 +217,50 @@ const AdvancedSettingsGroup = ({
         persistAppPolicies(nextPolicies);
     };
 
-    const getRulesForTarget = (target: SourceTarget): EditableRule[] => {
-        if (editingRules[target.id]) {
-            return editingRules[target.id];
-        }
-        return parseRules(target.rawRules);
-    };
-
-    const addRule = (target: SourceTarget) => {
-        const currentRules = getRulesForTarget(target);
-        const nextRules = [...currentRules, { match: "", replace: "", actionType: "replace" as const }];
-        setEditingRules(prev => ({ ...prev, [target.id]: nextRules }));
-        persistRulesForTarget(target, nextRules);
-    };
-
-    const updateRule = (target: SourceTarget, ruleIndex: number, patch: Partial<EditableRule>) => {
-        const currentRules = getRulesForTarget(target);
-        const nextRules = currentRules.map((rule, index) => (
-            index === ruleIndex ? { ...rule, ...patch } : rule
-        ));
-        setEditingRules(prev => ({ ...prev, [target.id]: nextRules }));
-        persistRulesForTarget(target, nextRules);
-    };
-
     const deleteRule = (target: SourceTarget, ruleIndex: number) => {
-        const currentRules = getRulesForTarget(target);
+        const currentRules = parseRules(target.rawRules);
         const nextRules = currentRules.filter((_, index) => index !== ruleIndex);
-        setEditingRules(prev => ({ ...prev, [target.id]: nextRules }));
         persistRulesForTarget(target, nextRules);
+    };
+
+    const openAddModal = (target: SourceTarget) => {
+        setEditingTarget(target);
+        setEditingRuleIndex(null);
+        setEditingRuleData({
+            match: "",
+            replace: "",
+            actionType: "replace"
+        });
+        setModalOpen(true);
+    };
+
+    const openEditModal = (target: SourceTarget, idx: number) => {
+        const rules = parseRules(target.rawRules);
+        setEditingTarget(target);
+        setEditingRuleIndex(idx);
+        setEditingRuleData(rules[idx]);
+        setModalOpen(true);
+    };
+
+    const handleSaveRule = (savedRule: EditableRule) => {
+        if (!editingTarget) return;
+
+        const currentRules = parseRules(editingTarget.rawRules);
+        let nextRules: EditableRule[];
+
+        if (editingRuleIndex === null) {
+            nextRules = [...currentRules, savedRule];
+        } else {
+            nextRules = currentRules.map((rule, idx) => (
+                idx === editingRuleIndex ? savedRule : rule
+            ));
+        }
+
+        persistRulesForTarget(editingTarget, nextRules);
+        setModalOpen(false);
+        setEditingTarget(null);
+        setEditingRuleIndex(null);
+        setEditingRuleData(null);
     };
 
     const toggleTargetAction = (target: SourceTarget) => {
@@ -286,84 +306,51 @@ const AdvancedSettingsGroup = ({
     };
 
     const renderRulesSection = (target: SourceTarget) => {
-        const rules = getRulesForTarget(target);
+        const rules = parseRules(target.rawRules);
 
         return (
             <>
-                {rules.length > 0 && (
-                    rules.map((rule, idx) => (
-                        <div key={`${target.id}-rule-${idx}`} className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px" }}>
-                            <div className="rule-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <div className="fluent-setting-info" style={{ flex: 1 }}>
-                                    <input
-                                        type="text"
-                                        className="fluent-input"
-                                        style={{ fontWeight: 600, border: "none", background: "transparent", padding: "2px 4px", fontSize: "13px", width: "100%" }}
-                                        value={rule.label ?? ""}
-                                        placeholder={`规则 ${idx + 1}`}
-                                        onFocus={focusEditorWindow}
-                                        onChange={(e) => updateRule(target, idx, { label: e.target.value })}
-                                    />
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                    <div className="fluent-segmented-control">
-                                        <button
-                                            type="button"
-                                            className={`fluent-segmented-button ${rule.actionType === "replace" ? "active" : ""}`}
-                                            onClick={() => updateRule(target, idx, { actionType: "replace" })}
-                                        >
-                                            替换
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`fluent-segmented-button ${rule.actionType === "ignore" ? "active" : ""}`}
-                                            onClick={() => updateRule(target, idx, { actionType: "ignore" })}
-                                        >
-                                            忽略
-                                        </button>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="fluent-button"
-                                        style={{ padding: "6px", color: "#ef4444", border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" }}
-                                        onClick={() => deleteRule(target, idx)}
-                                        title="删除规则"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div className={`rule-fields-grid ${rule.actionType === "replace" ? "two-cols" : ""}`}>
-                                <div className="rule-field">
-                                    <span className="rule-field-label">匹配正则表达式</span>
-                                    <textarea
-                                        className="fluent-textarea"
-                                        style={{ minHeight: "56px" }}
-                                        value={rule.match}
-                                        placeholder="输入正则表达式..."
-                                        onFocus={focusEditorWindow}
-                                        onChange={(e) => updateRule(target, idx, { match: e.target.value })}
-                                    />
-                                </div>
-
-                                {rule.actionType === "replace" && (
-                                    <div className="rule-field">
-                                        <span className="rule-field-label">替换为</span>
-                                        <textarea
-                                            className="fluent-textarea"
-                                            style={{ minHeight: "56px" }}
-                                            value={rule.replace}
-                                            placeholder="输入替换文本..."
-                                            onFocus={focusEditorWindow}
-                                            onChange={(e) => updateRule(target, idx, { replace: e.target.value })}
-                                        />
-                                    </div>
+                {rules.map((rule, idx) => (
+                    <div
+                        key={`${target.id}-rule-${idx}`}
+                        className="fluent-setting-card"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => openEditModal(target, idx)}
+                    >
+                        <div className="fluent-setting-info">
+                            <span className="fluent-setting-title">
+                                {rule.label?.trim() || `规则 ${idx + 1}`}
+                            </span>
+                            <span className="fluent-setting-description">
+                                <span style={{ marginRight: "12px" }}>匹配: <code>{rule.match}</code></span>
+                                {rule.actionType === "ignore" ? (
+                                    <span style={{ color: "var(--accent-color)" }}>忽略记录</span>
+                                ) : (
+                                    <span>替换为: <code>{rule.replace || '""'}</code></span>
                                 )}
-                            </div>
+                            </span>
                         </div>
-                    ))
-                )}
+                        <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
+                            <button
+                                type="button"
+                                className="fluent-button"
+                                style={{ padding: "6px 12px", fontSize: "12px", border: "none", background: "transparent", cursor: "pointer" }}
+                                onClick={() => openEditModal(target, idx)}
+                            >
+                                编辑
+                            </button>
+                            <button
+                                type="button"
+                                className="fluent-button"
+                                style={{ padding: "6px", color: "#ef4444", border: "none", background: "transparent", cursor: "pointer" }}
+                                onClick={() => deleteRule(target, idx)}
+                                title="删除规则"
+                            >
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
 
                 <button
                     type="button"
@@ -380,7 +367,7 @@ const AdvancedSettingsGroup = ({
                         margin: 0,
                         height: "40px"
                     }}
-                    onClick={() => addRule(target)}
+                    onClick={() => openAddModal(target)}
                 >
                     <Plus size={14} style={{ marginRight: "6px" }} />
                     <span style={{ fontWeight: 600, fontSize: "13px" }}>添加清洗规则</span>
@@ -558,6 +545,18 @@ const AdvancedSettingsGroup = ({
                     })}
                 </>
             )}
+            <RuleEditModal
+                show={modalOpen}
+                rule={editingRuleData}
+                isNew={editingRuleIndex === null}
+                onClose={() => {
+                    setModalOpen(false);
+                    setEditingTarget(null);
+                    setEditingRuleIndex(null);
+                    setEditingRuleData(null);
+                }}
+                onSave={handleSaveRule}
+            />
         </div>
     );
 };
