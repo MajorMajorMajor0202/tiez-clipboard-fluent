@@ -739,11 +739,11 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       </LayoutGroup>
 
       <div className="emoji-search-container">
-        <div className="emoji-search-wrapper">
-          <Search size={14} className="emoji-search-icon" />
+        <div className="fluent-search-box emoji-search-wrapper">
+          <Search size={14} className="fluent-search-icon emoji-search-icon" />
           <input
             type="text"
-            className="emoji-search-input"
+            className="fluent-search-input emoji-search-input"
             placeholder={t("search") || "搜索..."}
             value={searchQuery}
             onChange={(e) => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ChevronDown, ChevronUp, Plus, Trash2, Search, X } from "lucide-react";
@@ -96,14 +96,9 @@ const AdvancedSettingsGroup = ({
     theme
 }: AdvancedSettingsGroupProps) => {
     const [searchText, setSearchText] = useState("");
-    const [selectedSourceId, setSelectedSourceId] = useState("global");
-    const [expandedRuleIndex, setExpandedRuleIndex] = useState<number | null>(0);
-    const [draftRules, setDraftRules] = useState<EditableRule[]>(parseRules(cleanupRules));
-    const [sidebarWidth, setSidebarWidth] = useState(120);
-    const [sidebarHeight, setSidebarHeight] = useState(180);
-    const [isResizing, setIsResizing] = useState(false);
-    const [isStacked, setIsStacked] = useState(false);
-    const workbenchRef = useRef<HTMLElement | null>(null);
+    const [isGlobalExpanded, setIsGlobalExpanded] = useState(true);
+    const [expandedAppIds, setExpandedAppIds] = useState<Record<string, boolean>>({});
+    const [expandedRuleKeys, setExpandedRuleKeys] = useState<Record<string, number | null>>({});
 
     const configuredAppPolicies = appCleanupPolicies;
 
@@ -138,11 +133,6 @@ const AdvancedSettingsGroup = ({
         return targets;
     }, [cleanupRules, configuredAppPolicies, installedApps, t]);
 
-    const filteredTargets = useMemo(
-        () => sourceTargets,
-        [sourceTargets]
-    );
-
     const searchResults = useMemo(() => {
         const keyword = searchText.trim().toLowerCase();
         if (!keyword) {
@@ -164,83 +154,8 @@ const AdvancedSettingsGroup = ({
             .slice(0, 8);
     }, [installedApps, searchText, sourceTargets]);
 
-    const selectedTarget = useMemo(
-        () => sourceTargets.find((target) => target.id === selectedSourceId) ?? sourceTargets[0],
-        [selectedSourceId, sourceTargets]
-    );
-
-    useEffect(() => {
-        if (!selectedTarget) return;
-        const nextRules = parseRules(selectedTarget.rawRules);
-        setDraftRules(nextRules);
-        setExpandedRuleIndex(nextRules.length > 0 ? 0 : null);
-    }, [selectedTarget?.id]);
-
-    // App icons fetching removed for minimalist style
-
-    useEffect(() => {
-        const mediaQuery = window.matchMedia("(max-width: 340px)");
-        const updateLayoutMode = () => {
-            setIsStacked(mediaQuery.matches);
-        };
-
-        updateLayoutMode();
-        mediaQuery.addEventListener("change", updateLayoutMode);
-
-        return () => mediaQuery.removeEventListener("change", updateLayoutMode);
-    }, []);
-
-    useEffect(() => {
-        if (!isResizing) return;
-
-        const handleMouseMove = (event: MouseEvent) => {
-            const bounds = workbenchRef.current?.getBoundingClientRect();
-            if (!bounds) return;
-            if (isStacked) {
-                const maxHeight = Math.max(140, bounds.height - 220);
-                const nextHeight = Math.min(Math.max(event.clientY - bounds.top, 120), maxHeight);
-                setSidebarHeight(nextHeight);
-                return;
-            }
-
-            const nextWidth = Math.min(Math.max(event.clientX - bounds.left, 80), 280);
-            setSidebarWidth(nextWidth);
-        };
-
-        const handleMouseUp = () => {
-            setIsResizing(false);
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
-        };
-
-        document.body.style.cursor = isStacked ? "row-resize" : "col-resize";
-        document.body.style.userSelect = "none";
-        window.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
-
-        return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
-        };
-    }, [isResizing, isStacked]);
-
-    const handleDeleteTarget = (event: React.MouseEvent, target: SourceTarget) => {
-        event.stopPropagation();
-        if (target.kind === "global") return;
-
-        // Filter out the app policy. Since rules are inside the policy, they are deleted automatically.
-        const nextPolicies = appCleanupPolicies.filter(p => (
-            p.id !== target.policyId && (p.appPath !== target.appPath || !target.appPath)
-        ));
-        
-        persistAppPolicies(nextPolicies);
-        
-        // If the deleted target was selected, switch back to global
-        if (selectedSourceId === target.id) {
-            setSelectedSourceId("global");
-        }
+    const toggleAppExpand = (id: string) => {
+        setExpandedAppIds((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
     const persistAppPolicies = (nextPolicies: AppCleanupPolicy[]) => {
@@ -286,38 +201,55 @@ const AdvancedSettingsGroup = ({
         persistAppPolicies(nextPolicies);
     };
 
-    const updateRule = (ruleIndex: number, patch: Partial<EditableRule>) => {
-        if (!selectedTarget) return;
-        const nextRules = draftRules.map((rule, index) => (
+    const handleDeleteTarget = (event: React.MouseEvent, target: SourceTarget) => {
+        event.stopPropagation();
+        if (target.kind === "global") return;
+
+        const nextPolicies = appCleanupPolicies.filter(p => (
+            p.id !== target.policyId && (p.appPath !== target.appPath || !target.appPath)
+        ));
+        
+        persistAppPolicies(nextPolicies);
+    };
+
+    const getRulesForTarget = (target: SourceTarget): EditableRule[] => {
+        return parseRules(target.rawRules);
+    };
+
+    const addRule = (target: SourceTarget) => {
+        const currentRules = getRulesForTarget(target);
+        const nextRules = [...currentRules, { match: "", replace: "", actionType: "replace" as const }];
+        persistRulesForTarget(target, nextRules);
+        setExpandedRuleKeys(prev => ({ ...prev, [target.id]: nextRules.length - 1 }));
+    };
+
+    const updateRule = (target: SourceTarget, ruleIndex: number, patch: Partial<EditableRule>) => {
+        const currentRules = getRulesForTarget(target);
+        const nextRules = currentRules.map((rule, index) => (
             index === ruleIndex ? { ...rule, ...patch } : rule
         ));
-        setDraftRules(nextRules);
-        persistRulesForTarget(selectedTarget, nextRules);
+        persistRulesForTarget(target, nextRules);
     };
 
-    const addRule = () => {
-        if (!selectedTarget) return;
-        const nextRules = [...draftRules, { match: "", replace: "", actionType: "replace" as const }];
-        setDraftRules(nextRules);
-        persistRulesForTarget(selectedTarget, nextRules);
-        setExpandedRuleIndex(nextRules.length - 1);
-    };
-
-    const deleteRule = (ruleIndex: number) => {
-        if (!selectedTarget) return;
-        const nextRules = draftRules.filter((_, index) => index !== ruleIndex);
-        setDraftRules(nextRules);
-        persistRulesForTarget(selectedTarget, nextRules);
-        if (expandedRuleIndex === ruleIndex) {
-            setExpandedRuleIndex(nextRules.length > 0 ? Math.max(0, ruleIndex - 1) : null);
+    const deleteRule = (target: SourceTarget, ruleIndex: number) => {
+        const currentRules = getRulesForTarget(target);
+        const nextRules = currentRules.filter((_, index) => index !== ruleIndex);
+        persistRulesForTarget(target, nextRules);
+        
+        const expandedIdx = expandedRuleKeys[target.id];
+        if (expandedIdx === ruleIndex) {
+            setExpandedRuleKeys(prev => ({
+                ...prev,
+                [target.id]: nextRules.length > 0 ? Math.max(0, ruleIndex - 1) : null
+            }));
         }
     };
 
-    const toggleTargetAction = () => {
-        if (!selectedTarget || selectedTarget.kind === "global") return;
+    const toggleTargetAction = (target: SourceTarget) => {
+        if (target.kind === "global") return;
 
         const existingIndex = appCleanupPolicies.findIndex((policy) => (
-            selectedTarget.policyId ? policy.id === selectedTarget.policyId : policy.appPath === (selectedTarget.appPath ?? "")
+            target.policyId ? policy.id === target.policyId : policy.appPath === (target.appPath ?? "")
         ));
         
         if (existingIndex < 0) return;
@@ -336,7 +268,7 @@ const AdvancedSettingsGroup = ({
     const handleAddApp = (app: InstalledAppOption) => {
         const existing = sourceTargets.find((target) => target.kind === "app" && target.appPath === app.value);
         if (existing) {
-            setSelectedSourceId(existing.id);
+            toggleAppExpand(existing.id);
             setSearchText("");
             return;
         }
@@ -351,39 +283,167 @@ const AdvancedSettingsGroup = ({
             cleanupRules: ""
         };
         persistAppPolicies([...appCleanupPolicies, nextPolicy]);
-        setSelectedSourceId(`app:${app.value}`);
+        toggleAppExpand(`app:${app.value}`);
         setSearchText("");
     };
 
+    const renderRulesSection = (target: SourceTarget) => {
+        const rules = getRulesForTarget(target);
+        const expandedIdx = expandedRuleKeys[target.id];
+
+        return (
+            <div className="advanced-rules-container">
+                <div className="rules-section-header">
+                    <span className="rules-section-title">过滤和清洗规则</span>
+                    <button type="button" className="fluent-btn-primary" onClick={() => addRule(target)}>
+                        <Plus size={12} />
+                        <span>{t("advanced_add_rule")}</span>
+                    </button>
+                </div>
+
+                {rules.length === 0 ? (
+                    <div className="advanced-empty-state" style={{ marginTop: "4px" }}>
+                        <div className="advanced-empty-title">{t("advanced_empty_rules_title")}</div>
+                        <div className="advanced-empty-text">
+                            {target.kind === "global"
+                                ? t("advanced_empty_rules_global")
+                                : t("advanced_empty_rules_app")}
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+                        {rules.map((rule, idx) => {
+                            const isExpanded = expandedIdx === idx;
+                            return (
+                                <div key={`${target.id}-rule-${idx}`} className="advanced-rule-card">
+                                    <button
+                                        type="button"
+                                        className="advanced-rule-header"
+                                        onClick={() => setExpandedRuleKeys(prev => ({
+                                            ...prev,
+                                            [target.id]: isExpanded ? null : idx
+                                        }))}
+                                    >
+                                        <span className="advanced-rule-title">
+                                            {rule.label?.trim() || `${t("advanced_rule_label")} ${idx + 1}`}
+                                        </span>
+                                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    </button>
+
+                                    {isExpanded && (
+                                        <div className="advanced-rule-body">
+                                            <div className="advanced-rule-field">
+                                                <label>{t("advanced_rule_label_name")}</label>
+                                                <div className="fluent-input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        className="advanced-rule-input"
+                                                        value={rule.label ?? ""}
+                                                        placeholder={`${t("advanced_rule_label")} ${idx + 1}`}
+                                                        onFocus={focusEditorWindow}
+                                                        onChange={(e) => updateRule(target, idx, { label: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="advanced-rule-field">
+                                                <label>{t("advanced_match_label")}</label>
+                                                <div className="fluent-input-wrapper">
+                                                    <textarea
+                                                        className="advanced-rule-textarea"
+                                                        value={rule.match}
+                                                        placeholder={t("advanced_match_placeholder")}
+                                                        onFocus={focusEditorWindow}
+                                                        onChange={(e) => updateRule(target, idx, { match: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="advanced-rule-field">
+                                                <label>命中后动作</label>
+                                                <div className="fluent-segmented-control">
+                                                    <button
+                                                        type="button"
+                                                        className={`fluent-segmented-button ${rule.actionType === "replace" ? "active" : ""}`}
+                                                        onClick={() => updateRule(target, idx, { actionType: "replace" })}
+                                                    >
+                                                        {t("advanced_replace_label")}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={`fluent-segmented-button ${rule.actionType === "ignore" ? "active" : ""}`}
+                                                        onClick={() => updateRule(target, idx, { actionType: "ignore" })}
+                                                    >
+                                                        {t("app_cleanup_policy_ignore")}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {rule.actionType === "replace" && (
+                                                <div className="advanced-rule-field">
+                                                    <label>{t("advanced_replace_label")}</label>
+                                                    <div className="fluent-input-wrapper">
+                                                        <textarea
+                                                            className="advanced-rule-textarea"
+                                                            value={rule.replace}
+                                                            placeholder={t("advanced_replace_placeholder")}
+                                                            onFocus={focusEditorWindow}
+                                                            onChange={(e) => updateRule(target, idx, { replace: e.target.value })}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="advanced-rule-actions">
+                                                <button
+                                                    type="button"
+                                                    className="fluent-btn-danger"
+                                                    onClick={() => deleteRule(target, idx)}
+                                                >
+                                                    <Trash2 size={13} />
+                                                    <span>{t("delete")}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const globalTarget = sourceTargets[0];
+    const appTargets = sourceTargets.slice(1);
+
     return (
         <div className="settings-subpage advanced-settings-page">
-            {/* Header is handled by AppHeader */}
-
-            <section
-                ref={workbenchRef}
-                className={`advanced-workbench ${isStacked ? "stacked-layout" : ""}`}
-                style={{
-                    ["--advanced-sidebar-width" as string]: `${sidebarWidth}px`,
-                    ["--advanced-sidebar-height" as string]: `${sidebarHeight}px`
-                }}
-            >
-                <aside className="advanced-sidebar">
-                    <div className="advanced-sidebar-search">
-                        <div className="search-input-wrapper">
-                            <Search size={12} className="search-icon-placeholder" />
-                            <input
-                                className="search-input advanced-search-input"
-                                placeholder={t("search_apps_placeholder")}
-                                value={searchText}
-                                onFocus={focusEditorWindow}
-                                onChange={(e) => setSearchText(e.target.value)}
+            {/* 添加应用卡片 */}
+            <div className="fluent-settings-expander add-app-card">
+                <div className="setting-row">
+                    <div className="setting-row-info">
+                        <span className="setting-row-label">添加应用专属策略</span>
+                        <span className="setting-row-hint">搜索并选择一个已安装的应用，为其添加专属的剪贴板策略</span>
+                    </div>
+                    <div className="fluent-search-box">
+                        <Search size={14} className="fluent-search-icon" />
+                        <input
+                            type="text"
+                            className="fluent-search-input"
+                            placeholder={t("search_apps_placeholder")}
+                            value={searchText}
+                            onFocus={focusEditorWindow}
+                            onChange={(e) => setSearchText(e.target.value)}
+                        />
+                        {searchText && (
+                            <X
+                                size={14}
+                                style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", cursor: "pointer", opacity: 0.6 }}
+                                onClick={() => setSearchText("")}
                             />
-                            {searchText ? (
-                                <div className="action-icons">
-                                    <X size={12} className="action-icon clear" onClick={() => setSearchText("")} />
-                                </div>
-                            ) : null}
-                        </div>
+                        )}
                         {searchResults.length > 0 && (
                             <div className="advanced-search-results">
                                 {searchResults.map((app) => (
@@ -393,215 +453,144 @@ const AdvancedSettingsGroup = ({
                                         className="advanced-search-result-item"
                                         onClick={() => handleAddApp(app)}
                                     >
-                                        <span className="advanced-search-result-main">
-                                            <span className="advanced-search-result-name">{app.label}</span>
-                                        </span>
+                                        <span className="advanced-search-result-name">{app.label}</span>
                                         <span className="advanced-search-result-action">
-                                            {app.added ? t("advanced_open_added_app") : t("advanced_add_app")}
+                                            {app.added ? "已添加" : "添加"}
                                         </span>
                                     </button>
                                 ))}
                             </div>
                         )}
                     </div>
+                </div>
+            </div>
 
-                    <div className="advanced-target-list">
-                        {filteredTargets.map((target) => (
-                            <button
-                                key={target.id}
-                                type="button"
-                                className={`advanced-target-item ${selectedTarget?.id === target.id ? "active" : ""}`}
-                                onClick={() => setSelectedSourceId(target.id)}
-                            >
-                                <div className="target-color-wrapper">
-                                    <div
-                                        className="target-color-dot"
-                                        style={{ background: getTagColor(target.label, theme) }}
-                                    />
-                                </div>
-                                <div className="target-name-area">
-                                    <span className="target-name">{target.label}</span>
-                                    {target.kind === "app" && appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath)?.action === "ignore" ? (
-                                        <span className="target-badge ignore">{t("app_cleanup_policy_ignore")}</span>
-                                    ) : target.ruleCount > 0 ? (
-                                        <span className="target-badge">{target.ruleCount}</span>
-                                    ) : null}
-                                    {target.kind !== "global" && (
-                                        <div className="target-hover-actions">
-                                            <span
-                                                className="action-icon"
-                                                onClick={(e) => handleDeleteTarget(e, target)}
-                                                title={t("delete")}
-                                            >
-                                                <Trash2 size={13} />
+            <div className="advanced-section-title">全局策略</div>
+
+            {/* 全局折叠卡片 */}
+            <div className={`fluent-settings-expander ${isGlobalExpanded ? "expanded" : ""}`}>
+                <button
+                    type="button"
+                    className="expander-header"
+                    onClick={() => setIsGlobalExpanded(!isGlobalExpanded)}
+                >
+                    <div className="expander-title-area">
+                        <div className="expander-text">
+                            <span className="expander-title">全局清洗规则</span>
+                            <span className="expander-subtitle">对所有应用复制的内容生效（若应用有专属规则则优先执行专属规则）</span>
+                        </div>
+                    </div>
+                    <div className="expander-actions">
+                        {globalTarget.ruleCount > 0 && (
+                            <span className="target-badge">{globalTarget.ruleCount}</span>
+                        )}
+                        <span className="expander-arrow">
+                            <ChevronDown size={16} />
+                        </span>
+                    </div>
+                </button>
+                {isGlobalExpanded && (
+                    <div className="expander-content">
+                        {renderRulesSection(globalTarget)}
+                    </div>
+                )}
+            </div>
+
+            {appTargets.length > 0 && (
+                <>
+                    <div className="advanced-section-title">特定应用策略</div>
+                    {appTargets.map((target) => {
+                        const isExpanded = !!expandedAppIds[target.id];
+                        const policy = appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath);
+                        const isRecordEnabled = policy ? policy.action !== "ignore" : true;
+
+                        return (
+                            <div key={target.id} className={`fluent-settings-expander ${isExpanded ? "expanded" : ""}`}>
+                                <button
+                                    type="button"
+                                    className="expander-header"
+                                    onClick={() => toggleAppExpand(target.id)}
+                                >
+                                    <div className="expander-title-area">
+                                        <div
+                                            className="target-color-dot"
+                                            style={{
+                                                background: getTagColor(target.label, theme),
+                                                width: "8px",
+                                                height: "8px",
+                                                borderRadius: "50%",
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                        <div className="expander-text">
+                                            <span className="expander-title">{target.label}</span>
+                                            <span className="expander-subtitle" style={{ wordBreak: "break-all" }}>
+                                                {target.appPath}
                                             </span>
                                         </div>
-                                    )}
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </aside>
-
-                <div
-                    className={`advanced-divider ${isResizing ? "active" : ""} ${isStacked ? "stacked" : ""}`}
-                    onMouseDown={() => setIsResizing(true)}
-                >
-                    <span className="advanced-divider-handle" />
-                </div>
-
-                <div className="advanced-editor">
-                    <div className="advanced-editor-toolbar">
-                        {selectedTarget?.kind === "global" || (appCleanupPolicies.find(p => p.id === selectedTarget.policyId || p.appPath === selectedTarget.appPath)?.action !== "ignore") ? (
-                            <button type="button" className="btn-icon advanced-add-rule-btn" onClick={addRule}>
-                                <Plus size={14} />
-                                <span>{t("advanced_add_rule")}</span>
-                            </button>
-                        ) : null}
-                    </div>
-
-                    {selectedTarget?.kind === "app" && (
-                        <div className="advanced-action-toggle">
-                            <div className="advanced-action-info">
-                                <span className="advanced-action-label">记录此应用的内容？</span>
-                                <span className="advanced-action-hint">
-                                    {appCleanupPolicies.find(p => p.id === selectedTarget.policyId || p.appPath === selectedTarget.appPath)?.action === "ignore"
-                                        ? "当前已关闭记录，来自该应用的剪贴板内容将被忽略"
-                                        : "当前已开启记录，您可以点击上方按钮添加清洗或拦截规则"
-                                    }
-                                </span>
-                            </div>
-                            <button 
-                                type="button" 
-                                className={`advanced-action-switch ${appCleanupPolicies.find(p => p.id === selectedTarget.policyId || p.appPath === selectedTarget.appPath)?.action !== "ignore" ? "active" : ""}`}
-                                onClick={toggleTargetAction}
-                            >
-                                <span className="advanced-action-switch-track">
-                                    <span className="advanced-action-switch-thumb" />
-                                </span>
-                                <span className="advanced-action-switch-label">
-                                    {appCleanupPolicies.find(p => p.id === selectedTarget.policyId || p.appPath === selectedTarget.appPath)?.action !== "ignore"
-                                        ? "开启"
-                                        : "关闭"
-                                    }
-                                </span>
-                            </button>
-                        </div>
-                    )}
-
-                    <div className="advanced-rule-list">
-                        {selectedTarget?.kind === "app" && appCleanupPolicies.find(p => p.id === selectedTarget.policyId || p.appPath === selectedTarget.appPath)?.action === "ignore" ? (
-                            <div className="advanced-empty-state ignore-mode">
-                                <div className="advanced-empty-title">已停止记录</div>
-                                <div className="advanced-empty-text">
-                                    当前应用已被设置为忽略，记录功能已关闭。
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                {draftRules.length === 0 && (
-                                    <div className="advanced-empty-state">
-                                        <div className="advanced-empty-title">{t("advanced_empty_rules_title")}</div>
-                                        <div className="advanced-empty-text">
-                                            {selectedTarget?.kind === "global"
-                                                ? t("advanced_empty_rules_global")
-                                                : t("advanced_empty_rules_app")}
-                                        </div>
                                     </div>
-                                )}
+                                    <div className="expander-actions" onClick={(e) => e.stopPropagation()}>
+                                        {!isRecordEnabled ? (
+                                            <span className="target-badge ignore">{t("app_cleanup_policy_ignore")}</span>
+                                        ) : target.ruleCount > 0 ? (
+                                            <span className="target-badge">{target.ruleCount}</span>
+                                        ) : null}
+                                        <button
+                                            type="button"
+                                            className="fluent-switch-control"
+                                            style={{ padding: 0, marginLeft: "4px" }}
+                                            onClick={() => toggleAppExpand(target.id)}
+                                        >
+                                            <span className="expander-arrow" style={{ padding: "6px" }}>
+                                                <ChevronDown size={16} />
+                                            </span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="fluent-btn-danger"
+                                            style={{ padding: "6px", minHeight: "auto", height: "auto" }}
+                                            onClick={(e) => handleDeleteTarget(e, target)}
+                                            title={t("delete")}
+                                        >
+                                            <Trash2 size={13} />
+                                        </button>
+                                    </div>
+                                </button>
 
-                                {draftRules.map((rule, index) => {
-                                    const expanded = expandedRuleIndex === index;
-                                    return (
-                                        <div key={`${selectedTarget?.id ?? "target"}-${index}`} className="advanced-rule-card">
+                                {isExpanded && (
+                                    <div className="expander-content">
+                                        <div className="setting-row">
+                                            <div className="setting-row-info">
+                                                <span className="setting-row-label">记录此应用的内容？</span>
+                                                <span className="setting-row-hint">
+                                                    {isRecordEnabled
+                                                        ? "当前已开启记录，可以添加该应用专属的正则清洗规则"
+                                                        : "当前已关闭记录，来自该应用的内容将被完全忽略，不保存到剪贴板中"
+                                                    }
+                                                </span>
+                                            </div>
                                             <button
                                                 type="button"
-                                                className="advanced-rule-header"
-                                                onClick={() => setExpandedRuleIndex(expanded ? null : index)}
+                                                className={`fluent-switch-control ${isRecordEnabled ? "active" : ""}`}
+                                                onClick={() => toggleTargetAction(target)}
                                             >
-                                                <span className="advanced-rule-title">
-                                                    {rule.label?.trim() || `${t("advanced_rule_label")} ${index + 1}`}
+                                                <span className="fluent-switch-track">
+                                                    <span className="fluent-switch-thumb" />
                                                 </span>
-                                                {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                                <span className="fluent-switch-label">
+                                                    {isRecordEnabled ? "开启" : "关闭"}
+                                                </span>
                                             </button>
-
-                                            {expanded && (
-                                                <div className="advanced-rule-body">
-                                                    <div className="advanced-rule-field">
-                                                        <label>{t("advanced_rule_label_name")}</label>
-                                                        <input
-                                                            type="text"
-                                                            className="search-input advanced-rule-input"
-                                                            value={rule.label ?? ""}
-                                                            placeholder={`${t("advanced_rule_label")} ${index + 1}`}
-                                                            onFocus={focusEditorWindow}
-                                                            onChange={(e) => updateRule(index, { label: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div className="advanced-rule-field">
-                                                        <label>{t("advanced_match_label")}</label>
-                                                        <textarea
-                                                            className="search-input advanced-rule-textarea"
-                                                            value={rule.match}
-                                                            placeholder={t("advanced_match_placeholder")}
-                                                            onFocus={focusEditorWindow}
-                                                            onChange={(e) => updateRule(index, { match: e.target.value })}
-                                                        />
-                                                    </div>
-
-                                                    <div className="advanced-rule-field">
-                                                        <label>命中后动作</label>
-                                                        <div className="advanced-rule-action-tabs">
-                                                            <button 
-                                                                type="button" 
-                                                                className={`advanced-rule-action-tab ${rule.actionType === "replace" ? "active" : ""}`}
-                                                                onClick={() => updateRule(index, { actionType: "replace" })}
-                                                            >
-                                                                {t("advanced_replace_label")}
-                                                            </button>
-                                                            <button 
-                                                                type="button" 
-                                                                className={`advanced-rule-action-tab ${rule.actionType === "ignore" ? "active" : ""}`}
-                                                                onClick={() => updateRule(index, { actionType: "ignore" })}
-                                                            >
-                                                                {t("app_cleanup_policy_ignore")}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-
-                                                    {rule.actionType === "replace" && (
-                                                        <div className="advanced-rule-field">
-                                                            <label>{t("advanced_replace_label")}</label>
-                                                            <textarea
-                                                                className="search-input advanced-rule-textarea"
-                                                                value={rule.replace}
-                                                                placeholder={t("advanced_replace_placeholder")}
-                                                                onFocus={focusEditorWindow}
-                                                                onChange={(e) => updateRule(index, { replace: e.target.value })}
-                                                            />
-                                                        </div>
-                                                    )}
-
-                                                    <div className="advanced-rule-actions">
-                                                        <button
-                                                            type="button"
-                                                            className="btn-icon advanced-delete-btn"
-                                                            onClick={() => deleteRule(index)}
-                                                        >
-                                                            <Trash2 size={14} />
-                                                            <span>{t("delete")}</span>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
-                                    );
-                                })}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </section>
+
+                                        {isRecordEnabled && renderRulesSection(target)}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </>
+            )}
         </div>
     );
 };

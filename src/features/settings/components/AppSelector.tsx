@@ -150,11 +150,11 @@ const AppSelector = ({
 
     return (
         <div ref={containerRef} className="app-selector-wrapper">
-            <div className={`app-selector-input-wrapper ${isOpen ? 'dropdown-open' : ''}`}>
-                <Search size={14} className="search-icon" />
+            <div className={`fluent-search-box app-selector-input-wrapper ${isOpen ? 'dropdown-open' : ''}`}>
+                <Search size={14} className="fluent-search-icon search-icon" />
                 <input
                     type="text"
-                    className="app-selector-input"
+                    className="fluent-search-input app-selector-input"
                     placeholder={loading ? t('searching_apps') : t('search_apps_placeholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
