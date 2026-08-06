@@ -968,3 +968,25 @@ body.theme-acrylic .settings-view select.search-input option {
   max-width: 90% !important;
 }
 
+/* Wide dialog button layout overrides (for App Selector, Hotkey, and Rule Edit dialogs) */
+.app-selector-dialog .confirm-dialog-lower,
+.rule-edit-dialog .confirm-dialog-lower {
+  padding: 16px 24px !important;
+}
+
+.app-selector-dialog .confirm-dialog-buttons,
+.rule-edit-dialog .confirm-dialog-buttons {
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  display: flex !important;
+  width: 100% !important;
+}
+
+.app-selector-dialog .confirm-dialog-button,
+.rule-edit-dialog .confirm-dialog-button {
+  flex: none !important;
+  min-width: 80px !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
