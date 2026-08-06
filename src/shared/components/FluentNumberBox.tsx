@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 
@@ -24,23 +24,37 @@ const FluentNumberBox = ({
     style
 }: FluentNumberBoxProps) => {
     const [inputValue, setInputValue] = useState<string>(String(value));
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         setInputValue(String(value));
     }, [value]);
 
-    const handleIncrement = () => {
+    const selectAndFocusInput = () => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    };
+
+    const handleIncrement = (e: React.MouseEvent) => {
+        e.stopPropagation();
         const current = parseFloat(inputValue) || 0;
         const next = Math.min(max, current + step);
         setInputValue(String(next));
         onChange(next);
+        // Ensure input remains focused and highlighted
+        setTimeout(selectAndFocusInput, 0);
     };
 
-    const handleDecrement = () => {
+    const handleDecrement = (e: React.MouseEvent) => {
+        e.stopPropagation();
         const current = parseFloat(inputValue) || 0;
         const next = Math.max(min, current - step);
         setInputValue(String(next));
         onChange(next);
+        // Ensure input remains focused and highlighted
+        setTimeout(selectAndFocusInput, 0);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +63,6 @@ const FluentNumberBox = ({
             setInputValue("");
             return;
         }
-        // Only allow positive integers for limits
         if (!/^\d*$/.test(val)) return;
         setInputValue(val);
     };
@@ -77,47 +90,57 @@ const FluentNumberBox = ({
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "ArrowUp") {
             e.preventDefault();
-            handleIncrement();
+            const current = parseFloat(inputValue) || 0;
+            const next = Math.min(max, current + step);
+            setInputValue(String(next));
+            onChange(next);
         } else if (e.key === "ArrowDown") {
             e.preventDefault();
-            handleDecrement();
+            const current = parseFloat(inputValue) || 0;
+            const next = Math.max(min, current - step);
+            setInputValue(String(next));
+            onChange(next);
         }
     };
 
-    const focusEditorWindow = () => {
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        e.target.select();
         invoke("focus_clipboard_window").catch(console.error);
     };
 
     return (
-        <div className="fluent-number-box" style={style}>
+        <div className="fluent-number-box" style={style} onClick={selectAndFocusInput}>
             <input
+                ref={inputRef}
                 type="text"
                 className="fluent-number-box-input"
                 value={inputValue}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
-                onFocus={focusEditorWindow}
+                onFocus={handleFocus}
                 placeholder={placeholder}
             />
-            <button
-                type="button"
-                className="fluent-number-box-btn"
-                onClick={handleDecrement}
-                tabIndex={-1}
-                title="减少"
-            >
-                <ChevronDown size={12} />
-            </button>
-            <button
-                type="button"
-                className="fluent-number-box-btn"
-                onClick={handleIncrement}
-                tabIndex={-1}
-                title="增加"
-            >
-                <ChevronUp size={12} />
-            </button>
+            <div className="fluent-number-box-spinners">
+                <button
+                    type="button"
+                    className="fluent-number-box-spinner-btn"
+                    onClick={handleIncrement}
+                    tabIndex={-1}
+                    title="增加"
+                >
+                    <ChevronUp size={12} />
+                </button>
+                <button
+                    type="button"
+                    className="fluent-number-box-spinner-btn"
+                    onClick={handleDecrement}
+                    tabIndex={-1}
+                    title="减少"
+                >
+                    <ChevronDown size={12} />
+                </button>
+            </div>
         </div>
     );
 };

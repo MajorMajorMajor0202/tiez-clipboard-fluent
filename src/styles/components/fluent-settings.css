@@ -677,7 +677,7 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   }
 }
 
-/* Fluent NumberBox styles with horizontal 1/3 layout */
+/* Fluent NumberBox styles with floating vertical spinner panel */
 .fluent-number-box {
   display: inline-flex;
   align-items: center;
@@ -687,9 +687,10 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   background-color: var(--bg-input);
   overflow: hidden;
   height: 32px !important;
-  width: 72px !important; /* Designed compact, 24px per section */
+  width: 80px !important; /* Designed compact */
   box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: text;
 }
 
 .fluent-number-box:hover {
@@ -704,7 +705,7 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
 }
 
 .fluent-number-box-input {
-  width: 33.333% !important;
+  width: 100% !important;
   height: 100% !important;
   border: none !important;
   background: transparent !important;
@@ -712,39 +713,65 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   font-size: 13px !important;
   text-align: center !important;
   outline: none !important;
-  padding: 0 !important;
+  padding: 0 28px 0 8px !important; /* Extra right padding so spinner doesn't overlap text */
   box-sizing: border-box !important;
 }
 
-.fluent-number-box-btn {
-  width: 33.333% !important;
-  height: 100% !important;
+.fluent-number-box-spinners {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-element);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 1px;
+  gap: 1px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 22px;
+  box-sizing: border-box;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9) translateX(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  visibility: hidden;
+}
+
+.fluent-number-box:hover .fluent-number-box-spinners,
+.fluent-number-box:focus-within .fluent-number-box-spinners {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateX(0);
+  visibility: visible;
+}
+
+.fluent-number-box-spinner-btn {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  height: calc(50% - 0.5px) !important;
+  width: 100% !important;
   background: transparent !important;
-  border: none !important; /* No vertical separator line! */
+  border: none !important;
+  border-radius: 3px !important;
   color: var(--text-secondary) !important;
   cursor: pointer !important;
   padding: 0 !important;
   box-sizing: border-box !important;
-  transition: background 0.15s ease, color 0.15s ease !important;
+  transition: all 0.15s ease !important;
 }
 
-.fluent-number-box-btn:hover {
-  background: rgba(0, 0, 0, 0.04) !important;
-  color: var(--text-primary) !important;
+.fluent-number-box-spinner-btn:hover {
+  background: var(--bg-button) !important;
+  color: var(--accent-color) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08) !important;
 }
 
-.dark-mode .fluent-number-box-btn:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-
-.fluent-number-box-btn:active {
-  background: rgba(0, 0, 0, 0.08) !important;
-}
-
-.dark-mode .fluent-number-box-btn:active {
-  background: rgba(255, 255, 255, 0.1) !important;
+.fluent-number-box-spinner-btn:active {
+  background: var(--bg-subtle-active) !important;
+  box-shadow: none !important;
 }
 
