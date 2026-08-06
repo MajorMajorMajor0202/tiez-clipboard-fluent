@@ -24,6 +24,7 @@ const FluentNumberBox = ({
     style
 }: FluentNumberBoxProps) => {
     const [inputValue, setInputValue] = useState<string>(String(value));
+    const [isFocused, setIsFocused] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -38,22 +39,22 @@ const FluentNumberBox = ({
     };
 
     const handleIncrement = (e: React.MouseEvent) => {
-        e.stopPropagation();
+        e.preventDefault(); // Prevents input from losing focus
         const current = parseFloat(inputValue) || 0;
         const next = Math.min(max, current + step);
         setInputValue(String(next));
         onChange(next);
-        // Ensure input remains focused and highlighted
+        // Highlight content
         setTimeout(selectAndFocusInput, 0);
     };
 
     const handleDecrement = (e: React.MouseEvent) => {
-        e.stopPropagation();
+        e.preventDefault(); // Prevents input from losing focus
         const current = parseFloat(inputValue) || 0;
         const next = Math.max(min, current - step);
         setInputValue(String(next));
         onChange(next);
-        // Ensure input remains focused and highlighted
+        // Highlight content
         setTimeout(selectAndFocusInput, 0);
     };
 
@@ -68,6 +69,7 @@ const FluentNumberBox = ({
     };
 
     const handleBlur = () => {
+        setIsFocused(false);
         if (inputValue === "") {
             onChange(min);
             setInputValue(String(min));
@@ -104,6 +106,7 @@ const FluentNumberBox = ({
     };
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        setIsFocused(true);
         e.target.select();
         invoke("focus_clipboard_window").catch(console.error);
     };
@@ -121,26 +124,36 @@ const FluentNumberBox = ({
                 onFocus={handleFocus}
                 placeholder={placeholder}
             />
-            <div className="fluent-number-box-spinners">
-                <button
-                    type="button"
-                    className="fluent-number-box-spinner-btn"
-                    onClick={handleIncrement}
-                    tabIndex={-1}
-                    title="增加"
-                >
-                    <ChevronUp size={12} />
-                </button>
-                <button
-                    type="button"
-                    className="fluent-number-box-spinner-btn"
-                    onClick={handleDecrement}
-                    tabIndex={-1}
-                    title="减少"
-                >
-                    <ChevronDown size={12} />
-                </button>
+            
+            {/* Permanent display chevrons (non-interactive, clicks focus/select main input) */}
+            <div className="fluent-number-box-static-spinners">
+                <ChevronUp size={8} className="static-chevron" />
+                <ChevronDown size={8} className="static-chevron" />
             </div>
+
+            {/* Active dropdown/popover spinners panel overlaying the static chevrons */}
+            {isFocused && (
+                <div className="fluent-number-box-popup" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        type="button"
+                        className="fluent-number-box-popup-btn"
+                        onMouseDown={handleIncrement}
+                        tabIndex={-1}
+                        title="增加"
+                    >
+                        <ChevronUp size={12} />
+                    </button>
+                    <button
+                        type="button"
+                        className="fluent-number-box-popup-btn"
+                        onMouseDown={handleDecrement}
+                        tabIndex={-1}
+                        title="减少"
+                    >
+                        <ChevronDown size={12} />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

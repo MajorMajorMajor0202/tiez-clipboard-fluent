@@ -677,7 +677,7 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   }
 }
 
-/* Fluent NumberBox styles with floating vertical spinner panel */
+/* Fluent NumberBox styles with popover vertical spinner panel */
 .fluent-number-box {
   display: inline-flex;
   align-items: center;
@@ -685,7 +685,7 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   border: 1px solid var(--line-soft);
   border-radius: 4px;
   background-color: var(--bg-input);
-  overflow: hidden;
+  overflow: visible !important;
   height: 32px !important;
   width: 80px !important; /* Designed compact */
   box-sizing: border-box;
@@ -713,65 +713,95 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   font-size: 13px !important;
   text-align: center !important;
   outline: none !important;
-  padding: 0 28px 0 8px !important; /* Extra right padding so spinner doesn't overlap text */
+  padding: 0 24px 0 8px !important; /* Extra right padding for spinners */
   box-sizing: border-box !important;
 }
 
-.fluent-number-box-spinners {
+/* Static spinners (permanently visible, no hover interaction) */
+.fluent-number-box-static-spinners {
   display: flex;
   flex-direction: column;
-  background: var(--bg-element);
-  border: 1px solid var(--line-soft);
-  border-radius: 4px;
-  padding: 1px;
-  gap: 1px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   position: absolute;
-  right: 4px;
-  top: 4px;
-  bottom: 4px;
-  width: 22px;
+  right: 6px;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  pointer-events: none; /* Clicking passes through to the input */
+  opacity: 0.6;
+}
+
+.fluent-number-box-static-spinners .static-chevron {
+  color: var(--text-secondary);
+}
+
+/* Floating vertical rounded rectangle popup window (completely covers static chevrons) */
+.fluent-number-box-popup {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff !important;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: -8px; /* Pops out slightly on the right */
+  top: -12px;  /* Centered vertically: (56 - 32)/2 = 12px */
+  width: 32px;
+  height: 56px;
   box-sizing: border-box;
-  z-index: 5;
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.9) translateX(4px);
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
-  visibility: hidden;
+  z-index: 999; /* Float on top of everything */
+  animation: fluent-popup-fade-in 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
-.fluent-number-box:hover .fluent-number-box-spinners,
-.fluent-number-box:focus-within .fluent-number-box-spinners {
-  opacity: 1;
-  pointer-events: auto;
-  transform: scale(1) translateX(0);
-  visibility: visible;
+.dark-mode .fluent-number-box-popup {
+  background-color: #2c2c2c !important;
 }
 
-.fluent-number-box-spinner-btn {
+@keyframes fluent-popup-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Interactive popup buttons */
+.fluent-number-box-popup-btn {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  height: calc(50% - 0.5px) !important;
+  height: calc(50% - 1px) !important;
   width: 100% !important;
   background: transparent !important;
   border: none !important;
-  border-radius: 3px !important;
-  color: var(--text-secondary) !important;
+  border-radius: 4px !important;
+  color: var(--text-primary) !important;
   cursor: pointer !important;
   padding: 0 !important;
   box-sizing: border-box !important;
-  transition: all 0.15s ease !important;
+  transition: background 0.1s ease !important;
 }
 
-.fluent-number-box-spinner-btn:hover {
-  background: var(--bg-button) !important;
-  color: var(--accent-color) !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+.fluent-number-box-popup-btn:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
 }
 
-.fluent-number-box-spinner-btn:active {
-  background: var(--bg-subtle-active) !important;
-  box-shadow: none !important;
+.dark-mode .fluent-number-box-popup-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.fluent-number-box-popup-btn:active {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark-mode .fluent-number-box-popup-btn:active {
+  background: rgba(255, 255, 255, 0.14) !important;
 }
 

@@ -433,3 +433,9 @@ body.hide-app-border #root {
   transform: translateY(0);
   transition: transform 0.22s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.22s ease-out;
 }
+
+/* Custom Global selection color using Fluent Accent/Highlight color */
+::selection {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+}
