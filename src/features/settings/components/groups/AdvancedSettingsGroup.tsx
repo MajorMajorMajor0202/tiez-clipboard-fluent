@@ -96,9 +96,9 @@ const AdvancedSettingsGroup = ({
     theme
 }: AdvancedSettingsGroupProps) => {
     const [searchText, setSearchText] = useState("");
-    const [isGlobalExpanded, setIsGlobalExpanded] = useState(true);
-    const [expandedAppIds, setExpandedAppIds] = useState<Record<string, boolean>>({});
-    const [expandedRuleKeys, setExpandedRuleKeys] = useState<Record<string, number | null>>({});
+    const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
+        global: true
+    });
 
     const configuredAppPolicies = appCleanupPolicies;
 
@@ -154,8 +154,8 @@ const AdvancedSettingsGroup = ({
             .slice(0, 8);
     }, [installedApps, searchText, sourceTargets]);
 
-    const toggleAppExpand = (id: string) => {
-        setExpandedAppIds((prev) => ({ ...prev, [id]: !prev[id] }));
+    const toggleCard = (id: string) => {
+        setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
     const persistAppPolicies = (nextPolicies: AppCleanupPolicy[]) => {
@@ -220,7 +220,6 @@ const AdvancedSettingsGroup = ({
         const currentRules = getRulesForTarget(target);
         const nextRules = [...currentRules, { match: "", replace: "", actionType: "replace" as const }];
         persistRulesForTarget(target, nextRules);
-        setExpandedRuleKeys(prev => ({ ...prev, [target.id]: nextRules.length - 1 }));
     };
 
     const updateRule = (target: SourceTarget, ruleIndex: number, patch: Partial<EditableRule>) => {
@@ -235,14 +234,6 @@ const AdvancedSettingsGroup = ({
         const currentRules = getRulesForTarget(target);
         const nextRules = currentRules.filter((_, index) => index !== ruleIndex);
         persistRulesForTarget(target, nextRules);
-        
-        const expandedIdx = expandedRuleKeys[target.id];
-        if (expandedIdx === ruleIndex) {
-            setExpandedRuleKeys(prev => ({
-                ...prev,
-                [target.id]: nextRules.length > 0 ? Math.max(0, ruleIndex - 1) : null
-            }));
-        }
     };
 
     const toggleTargetAction = (target: SourceTarget) => {
@@ -268,7 +259,7 @@ const AdvancedSettingsGroup = ({
     const handleAddApp = (app: InstalledAppOption) => {
         const existing = sourceTargets.find((target) => target.kind === "app" && target.appPath === app.value);
         if (existing) {
-            toggleAppExpand(existing.id);
+            toggleCard(existing.id);
             setSearchText("");
             return;
         }
@@ -283,129 +274,101 @@ const AdvancedSettingsGroup = ({
             cleanupRules: ""
         };
         persistAppPolicies([...appCleanupPolicies, nextPolicy]);
-        toggleAppExpand(`app:${app.value}`);
+        toggleCard(`app:${app.value}`);
         setSearchText("");
     };
 
     const renderRulesSection = (target: SourceTarget) => {
         const rules = getRulesForTarget(target);
-        const expandedIdx = expandedRuleKeys[target.id];
 
         return (
-            <div className="advanced-rules-container">
-                <div className="rules-section-header">
-                    <span className="rules-section-title">过滤和清洗规则</span>
-                    <button type="button" className="fluent-btn-primary" onClick={() => addRule(target)}>
-                        <Plus size={12} />
-                        <span>{t("advanced_add_rule")}</span>
+            <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px", border: "none", boxShadow: "none", background: "transparent", padding: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="fluent-setting-title" style={{ fontSize: "12px", color: "var(--text-secondary)" }}>过滤和清洗规则</span>
+                    <button type="button" className="fluent-button fluent-button-primary" style={{ padding: "4px 12px", fontSize: "12px" }} onClick={() => addRule(target)}>
+                        <Plus size={14} style={{ marginRight: "4px", verticalAlign: "middle" }} />
+                        <span style={{ verticalAlign: "middle" }}>{t("advanced_add_rule")}</span>
                     </button>
                 </div>
 
                 {rules.length === 0 ? (
-                    <div className="advanced-empty-state" style={{ marginTop: "4px" }}>
-                        <div className="advanced-empty-title">{t("advanced_empty_rules_title")}</div>
-                        <div className="advanced-empty-text">
+                    <div className="fluent-setting-card" style={{ justifyContent: "center", padding: "20px", borderStyle: "dashed" }}>
+                        <span className="fluent-setting-description" style={{ textAlign: "center" }}>
                             {target.kind === "global"
                                 ? t("advanced_empty_rules_global")
                                 : t("advanced_empty_rules_app")}
-                        </div>
+                        </span>
                     </div>
                 ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         {rules.map((rule, idx) => {
-                            const isExpanded = expandedIdx === idx;
                             return (
-                                <div key={`${target.id}-rule-${idx}`} className="advanced-rule-card">
-                                    <button
-                                        type="button"
-                                        className="advanced-rule-header"
-                                        onClick={() => setExpandedRuleKeys(prev => ({
-                                            ...prev,
-                                            [target.id]: isExpanded ? null : idx
-                                        }))}
-                                    >
-                                        <span className="advanced-rule-title">
-                                            {rule.label?.trim() || `${t("advanced_rule_label")} ${idx + 1}`}
-                                        </span>
-                                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                    </button>
-
-                                    {isExpanded && (
-                                        <div className="advanced-rule-body">
-                                            <div className="advanced-rule-field">
-                                                <label>{t("advanced_rule_label_name")}</label>
-                                                <div className="fluent-input-wrapper">
-                                                    <input
-                                                        type="text"
-                                                        className="advanced-rule-input"
-                                                        value={rule.label ?? ""}
-                                                        placeholder={`${t("advanced_rule_label")} ${idx + 1}`}
-                                                        onFocus={focusEditorWindow}
-                                                        onChange={(e) => updateRule(target, idx, { label: e.target.value })}
-                                                    />
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="advanced-rule-field">
-                                                <label>{t("advanced_match_label")}</label>
-                                                <div className="fluent-input-wrapper">
-                                                    <textarea
-                                                        className="advanced-rule-textarea"
-                                                        value={rule.match}
-                                                        placeholder={t("advanced_match_placeholder")}
-                                                        onFocus={focusEditorWindow}
-                                                        onChange={(e) => updateRule(target, idx, { match: e.target.value })}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="advanced-rule-field">
-                                                <label>命中后动作</label>
-                                                <div className="fluent-segmented-control">
-                                                    <button
-                                                        type="button"
-                                                        className={`fluent-segmented-button ${rule.actionType === "replace" ? "active" : ""}`}
-                                                        onClick={() => updateRule(target, idx, { actionType: "replace" })}
-                                                    >
-                                                        {t("advanced_replace_label")}
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={`fluent-segmented-button ${rule.actionType === "ignore" ? "active" : ""}`}
-                                                        onClick={() => updateRule(target, idx, { actionType: "ignore" })}
-                                                    >
-                                                        {t("app_cleanup_policy_ignore")}
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {rule.actionType === "replace" && (
-                                                <div className="advanced-rule-field">
-                                                    <label>{t("advanced_replace_label")}</label>
-                                                    <div className="fluent-input-wrapper">
-                                                        <textarea
-                                                            className="advanced-rule-textarea"
-                                                            value={rule.replace}
-                                                            placeholder={t("advanced_replace_placeholder")}
-                                                            onFocus={focusEditorWindow}
-                                                            onChange={(e) => updateRule(target, idx, { replace: e.target.value })}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div className="advanced-rule-actions">
-                                                <button
-                                                    type="button"
-                                                    className="fluent-btn-danger"
-                                                    onClick={() => deleteRule(target, idx)}
-                                                >
-                                                    <Trash2 size={13} />
-                                                    <span>{t("delete")}</span>
-                                                </button>
-                                            </div>
+                                <div key={`${target.id}-rule-${idx}`} className="fluent-rule-editor-card">
+                                    <div className="rule-header-row">
+                                        <div className="fluent-setting-info" style={{ flex: 1 }}>
+                                            <input
+                                                type="text"
+                                                className="fluent-input"
+                                                style={{ fontWeight: 600, border: "none", background: "transparent", padding: "2px 4px", fontSize: "13px" }}
+                                                value={rule.label ?? ""}
+                                                placeholder={`${t("advanced_rule_label")} ${idx + 1}`}
+                                                onFocus={focusEditorWindow}
+                                                onChange={(e) => updateRule(target, idx, { label: e.target.value })}
+                                            />
                                         </div>
-                                    )}
+                                        <div className="fluent-segmented-control">
+                                            <button
+                                                type="button"
+                                                className={`fluent-segmented-button ${rule.actionType === "replace" ? "active" : ""}`}
+                                                onClick={() => updateRule(target, idx, { actionType: "replace" })}
+                                            >
+                                                {t("advanced_replace_label")}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`fluent-segmented-button ${rule.actionType === "ignore" ? "active" : ""}`}
+                                                onClick={() => updateRule(target, idx, { actionType: "ignore" })}
+                                            >
+                                                {t("app_cleanup_policy_ignore")}
+                                            </button>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="fluent-button"
+                                            style={{ padding: "6px", color: "#ef4444" }}
+                                            onClick={() => deleteRule(target, idx)}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                    
+                                    <div className={`rule-fields-grid ${rule.actionType === "replace" ? "two-cols" : ""}`}>
+                                        <div className="rule-field">
+                                            <span className="rule-field-label">{t("advanced_match_label")}</span>
+                                            <textarea
+                                                className="fluent-textarea"
+                                                style={{ minHeight: "56px" }}
+                                                value={rule.match}
+                                                placeholder={t("advanced_match_placeholder")}
+                                                onFocus={focusEditorWindow}
+                                                onChange={(e) => updateRule(target, idx, { match: e.target.value })}
+                                            />
+                                        </div>
+
+                                        {rule.actionType === "replace" && (
+                                            <div className="rule-field">
+                                                <span className="rule-field-label">{t("advanced_replace_label")}</span>
+                                                <textarea
+                                                    className="fluent-textarea"
+                                                    style={{ minHeight: "56px" }}
+                                                    value={rule.replace}
+                                                    placeholder={t("advanced_replace_placeholder")}
+                                                    onFocus={focusEditorWindow}
+                                                    onChange={(e) => updateRule(target, idx, { replace: e.target.value })}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
@@ -417,21 +380,23 @@ const AdvancedSettingsGroup = ({
 
     const globalTarget = sourceTargets[0];
     const appTargets = sourceTargets.slice(1);
+    const isGlobalExpanded = !!expandedCards.global;
 
     return (
-        <div className="settings-subpage advanced-settings-page">
-            {/* 添加应用卡片 */}
-            <div className="fluent-settings-expander add-app-card">
-                <div className="setting-row">
-                    <div className="setting-row-info">
-                        <span className="setting-row-label">添加应用专属策略</span>
-                        <span className="setting-row-hint">搜索并选择一个已安装的应用，为其添加专属的剪贴板策略</span>
-                    </div>
-                    <div className="fluent-search-box">
-                        <Search size={14} className="fluent-search-icon" />
+        <div className="fluent-settings-content" style={{ padding: 0 }}>
+            {/* 添加特定应用策略 */}
+            <div className="fluent-setting-card" style={{ marginBottom: "16px" }}>
+                <div className="fluent-setting-info">
+                    <span className="fluent-setting-title">添加应用专属策略</span>
+                    <span className="fluent-setting-description">搜索并选择一个已安装的应用，为其添加专属的剪贴板策略</span>
+                </div>
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <Search size={14} style={{ position: "absolute", left: "10px", color: "var(--text-secondary)", opacity: 0.6 }} />
                         <input
                             type="text"
-                            className="fluent-search-input"
+                            className="fluent-input"
+                            style={{ width: "200px", paddingLeft: "28px" }}
                             placeholder={t("search_apps_placeholder")}
                             value={searchText}
                             onFocus={focusEditorWindow}
@@ -440,57 +405,59 @@ const AdvancedSettingsGroup = ({
                         {searchText && (
                             <X
                                 size={14}
-                                style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", cursor: "pointer", opacity: 0.6 }}
+                                style={{ position: "absolute", right: 8, cursor: "pointer", opacity: 0.6 }}
                                 onClick={() => setSearchText("")}
                             />
                         )}
-                        {searchResults.length > 0 && (
-                            <div className="advanced-search-results">
-                                {searchResults.map((app) => (
-                                    <button
-                                        key={app.value}
-                                        type="button"
-                                        className="advanced-search-result-item"
-                                        onClick={() => handleAddApp(app)}
-                                    >
-                                        <span className="advanced-search-result-name">{app.label}</span>
-                                        <span className="advanced-search-result-action">
-                                            {app.added ? "已添加" : "添加"}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
                     </div>
+                    {searchResults.length > 0 && (
+                        <div className="advanced-search-results">
+                            {searchResults.map((app) => (
+                                <button
+                                    key={app.value}
+                                    type="button"
+                                    className="advanced-search-result-item"
+                                    onClick={() => handleAddApp(app)}
+                                >
+                                    <span className="advanced-search-result-name">{app.label}</span>
+                                    <span className="advanced-search-result-action">
+                                        {app.added ? "已添加" : "添加"}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <div className="advanced-section-title">全局策略</div>
+            <div className="fluent-section-title">全局策略</div>
 
             {/* 全局折叠卡片 */}
-            <div className={`fluent-settings-expander ${isGlobalExpanded ? "expanded" : ""}`}>
-                <button
-                    type="button"
-                    className="expander-header"
-                    onClick={() => setIsGlobalExpanded(!isGlobalExpanded)}
+            <div className="fluent-setting-expander">
+                <div
+                    className={`fluent-setting-expander-header ${isGlobalExpanded ? "expanded" : ""}`}
+                    onClick={() => toggleCard("global")}
                 >
-                    <div className="expander-title-area">
-                        <div className="expander-text">
-                            <span className="expander-title">全局清洗规则</span>
-                            <span className="expander-subtitle">对所有应用复制的内容生效（若应用有专属规则则优先执行专属规则）</span>
-                        </div>
+                    <div className="fluent-setting-info">
+                        <span className="fluent-setting-title">全局清洗规则</span>
+                        <span className="fluent-setting-description">对所有应用复制的内容生效（特定应用策略优先）</span>
                     </div>
-                    <div className="expander-actions">
+                    <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
                         {globalTarget.ruleCount > 0 && (
-                            <span className="target-badge">{globalTarget.ruleCount}</span>
+                            <span className="fluent-setting-badge">{globalTarget.ruleCount} 条规则</span>
                         )}
-                        <span className="expander-arrow">
-                            <ChevronDown size={16} />
-                        </span>
+                        <button
+                            type="button"
+                            className="fluent-hotkey-recorder"
+                            style={{ height: "32px", padding: "0 8px" }}
+                            onClick={() => toggleCard("global")}
+                        >
+                            {isGlobalExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
                     </div>
-                </button>
+                </div>
                 {isGlobalExpanded && (
-                    <div className="expander-content">
+                    <div className="fluent-setting-expander-content">
                         {renderRulesSection(globalTarget)}
                     </div>
                 )}
@@ -498,20 +465,19 @@ const AdvancedSettingsGroup = ({
 
             {appTargets.length > 0 && (
                 <>
-                    <div className="advanced-section-title">特定应用策略</div>
+                    <div className="fluent-section-title">特定应用策略</div>
                     {appTargets.map((target) => {
-                        const isExpanded = !!expandedAppIds[target.id];
+                        const isExpanded = !!expandedCards[target.id];
                         const policy = appCleanupPolicies.find(p => p.id === target.policyId || p.appPath === target.appPath);
                         const isRecordEnabled = policy ? policy.action !== "ignore" : true;
 
                         return (
-                            <div key={target.id} className={`fluent-settings-expander ${isExpanded ? "expanded" : ""}`}>
-                                <button
-                                    type="button"
-                                    className="expander-header"
-                                    onClick={() => toggleAppExpand(target.id)}
+                            <div key={target.id} className="fluent-setting-expander">
+                                <div
+                                    className={`fluent-setting-expander-header ${isExpanded ? "expanded" : ""}`}
+                                    onClick={() => toggleCard(target.id)}
                                 >
-                                    <div className="expander-title-area">
+                                    <div className="fluent-setting-info" style={{ flexDirection: "row", alignItems: "center", gap: "10px" }}>
                                         <div
                                             className="target-color-dot"
                                             style={{
@@ -522,68 +488,63 @@ const AdvancedSettingsGroup = ({
                                                 flexShrink: 0
                                             }}
                                         />
-                                        <div className="expander-text">
-                                            <span className="expander-title">{target.label}</span>
-                                            <span className="expander-subtitle" style={{ wordBreak: "break-all" }}>
-                                                {target.appPath}
-                                            </span>
+                                        <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                                            <span className="fluent-setting-title">{target.label}</span>
+                                            <span className="fluent-setting-description" style={{ wordBreak: "break-all" }}>{target.appPath}</span>
                                         </div>
                                     </div>
-                                    <div className="expander-actions" onClick={(e) => e.stopPropagation()}>
+                                    <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
                                         {!isRecordEnabled ? (
-                                            <span className="target-badge ignore">{t("app_cleanup_policy_ignore")}</span>
+                                            <span className="fluent-setting-badge ignore">{t("app_cleanup_policy_ignore")}</span>
                                         ) : target.ruleCount > 0 ? (
-                                            <span className="target-badge">{target.ruleCount}</span>
+                                            <span className="fluent-setting-badge">{target.ruleCount} 条规则</span>
                                         ) : null}
                                         <button
                                             type="button"
-                                            className="fluent-switch-control"
-                                            style={{ padding: 0, marginLeft: "4px" }}
-                                            onClick={() => toggleAppExpand(target.id)}
+                                            className="fluent-hotkey-recorder"
+                                            style={{ height: "32px", padding: "0 8px" }}
+                                            onClick={() => toggleCard(target.id)}
                                         >
-                                            <span className="expander-arrow" style={{ padding: "6px" }}>
-                                                <ChevronDown size={16} />
-                                            </span>
+                                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                         </button>
                                         <button
                                             type="button"
-                                            className="fluent-btn-danger"
-                                            style={{ padding: "6px", minHeight: "auto", height: "auto" }}
+                                            className="fluent-button"
+                                            style={{ padding: "6px 8px", color: "#ef4444", height: "32px" }}
                                             onClick={(e) => handleDeleteTarget(e, target)}
-                                            title={t("delete")}
                                         >
-                                            <Trash2 size={13} />
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
-                                </button>
+                                </div>
 
                                 {isExpanded && (
-                                    <div className="expander-content">
-                                        <div className="setting-row">
-                                            <div className="setting-row-info">
-                                                <span className="setting-row-label">记录此应用的内容？</span>
-                                                <span className="setting-row-hint">
+                                    <div className="fluent-setting-expander-content" style={{ gap: "12px" }}>
+                                        <div className="fluent-setting-card" style={{ border: "none", boxShadow: "none", background: "transparent", padding: "4px 0", marginBottom: 0 }}>
+                                            <div className="fluent-setting-info">
+                                                <span className="fluent-setting-title" style={{ fontSize: "13px" }}>记录此应用的内容？</span>
+                                                <span className="fluent-setting-description">
                                                     {isRecordEnabled
                                                         ? "当前已开启记录，可以添加该应用专属的正则清洗规则"
                                                         : "当前已关闭记录，来自该应用的内容将被完全忽略，不保存到剪贴板中"
                                                     }
                                                 </span>
                                             </div>
-                                            <button
-                                                type="button"
-                                                className={`fluent-switch-control ${isRecordEnabled ? "active" : ""}`}
-                                                onClick={() => toggleTargetAction(target)}
-                                            >
-                                                <span className="fluent-switch-track">
-                                                    <span className="fluent-switch-thumb" />
-                                                </span>
-                                                <span className="fluent-switch-label">
-                                                    {isRecordEnabled ? "开启" : "关闭"}
-                                                </span>
-                                            </button>
+                                            <label className="fluent-switch" style={{ flexShrink: 0 }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isRecordEnabled}
+                                                    onChange={() => toggleTargetAction(target)}
+                                                />
+                                                <span className="fluent-slider" />
+                                            </label>
                                         </div>
 
-                                        {isRecordEnabled && renderRulesSection(target)}
+                                        {isRecordEnabled && (
+                                            <div style={{ borderTop: "1px solid var(--line-soft)", paddingTop: "12px", marginTop: "4px" }}>
+                                                {renderRulesSection(target)}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
