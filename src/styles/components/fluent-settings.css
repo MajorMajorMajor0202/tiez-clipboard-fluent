@@ -805,3 +805,13 @@ body.is-settings-window.theme-acrylic .fluent-settings-layout {
   background: rgba(255, 255, 255, 0.14) !important;
 }
 
+/* Fluent Native Checkboxes styling using Accent Color */
+input[type="checkbox"]:not(.cb) {
+  accent-color: var(--accent-color) !important;
+}
+
+/* Also style checkboxes with the .cb class if they are not inside switch toggles */
+label:not(.switch) > input[type="checkbox"].cb {
+  accent-color: var(--accent-color) !important;
+}
+
