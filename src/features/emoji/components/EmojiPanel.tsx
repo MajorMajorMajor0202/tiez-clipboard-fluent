@@ -199,6 +199,96 @@ const SKIN_TONE_SUPPORTED_BASE = new Set(
   ].map(emoji => Array.from(emoji)[0])
 );
 
+const emojiSupportCache = new Map<string, boolean>();
+
+const isEmojiSupported = (emoji: string): boolean => {
+  if (emojiSupportCache.has(emoji)) {
+    return emojiSupportCache.get(emoji)!;
+  }
+  
+  if (emoji.length <= 2 && emoji.codePointAt(0)! < 0x1f000) {
+    emojiSupportCache.set(emoji, true);
+    return true;
+  }
+  
+  if (typeof document === 'undefined') return true;
+  
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      emojiSupportCache.set(emoji, true);
+      return true;
+    }
+    
+    ctx.clearRect(0, 0, 16, 16);
+    ctx.font = '16px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textBaseline = 'top';
+    
+    ctx.fillText('\uFFFF', 0, 0); 
+    const tofuData = ctx.getImageData(0, 0, 16, 16).data;
+    
+    ctx.clearRect(0, 0, 16, 16);
+    ctx.fillText(emoji, 0, 0);
+    const emojiData = ctx.getImageData(0, 0, 16, 16).data;
+    
+    const isSameData = (d1: Uint8ClampedArray, d2: Uint8ClampedArray): boolean => {
+      for (let i = 0; i < d1.length; i++) {
+        if (d1[i] !== d2[i]) return false;
+      }
+      return true;
+    };
+    
+    const isBlank = (d: Uint8ClampedArray): boolean => {
+      for (let i = 3; i < d.length; i += 4) {
+        if (d[i] !== 0) return false;
+      }
+      return true;
+    };
+    
+    const isSupported = !isSameData(emojiData, tofuData) && !isBlank(emojiData);
+    emojiSupportCache.set(emoji, isSupported);
+    return isSupported;
+  } catch (e) {
+    emojiSupportCache.set(emoji, true);
+    return true;
+  }
+};
+
+const EmojiItem = ({ emoji }: { emoji: string }) => {
+  const supported = isEmojiSupported(emoji);
+  if (supported) {
+    return <>{emoji}</>;
+  }
+  
+  const hex = Array.from(emoji)
+    .map(c => c.codePointAt(0)!)
+    .filter(cp => cp !== 0xfe0f)
+    .map(cp => cp.toString(16))
+    .join('-');
+  
+  const url = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/" + hex + ".svg";
+  
+  return (
+    <img 
+      src={url} 
+      alt={emoji} 
+      style={{ width: '1em', height: '1em', verticalAlign: 'middle', objectFit: 'contain' }} 
+      onError={(e) => {
+        const img = e.target as HTMLImageElement;
+        img.style.display = 'none';
+        const parent = img.parentNode;
+        if (parent) {
+          const textNode = document.createTextNode(emoji);
+          parent.appendChild(textNode);
+        }
+      }}
+    />
+  );
+};
+
 const SKIN_TONES = [
   { value: "", color: "#FFC83B" },      // Default Yellow
   { value: "🏻", color: "#F9DEC9" },    // Light
@@ -781,7 +871,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                             className="emoji-btn"
                             onClick={() => handleSend(finalEmoji, "text")}
                           >
-                            {finalEmoji}
+                            <EmojiItem emoji={finalEmoji} />
                           </button>
                         </FluentTooltip>
                       );

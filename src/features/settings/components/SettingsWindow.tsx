@@ -709,13 +709,13 @@ const SettingsWindow = () => {
 
   // Sidebar items
   const menuItems = [
-    { id: "general", label: t("general_settings") || "常规与系统", icon: <Settings size={16} /> },
+    { id: "general", label: t("general_settings") || "常规设置", icon: <Settings size={16} /> },
     { id: "clipboard", label: t("clipboard_settings") || "剪贴板与热键", icon: <Sliders size={16} /> },
-    { id: "privacy", label: t("privacy_protection") || "隐私与过滤", icon: <Shield size={16} /> },
+    { id: "privacy", label: t("privacy_protection") || "隐私保护", icon: <Shield size={16} /> },
     { id: "sync", label: t("sync_and_transfer") || "同步与传输", icon: <Wifi size={16} /> },
     { id: "ai", label: t("ai_settings") || "AI 智能助手", icon: <Cpu size={16} /> },
     { id: "appearance", label: t("appearance_settings") || "个性化外观", icon: <Palette size={16} /> },
-    { id: "advanced", label: t("advanced_settings") || "高级设置与策略", icon: <Sliders size={16} /> }
+    { id: "advanced", label: t("advanced_settings") || "数据清洗与过滤", icon: <Sliders size={16} /> }
   ];
 
   return (
@@ -756,13 +756,13 @@ const SettingsWindow = () => {
         {/* Tab 1: General & System */}
         {activeTab === "general" && (
           <div>
-            <h2 className="fluent-page-header">{t("general_settings") || "常规与系统"}</h2>
+            <h2 className="fluent-page-header">{t("general_settings") || "常规设置"}</h2>
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
                 <span className="fluent-setting-title">开机自启动</span>
                 <span className="fluent-setting-description">
-                  允许程序随操作系统一同启动
+                  允许应用随系统引导自动运行
                   {import.meta.env.DEV && (
                     <span style={{ display: 'block', color: 'var(--accent-color, #ff9800)', fontSize: '11px', marginTop: '4px', lineHeight: '1.4' }}>
                       ⚠️ 调试版提示：当前处于开发调试模式。开机自启动将运行调试版二进制，由于此时本地 Vite 开发服务（Port 1420）未运行，会导致黑框命令行窗口弹出并显示网页连接错误（ERR_CONNECTION_REFUSED）。该现象在打包为正式 Release 版后会自动消失（Release 版无命令行黑框且离线加载内置资源）。
@@ -787,7 +787,7 @@ const SettingsWindow = () => {
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
                 <span className="fluent-setting-title">静默启动</span>
-                <span className="fluent-setting-description">随开机启动时隐藏主窗口，仅在后台托盘静默运行</span>
+                <span className="fluent-setting-description">启动时隐藏主窗口，保持在后台托盘静默运行</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -806,7 +806,7 @@ const SettingsWindow = () => {
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
                 <span className="fluent-setting-title">隐藏系统托盘图标</span>
-                <span className="fluent-setting-description">隐藏右下角通知区域的图标 (需要重启应用以完全应用)</span>
+                <span className="fluent-setting-description">不在任务栏通知区域显示图标，仅可通过快捷键呼出</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -825,8 +825,8 @@ const SettingsWindow = () => {
             {isMacPlatform() && (
               <div className="fluent-setting-card">
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">隐藏 macOS Dock 图标</span>
-                  <span className="fluent-setting-description">隐藏 Dock 上的图标</span>
+                  <span className="fluent-setting-title">隐藏程序坞 Dock 图标</span>
+                  <span className="fluent-setting-description">在 macOS 程序坞中隐去应用图标，保持桌面整洁</span>
                 </div>
                 <label className="fluent-switch">
                   <input
@@ -845,8 +845,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">边缘贴边停靠</span>
-                <span className="fluent-setting-description">窗口悬浮停靠在屏幕边缘时自动吸附隐藏</span>
+                <span className="fluent-setting-title">贴边自动收纳</span>
+                <span className="fluent-setting-description">当窗口贴近屏幕边缘时自动缩进隐藏，鼠标悬停时平滑划出</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -864,8 +864,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">显示快捷搜索框</span>
-                <span className="fluent-setting-description">展示主界面底部的全局搜索输入框</span>
+                <span className="fluent-setting-title">常驻主页搜索栏</span>
+                <span className="fluent-setting-description">在主窗口固定显示搜索框，关闭后可通过向上滚动列表唤出</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -883,8 +883,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">显示回到顶部浮动按钮</span>
-                <span className="fluent-setting-description">当剪贴板列表滚动较深时，展示一键回到顶部的悬浮按钮</span>
+                <span className="fluent-setting-title">回到顶部悬浮钮</span>
+                <span className="fluent-setting-description">列表滚动超过一屏时，在右下角显示一键直达首位的便捷按钮</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -902,8 +902,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">启用标签管理器</span>
-                <span className="fluent-setting-description">开启后可以为剪贴板项分配多色分类标签</span>
+                <span className="fluent-setting-title">启用标签分类</span>
+                <span className="fluent-setting-description">激活后可在主界面对历史记录进行多色标签归类与筛选</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -921,8 +921,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">启用表情包栏面板</span>
-                <span className="fluent-setting-description">开启后允许在主界面头部快速插入常用表情包和GIF图片</span>
+                <span className="fluent-setting-title">启用表情收藏面板</span>
+                <span className="fluent-setting-description">在主窗口顶栏展示常用表情包，支持图片和 GIF 快捷拖拽粘贴</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -940,8 +940,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">启用快捷键选择</span>
-                <span className="fluent-setting-description">允许在列表里使用方向键移动和选中项目</span>
+                <span className="fluent-setting-title">键盘方向键导航</span>
+                <span className="fluent-setting-description">允许使用键盘上下键 (↑/↓) 直接高亮选中历史条目，按回车粘贴</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -966,8 +966,8 @@ const SettingsWindow = () => {
                 }}
               >
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">按键与粘贴音效</span>
-                  <span className="fluent-setting-description">开启软件按键交互音效及成功粘贴提示声</span>
+                  <span className="fluent-setting-title">音效反馈</span>
+                  <span className="fluent-setting-description">管理软件内按键交互及粘贴动作的提示音效</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <label className="fluent-switch" onClick={e => e.stopPropagation()}>
@@ -989,8 +989,8 @@ const SettingsWindow = () => {
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">粘贴音效</span>
-                      <span className="fluent-setting-description">当成功模拟粘贴完成后播放提示音</span>
+                      <span className="fluent-setting-title">粘贴成功提示音</span>
+                      <span className="fluent-setting-description">当系统模拟粘贴指令完成后播放反馈音效</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1035,8 +1035,8 @@ const SettingsWindow = () => {
                 onClick={() => toggleExpander('apps')}
               >
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">默认打开程序</span>
-                  <span className="fluent-setting-description">配置剪贴板中不同格式条目的默认双击打开软件</span>
+                  <span className="fluent-setting-title">配置格式关联程序</span>
+                  <span className="fluent-setting-description">自定义双击不同格式历史条目时的默认打开应用</span>
                 </div>
                 <ChevronDown size={16} className={`fluent-chevron ${expandedCards['apps'] ? 'expanded' : ''}`} />
               </div>
@@ -1072,8 +1072,8 @@ const SettingsWindow = () => {
                 onClick={() => toggleExpander('dbPath')}
               >
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">数据库物理路径</span>
-                  <span className="fluent-setting-description">存储所有本地历史数据的文件路径</span>
+                  <span className="fluent-setting-title">本地数据库路径</span>
+                  <span className="fluent-setting-description">查看或修改本地剪贴板历史数据的物理存放位置</span>
                 </div>
                 <ChevronDown size={16} className={`fluent-chevron ${expandedCards['dbPath'] ? 'expanded' : ''}`} />
               </div>
@@ -1129,8 +1129,8 @@ const SettingsWindow = () => {
             
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">出厂重置所有设置</span>
-                <span className="fluent-setting-description">清除所有设置并恢复默认，这不会清空您的剪贴板数据库</span>
+                <span className="fluent-setting-title">重置应用配置</span>
+                <span className="fluent-setting-description">清除所有自定义设置，恢复初始状态；这不会清空您的历史记录数据库</span>
               </div>
               <button className="fluent-button" onClick={handleResetSettings} style={{ color: "#f44336", borderColor: "rgba(244,67,54,0.3)" }}>重置设置</button>
             </div>
@@ -1149,8 +1149,8 @@ const SettingsWindow = () => {
                 onClick={() => toggleExpander('hotkeys')}
               >
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">全局与核心热键</span>
-                  <span className="fluent-setting-description">设置各种唤起主界面和快捷粘贴的热键</span>
+                  <span className="fluent-setting-title">快捷键分配</span>
+                  <span className="fluent-setting-description">配置用于快速唤起窗口、启动搜索或特殊粘贴的全局热键</span>
                 </div>
                 <ChevronDown size={16} className={`fluent-chevron ${expandedCards['hotkeys'] ? 'expanded' : ''}`} />
               </div>
@@ -1159,8 +1159,8 @@ const SettingsWindow = () => {
                   {/* Global hotkey */}
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">主程序全局呼出快捷键</span>
-                      <span className="fluent-setting-description">全局任意地方快速调出主界面的快捷键</span>
+                      <span className="fluent-setting-title">唤起主窗口</span>
+                      <span className="fluent-setting-description">在任意软件中快速呼出或隐藏 TieZ 主界面的全局快捷组合键</span>
                     </div>
                     <div
                       className="fluent-hotkey-recorder"
@@ -1175,8 +1175,8 @@ const SettingsWindow = () => {
                   {/* Search hotkey */}
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">直接进入搜索热键</span>
-                      <span className="fluent-setting-description">激活后主窗口立即进入搜索状态</span>
+                      <span className="fluent-setting-title">唤起并直接搜索</span>
+                      <span className="fluent-setting-description">呼出 TieZ 窗口的同时，自动聚焦底部的搜索框以便直接输入</span>
                     </div>
                     <div
                       className="fluent-hotkey-recorder"
@@ -1191,8 +1191,8 @@ const SettingsWindow = () => {
                   {/* Rich text paste hotkey */}
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">强制富文本粘贴热键</span>
-                      <span className="fluent-setting-description">双击条目时模拟带格式粘贴的按键</span>
+                      <span className="fluent-setting-title">强制富文本粘贴</span>
+                      <span className="fluent-setting-description">对于收集到的带排版内容，绕过默认纯文本逻辑进行原格式粘贴</span>
                     </div>
                     <div
                       className="fluent-hotkey-recorder"
@@ -1214,8 +1214,8 @@ const SettingsWindow = () => {
                 onClick={() => toggleExpander('storage')}
               >
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">数据捕获与持久化限制</span>
-                  <span className="fluent-setting-description">开启与设置数据库的最大存储限额和过滤策略</span>
+                  <span className="fluent-setting-title">数据捕获与本地存储限制</span>
+                  <span className="fluent-setting-description">配置历史数据的存盘规则、最大保留数量与去重合并策略</span>
                 </div>
                 <ChevronDown size={16} className={`fluent-chevron ${expandedCards['storage'] ? 'expanded' : ''}`} />
               </div>
@@ -1240,8 +1240,8 @@ const SettingsWindow = () => {
                     <>
                       <div className="fluent-setting-card">
                         <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">启用条目存储数量上限</span>
-                          <span className="fluent-setting-description">限制数据库内的最大条目数</span>
+                          <span className="fluent-setting-title">启用最大存储上限</span>
+                          <span className="fluent-setting-description">限制本地数据库中允许保留的历史记录总条数</span>
                         </div>
                         <label className="fluent-switch">
                           <input
@@ -1259,8 +1259,8 @@ const SettingsWindow = () => {
                       {persistentLimitEnabled && (
                         <div className="fluent-setting-card">
                           <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">存储最大记录数限制</span>
-                            <span className="fluent-setting-description">历史超出此上限后会自动清理最旧的历史（范围：50-99999）</span>
+                            <span className="fluent-setting-title">配置最大记录条数</span>
+                            <span className="fluent-setting-description">设定允许保留的上限数 (50-99999)；超出时将按时间顺序覆盖最旧记录</span>
                           </div>
                           <FluentNumberBox
                             value={persistentLimit}
@@ -1278,8 +1278,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">重复内容合并去重</span>
-                      <span className="fluent-setting-description">再次复制已有内容时，不再创建新条目而是将已有条目移动到第一名</span>
+                      <span className="fluent-setting-title">合并重复记录</span>
+                      <span className="fluent-setting-description">再次复制已存在的内容时，将其移至列表首位并删除旧副本，防止列表重复</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1293,8 +1293,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">捕获剪贴板复制的文件</span>
-                      <span className="fluent-setting-description">是否收集并记录复制的操作系统文件</span>
+                      <span className="fluent-setting-title">捕获文件路径</span>
+                      <span className="fluent-setting-description">允许将复制的文件、文件夹及视频文件路径录入剪贴板历史列表</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1308,8 +1308,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">捕获富文本 (HTML/格式化文本)</span>
-                      <span className="fluent-setting-description">支持收集富文本并在双击条目时恢复格式粘贴</span>
+                      <span className="fluent-setting-title">收集富文本排版</span>
+                      <span className="fluent-setting-description">捕获文本的加粗、颜色等样式；双击可通过右键菜单粘回带格式文本</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1325,7 +1325,7 @@ const SettingsWindow = () => {
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
                         <span className="fluent-setting-title">富文本快照预览</span>
-                        <span className="fluent-setting-description">将 HTML 富文本转换为底板快照预览，提升显示稳定性但会占用更多内存</span>
+                        <span className="fluent-setting-description">将捕获的 HTML 渲染为临时内存图像以加快主列表显示速度，稍微增加内存占用</span>
                       </div>
                       <label className="fluent-switch">
                         <input
@@ -1352,7 +1352,7 @@ const SettingsWindow = () => {
               >
                 <div className="fluent-setting-info">
                   <span className="fluent-setting-title">智能粘贴行为</span>
-                  <span className="fluent-setting-description">双击条目粘贴后的软件自动化执行行为</span>
+                  <span className="fluent-setting-description">配置双击历史条目后，应用与系统输入焦点之间的交互策略</span>
                 </div>
                 <ChevronDown size={16} className={`fluent-chevron ${expandedCards['paste'] ? 'expanded' : ''}`} />
               </div>
@@ -1360,8 +1360,8 @@ const SettingsWindow = () => {
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">双击条目后自动模拟回车/粘贴</span>
-                      <span className="fluent-setting-description">在主界面双击内容后，自动退回原焦点输入框并模拟快捷键粘贴</span>
+                      <span className="fluent-setting-title">双击自动执行粘贴</span>
+                      <span className="fluent-setting-description">在主列表双击某条历史后，自动退回原焦点输入框并模拟快捷键粘贴</span>
                     </div>
                     <FluentDropdown
                       options={[
@@ -1382,8 +1382,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">粘贴后自动销毁删除条目</span>
-                      <span className="fluent-setting-description">普通条目粘贴一次后立即在数据库自动删除，已置顶或带标签的除外</span>
+                      <span className="fluent-setting-title">单次粘贴立即销毁</span>
+                      <span className="fluent-setting-description">历史内容粘贴一次后自动在数据库中删除；“已置顶”或“带标签”的内容除外</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1400,8 +1400,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">粘贴条目后置顶到第一名</span>
-                      <span className="fluent-setting-description">成功粘贴后，该历史记录自动移回列表首位，便于后续连续复制</span>
+                      <span className="fluent-setting-title">最近粘贴历史重排序</span>
+                      <span className="fluent-setting-description">粘贴历史项后，自动将其移动到主列表首位，方便后续连续多次使用</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1418,8 +1418,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">启用顺次粘贴模式</span>
-                      <span className="fluent-setting-description">按压设定热键时，将收集好的队列内容按顺序进行依次粘贴</span>
+                      <span className="fluent-setting-title">顺次粘贴队列</span>
+                      <span className="fluent-setting-description">开启后，使用顺次粘贴快捷键可以按复制时间先后顺序依次进行粘贴</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1437,8 +1437,8 @@ const SettingsWindow = () => {
                   {sequentialMode && (
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">顺次粘贴专属快捷键</span>
-                        <span className="fluent-setting-description">专门触发下一顺位粘贴组合键</span>
+                        <span className="fluent-setting-title">下一顺位粘贴快捷键</span>
+                        <span className="fluent-setting-description">在顺次粘贴模式下，触发取出并粘贴下一个队列项的快捷组合键</span>
                       </div>
                       <div
                         className="fluent-hotkey-recorder"
@@ -1463,8 +1463,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">启用全局隐私内容脱敏保护</span>
-                <span className="fluent-setting-description">自动在首页界面遮罩掩盖密码、手机号、验证码、链接等敏感文本</span>
+                <span className="fluent-setting-title">敏感信息自动脱敏</span>
+                <span className="fluent-setting-description">自动在主窗口列表中模糊遮蔽密码、手机号、验证码、链接等敏感文本</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -1488,8 +1488,8 @@ const SettingsWindow = () => {
                     onClick={() => toggleExpander('privKinds')}
                   >
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">受保护的敏感信息种类</span>
-                      <span className="fluent-setting-description">只有勾选的信息种类才会在首页界面被自动遮罩</span>
+                      <span className="fluent-setting-title">脱敏信息识别类型</span>
+                      <span className="fluent-setting-description">勾选触发自动脱敏过滤的内置字段；未勾选的种类将维持明文显示</span>
                     </div>
                     <ChevronDown size={16} className={`fluent-chevron ${expandedCards['privKinds'] ? 'expanded' : ''}`} />
                   </div>
@@ -1535,7 +1535,7 @@ const SettingsWindow = () => {
                   >
                     <div className="fluent-setting-info">
                       <span className="fluent-setting-title">脱敏遮罩显示控制</span>
-                      <span className="fluent-setting-description">配置前后明文显露位数及特殊邮箱后缀过滤</span>
+                      <span className="fluent-setting-description">配置敏感文本前后的明文保留位数，以及邮箱域名的脱敏策略</span>
                     </div>
                     <ChevronDown size={16} className={`fluent-chevron ${expandedCards['maskSettings'] ? 'expanded' : ''}`} />
                   </div>
@@ -1543,8 +1543,8 @@ const SettingsWindow = () => {
                     <div className="fluent-setting-expander-content">
                       <div className="fluent-setting-card">
                         <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">前部显露字符数</span>
-                          <span className="fluent-setting-description">敏感字符串开头不遮盖的字符位数 (0-20)</span>
+                          <span className="fluent-setting-title">头部明文保留字数</span>
+                          <span className="fluent-setting-description">敏感文本开头不执行遮蔽的字符长度，支持设置 0 至 20 个字符</span>
                         </div>
                         <FluentNumberBox
                           value={sensitiveMaskPrefixVisible}
@@ -1559,8 +1559,8 @@ const SettingsWindow = () => {
 
                       <div className="fluent-setting-card">
                         <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">后部显露字符数</span>
-                          <span className="fluent-setting-description">敏感字符串结尾不遮盖的字符位数 (0-20)</span>
+                          <span className="fluent-setting-title">尾部明文保留字数</span>
+                          <span className="fluent-setting-description">敏感文本结尾不执行遮蔽的字符长度，支持设置 0 至 20 个字符</span>
                         </div>
                         <FluentNumberBox
                           value={sensitiveMaskSuffixVisible}
@@ -1575,8 +1575,8 @@ const SettingsWindow = () => {
 
                       <div className="fluent-setting-card">
                         <div className="fluent-setting-info">
-                          <span className="fluent-setting-title">遮盖邮箱域名后缀</span>
-                          <span className="fluent-setting-description">开启后，邮箱 @ 后面的服务器域名部分也会被星号脱敏</span>
+                          <span className="fluent-setting-title">电子邮箱后缀脱敏</span>
+                          <span className="fluent-setting-description">开启后将同步模糊电子邮箱中 @ 符号后的域名部分，进一步保障隐私</span>
                         </div>
                         <label className="fluent-switch">
                           <input
@@ -1601,8 +1601,8 @@ const SettingsWindow = () => {
                     onClick={() => toggleExpander('customPriv')}
                   >
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">自定义敏感信息正则表达式</span>
-                      <span className="fluent-setting-description">根据自行编写的正则规则对特定字符组合进行匹配遮罩</span>
+                      <span className="fluent-setting-title">自定义正则屏蔽规则</span>
+                      <span className="fluent-setting-description">使用正则表达式定义需保护的私有内容格式；凡命中规则的字符都将被自动遮罩</span>
                     </div>
                     <ChevronDown size={16} className={`fluent-chevron ${expandedCards['customPriv'] ? 'expanded' : ''}`} />
                   </div>
@@ -1642,8 +1642,8 @@ const SettingsWindow = () => {
                 }}
               >
                 <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">局域网极速文件传输 (LAN)</span>
-                  <span className="fluent-setting-description">开启本地网页文件接收端，允许局域网手机/电脑扫码上传文件和聊天</span>
+                  <span className="fluent-setting-title">局域网极速文件传输</span>
+                  <span className="fluent-setting-description">开启本地文件传输网页，允许处于同一局域网的设备通过浏览器上传文件或聊天</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <label className="fluent-switch" onClick={e => e.stopPropagation()}>
@@ -1666,8 +1666,8 @@ const SettingsWindow = () => {
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">服务端口</span>
-                      <span className="fluent-setting-description">局域网接收端运行的端口号，默认 18888</span>
+                      <span className="fluent-setting-title">服务监听端口</span>
+                      <span className="fluent-setting-description">配置本地传输服务占用的网络通信端口，默认使用 18888</span>
                     </div>
                     <div className="fluent-input-wrapper" style={{ width: "80px" }}>
                       <input
@@ -1683,8 +1683,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">服务局域网 IP</span>
-                      <span className="fluent-setting-description">在浏览器里访问的地址，同局域网设备可用</span>
+                      <span className="fluent-setting-title">本地网络 IP 访问点</span>
+                      <span className="fluent-setting-description">提供给其他同局域网设备进行连接的浏览器访问基准地址</span>
                     </div>
                     {availableIps && availableIps.length > 1 && setLocalIp ? (
                       <FluentDropdown
@@ -1702,8 +1702,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">自动打开接收网页</span>
-                      <span className="fluent-setting-description">接收到文件后，主窗口自动显示传输列表</span>
+                      <span className="fluent-setting-title">接收文件后展示列表</span>
+                      <span className="fluent-setting-description">当本机接收到传输文件时，主界面自动弹窗展现局域网传输列表</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1717,8 +1717,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">服务自动关闭机制</span>
-                      <span className="fluent-setting-description">若检测到无任务且接收网页关闭后自动休眠关闭服务</span>
+                      <span className="fluent-setting-title">空闲自动关闭机制</span>
+                      <span className="fluent-setting-description">若连续 5 分钟没有任何文件接收活动且传输网页关闭，将自动关闭服务以节省资源</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1732,8 +1732,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">自动复制接收的文件</span>
-                      <span className="fluent-setting-description">文件接收完毕后自动放进您的剪贴板首位</span>
+                      <span className="fluent-setting-title">文件接收完毕自动复制</span>
+                      <span className="fluent-setting-description">局域网文件传输完成后，自动将该文件存入剪贴板首位以备随时粘贴</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1747,7 +1747,7 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                      <span className="fluent-setting-title">传输文件保存路径</span>
+                      <span className="fluent-setting-title">传输文件存储目录</span>
                       <button
                         className="fluent-button"
                         onClick={async () => {
@@ -1789,7 +1789,7 @@ const SettingsWindow = () => {
               >
                 <div className="fluent-setting-info">
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span className="fluent-setting-title">多端剪贴板/验证码同步 (MQTT)</span>
+                    <span className="fluent-setting-title">MQTT 跨端同步服务</span>
                     {mqttEnabled && (
                       <span
                         style={{
@@ -1799,7 +1799,7 @@ const SettingsWindow = () => {
                       />
                     )}
                   </div>
-                  <span className="fluent-setting-description">基于 MQTT 代理服务器实现云端剪贴板历史和短信验证码的低延迟同步</span>
+                  <span className="fluent-setting-description">基于 MQTT 代理服务器，在多端设备间进行剪贴板历史及短信验证码的低延迟同步</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <label className="fluent-switch" onClick={e => e.stopPropagation()}>
@@ -1821,8 +1821,8 @@ const SettingsWindow = () => {
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">连接协议</span>
-                      <span className="fluent-setting-description">mqtt:// 默认(1883), mqtts:// 安全加密(8883), ws:// websocket(8083)</span>
+                      <span className="fluent-setting-title">服务器通信协议</span>
+                      <span className="fluent-setting-description">支持基于 TCP 的 mqtt(s) 标准协议或基于浏览器的 ws(s) 网络套接字协议</span>
                     </div>
                     <FluentDropdown
                       options={[
@@ -1850,8 +1850,8 @@ const SettingsWindow = () => {
                   { (mqttProtocol === 'ws://' || mqttProtocol === 'wss://') && (
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">WS Path 路径</span>
-                        <span className="fluent-setting-description">网页同步服务特定的路径，默认 /mqtt</span>
+                        <span className="fluent-setting-title">WebSocket 访问路径</span>
+                        <span className="fluent-setting-description">当选用 ws:// 或 wss:// 协议时所需的特定服务器终端路由路径</span>
                       </div>
                       <div className="fluent-input-wrapper">
                         <input
@@ -1867,8 +1867,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">服务器主机地址</span>
-                      <span className="fluent-setting-description">MQTT 代理服务器的 IP 或域名</span>
+                      <span className="fluent-setting-title">代理服务器主机地址</span>
+                      <span className="fluent-setting-description">MQTT 代理服务器的 IP 地址或网络域名</span>
                     </div>
                     <div className="fluent-input-wrapper">
                       <input
@@ -1882,8 +1882,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">端口号</span>
-                      <span className="fluent-setting-description">MQTT 连接端口，默认 18883/1883</span>
+                      <span className="fluent-setting-title">通信端口号</span>
+                      <span className="fluent-setting-description">代理服务占用的端口，标准端口为 1883 (非加密) 或 8883 (SSL 加密)</span>
                     </div>
                     <div className="fluent-input-wrapper" style={{ width: "80px" }}>
                       <input
@@ -1898,8 +1898,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">用户名</span>
-                      <span className="fluent-setting-description">连接服务器所需的用户名，选填</span>
+                      <span className="fluent-setting-title">认证用户名</span>
+                      <span className="fluent-setting-description">可选；连接公共或私有代理服务器时所需的账户名称</span>
                     </div>
                     <div className="fluent-input-wrapper">
                       <input
@@ -1913,8 +1913,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">密码</span>
-                      <span className="fluent-setting-description">连接所需的密码，选填</span>
+                      <span className="fluent-setting-title">认证密码</span>
+                      <span className="fluent-setting-description">可选；与上述用户名配套使用的连接鉴权密码</span>
                     </div>
                     <div className="fluent-input-wrapper">
                       <input
@@ -1928,8 +1928,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">同步 Topic 订阅名</span>
-                      <span className="fluent-setting-description">所有端必须使用一致的主题名才可以实现互相通讯</span>
+                      <span className="fluent-setting-title">订阅主题 (Topic)</span>
+                      <span className="fluent-setting-description">所有需互通的多端设备必须使用完全相同的订阅主题名称来进行广播</span>
                     </div>
                     <div className="fluent-input-wrapper">
                       <input
@@ -1943,8 +1943,8 @@ const SettingsWindow = () => {
 
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">接收同步提醒推送通知</span>
-                      <span className="fluent-setting-description">当别的电脑或手机同步新验证码时发出系统弹窗通知</span>
+                      <span className="fluent-setting-title">同步成功系统通知</span>
+                      <span className="fluent-setting-description">当其他设备成功同步了新短信验证码或文本时，在系统右下角弹出气泡提醒</span>
                     </div>
                     <label className="fluent-switch">
                       <input
@@ -1973,7 +1973,7 @@ const SettingsWindow = () => {
                 >
                   <div className="fluent-setting-info">
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span className="fluent-setting-title">云端文件自动同步 (WebDAV)</span>
+                      <span className="fluent-setting-title">WebDAV 跨端数据云同步</span>
                       {cloudSyncEnabled && (
                         <span
                           style={{
@@ -1983,7 +1983,7 @@ const SettingsWindow = () => {
                         />
                       )}
                     </div>
-                    <span className="fluent-setting-description">支持将本地剪贴板数据加密同步备份至坚果云、Nextcloud 等 WebDAV 云盘</span>
+                    <span className="fluent-setting-description">支持将本地剪贴板数据加密上传备份至坚果云、Nextcloud 等 WebDAV 云盘，并在多端同步</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <label className="fluent-switch" onClick={e => e.stopPropagation()}>
@@ -2005,8 +2005,8 @@ const SettingsWindow = () => {
                   <div className="fluent-setting-expander-content">
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">定时自动静默同步</span>
-                        <span className="fluent-setting-description">自动在后台检测更新并同步备份</span>
+                        <span className="fluent-setting-title">后台定时静默同步</span>
+                        <span className="fluent-setting-description">在后台周期性自动执行本地历史记录与云端备份数据库的合并校准</span>
                       </div>
                       <label className="fluent-switch">
                         <input
@@ -2025,8 +2025,8 @@ const SettingsWindow = () => {
                       <>
                         <div className="fluent-setting-card">
                           <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">同步扫描周期 (秒)</span>
-                            <span className="fluent-setting-description">检查同步内容变化的频率 (5 - 3600)</span>
+                            <span className="fluent-setting-title">增量检查周期</span>
+                            <span className="fluent-setting-description">在后台轮询检查本地剪贴板内容变化并自动上传的频率 (范围：5 至 3600 秒)</span>
                           </div>
                           <FluentNumberBox
                             value={cloudSyncIntervalSec}
@@ -2041,8 +2041,8 @@ const SettingsWindow = () => {
 
                         <div className="fluent-setting-card">
                           <div className="fluent-setting-info">
-                            <span className="fluent-setting-title">全量物理快照间隔 (分钟)</span>
-                            <span className="fluent-setting-description">执行强力校准合并与垃圾清理的间隔</span>
+                            <span className="fluent-setting-title">全量对齐快照周期</span>
+                            <span className="fluent-setting-description">执行深层双向数据校准合并与云端过期历史清理的间隔频率</span>
                           </div>
                           <FluentNumberBox
                             value={cloudSyncSnapshotIntervalMin}
@@ -2059,8 +2059,8 @@ const SettingsWindow = () => {
 
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">WebDAV 服务商链接 URL</span>
-                        <span className="fluent-setting-description">提供 WebDAV 接口的服务商网络地址</span>
+                        <span className="fluent-setting-title">WebDAV 服务器地址</span>
+                        <span className="fluent-setting-description">您的云盘提供商提供的 WebDAV 访问端点网络地址</span>
                       </div>
                       <div className="fluent-input-wrapper">
                         <input
@@ -2075,8 +2075,8 @@ const SettingsWindow = () => {
 
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">WebDAV 登录用户名</span>
-                        <span className="fluent-setting-description">您的云盘登录账户名</span>
+                        <span className="fluent-setting-title">WebDAV 用户名</span>
+                        <span className="fluent-setting-description">用于登录 WebDAV 服务商的云端账户名</span>
                       </div>
                       <div className="fluent-input-wrapper">
                         <input
@@ -2091,8 +2091,8 @@ const SettingsWindow = () => {
 
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">WebDAV 专属应用授权密码</span>
-                        <span className="fluent-setting-description">推荐在云盘后台生成一个特定“应用密码”填写于此</span>
+                        <span className="fluent-setting-title">应用专用授权密码</span>
+                        <span className="fluent-setting-description">多数云盘服务商为保障安全，要求并推荐在后台生成“应用专用密码”填写在此</span>
                       </div>
                       <div className="fluent-input-wrapper">
                         <input
@@ -2107,8 +2107,8 @@ const SettingsWindow = () => {
 
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">同步根目录文件夹名称</span>
-                        <span className="fluent-setting-description">云盘中保存备份数据的根目录，默认 tiez-sync</span>
+                        <span className="fluent-setting-title">同步数据根目录</span>
+                        <span className="fluent-setting-description">在您的云盘中存放此应用同步数据的专用目录名称</span>
                       </div>
                       <div className="fluent-input-wrapper">
                         <input
@@ -2143,8 +2143,8 @@ const SettingsWindow = () => {
 
                     <div className="fluent-setting-card">
                       <div className="fluent-setting-info">
-                        <span className="fluent-setting-title">立即触发数据强制同步</span>
-                        <span className="fluent-setting-description">手动强制执行一次云端数据同步比对</span>
+                        <span className="fluent-setting-title">强制全量数据同步</span>
+                        <span className="fluent-setting-description">立即手动触发一次本地数据与云端备份文件的强力合并与比对</span>
                       </div>
                       <button
                         className="fluent-button"
@@ -2168,8 +2168,8 @@ const SettingsWindow = () => {
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
-                <span className="fluent-setting-title">启用内置 AI 智能菜单</span>
-                <span className="fluent-setting-description">开启后对条目鼠标右键或点击菜单，可触发快速AI翻译、多端嘴替和智能任务润色</span>
+                <span className="fluent-setting-title">启用内置 AI 助手功能</span>
+                <span className="fluent-setting-description">在条目右键菜单中加入大模型处理入口，支持对剪贴板内容进行快速翻译、解释或润色</span>
               </div>
               <label className="fluent-switch">
                 <input
@@ -2193,8 +2193,8 @@ const SettingsWindow = () => {
                     onClick={() => toggleExpander('aiModels')}
                   >
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">AI 连接模型库管理</span>
-                      <span className="fluent-setting-description">管理与测试第三方 OpenAI / Claude 兼容的模型端点和 API 密钥</span>
+                      <span className="fluent-setting-title">模型库配置管理</span>
+                      <span className="fluent-setting-description">添加、修改并测试第三方兼容 OpenAI/Claude 的大模型连接端点和 API 密钥</span>
                     </div>
                     <ChevronDown size={16} className={`fluent-chevron ${expandedCards['aiModels'] ? 'expanded' : ''}`} />
                   </div>
@@ -2264,8 +2264,8 @@ const SettingsWindow = () => {
                     onClick={() => toggleExpander('aiStrategy')}
                   >
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">应用功能场景的模型绑定</span>
-                      <span className="fluent-setting-description">配置智能任务润色、嘴替多策略调用的首选执行模型</span>
+                      <span className="fluent-setting-title">功能场景模型绑定</span>
+                      <span className="fluent-setting-description">分别为智能任务执行、对话多端嘴替、快速翻译三个场景分配专属的模型配置</span>
                     </div>
                     <ChevronDown size={16} className={`fluent-chevron ${expandedCards['aiStrategy'] ? 'expanded' : ''}`} />
                   </div>
@@ -2302,8 +2302,8 @@ const SettingsWindow = () => {
                 {/* Translations and budget */}
                 <div className="fluent-setting-card">
                   <div className="fluent-setting-info">
-                    <span className="fluent-setting-title">默认智能翻译目标语言</span>
-                    <span className="fluent-setting-description">AI 翻译快捷菜单执行后输出的偏好语言</span>
+                    <span className="fluent-setting-title">默认智能翻译语言</span>
+                    <span className="fluent-setting-description">执行 AI 翻译快捷功能后，偏好输出的译文目标语种</span>
                   </div>
                   <FluentDropdown
                     options={[
@@ -2324,8 +2324,8 @@ const SettingsWindow = () => {
 
                 <div className="fluent-setting-card">
                   <div className="fluent-setting-info">
-                    <span className="fluent-setting-title">AI 模型深度思考 Token 限制</span>
-                    <span className="fluent-setting-description">允许推理模型执行思考链条的最大上限 Token 数</span>
+                    <span className="fluent-setting-title">推理深度思考限制</span>
+                    <span className="fluent-setting-description">支持推理大模型思考链条的最大上限 Token 预算，合理控制处理时长与成本</span>
                   </div>
                   <FluentNumberBox
                     value={aiThinkingBudget}
@@ -2620,7 +2620,7 @@ const SettingsWindow = () => {
         {/* Tab 7: Advanced Rules */}
         {activeTab === "advanced" && (
           <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
-            <h2 className="fluent-page-header">{t("advanced_settings") || "高级设置与策略"}</h2>
+            <h2 className="fluent-page-header">{t("advanced_settings") || "数据清洗与过滤"}</h2>
             <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
               <AdvancedSettingsGroup
                 t={t}
