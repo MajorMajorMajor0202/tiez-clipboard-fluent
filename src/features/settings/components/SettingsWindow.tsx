@@ -1059,48 +1059,67 @@ const SettingsWindow = () => {
               )}
             </div>
 
-            {/* Data storage Card */}
-            <h3 className="fluent-section-title">存储与数据库</h3>
-            <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {/* Data storage Card (Collapsible Expander) */}
+            <div className="fluent-setting-expander">
+              <div
+                className={`fluent-setting-expander-header ${expandedCards['dbPath'] ? 'expanded' : ''}`}
+                onClick={() => toggleExpander('dbPath')}
+              >
                 <div className="fluent-setting-info">
                   <span className="fluent-setting-title">数据库物理路径</span>
                   <span className="fluent-setting-description">存储所有本地历史数据的文件路径</span>
                 </div>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    className="fluent-button"
-                    onClick={async () => {
-                      const { open, ask, message } = await import("@tauri-apps/plugin-dialog");
-                      open({ directory: true, multiple: false, title: t('change_data_path') })
-                        .then(async (selected) => {
-                          if (selected) {
-                            const newPath = selected as string;
-                            const confirm = await ask(
-                              t('data_move_confirm').replace('{path}', newPath),
-                              { title: t('change_data_path'), kind: 'warning' }
-                            );
-                            if (confirm) {
-                              try {
-                                await invoke("set_data_path", { newPath });
-                                await message(t('data_move_success'), { title: t('notice'), kind: 'info' });
-                                await invoke("relaunch");
-                              } catch (e) {
-                                pushToast(String(e));
-                              }
-                            }
-                          }
-                        });
-                    }}
-                  >
-                    搬迁数据库
-                  </button>
-                  <button className="fluent-button" onClick={() => invoke("open_data_folder").catch(console.error)}>
-                    打开数据目录
-                  </button>
-                </div>
+                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['dbPath'] ? 'expanded' : ''}`} />
               </div>
-              <div className="fluent-value-display" style={{ wordBreak: "break-all" }}>{dataPath}</div>
+              {expandedCards['dbPath'] && (
+                <div className="fluent-setting-expander-content">
+                  <div className="fluent-setting-card" style={{ background: "transparent", border: "none", padding: "8px 12px", gap: "16px", alignItems: "center" }}>
+                    <div className="fluent-value-display" style={{ wordBreak: "break-all", fontSize: "12px", flex: 1, color: "var(--text-secondary)" }}>
+                      {dataPath}
+                    </div>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center", flexShrink: 0 }}>
+                      <button
+                        className="fluent-button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(dataPath);
+                          pushToast(t('copied') || "已复制");
+                        }}
+                        style={{ padding: "4px 10px", height: "28px", fontSize: "12px" }}
+                      >
+                        复制路径
+                      </button>
+                      <button
+                        className="fluent-button"
+                        onClick={async () => {
+                          const { open, ask, message } = await import("@tauri-apps/plugin-dialog");
+                          open({ directory: true, multiple: false, title: t('change_data_path') })
+                            .then(async (selected) => {
+                              if (selected) {
+                                const newPath = selected as string;
+                                const confirm = await ask(
+                                  t('data_move_confirm').replace('{path}', newPath),
+                                  { title: t('change_data_path'), kind: 'warning' }
+                                );
+                                if (confirm) {
+                                  try {
+                                    await invoke("set_data_path", { newPath });
+                                    await message(t('data_move_success'), { title: t('notice'), kind: 'info' });
+                                    await invoke("relaunch");
+                                  } catch (e) {
+                                    pushToast(String(e));
+                                  }
+                                }
+                              }
+                            });
+                        }}
+                        style={{ padding: "4px 10px", height: "28px", fontSize: "12px" }}
+                      >
+                        搬迁数据库
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="fluent-setting-card">
