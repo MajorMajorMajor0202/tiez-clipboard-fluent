@@ -1019,6 +1019,9 @@ const SettingsWindow = () => {
                       step="0.01"
                       value={soundVolume}
                       onChange={(e) => setSoundVolume(parseFloat(e.target.value))}
+                      style={{
+                        ['--range-progress' as any]: `${soundVolume * 100}%`
+                      }}
                     />
                   </div>
                 </div>
@@ -2466,6 +2469,9 @@ const SettingsWindow = () => {
                         setClipboardItemFontSize(val);
                         saveAppSetting('clipboard_item_font_size', String(val));
                       }}
+                      style={{
+                        ['--range-progress' as any]: `${((clipboardItemFontSize - 11) / 7) * 100}%`
+                      }}
                     />
                   </div>
 
@@ -2483,6 +2489,9 @@ const SettingsWindow = () => {
                         const val = parseInt(e.target.value);
                         setClipboardTagFontSize(val);
                         saveAppSetting('clipboard_tag_font_size', String(val));
+                      }}
+                      style={{
+                        ['--range-progress' as any]: `${((clipboardTagFontSize - 8) / 6) * 100}%`
                       }}
                     />
                   </div>
@@ -2569,6 +2578,9 @@ const SettingsWindow = () => {
                                   setCustomBackgroundOpacity(val);
                                   saveAppSetting('custom_background_opacity', String(val));
                                 }}
+                                style={{
+                                  ['--range-progress' as any]: `${customBackgroundOpacity}%`
+                                }}
                               />
                             </div>
                           </>
@@ -2591,6 +2603,9 @@ const SettingsWindow = () => {
                             const val = parseInt(e.target.value);
                             setSurfaceOpacity(val);
                             saveAppSetting('surface_opacity', String(val));
+                          }}
+                          style={{
+                            ['--range-progress' as any]: `${surfaceOpacity}%`
                           }}
                         />
                       </div>

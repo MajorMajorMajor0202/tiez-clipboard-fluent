@@ -505,27 +505,92 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 /* Custom range slider */
 .fluent-range {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: var(--line-strong);
+  background:
+    linear-gradient(var(--accent-color), var(--accent-color)) 0/ var(--range-progress, 0%) 100% no-repeat,
+    rgba(0, 0, 0, 0.08);
   outline: none;
   cursor: pointer;
+}
+
+.dark-mode .fluent-range {
+  background:
+    linear-gradient(var(--accent-color), var(--accent-color)) 0/ var(--range-progress, 0%) 100% no-repeat,
+    rgba(255, 255, 255, 0.12);
+}
+
+.fluent-range::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+  border: none;
 }
 
 .fluent-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--accent-color);
+  background-color: var(--accent-color);
+  border: 5px solid #ffffff;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: transform 0.1s;
+  margin-top: -7px;
+  transition: border-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fluent-range::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+.fluent-range:hover::-webkit-slider-thumb {
+  border-width: 3px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.fluent-range:active::-webkit-slider-thumb {
+  border-width: 5.8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Firefox Support */
+.fluent-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+}
+
+.dark-mode .fluent-range::-moz-range-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.fluent-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent-color);
+}
+
+.fluent-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  border: 5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: border-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.fluent-range:hover::-moz-range-thumb {
+  border-width: 3px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.fluent-range:active::-moz-range-thumb {
+  border-width: 5.8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 /* Chevron animate */
