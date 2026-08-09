@@ -10,7 +10,10 @@ import {
   Cpu,
   Palette,
   Settings,
-  Edit3
+  Edit3,
+  Activity,
+  Trash2,
+  Plus
 } from "lucide-react";
 import { translations } from "../../../locales";
 import { useAppState } from "../../app/hooks/useAppState";
@@ -2193,53 +2196,59 @@ const SettingsWindow = () => {
                     <ChevronDown size={16} className={`fluent-chevron ${expandedCards['aiModels'] ? 'expanded' : ''}`} />
                   </div>
                   {expandedCards['aiModels'] && (
-                    <div className="fluent-setting-expander-content" style={{ padding: "12px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                        <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)" }}>当前模型配置列表</span>
-                        <button
-                          className="fluent-button"
-                          style={{ padding: "2px 8px", fontSize: "11px" }}
-                          onClick={() => setEditingProfile({ isNew: true, baseUrl: 'https://api.longcat.chat/openai/v1', apiKey: '', model: '', enableThinking: false })}
-                        >
-                          + 添加模型
-                        </button>
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                        {aiProfiles.map(profile => (
-                          <div
-                            key={profile.id}
-                            className="fluent-setting-card"
-                            style={{ padding: "8px 12px", marginBottom: "0" }}
-                          >
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: 0 }}>
-                              <span
-                                style={{
-                                  width: '8px', height: '8px', borderRadius: '50%',
-                                  backgroundColor:
-                                    profileStatuses[profile.id] === 'success' ? '#4CAF50' :
-                                      profileStatuses[profile.id] === 'error' ? '#F44336' :
-                                        profileStatuses[profile.id] === 'loading' ? '#FF9800' : '#999',
-                                }}
-                              />
-                              <div style={{ minWidth: 0 }}>
-                                <div style={{ fontSize: "13px", fontWeight: "600", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                                  {profile.model}
-                                </div>
-                                <div style={{ fontSize: "10px", color: "var(--text-secondary)" }}>
-                                  {profile.baseUrl}
+                    <div className="fluent-setting-expander-content">
+                      <div className="fluent-model-list">
+                        {aiProfiles.map(profile => {
+                          const status = profileStatuses[profile.id] || 'idle';
+                          return (
+                            <div key={profile.id} className="fluent-model-item">
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
+                                <span className={`status-indicator-dot ${status}`} />
+                                <div style={{ minWidth: 0 }}>
+                                  <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                                    {profile.model}
+                                  </div>
+                                  <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                                    {profile.baseUrl}
+                                  </div>
                                 </div>
                               </div>
+                              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                <button
+                                  className="fluent-model-action-btn"
+                                  title="测试连接"
+                                  onClick={() => checkModelStatus(profile)}
+                                >
+                                  <Activity size={14} />
+                                </button>
+                                <button
+                                  className="fluent-model-action-btn"
+                                  title="编辑配置"
+                                  onClick={() => setEditingProfile(profile)}
+                                >
+                                  <Edit3 size={14} />
+                                </button>
+                                {!['lc_flash_v1', 'lc_think_v1', 'lc_think_2601_v1'].includes(profile.id) && (
+                                  <button
+                                    className="fluent-model-action-btn delete-btn"
+                                    title="删除配置"
+                                    onClick={() => handleDeleteProfile(profile.id)}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                            <div style={{ display: "flex", gap: "4px" }}>
-                              <button className="fluent-button" style={{ padding: "4px 8px" }} onClick={() => checkModelStatus(profile)}>测试</button>
-                              <button className="fluent-button" style={{ padding: "4px 8px" }} onClick={() => setEditingProfile(profile)}>编辑</button>
-                              {!['lc_flash_v1', 'lc_think_v1', 'lc_think_2601_v1'].includes(profile.id) && (
-                                <button className="fluent-button" style={{ padding: "4px 8px", color: "#f44336" }} onClick={() => handleDeleteProfile(profile.id)}>删除</button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
+                      </div>
+
+                      <div
+                        className="fluent-model-add-card"
+                        onClick={() => setEditingProfile({ isNew: true, baseUrl: 'https://api.longcat.chat/openai/v1', apiKey: '', model: '', enableThinking: false })}
+                      >
+                        <Plus size={14} />
+                        <span>添加自定义 AI 模型配置</span>
                       </div>
                     </div>
                   )}
