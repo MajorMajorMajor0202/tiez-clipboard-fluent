@@ -24,6 +24,31 @@ interface FileServerStatusPayload {
   ip: string;
 }
 
+// Module-level singleton: only run the expensive app scan once per session,
+// even if multiple components call useAppBootstrap (e.g. App.tsx, SettingsWindow, AdvancedSettingsWindow).
+let appScanPromise: Promise<InstalledAppOption[]> | null = null;
+
+const getInstalledApps = (): Promise<InstalledAppOption[]> => {
+  if (!appScanPromise) {
+    appScanPromise = invoke<{ name: string; path: string }[]>("scan_installed_apps")
+      .then((apps) => {
+        if (apps && apps.length > 0) {
+          return apps
+            .map((a) => ({ label: a.name, value: a.path }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+        }
+        console.warn("No apps found by scan_installed_apps");
+        return [];
+      })
+      .catch((err) => {
+        console.error("Failed to scan apps:", err);
+        appScanPromise = null; // allow retry on next mount if it failed
+        return [];
+      });
+  }
+  return appScanPromise;
+};
+
 export const useAppBootstrap = ({
   fetchEffectiveTransferPath,
   setDataPath,
@@ -43,21 +68,10 @@ export const useAppBootstrap = ({
 
     invoke<string>("get_data_path").then(setDataPath).catch(console.error);
 
-    invoke<{ name: string; path: string }[]>("scan_installed_apps")
-      .then((apps) => {
-        if (apps && apps.length > 0) {
-          setInstalledApps(
-            apps
-              .map((a) => ({ label: a.name, value: a.path }))
-              .sort((a, b) => a.label.localeCompare(b.label))
-          );
-        } else {
-          console.warn("No apps found by scan_installed_apps");
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to scan apps:", err);
-      });
+    // Use the singleton so scan_installed_apps is only called once per session
+    getInstalledApps().then((apps) => {
+      if (apps.length > 0) setInstalledApps(apps);
+    });
 
     invoke<boolean>("is_autostart_enabled").then(setAutoStart).catch(console.error);
 
