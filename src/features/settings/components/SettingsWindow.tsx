@@ -1073,50 +1073,47 @@ const SettingsWindow = () => {
               </div>
               {expandedCards['dbPath'] && (
                 <div className="fluent-setting-expander-content">
-                  <div className="fluent-setting-card" style={{ background: "transparent", border: "none", padding: "8px 12px", gap: "16px", alignItems: "center" }}>
-                    <div className="fluent-value-display" style={{ wordBreak: "break-all", fontSize: "12px", flex: 1, color: "var(--text-secondary)" }}>
-                      {dataPath}
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center", flexShrink: 0 }}>
-                      <button
-                        className="fluent-button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(dataPath);
-                          pushToast(t('copied') || "已复制");
-                        }}
-                        style={{ padding: "4px 10px", height: "28px", fontSize: "12px" }}
-                      >
-                        复制路径
-                      </button>
-                      <button
-                        className="fluent-button"
-                        onClick={async () => {
-                          const { open, ask, message } = await import("@tauri-apps/plugin-dialog");
-                          open({ directory: true, multiple: false, title: t('change_data_path') })
-                            .then(async (selected) => {
-                              if (selected) {
-                                const newPath = selected as string;
-                                const confirm = await ask(
-                                  t('data_move_confirm').replace('{path}', newPath),
-                                  { title: t('change_data_path'), kind: 'warning' }
-                                );
-                                if (confirm) {
-                                  try {
-                                    await invoke("set_data_path", { newPath });
-                                    await message(t('data_move_success'), { title: t('notice'), kind: 'info' });
-                                    await invoke("relaunch");
-                                  } catch (e) {
-                                    pushToast(String(e));
-                                  }
+                  <div className="fluent-setting-card" style={{ padding: "8px 12px", gap: "12px", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      className="fluent-input"
+                      value={dataPath}
+                      readOnly
+                      onClick={(e) => e.currentTarget.select()}
+                      style={{ flex: 1, minWidth: 0, textOverflow: "ellipsis" }}
+                    />
+                    <button
+                      className="fluent-button"
+                      onClick={async () => {
+                        const { open, ask, message } = await import("@tauri-apps/plugin-dialog");
+                        open({ directory: true, multiple: false, title: t('change_data_path') })
+                          .then(async (selected) => {
+                            if (selected) {
+                              const newPath = selected as string;
+                              const confirm = await ask(
+                                t('data_move_confirm').replace('{path}', newPath),
+                                { title: t('change_data_path'), kind: 'warning' }
+                              );
+                              if (confirm) {
+                                try {
+                                  await invoke("set_data_path", { newPath });
+                                  await message(t('data_move_success'), { title: t('notice'), kind: 'info' });
+                                  await invoke("relaunch");
+                                } catch (e) {
+                                  pushToast(String(e));
                                 }
                               }
-                            });
-                        }}
-                        style={{ padding: "4px 10px", height: "28px", fontSize: "12px" }}
-                      >
-                        搬迁数据库
-                      </button>
-                    </div>
+                            }
+                          });
+                      }}
+                      style={{
+                        flexShrink: 0,
+                        background: "var(--bg-button)",
+                        boxShadow: "none"
+                      }}
+                    >
+                      搬迁数据库
+                    </button>
                   </div>
                 </div>
               )}
