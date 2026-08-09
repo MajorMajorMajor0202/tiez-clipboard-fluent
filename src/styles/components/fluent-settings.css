@@ -372,11 +372,16 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   color: var(--text-primary);
   font-size: 13px;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.fluent-input:hover {
+  border-color: var(--line-strong);
 }
 
 .fluent-input:focus {
-  border-color: var(--accent-color);
+  border-color: var(--line-strong);
+  background-color: var(--bg-input);
 }
 
 .fluent-button {

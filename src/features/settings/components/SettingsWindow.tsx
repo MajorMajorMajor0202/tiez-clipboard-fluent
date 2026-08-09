@@ -1074,14 +1074,16 @@ const SettingsWindow = () => {
               {expandedCards['dbPath'] && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card" style={{ padding: "8px 12px", gap: "12px", alignItems: "center" }}>
-                    <input
-                      type="text"
-                      className="fluent-input"
-                      value={dataPath}
-                      readOnly
-                      onClick={(e) => e.currentTarget.select()}
-                      style={{ flex: 1, minWidth: 0, textOverflow: "ellipsis" }}
-                    />
+                    <div className="fluent-input-wrapper" style={{ flex: 1, minWidth: 0 }}>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={dataPath}
+                        readOnly
+                        onClick={(e) => e.currentTarget.select()}
+                        style={{ flex: 1, minWidth: 0, textOverflow: "ellipsis" }}
+                      />
+                    </div>
                     <button
                       className="fluent-button"
                       onClick={async () => {
@@ -1661,14 +1663,16 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">服务端口</span>
                       <span className="fluent-setting-description">局域网接收端运行的端口号，默认 18888</span>
                     </div>
-                    <input
-                      type="text"
-                      className="fluent-input"
-                      style={{ width: "80px", textAlign: "center" }}
-                      value={fileServerPort}
-                      onChange={e => setFileServerPort(e.target.value)}
-                      onBlur={() => applyFileServerPort(fileServerPort)}
-                    />
+                    <div className="fluent-input-wrapper" style={{ width: "80px" }}>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        style={{ width: "100%", textAlign: "center" }}
+                        value={fileServerPort}
+                        onChange={e => setFileServerPort(e.target.value)}
+                        onBlur={() => applyFileServerPort(fileServerPort)}
+                      />
+                    </div>
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1843,13 +1847,15 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">WS Path 路径</span>
                         <span className="fluent-setting-description">网页同步服务特定的路径，默认 /mqtt</span>
                       </div>
-                      <input
-                        type="text"
-                        className="fluent-input"
-                        value={mqttWsPath}
-                        onChange={(e) => { setMqttWsPath(e.target.value); saveMqtt('mqtt_ws_path', e.target.value); }}
-                        placeholder="/mqtt"
-                      />
+                      <div className="fluent-input-wrapper">
+                        <input
+                          type="text"
+                          className="fluent-input"
+                          value={mqttWsPath}
+                          onChange={(e) => { setMqttWsPath(e.target.value); saveMqtt('mqtt_ws_path', e.target.value); }}
+                          placeholder="/mqtt"
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -1858,12 +1864,14 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">服务器主机地址</span>
                       <span className="fluent-setting-description">MQTT 代理服务器的 IP 或域名</span>
                     </div>
-                    <input
-                      type="text"
-                      className="fluent-input"
-                      value={mqttServer}
-                      onChange={(e) => { setMqttServer(e.target.value); saveMqtt('mqtt_server', e.target.value); }}
-                    />
+                    <div className="fluent-input-wrapper">
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={mqttServer}
+                        onChange={(e) => { setMqttServer(e.target.value); saveMqtt('mqtt_server', e.target.value); }}
+                      />
+                    </div>
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1871,13 +1879,15 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">端口号</span>
                       <span className="fluent-setting-description">MQTT 连接端口，默认 18883/1883</span>
                     </div>
-                    <input
-                      type="text"
-                      className="fluent-input"
-                      style={{ width: "80px", textAlign: "center" }}
-                      value={mqttPort}
-                      onChange={(e) => { setMqttPort(e.target.value); saveMqtt('mqtt_port', e.target.value); }}
-                    />
+                    <div className="fluent-input-wrapper" style={{ width: "80px" }}>
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        style={{ width: "100%", textAlign: "center" }}
+                        value={mqttPort}
+                        onChange={(e) => { setMqttPort(e.target.value); saveMqtt('mqtt_port', e.target.value); }}
+                      />
+                    </div>
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1885,12 +1895,14 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">用户名</span>
                       <span className="fluent-setting-description">连接服务器所需的用户名，选填</span>
                     </div>
-                    <input
-                      type="text"
-                      className="fluent-input"
-                      value={mqttUser}
-                      onChange={(e) => { setMqttUser(e.target.value); saveMqtt('mqtt_username', e.target.value); }}
-                    />
+                    <div className="fluent-input-wrapper">
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={mqttUser}
+                        onChange={(e) => { setMqttUser(e.target.value); saveMqtt('mqtt_username', e.target.value); }}
+                      />
+                    </div>
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1898,12 +1910,14 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">密码</span>
                       <span className="fluent-setting-description">连接所需的密码，选填</span>
                     </div>
-                    <input
-                      type="password"
-                      className="fluent-input"
-                      value={mqttPass}
-                      onChange={(e) => { setMqttPass(e.target.value); saveMqtt('mqtt_password', e.target.value); }}
-                    />
+                    <div className="fluent-input-wrapper">
+                      <input
+                        type="password"
+                        className="fluent-input"
+                        value={mqttPass}
+                        onChange={(e) => { setMqttPass(e.target.value); saveMqtt('mqtt_password', e.target.value); }}
+                      />
+                    </div>
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1911,12 +1925,14 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">同步 Topic 订阅名</span>
                       <span className="fluent-setting-description">所有端必须使用一致的主题名才可以实现互相通讯</span>
                     </div>
-                    <input
-                      type="text"
-                      className="fluent-input"
-                      value={mqttTopic}
-                      onChange={(e) => { setMqttTopic(e.target.value); saveMqtt('mqtt_topic', e.target.value); }}
-                    />
+                    <div className="fluent-input-wrapper">
+                      <input
+                        type="text"
+                        className="fluent-input"
+                        value={mqttTopic}
+                        onChange={(e) => { setMqttTopic(e.target.value); saveMqtt('mqtt_topic', e.target.value); }}
+                      />
+                    </div>
                   </div>
 
                   <div className="fluent-setting-card">
@@ -2040,13 +2056,15 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">WebDAV 服务商链接 URL</span>
                         <span className="fluent-setting-description">提供 WebDAV 接口的服务商网络地址</span>
                       </div>
-                      <input
-                        type="text"
-                        className="fluent-input"
-                        value={cloudSyncWebdavUrl}
-                        onChange={e => setCloudSyncWebdavUrl(e.target.value)}
-                        onBlur={() => saveCloudSync('cloud_sync_webdav_url', cloudSyncWebdavUrl.trim())}
-                      />
+                      <div className="fluent-input-wrapper">
+                        <input
+                          type="text"
+                          className="fluent-input"
+                          value={cloudSyncWebdavUrl}
+                          onChange={e => setCloudSyncWebdavUrl(e.target.value)}
+                          onBlur={() => saveCloudSync('cloud_sync_webdav_url', cloudSyncWebdavUrl.trim())}
+                        />
+                      </div>
                     </div>
 
                     <div className="fluent-setting-card">
@@ -2054,13 +2072,15 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">WebDAV 登录用户名</span>
                         <span className="fluent-setting-description">您的云盘登录账户名</span>
                       </div>
-                      <input
-                        type="text"
-                        className="fluent-input"
-                        value={cloudSyncWebdavUsername}
-                        onChange={e => setCloudSyncWebdavUsername(e.target.value)}
-                        onBlur={() => saveCloudSync('cloud_sync_webdav_username', cloudSyncWebdavUsername.trim())}
-                      />
+                      <div className="fluent-input-wrapper">
+                        <input
+                          type="text"
+                          className="fluent-input"
+                          value={cloudSyncWebdavUsername}
+                          onChange={e => setCloudSyncWebdavUsername(e.target.value)}
+                          onBlur={() => saveCloudSync('cloud_sync_webdav_username', cloudSyncWebdavUsername.trim())}
+                        />
+                      </div>
                     </div>
 
                     <div className="fluent-setting-card">
@@ -2068,13 +2088,15 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">WebDAV 专属应用授权密码</span>
                         <span className="fluent-setting-description">推荐在云盘后台生成一个特定“应用密码”填写于此</span>
                       </div>
-                      <input
-                        type="password"
-                        className="fluent-input"
-                        value={cloudSyncWebdavPassword}
-                        onChange={e => setCloudSyncWebdavPassword(e.target.value)}
-                        onBlur={() => saveCloudSync('cloud_sync_webdav_password', cloudSyncWebdavPassword)}
-                      />
+                      <div className="fluent-input-wrapper">
+                        <input
+                          type="password"
+                          className="fluent-input"
+                          value={cloudSyncWebdavPassword}
+                          onChange={e => setCloudSyncWebdavPassword(e.target.value)}
+                          onBlur={() => saveCloudSync('cloud_sync_webdav_password', cloudSyncWebdavPassword)}
+                        />
+                      </div>
                     </div>
 
                     <div className="fluent-setting-card">
@@ -2082,13 +2104,15 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">同步根目录文件夹名称</span>
                         <span className="fluent-setting-description">云盘中保存备份数据的根目录，默认 tiez-sync</span>
                       </div>
-                      <input
-                        type="text"
-                        className="fluent-input"
-                        value={cloudSyncWebdavBasePath}
-                        onChange={e => setCloudSyncWebdavBasePath(e.target.value)}
-                        onBlur={() => saveCloudSync('cloud_sync_webdav_base_path', cloudSyncWebdavBasePath.trim() || 'tiez-sync')}
-                      />
+                      <div className="fluent-input-wrapper">
+                        <input
+                          type="text"
+                          className="fluent-input"
+                          value={cloudSyncWebdavBasePath}
+                          onChange={e => setCloudSyncWebdavBasePath(e.target.value)}
+                          onBlur={() => saveCloudSync('cloud_sync_webdav_base_path', cloudSyncWebdavBasePath.trim() || 'tiez-sync')}
+                        />
+                      </div>
                     </div>
 
                     {/* Cloud Status Box */}

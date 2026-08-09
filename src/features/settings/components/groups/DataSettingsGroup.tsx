@@ -20,26 +20,27 @@ const DataSettingsGroup = ({ t, collapsed, onToggle, dataPath }: DataSettingsGro
                 <div className="setting-item column no-border" style={{ gap: '8px' }}>
                     <span className="item-label" style={{ textTransform: 'uppercase', fontSize: '11px', opacity: 0.8 }}>{t('data_path')}</span>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
-                        <input
-                            type="text"
-                            value={dataPath}
-                            readOnly
-                            onClick={(e) => e.currentTarget.select()}
-                            style={{
-                                flex: 1,
-                                minWidth: 0,
-                                textOverflow: 'ellipsis',
-                                fontSize: '12px',
-                                padding: '6px 10px',
-                                borderRadius: '4px',
-                                border: '1px solid var(--line-soft)',
-                                background: 'var(--bg-input)',
-                                color: 'var(--text-primary)',
-                                outline: 'none',
-                                boxSizing: 'border-box',
-                                height: '28px'
-                            }}
-                        />
+                        <div className="fluent-input-wrapper" style={{ flex: 1, minWidth: 0 }}>
+                            <input
+                                type="text"
+                                value={dataPath}
+                                readOnly
+                                onClick={(e) => e.currentTarget.select()}
+                                style={{
+                                    width: '100%',
+                                    textOverflow: 'ellipsis',
+                                    fontSize: '12px',
+                                    padding: '6px 10px',
+                                    borderRadius: '4px',
+                                    border: '1px solid var(--line-soft)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-primary)',
+                                    outline: 'none',
+                                    boxSizing: 'border-box',
+                                    height: '28px'
+                                }}
+                            />
+                        </div>
                         <button
                             className="btn-icon"
                             onClick={() => {
