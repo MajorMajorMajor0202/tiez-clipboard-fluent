@@ -2266,17 +2266,21 @@ const SettingsWindow = () => {
                       ].map(strategy => (
                         <div key={strategy.key} className="fluent-setting-card">
                           <span className="fluent-setting-title">{strategy.label}</span>
-                          <select
-                            className="fluent-select"
-                            value={strategy.value}
-                            onChange={(e) => {
-                              strategy.setter(e.target.value);
-                              saveSetting(strategy.key, e.target.value);
+                          <FluentDropdown
+                            options={
+                              aiProfiles.length > 0
+                                ? aiProfiles.map(p => ({ id: p.id, label: p.model }))
+                                : [{ id: "none", label: "请先添加模型配置" }]
+                            }
+                            value={strategy.value || "none"}
+                            onChange={(val) => {
+                              if (val !== "none") {
+                                strategy.setter(val);
+                                saveSetting(strategy.key, val);
+                              }
                             }}
-                          >
-                            <option value="none" disabled>{aiProfiles.length > 0 ? "选择绑定模型" : "请先添加模型配置"}</option>
-                            {aiProfiles.map(p => <option key={p.id} value={p.id}>{p.model}</option>)}
-                          </select>
+                            style={{ width: "240px" }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -2289,21 +2293,21 @@ const SettingsWindow = () => {
                     <span className="fluent-setting-title">默认智能翻译目标语言</span>
                     <span className="fluent-setting-description">AI 翻译快捷菜单执行后输出的偏好语言</span>
                   </div>
-                  <select
-                    className="fluent-select"
+                  <FluentDropdown
+                    options={[
+                      { id: "auto_zh_en", label: "中英自动互译" },
+                      { id: "zh", label: "简体中文" },
+                      { id: "en", label: "English" },
+                      { id: "ja", label: "日本語" },
+                      { id: "de", label: "Deutsch" },
+                      { id: "fr", label: "Français" }
+                    ]}
                     value={aiTargetLang}
-                    onChange={(e) => {
-                      setAiTargetLang(e.target.value);
-                      saveSetting('ai_target_lang', e.target.value);
+                    onChange={(val) => {
+                      setAiTargetLang(val);
+                      saveSetting('ai_target_lang', val);
                     }}
-                  >
-                    <option value="auto_zh_en">中英自动互译</option>
-                    <option value="zh">简体中文</option>
-                    <option value="en">English</option>
-                    <option value="ja">日本語</option>
-                    <option value="de">Deutsch</option>
-                    <option value="fr">Français</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="fluent-setting-card">

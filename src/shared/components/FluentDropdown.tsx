@@ -13,6 +13,7 @@ interface FluentDropdownProps {
   onChange: (id: string) => void;
   triggerClassName?: string;
   menuClassName?: string;
+  style?: React.CSSProperties;
 }
 
 export const FluentDropdown: React.FC<FluentDropdownProps> = ({
@@ -21,6 +22,7 @@ export const FluentDropdown: React.FC<FluentDropdownProps> = ({
   onChange,
   triggerClassName = "",
   menuClassName = "",
+  style,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -67,7 +69,13 @@ export const FluentDropdown: React.FC<FluentDropdownProps> = ({
   };
 
   return (
-    <div className="fluent-dropdown-container">
+    <div
+      className="fluent-dropdown-container"
+      style={{
+        ...style,
+        zIndex: isOpen ? 1000 : undefined
+      }}
+    >
       <button
         ref={triggerRef}
         className={`fluent-dropdown-trigger-btn ${triggerClassName}`}

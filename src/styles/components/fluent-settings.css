@@ -256,6 +256,12 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
   border-bottom-right-radius: 4px;
 }
 
+.fluent-setting-expander:focus-within,
+.fluent-setting-card:focus-within {
+  position: relative;
+  z-index: 15;
+}
+
 /* Custom backgrounds / values style */
 /* Windows Fluent Hotkey Recorder */
 .fluent-hotkey-recorder {
