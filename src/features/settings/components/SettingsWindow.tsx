@@ -1601,7 +1601,7 @@ const SettingsWindow = () => {
                   {expandedCards['customPriv'] && (
                     <div className="fluent-setting-expander-content" style={{ padding: "12px" }}>
                       <textarea
-                        className="fluent-textarea"
+                        className="fluent-dialog-textarea"
                         style={{ width: "100%", minHeight: "120px", boxSizing: "border-box" }}
                         placeholder="每行输入一条正则表达式，示例：\n(?i)password\\s*[:=]\\s*.+\n[0-9]{18}"
                         value={privacyProtectionCustomRules}

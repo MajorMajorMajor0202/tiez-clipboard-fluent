@@ -576,8 +576,8 @@ const ClipboardSettingsGroup = (props: ClipboardSettingsGroupProps) => {
                         </div>
                         {props.privacyRulesOpen && (
                             <textarea
-                                className="search-input"
-                                style={{ width: 'calc(100% - 30px)', maxWidth: '100%', minHeight: '80px', padding: '8px', borderRadius: '0', marginLeft: '30px', boxSizing: 'border-box' }}
+                                className="fluent-dialog-textarea"
+                                style={{ width: 'calc(100% - 30px)', maxWidth: '100%', minHeight: '80px', marginLeft: '30px', boxSizing: 'border-box' }}
                                 placeholder={props.t('privacy_protection_custom_rules_placeholder')}
                                 value={props.privacyProtectionCustomRules}
                                 onFocus={() => invoke("focus_clipboard_window").catch(console.error)}
