@@ -124,7 +124,7 @@ pub fn init_db(path: &str) -> Result<Connection> {
         "
         PRAGMA journal_mode = WAL;
         PRAGMA synchronous = NORMAL;
-        PRAGMA auto_vacuum = FULL;
+        PRAGMA auto_vacuum = INCREMENTAL;
     ",
     )?;
 

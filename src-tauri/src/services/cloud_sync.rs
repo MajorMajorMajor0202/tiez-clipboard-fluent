@@ -2381,6 +2381,7 @@ async fn fetch_webdav_settings_snapshot(
     .await
 }
 
+#[allow(dead_code)]
 async fn pull_remote_settings_snapshot(
     app: &AppHandle,
     client: &Client,
