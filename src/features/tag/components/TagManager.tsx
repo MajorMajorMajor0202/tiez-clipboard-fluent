@@ -770,7 +770,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 </div>
 
                 <div className="items-area-wrapper" style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'visible', minHeight: 0 }}>
-                    <div className="items-area custom-scrollbar fluent-scrollbar-host" ref={itemsAreaRef}>
+                    <div className="items-area fluent-scrollbar-host" ref={itemsAreaRef}>
                         {loading ? <div className="status-msg">{t('processing')}</div> : sortedItems.length === 0 ? (
                             <div className="status-msg">{selectedTag ? t('no_items') : t('select_tag_to_begin')}</div>
                         ) : (
@@ -1713,6 +1713,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .items-area { 
                     flex: 1; 
                     overflow-y: auto; 
+                    overflow-x: hidden;
                     padding: 8px 8px 8px 8px; 
                     scrollbar-width: none !important;
                     scrollbar-gutter: auto;

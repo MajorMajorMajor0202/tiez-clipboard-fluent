@@ -641,6 +641,7 @@
   flex: 1 !important;
   min-height: 0 !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   padding: 8px 8px 8px 8px !important;
   scrollbar-width: none !important;
   scrollbar-gutter: auto !important;
@@ -1013,6 +1014,11 @@
     height: 44px !important;
     max-height: 44px !important;
     gap: 4px !important;
+    scrollbar-width: none !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll::-webkit-scrollbar {
+    display: none !important;
   }
 
   .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item {
