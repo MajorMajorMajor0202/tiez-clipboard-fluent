@@ -152,8 +152,7 @@
       "icons/app.icns"
     ],
     "targets": [
-      "dmg",
-      "app"
+      "nsis"
     ],
     "macOS": {
       "frameworks": [],
