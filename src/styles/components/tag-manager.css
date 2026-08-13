@@ -1,0 +1,1129 @@
+.themed-tag-manager {
+  --tm-gap: 12px;
+  --tm-sidebar-width: clamp(184px, 25%, 216px);
+  --tm-sidebar-collapsed-width: 50px;
+  display: flex !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  gap: var(--tm-gap) !important;
+  padding: 8px 12px 12px !important;
+  background: var(--bg-content) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-main) !important;
+  box-sizing: border-box;
+  overflow: hidden !important;
+}
+
+.theme-mica.themed-tag-manager,
+.theme-acrylic.themed-tag-manager {
+  background: transparent !important;
+}
+
+.themed-tag-manager *,
+.themed-tag-manager *::before,
+.themed-tag-manager *::after {
+  box-sizing: border-box;
+}
+
+.themed-tag-manager .tag-sidebar,
+.themed-tag-manager .tag-content {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.themed-tag-manager .tag-sidebar {
+  width: var(--tm-sidebar-width) !important;
+  min-height: 0 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: visible !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .tag-sidebar {
+  width: var(--tm-sidebar-collapsed-width) !important;
+}
+
+.theme-mica .tag-sidebar,
+.theme-mica .tag-content,
+.theme-acrylic .tag-sidebar,
+.theme-acrylic .tag-content {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.themed-tag-manager .sidebar-header {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  border-top: 1px solid var(--panel-divider-color) !important;
+  border-bottom: none !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .sidebar-header {
+  justify-content: center !important;
+  padding-inline: 0 !important;
+}
+
+.themed-tag-manager .collapse-toggle {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  opacity: 0.55 !important;
+  transition: opacity 0.15s ease, color 0.15s ease !important;
+}
+
+.themed-tag-manager .collapse-toggle:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--accent-color) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.themed-tag-manager .tag-search-box {
+  position: relative !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 8px 8px 0 !important;
+  padding: 0 8px 0 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  border: var(--input-border) !important;
+  border-radius: 4px !important;
+  background: var(--bg-element) !important;
+  box-shadow: var(--input-shadow) !important;
+  transition: background 0.18s ease !important;
+}
+
+.themed-tag-manager .tag-search-box::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: var(--accent-color) !important;
+  transform: scaleX(0) !important;
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+  border-radius: 0 0 2px 2px !important;
+  z-index: 2 !important;
+}
+
+.themed-tag-manager .tag-search-box:focus-within::after {
+  transform: scaleX(1) !important;
+}
+
+.themed-tag-manager .tag-search-box:focus-within {
+  border-color: var(--line-strong) !important;
+  box-shadow: none !important;
+  background: var(--bg-input) !important;
+}
+
+.themed-tag-manager .tag-search-box .search-icon-placeholder {
+  position: absolute !important;
+  left: 4px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.45 !important;
+  pointer-events: none !important;
+}
+
+.themed-tag-manager .tag-search-box input {
+  width: 100% !important;
+  height: 30px !important;
+  padding: 0 8px 0 24px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  font-weight: var(--input-font-weight) !important;
+  outline: none !important;
+}
+
+.themed-tag-manager .tag-search-box input::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+  font-size: 13px !important;
+  font-style: normal !important;
+}
+
+.themed-tag-manager .action-icons {
+  position: absolute !important;
+  right: 4px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.themed-tag-manager .action-icon {
+  width: 20px !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer !important;
+  opacity: 0.55 !important;
+  background: transparent !important;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease !important;
+}
+
+.themed-tag-manager .action-icon:hover {
+  opacity: 1 !important;
+  color: var(--accent-color) !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+.themed-tag-manager .action-icon.create {
+  color: var(--accent-color) !important;
+  opacity: 0.7 !important;
+}
+
+.themed-tag-manager .tag-scroll {
+  position: relative !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 8px 8px 12px !important;
+}
+
+.themed-tag-manager .tag-selection-indicator {
+  position: absolute !important;
+  left: 8px !important;
+  top: 0 !important;
+  width: 3px !important;
+  height: 16px !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  transition: transform 0.22s cubic-bezier(0.85, 0, 0.15, 1) !important;
+}
+
+.themed-tag-manager .tag-selection-indicator-inner {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 1.5px !important;
+  background: var(--accent-color) !important;
+  transform-origin: center !important;
+  animation: fluent-stretch 0.22s cubic-bezier(0.85, 0, 0.15, 1) !important;
+}
+
+@keyframes fluent-stretch {
+  0% { transform: scaleY(1); }
+  45% { transform: scaleY(1.35); }
+  100% { transform: scaleY(1); }
+}
+
+.themed-tag-manager .theme-mica:not(.sidebar-collapsed) .tag-selection-indicator,
+.themed-tag-manager .theme-acrylic:not(.sidebar-collapsed) .tag-selection-indicator {
+  left: 12px !important;
+}
+
+.themed-tag-manager .tag-item {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin-bottom: 4px !important;
+  padding: 0 10px !important;
+  border: 1px solid transparent !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease !important;
+}
+
+.themed-tag-manager .tag-item:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: transparent !important;
+}
+
+.dark-mode .themed-tag-manager .tag-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.themed-tag-manager .tag-item.active {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.dark-mode .themed-tag-manager .tag-item.active {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.themed-tag-manager .tag-item.create-hint {
+  border-style: dashed !important;
+  border-color: var(--line-soft) !important;
+  color: var(--text-secondary) !important;
+}
+
+.themed-tag-manager .tag-item.create-hint:hover {
+  border-style: solid !important;
+}
+
+.themed-tag-manager .tag-color-wrapper {
+  width: 18px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.themed-tag-manager .tag-color-dot {
+  width: 18px !important;
+  height: 18px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  transition: transform 0.16s ease !important;
+}
+
+.themed-tag-manager .tag-color-dot:hover {
+  transform: scale(1.15) !important;
+}
+
+.themed-tag-manager .tag-name {
+  flex: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.themed-tag-manager .inline-tag-edit {
+  flex: 1 !important;
+  min-width: 0 !important;
+  height: 30px !important;
+  padding: 0 10px !important;
+  border: var(--input-border) !important;
+  border-radius: var(--input-radius) !important;
+  background: var(--bg-input) !important;
+  box-shadow: var(--input-shadow) !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  outline: none !important;
+}
+
+.themed-tag-manager .inline-tag-edit:focus {
+  border-color: var(--input-focus-border-color) !important;
+  box-shadow: var(--input-focus-shadow) !important;
+}
+
+.themed-tag-manager .tag-name-area {
+  flex: 1 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  transition: padding-right 0.15s ease !important;
+}
+
+.themed-tag-manager .tag-item.has-actions:hover .tag-name-area {
+  padding-right: 52px !important;
+}
+
+.themed-tag-manager .tag-hover-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 0 !important;
+  transform: translateY(-50%) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.16s ease !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+}
+
+/* Only show hover actions on hover — not on active/selected */
+.themed-tag-manager .tag-item:hover .tag-hover-actions {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.themed-tag-manager .tag-hover-actions > span {
+  width: 20px !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+}
+
+.themed-tag-manager .tag-hover-actions > span:hover {
+  background: rgba(var(--accent-color-rgb), 0.12) !important;
+  color: var(--accent-color) !important;
+}
+
+.dark-mode .themed-tag-manager .tag-hover-actions > span:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary) !important;
+}
+
+.themed-tag-manager .tag-badge {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  min-width: 24px !important;
+  height: 20px !important;
+  padding: 0 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--accent-color-rgb), 0.08) !important;
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.themed-tag-manager .tag-item.active .tag-badge {
+  background: var(--accent-color) !important;
+  color: #ffffff !important;
+}
+
+.themed-tag-manager .sidebar-status {
+  padding: 18px 10px !important;
+  text-align: center !important;
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .tag-scroll {
+  padding-inline: 8px !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-item {
+  justify-content: center !important;
+  align-items: center !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  width: 32px !important;
+  padding: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  gap: 0 !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-name-area,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-name,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-badge,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-hover-actions,
+.themed-tag-manager.sidebar-collapsed .tag-scroll .sidebar-status {
+  display: none !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-color-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+}
+
+.themed-tag-manager.sidebar-collapsed .tag-scroll .tag-item.active::before {
+  display: none !important;
+}
+
+.themed-tag-manager .tag-content {
+  flex: 1 !important;
+  min-width: 320px !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: visible !important;
+  container-type: inline-size;
+}
+
+.themed-tag-manager .content-toolbar {
+  min-height: 48px !important;
+  padding: 8px 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  border-bottom: none !important;
+  background: transparent !important;
+  flex-shrink: 0 !important;
+}
+
+/* Shared styles for both old (.toolbar-left/.toolbar-right) and new (.toolbar-row-*) classes */
+.themed-tag-manager .toolbar-left,
+.themed-tag-manager .toolbar-right,
+.themed-tag-manager .toolbar-row-left,
+.themed-tag-manager .toolbar-row-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
+}
+
+.themed-tag-manager .toolbar-left,
+.themed-tag-manager .toolbar-row-left {
+  overflow: hidden !important;
+}
+
+.themed-tag-manager .toolbar-right,
+.themed-tag-manager .toolbar-row-right {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+.themed-tag-manager .toolbar-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: nowrap !important;
+}
+
+.themed-tag-manager .selected-tag-indicator {
+  display: inline-flex !important;
+  flex: 0 1 auto !important;
+  align-items: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  max-width: min(100%, 220px) !important;
+  padding: 6px 10px !important;
+  border-radius: var(--radius-pill) !important;
+  background: rgba(var(--accent-color-rgb), 0.08) !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.themed-tag-manager .breadcrumb-marker {
+  color: var(--accent-color) !important;
+}
+
+.themed-tag-manager .breadcrumb-text {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+
+.themed-tag-manager .item-count {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  margin-left: 6px !important;
+}
+
+.themed-tag-manager .toolbar-divider {
+  width: 1px !important;
+  height: 20px !important;
+  background: var(--panel-divider-color) !important;
+}
+
+.themed-tag-manager .sort-group {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  flex-shrink: 1 !important;
+  gap: 4px !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+}
+
+.themed-tag-manager .sort-btn {
+  border: var(--button-border) !important;
+  background: var(--bg-button) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--button-shadow) !important;
+}
+
+.themed-tag-manager .sort-btn {
+  min-height: 32px !important;
+  height: 32px !important;
+  flex: 0 0 auto !important;
+  padding: 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  border-radius: var(--button-radius) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    color 0.18s ease !important;
+}
+
+.themed-tag-manager .sort-btn:hover {
+  background: var(--bg-input) !important;
+  border-color: var(--button-hover-border-color) !important;
+  box-shadow: var(--button-hover-shadow) !important;
+  color: var(--text-primary) !important;
+  transform: var(--button-hover-transform) !important;
+}
+
+/* Removed legacy overrides to let local styles in TagManager.tsx apply */
+
+.themed-tag-manager .add-item-btn {
+  min-height: 34px !important;
+  height: 34px !important;
+  margin-left: 0 !important;
+  padding: 0 12px !important;
+  gap: 4px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  box-shadow: var(--button-shadow) !important;
+}
+
+.themed-tag-manager .add-item-btn span {
+  display: inline-block !important;
+}
+
+.themed-tag-manager .items-area-wrapper {
+  position: relative !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: visible !important;
+  min-height: 0 !important;
+}
+
+.themed-tag-manager .items-area {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 8px 8px 8px 8px !important;
+  scrollbar-width: none !important;
+  scrollbar-gutter: auto !important;
+  background: transparent !important;
+}
+
+.themed-tag-manager .fluent-scrollbar {
+  top: 8px !important;
+  right: -10px !important;
+  bottom: 4px !important;
+}
+
+.themed-tag-manager .status-msg {
+  padding: 24px 12px !important;
+  text-align: center !important;
+  color: var(--text-secondary) !important;
+  font-size: 13px !important;
+}
+
+.themed-tag-manager .items-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  align-content: flex-start !important;
+}
+
+@container (min-width: 340px) {
+  .themed-tag-manager .items-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@container (min-width: 520px) {
+  .themed-tag-manager .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)) !important;
+  }
+}
+
+.themed-tag-manager .items-list {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+.themed-tag-manager .themed-card {
+  position: relative !important;
+  min-height: 112px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 10px !important;
+  border: var(--card-border) !important;
+  border-radius: var(--card-radius) !important;
+  background: var(--bg-element) !important;
+  box-shadow: var(--card-shadow) !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease !important;
+}
+
+.themed-tag-manager .themed-card:hover {
+  background: var(--data-panel-hover-background) !important;
+  border-color: var(--card-hover-border-color) !important;
+  box-shadow: var(--card-hover-shadow) !important;
+  transform: var(--card-hover-transform) !important;
+}
+
+.dark-mode .themed-tag-manager .themed-card:hover {
+  border-color: var(--line-strong, rgba(255, 255, 255, 0.16)) !important;
+}
+
+.dark-mode.theme-mica .themed-tag-manager .themed-card:hover,
+.dark-mode.theme-acrylic .themed-tag-manager .themed-card:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.themed-tag-manager .items-list .themed-card {
+  min-height: 84px !important;
+}
+
+.themed-tag-manager .card-top-row {
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+  margin-bottom: 6px !important;
+  opacity: 1 !important;
+}
+
+.themed-tag-manager .card-actions-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.themed-tag-manager .card-action-btn,
+.themed-tag-manager .del-btn {
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  border-radius: var(--fluent-corner-control) !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+  opacity: 0.9 !important;
+  cursor: pointer !important;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease !important;
+}
+
+.themed-tag-manager .card-action-btn:hover,
+.themed-tag-manager .del-btn:hover {
+  background: rgba(128,128,128,0.08) !important;
+  color: var(--accent-color) !important;
+}
+
+.themed-tag-manager .del-btn:hover {
+  color: var(--accent-color) !important;
+}
+
+.themed-tag-manager .card-media {
+  flex: 1 !important;
+  min-height: 72px !important;
+  margin-top: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  border-radius: var(--data-panel-radius) !important;
+  background: var(--bg-input) !important;
+}
+
+.themed-tag-manager .card-media img {
+  max-width: 100% !important;
+  max-height: 104px !important;
+  object-fit: contain !important;
+}
+
+.themed-tag-manager .card-body-text {
+  flex: 1 !important;
+  padding-top: 0 !important;
+  color: var(--text-primary) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  word-break: break-word !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
+.themed-tag-manager .items-list .card-body-text {
+  -webkit-line-clamp: 3 !important;
+}
+
+.themed-tag-manager.stacked-layout .items-area {
+  padding: 8px 8px 8px 8px !important;
+  scrollbar-gutter: auto !important;
+}
+
+.themed-tag-manager.stacked-layout .items-grid {
+  gap: 8px !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list {
+  gap: 8px !important;
+}
+
+.themed-tag-manager.stacked-layout .items-grid .themed-card {
+  min-height: 96px !important;
+  padding: 8px !important;
+  border-radius: calc(var(--card-radius) - 2px) !important;
+}
+
+.themed-tag-manager.stacked-layout .items-grid .card-body-text {
+  font-size: 12px !important;
+  -webkit-line-clamp: 3 !important;
+}
+
+.themed-tag-manager.stacked-layout .items-grid .card-divider {
+  margin: 8px 0 6px !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .themed-card {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-areas:
+    "body actions"
+    "meta meta" !important;
+  min-height: 68px !important;
+  padding: 8px 10px !important;
+  border-radius: calc(var(--card-radius) - 2px) !important;
+  background: var(--bg-element) !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .card-top-row {
+  grid-area: actions !important;
+  margin-bottom: 0 !important;
+  align-self: start !important;
+  justify-self: end !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .card-body-text {
+  grid-area: body !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .card-media {
+  grid-area: body !important;
+  min-height: 48px !important;
+  margin-top: 0 !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .card-divider {
+  display: none !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .card-footer {
+  grid-area: meta !important;
+  font-size: 10px !important;
+  gap: 4px !important;
+  margin-top: 4px !important;
+}
+
+.themed-tag-manager.stacked-layout .items-list .card-action-btn,
+.themed-tag-manager.stacked-layout .items-list .del-btn {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.themed-tag-manager .card-divider {
+  height: 1px !important;
+  margin: 10px 0 8px !important;
+  background: var(--panel-divider-color) !important;
+}
+
+.themed-tag-manager .card-footer {
+  margin-top: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+}
+
+.themed-tag-manager .meta-usage {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.tag-manager-textarea {
+  display: block !important;
+  width: 100% !important;
+  max-width: 232px !important;
+  height: 96px !important;
+  min-height: 96px !important;
+  margin: 0 auto !important;
+  padding: 8px 12px 9px 12px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--line-soft) !important;
+  border-bottom: 1px solid var(--text-secondary) !important;
+  background: var(--bg-input) !important;
+  box-shadow: var(--input-shadow) !important;
+  color: var(--text-primary) !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  outline: none !important;
+  resize: vertical !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s ease, border-bottom-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important;
+}
+
+.tag-manager-textarea:hover {
+  border-color: var(--text-secondary) !important;
+  background: var(--bg-input-hover, var(--bg-input)) !important;
+}
+
+.tag-manager-textarea:focus {
+  border-color: var(--line-soft) !important;
+  border-bottom: 2px solid var(--accent-color) !important;
+  padding-bottom: 8px !important;
+  box-shadow: 0 0 0 1px var(--accent-color) !important;
+}
+
+@container (max-width: 470px) {
+  .themed-tag-manager .selected-tag-indicator {
+    max-width: 108px !important;
+    padding: 6px 8px !important;
+  }
+
+  .themed-tag-manager .toolbar-divider {
+    display: none !important;
+  }
+
+  .themed-tag-manager .sort-group {
+    gap: 4px !important;
+  }
+
+  .themed-tag-manager .sort-btn,
+  .themed-tag-manager .add-item-btn {
+    width: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+  }
+
+  .themed-tag-manager .sort-btn span,
+  .themed-tag-manager .add-item-btn span {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .themed-tag-manager {
+    flex-direction: column !important;
+    gap: 0px !important;
+    padding: 8px 12px 12px !important;
+  }
+
+  .themed-tag-manager .tag-sidebar {
+    width: 100% !important;
+    height: var(--tm-sidebar-height, 180px) !important;
+    max-height: none !important;
+    margin-bottom: 8px !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed .tag-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Force collapse-toggle header to align right when collapsed vertically */
+  .themed-tag-manager.sidebar-collapsed .sidebar-header {
+    justify-content: flex-end !important;
+    padding-inline: 10px !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed .tag-sidebar .tag-search-box {
+    margin: 8px 8px 4px !important;
+  }
+
+  /* Horizontal Tag List when Collapsed and Stacked */
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    flex-direction: row !important;
+    padding: 4px 8px 8px !important;
+    height: 44px !important;
+    max-height: 44px !important;
+    gap: 4px !important;
+    scrollbar-width: none !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: transparent !important;
+  }
+
+  .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: transparent !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item.active {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border-color: transparent !important;
+  }
+
+  .dark-mode .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item.active {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: transparent !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-color-wrapper {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-name-area,
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-name,
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-scroll .tag-item .tag-badge {
+    display: none !important;
+  }
+
+  /* Horizontal indicator at the bottom inside the gray square container, keeping 3x16 size */
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-selection-indicator {
+    position: absolute !important;
+    left: 8px !important;
+    top: 33px !important;
+    bottom: auto !important;
+    width: 32px !important;
+    height: 3px !important;
+    background: transparent !important;
+    z-index: 10 !important;
+    transition: transform 0.22s cubic-bezier(0.85, 0, 0.15, 1) !important;
+  }
+
+  .themed-tag-manager.sidebar-collapsed.stacked-layout .tag-selection-indicator-inner {
+    width: 16px !important;
+    height: 3px !important;
+    margin: 0 auto !important;
+    border-radius: 1.5px !important;
+    background: var(--accent-color) !important;
+  }
+
+  .themed-tag-manager .tag-scroll {
+    max-height: none !important;
+  }
+
+  .themed-tag-manager .tag-divider {
+    display: flex !important;
+    width: 100% !important;
+    height: 12px !important;
+    margin: -6px 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: row-resize !important;
+    background: rgba(0, 0, 0, 0) !important;
+    z-index: 1000 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+  }
+
+  .themed-tag-manager .tag-content {
+    flex: 1 !important;
+    min-height: 0 !important;
+    margin-top: 8px !important;
+  }
+
+  .themed-tag-manager .tag-divider-handle {
+    width: 36px !important;
+    height: 1px !important;
+  }
+
+  .themed-tag-manager .sort-btn span,
+  .themed-tag-manager .add-item-btn span {
+    display: none !important;
+  }
+
+  .themed-tag-manager.stacked-layout .items-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}

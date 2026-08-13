@@ -1,0 +1,115 @@
+/* Fluent Design Tooltip */
+
+.fluent-tooltip-portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  pointer-events: none;
+}
+
+.fluent-tooltip {
+  position: relative;
+  display: inline-block;
+  padding: 4px 8px;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #1a1a1a;
+  white-space: nowrap;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Placement specific base transforms */
+.fluent-tooltip.placement-bottom {
+  transform: translateY(0);
+}
+
+.fluent-tooltip.placement-top {
+  transform: translateY(-100%);
+}
+
+/* Arrow pointing dynamically toward the trigger */
+.fluent-tooltip::after {
+  content: "";
+  position: absolute;
+  left: var(--arrow-left, 50%);
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+/* Arrow positions and border colors per placement */
+.fluent-tooltip.placement-bottom::after {
+  top: -5px;
+  border-bottom: 5px solid rgba(255, 255, 255, 0.95);
+  border-top: none;
+}
+
+.fluent-tooltip.placement-top::after {
+  bottom: -5px;
+  border-top: 5px solid rgba(255, 255, 255, 0.95);
+  border-bottom: none;
+}
+
+/* Dark mode */
+:root.dark-mode .fluent-tooltip,
+body.dark-mode .fluent-tooltip {
+  background: rgba(30, 30, 30, 0.95);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+:root.dark-mode .fluent-tooltip.placement-bottom::after,
+body.dark-mode .fluent-tooltip.placement-bottom::after {
+  border-bottom-color: rgba(30, 30, 30, 0.95);
+}
+
+:root.dark-mode .fluent-tooltip.placement-top::after,
+body.dark-mode .fluent-tooltip.placement-top::after {
+  border-top-color: rgba(30, 30, 30, 0.95);
+}
+
+/* Tooltip entrance animations */
+.fluent-tooltip.placement-bottom.fluent-tooltip-enter {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.fluent-tooltip.placement-bottom.fluent-tooltip-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.12s ease-out,
+    transform 0.12s ease-out;
+}
+
+.fluent-tooltip.placement-top.fluent-tooltip-enter {
+  opacity: 0;
+  transform: translateY(-100%) translateY(-4px);
+}
+
+.fluent-tooltip.placement-top.fluent-tooltip-visible {
+  opacity: 1;
+  transform: translateY(-100%);
+  transition:
+    opacity 0.12s ease-out,
+    transform 0.12s ease-out;
+}

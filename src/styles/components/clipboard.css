@@ -1,0 +1,27 @@
+/* Clipboard Item Selection */
+.history-item.selected {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--card-border-color, rgba(128, 128, 128, 0.2)) !important;
+  box-shadow: none !important;
+  z-index: 10;
+  position: relative;
+}
+
+.history-item.selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid var(--text-primary) !important;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.history-item.selected {
+  color: inherit;
+  transform: none !important;
+}

@@ -1,0 +1,651 @@
+/* Mount animation - GPU-composited only (opacity + transform, no layout props) */
+@keyframes emoji-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.emoji-panel-mount-wrapper {
+  height: 100%;
+  overflow: hidden;
+  will-change: transform, opacity;
+  animation: emoji-slide-in 0.22s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+/* Emoji Panel - Simplified Premium */
+.emoji-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 12px 16px 16px;
+  background: transparent;
+  position: relative;
+}
+
+/* Tabs - Minimalist */
+.emoji-tabs {
+  display: flex;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  position: relative;
+  z-index: 10;
+}
+
+/* Emoji Search Bar */
+.emoji-search-container {
+  position: relative;
+  width: 100%;
+  padding: 0;
+}
+
+.emoji-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.emoji-search-input {
+  width: 100%;
+  height: 32px;
+  background: var(--bg-input);
+  border: var(--input-border);
+  border-radius: var(--input-radius);
+  padding: 6px 12px 6px 32px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-weight: var(--input-font-weight);
+  font-size: 13px;
+  outline: none;
+  box-shadow: none;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.emoji-search-input:focus {
+  background: var(--bg-input);
+  border-color: var(--line-strong);
+}
+
+.emoji-search-wrapper::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 2px 2px;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.emoji-search-wrapper:focus-within::after {
+  transform: scaleX(1);
+}
+
+.emoji-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Skin Tone Selector */
+.emoji-skin-tone-bar {
+  display: flex;
+  gap: 16px;
+  padding: 4px 8px;
+  align-items: center;
+}
+
+.emoji-search-container .emoji-skin-tone-bar {
+  margin-top: 8px;
+}
+
+.emoji-group .emoji-skin-tone-bar {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.skin-tone-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--line-soft);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.skin-tone-dot:hover {
+  transform: scale(1.15);
+}
+
+.skin-tone-dot.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+  transform: scale(1.1);
+}
+
+.emoji-tab {
+  flex: 1;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.emoji-tab-text {
+  position: relative;
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+  line-height: 16px;
+  height: 16px;
+  display: block;
+}
+
+.emoji-tab.active .emoji-tab-text {
+  color: #000000 !important;
+}
+
+.active-tab-bg {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  border-radius: 4px;
+  z-index: 1;
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.active-tab-indicator {
+  position: absolute;
+  bottom: 1px;
+  left: calc(50% - 9px);
+  width: 18px;
+  height: 3px;
+  background: var(--accent-color);
+  border-radius: 9999px;
+  z-index: 2;
+}
+
+/* Content Area — sliding track architecture */
+.emoji-content-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden; /* clips the offscreen panel */
+}
+
+/* Fade-up animation for first content appearance — opacity only to avoid
+   conflicting with the horizontal translateX slide transition */
+@keyframes emoji-track-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Track holds both panels side-by-side at 200% width */
+.emoji-panels-track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  will-change: transform, opacity;
+  transform: translateX(0);
+  transition: transform 0.26s cubic-bezier(0.1, 0.9, 0.2, 1);
+  /* First-time fade-in — runs once on mount, doesn't touch transform */
+  animation: emoji-track-appear 0.2s ease-out both;
+}
+
+/* Slide to reveal favorites panel */
+.emoji-panels-track.show-favorites {
+  transform: translateX(-50%);
+}
+
+/* Each panel occupies 50% of the 200%-wide track = 100% of visible area */
+.emoji-content {
+  width: 50%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emoji-fav-container {
+  width: 50%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative; /* Established positioning context for absolute overlays */
+}
+
+/* Remove old tab-active/tab-hidden opacity classes */
+
+/* Scrollbar */
+.emoji-content::-webkit-scrollbar,
+.emoji-fav-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.emoji-content::-webkit-scrollbar-thumb,
+.emoji-fav-container::-webkit-scrollbar-thumb {
+  background: var(--line-soft);
+  border-radius: 4px;
+  transition: background-color 0.15s ease-out;
+}
+
+/* Hide scrollbar thumb during transition so it doesn't animate across the screen */
+.is-switching .emoji-content::-webkit-scrollbar-thumb,
+.is-switching .emoji-fav-container::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}
+
+/* Emoji Grid */
+.emoji-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emoji-group-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  padding-left: 4px;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 0px;
+}
+
+.emoji-btn {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.1s ease, border-color 0.1s ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.emoji-btn:hover {
+  background: rgba(120, 120, 120, 0.15) !important;
+  border-color: #000000 !important;
+}
+
+/* Favorites Grid - Clean Grid */
+.emoji-fav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  padding: 4px;
+}
+
+.emoji-fav-card {
+  aspect-ratio: 1;
+  position: relative;
+  background: var(--bg-button);
+  border: 2px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 8px;
+  transition: border-color 0.1s ease, background-color 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-fav-card:hover {
+  border-color: #000000 !important;
+  background: var(--bg-hover);
+}
+
+.emoji-fav-preview {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.emoji-fav-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Remove button - Clean. No position:absolute — the tooltip wrapper span
+   already handles corner placement. This keeps the button centered within
+   its span so FluentTooltip's cx calculation aligns with the visual button. */
+.emoji-fav-remove {
+  width: 20px;
+  height: 20px;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.emoji-fav-card:hover .emoji-fav-remove,
+.emoji-fav-card[data-delete-visible="true"] .emoji-fav-remove {
+  opacity: 1;
+}
+
+.emoji-fav-remove:hover {
+  background: #ff4757;
+  color: white;
+  border-color: #ff4757;
+}
+
+/* Rename button - same size & circular shape as remove, positioned at bottom-right corner
+   symmetrically opposite to remove (top-right). Light gray hover, icon stays dark.
+   No position:absolute — the tooltip wrapper span already handles corner placement. */
+.emoji-fav-rename {
+  width: 20px;
+  height: 20px;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.emoji-fav-card:hover .emoji-fav-rename {
+  opacity: 1;
+}
+
+.emoji-fav-rename:hover {
+  background: #f0f0f0;
+  color: var(--text-primary);
+  border-color: var(--line-strong);
+}
+
+/* Add Button Card - Ultra Minimalist */
+.emoji-fav-add {
+  border: 2px dashed var(--line-strong);
+  background: transparent;
+  cursor: pointer;
+}
+
+.emoji-fav-add-btn {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+}
+
+.add-icon-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-fav-add:hover {
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+.emoji-fav-add:hover .emoji-fav-add-btn {
+  color: #000000 !important;
+}
+
+/* Empty State - Background Text */
+.emoji-fav-empty {
+  position: absolute;
+  inset: 60px 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.emoji-fav-empty span {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  font-weight: 500;
+  max-width: 22ch;
+  line-height: 1.5;
+}
+
+.emoji-fav-tip {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 12px;
+  opacity: 0.7;
+}
+
+/* Drop Overlay - Ultra Minimalist */
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--accent-color-rgb), 0.12);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--accent-color);
+  border-radius: 4px;
+  margin: 4px;
+  pointer-events: none;
+}
+
+.drop-overlay p {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-color);
+  background: var(--bg-panel);
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--line-soft);
+}
+
+/* Layout overrides for FluentTooltip wrapper span inside grids */
+.emoji-grid > span,
+.emoji-fav-card > span:has(.emoji-fav-preview),
+.emoji-fav-card.emoji-fav-add > span {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+}
+
+/* Absolute positioning for remove and rename button tooltip trigger wrappers.
+   Explicit width/height prevents the span from collapsing to 0×0 (child buttons
+   are position:absolute, taken out of flow), ensuring FluentTooltip's
+   rect.bottom + 12 offset is measured from the actual 20×20 button area. */
+.emoji-fav-card > span:has(.emoji-fav-remove) {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  z-index: 10;
+}
+
+.emoji-fav-card > span:has(.emoji-fav-rename) {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  z-index: 10;
+}
+
+/* Night Mode (Dark Mode) Adjustments */
+:root.dark-mode .emoji-tab.active .emoji-tab-text,
+body.dark-mode .emoji-tab.active .emoji-tab-text {
+  color: #ffffff !important;
+}
+
+:root.dark-mode .active-tab-bg,
+body.dark-mode .active-tab-bg {
+  background: var(--bg-button);
+  border-color: var(--line-strong);
+}
+
+:root.dark-mode .emoji-btn:hover,
+body.dark-mode .emoji-btn:hover {
+  border-color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-card:hover,
+body.dark-mode .emoji-fav-card:hover {
+  border-color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-add:hover,
+body.dark-mode .emoji-fav-add:hover {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-add:hover .emoji-fav-add-btn,
+body.dark-mode .emoji-fav-add:hover .emoji-fav-add-btn {
+  color: #ffffff !important;
+}
+
+:root.dark-mode .emoji-fav-rename:hover,
+body.dark-mode .emoji-fav-rename:hover {
+  background: #333333 !important;
+  color: #ffffff !important;
+  border-color: var(--line-strong) !important;
+}
+
+/* Favorite Rename Flyout - WinUI 3 Style (Matches Tag Editor Input) */
+@keyframes rename-flyout-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.emoji-fav-rename-flyout {
+  padding: 8px;
+  background: var(--flyout-background, var(--bg-element));
+  border: var(--flyout-border, 1px solid rgba(128, 128, 128, 0.2));
+  border-radius: 4px;
+  width: 192px;
+  box-shadow: var(--flyout-shadow, 0 8px 16px rgba(0, 0, 0, 0.14));
+  backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
+  animation: rename-flyout-appear 0.15s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  box-sizing: border-box;
+}
+
+.rename-flyout-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.rename-flyout-search-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.rename-flyout-search-input {
+  width: 100%;
+  height: 24px;
+  background: var(--bg-input);
+  border: var(--input-border, 1px solid rgba(128, 128, 128, 0.15));
+  border-radius: 4px;
+  padding: 4px 8px 4px 28px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.rename-flyout-search-input:focus {
+  background: var(--bg-input);
+  border-color: var(--line-strong, rgba(128, 128, 128, 0.4));
+}
+
+:root.dark-mode .rename-flyout-search-input,
+body.dark-mode .rename-flyout-search-input {
+  border-color: var(--line-strong);
+}
+
+:root.dark-mode .emoji-fav-rename-flyout,
+body.dark-mode .emoji-fav-rename-flyout {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}

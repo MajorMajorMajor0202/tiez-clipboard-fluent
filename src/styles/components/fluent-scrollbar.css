@@ -1,0 +1,186 @@
+/* ============================================================
+ * Fluent Scrollbar — Windows 11 style custom overlay scrollbar
+ * ============================================================
+ * Layout: 12px wide column, absolutely positioned on the right.
+ * Rest:   Track transparent, thumb is a 2px centered pill.
+ * Hover:  Thumb expands to 6px. Track fades in. Arrows appear.
+ * ============================================================ */
+
+/* ── Scrollbar host: 12px wide column on the right of the list ── */
+.fluent-scrollbar {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  bottom: 0;
+  width: 12px;
+  pointer-events: auto;
+  z-index: 100;
+}
+
+/* ── Track — fills the full height of the scrollbar host ── */
+.fluent-scrollbar__track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  overflow: visible;
+}
+
+.fluent-scrollbar--active .fluent-scrollbar__track {
+  background: rgba(128, 128, 128, 0.09);
+}
+
+/* ── Arrow buttons — inside the track ── */
+.fluent-scrollbar__arrow {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  /* Hidden (transparent) in rest state */
+  color: transparent;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 4px;
+}
+
+.fluent-scrollbar__arrow--up {
+  top: 0;
+}
+
+.fluent-scrollbar__arrow--down {
+  bottom: 0;
+}
+
+.fluent-scrollbar--active .fluent-scrollbar__arrow {
+  color: var(--text-secondary, rgba(96, 96, 96, 0.65));
+  pointer-events: auto;
+}
+
+.fluent-scrollbar--active .fluent-scrollbar__arrow:hover {
+  background: rgba(128, 128, 128, 0.14);
+  color: var(--text-primary, rgba(32, 32, 32, 0.9));
+}
+
+.fluent-scrollbar--active .fluent-scrollbar__arrow:active {
+  background: rgba(128, 128, 128, 0.22);
+}
+
+/* ── Thumb ── */
+.fluent-scrollbar__thumb {
+  position: absolute;
+  /* Shifted left by 2px in the rest state */
+  right: 2px;
+  width: 2px;
+  border-radius: 999px;
+  z-index: 1;
+  background: rgba(128, 128, 128, 0.42);
+  cursor: grab;
+  /* Smooth expand animation — expand to the left and center */
+  transition:
+    width 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    right 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.18s ease;
+  pointer-events: auto;
+}
+
+.fluent-scrollbar__thumb:hover {
+  background: rgba(96, 96, 96, 0.62);
+}
+
+.fluent-scrollbar__thumb:active,
+.fluent-scrollbar--active .fluent-scrollbar__thumb:active {
+  cursor: grabbing;
+  background: rgba(64, 64, 64, 0.75);
+}
+
+/* On hover, expand the thumb to 6px and center it in the 12px track (right: 3px) */
+.fluent-scrollbar--active .fluent-scrollbar__thumb {
+  right: 3px;
+  width: 6px;
+  background: rgba(96, 96, 96, 0.62);
+}
+
+/* ── Dark mode overrides ── */
+.dark-mode .fluent-scrollbar__thumb {
+  background: rgba(200, 200, 200, 0.3);
+}
+
+.dark-mode .fluent-scrollbar__thumb:hover {
+  background: rgba(200, 200, 200, 0.5);
+}
+
+.dark-mode .fluent-scrollbar--active .fluent-scrollbar__thumb,
+.dark-mode .fluent-scrollbar__thumb:active {
+  background: rgba(200, 200, 200, 0.6);
+}
+
+.dark-mode .fluent-scrollbar--active .fluent-scrollbar__track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .fluent-scrollbar--active .fluent-scrollbar__arrow {
+  color: rgba(200, 200, 200, 0.6);
+}
+
+.dark-mode .fluent-scrollbar--active .fluent-scrollbar__arrow:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(240, 240, 240, 0.9);
+}
+
+/* ── Mica theme dark mode ── */
+.theme-mica.dark-mode .fluent-scrollbar__thumb {
+  background: rgba(200, 200, 200, 0.28);
+}
+
+.theme-mica.dark-mode .fluent-scrollbar--active .fluent-scrollbar__thumb {
+  background: rgba(200, 200, 200, 0.55);
+}
+
+.theme-mica.dark-mode .fluent-scrollbar--active .fluent-scrollbar__track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Acrylic theme ── */
+.theme-acrylic .fluent-scrollbar__thumb {
+  background: rgba(96, 113, 136, 0.4);
+}
+
+.theme-acrylic .fluent-scrollbar--active .fluent-scrollbar__thumb {
+  background: rgba(96, 113, 136, 0.65);
+}
+
+.theme-acrylic.dark-mode .fluent-scrollbar__thumb {
+  background: rgba(160, 180, 210, 0.3);
+}
+
+.theme-acrylic.dark-mode .fluent-scrollbar--active .fluent-scrollbar__thumb {
+  background: rgba(160, 180, 210, 0.55);
+}
+
+/* ── Arrows Outside mode ── */
+.fluent-scrollbar--arrows-outside {
+  overflow: visible !important;
+}
+
+.fluent-scrollbar--arrows-outside .fluent-scrollbar__arrow--up {
+  top: -12px !important;
+}
+
+.fluent-scrollbar--arrows-outside .fluent-scrollbar__arrow--down {
+  bottom: -12px !important;
+}

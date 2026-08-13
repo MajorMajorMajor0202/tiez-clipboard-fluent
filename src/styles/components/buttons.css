@@ -1,0 +1,73 @@
+/* Shared Icon Buttons */
+.btn-icon {
+  background: var(--bg-button);
+  border: var(--button-border);
+  border-radius: var(--button-radius);
+  color: var(--text-primary);
+  padding: 6px;
+  cursor: pointer;
+  box-shadow: var(--button-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+
+.btn-icon:hover {
+  transform: var(--button-hover-transform);
+  box-shadow: var(--button-hover-shadow);
+  background: var(--bg-input);
+  border-color: var(--button-hover-border-color);
+}
+
+.btn-icon:active {
+  transform: var(--button-active-transform);
+  box-shadow: var(--button-active-shadow);
+}
+
+.btn-icon.active {
+  background: var(--button-active-filled-background);
+  color: var(--button-active-filled-color);
+  border-color: var(--button-active-filled-border-color);
+  box-shadow: var(--button-active-filled-shadow);
+}
+
+/* Ghost icon button — no background container, blends into the surface */
+.btn-icon-ghost {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  box-shadow: none;
+  color: var(--text-secondary);
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+
+.btn-icon-ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-subtle-hover);
+}
+
+.btn-icon-ghost:active {
+  background: var(--bg-subtle-active);
+}
+
+.btn-icon-ghost.active {
+  color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.1);
+}
+
+.btn-icon-ghost.active:hover {
+  background: rgba(var(--accent-color-rgb), 0.16);
+}

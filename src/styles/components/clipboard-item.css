@@ -1,0 +1,530 @@
+/* Clipboard Item Meta */
+.item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: var(--meta-text-transform);
+  letter-spacing: var(--meta-letter-spacing);
+  color: var(--text-secondary);
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.item-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.app-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.app-info svg,
+.source-app-icon {
+  flex-shrink: 0;
+}
+
+.app-info span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-app-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
+}
+
+/* Clipboard Item Content Preview */
+.content-preview {
+  font-size: var(--clipboard-item-font-size);
+  line-height: var(--content-line-height);
+  font-family: var(--content-font-family);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.content-preview-shell {
+  position: relative;
+  min-width: 0;
+  margin-top: 4px;
+}
+
+/* Make content preview shell taller when has overlay tags */
+.content-preview-shell.has-overlay-tags {
+  padding-bottom: 16px; /* multiple of 4: 16px space at the bottom */
+}
+
+/* Tag dot indicators in bottom-right corner */
+.tag-dot {
+  width: 8px; /* 8px normally */
+  height: 8px; /* 8px normally */
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.tag-dot-delete-icon {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  color: currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tag-dot:hover {
+  transform: scale(1.5); /* scales up to 12px (8px * 1.5) */
+}
+
+.tag-dot:hover .tag-dot-delete-icon {
+  opacity: 1;
+}
+
+
+
+.color-code-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.color-code-swatch {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--fluent-corner-control);
+  border: 1px solid var(--line-soft);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.color-code-value {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--clipboard-item-font-size);
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item.file-item .file-thumbnail-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 100px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--fluent-corner-overlay);
+  background: transparent;
+  display: block;
+  object-fit: contain;
+}
+
+/* Clipboard Item Video Cards */
+.video-file-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: var(--bg-panel);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--panel-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.video-file-card:hover {
+  background: var(--bg-input);
+  border-style: solid;
+  box-shadow: var(--shadow-xs);
+}
+
+.video-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  background: var(--text-primary);
+  color: var(--bg-window);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--fluent-corner-overlay);
+  flex-shrink: 0;
+}
+
+.video-info-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.video-name {
+  font-weight: 700;
+  font-size: var(--clipboard-item-font-size);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.video-hint {
+  font-size: calc(var(--clipboard-item-font-size) - 2px);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.video-thumbnail-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.video-thumbnail-card:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.video-thumbnail-wrapper {
+  width: 70px;
+  height: 48px;
+  background: #000;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  flex-shrink: 0;
+}
+
+.video-thumbnail-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+/* Clipboard Item File Cards */
+.file-thumbnail-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.file-thumbnail-card:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.file-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  background: transparent;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  flex-shrink: 0;
+  border: none;
+  overflow: hidden;
+}
+
+.file-icon-wrapper-system {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.file-icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.file-icon-wrapper-system .file-icon-image {
+  width: 100%;
+  height: 100%;
+  transform: translateY(1px);
+}
+
+.file-info-wrapper {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.file-name {
+  font-weight: 700;
+  font-size: var(--clipboard-item-font-size);
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.file-hint {
+  font-size: calc(var(--clipboard-item-font-size) - 2px);
+  line-height: 1.2;
+  color: var(--text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
+}
+
+/* Quick Actions */
+.item-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
+}
+
+.history-item:hover .item-actions,
+.history-item.selected .item-actions,
+.history-item.tag-editing .item-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+.item-actions .btn-icon {
+  padding: 2px;
+  height: 20px;
+  width: 20px;
+  box-shadow: var(--button-shadow);
+}
+
+.item-actions .btn-icon-ghost {
+  padding: 2px;
+  height: 20px;
+  width: 20px;
+}
+
+.item-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-meta-right-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Added gap for hint and time */
+  opacity: 0.6;
+  font-size: 10px;
+}
+
+.meta-time {
+  white-space: nowrap;
+}
+
+.quick-paste-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--accent-color);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+/* Tag edit toggle active state */
+.btn-icon-ghost.tag-editing-active {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.14)) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.6;
+}
+
+.tag-edit-flyout {
+  width: 192px; /* multiple of 4 */
+  background: var(--flyout-background, var(--bg-element));
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px; /* 4px rounded corner */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.08);
+  backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
+  padding: 8px; /* multiple of 4 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* multiple of 4 */
+  box-sizing: border-box;
+}
+
+.dark-mode .tag-edit-flyout {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Mimics homepage search wrapper */
+.tag-flyout-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.tag-flyout-search-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+  transform-origin: center;
+}
+
+.tag-flyout-search-wrapper:focus-within::after {
+  transform: scaleX(1);
+}
+
+.tag-flyout-search-icon {
+  position: absolute;
+  left: 8px; /* multiple of 4 */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.tag-flyout-search-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: var(--input-border, 1px solid rgba(128, 128, 128, 0.15));
+  border-radius: 4px; /* 4px rounded corner */
+  padding: 6px 8px 6px 28px; /* multiple of 4 */
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.tag-flyout-search-input:focus {
+  background: var(--bg-input);
+  border-color: var(--line-strong, rgba(128, 128, 128, 0.4));
+}
+
+/* Suggestion list below input */
+.tag-flyout-suggestions {
+  max-height: 140px; /* multiple of 4 */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* multiple of 4 */
+  box-sizing: border-box;
+  padding: 2px 0;
+}
+
+/* The items in suggestion list: circular color dot + name */
+.tag-flyout-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* multiple of 4 */
+  width: 100%;
+  padding: 6px 8px; /* multiple of 4 */
+  background: transparent;
+  border: none;
+  border-radius: 4px; /* 4px rounded corner */
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  transition: background 0.15s ease;
+}
+
+.tag-flyout-suggest-item:hover,
+.tag-flyout-suggest-item.active {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.14));
+}
+
+/* Circular color dot */
+.tag-flyout-color-dot {
+  width: 8px; /* multiple of 4 */
+  height: 8px; /* multiple of 4 */
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Text with truncation */
+.tag-flyout-text {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

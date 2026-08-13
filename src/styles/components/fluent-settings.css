@@ -1,0 +1,1023 @@
+body:has(.fluent-settings-layout):not(.theme-mica):not(.theme-acrylic),
+body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
+  background-color: var(--bg-body) !important;
+}
+
+.fluent-settings-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: var(--fluent-font-family);
+  background-color: var(--bg-window);
+  color: var(--text-primary);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Sidebar navigation */
+.fluent-sidebar {
+  width: 200px;
+  background-color: transparent;
+  border-right: none;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.fluent-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  position: relative;
+  border: none;
+  background-color: transparent;
+  width: 100%;
+  text-align: left;
+  will-change: background-color; /* Force GPU compositing layer to prevent Chromium rendering bug on transparent backdrop */
+}
+
+.fluent-sidebar-item:hover {
+  background-color: rgba(128, 128, 128, 0.12);
+}
+
+.fluent-sidebar-item:active {
+  background-color: rgba(128, 128, 128, 0.22);
+}
+
+.fluent-sidebar-item.active {
+  background-color: rgba(128, 128, 128, 0.18);
+  font-weight: 600;
+}
+
+.fluent-sidebar-item.active:hover {
+  background-color: rgba(128, 128, 128, 0.24);
+}
+
+/* Active indicator bar - vertical sliding wrapper */
+.fluent-sidebar-indicator {
+  position: absolute;
+  left: 8px; /* matching the padding of sidebar */
+  top: 0;
+  width: 3px;
+  height: 20px;
+  z-index: 10;
+  pointer-events: none;
+  background: transparent;
+  transition: transform 0.22s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+.fluent-sidebar-indicator-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  background-color: var(--accent-color);
+  transform-origin: center;
+  animation: fluent-stretch-vertical 0.22s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+@keyframes fluent-stretch-vertical {
+  0% { transform: scaleY(1); }
+  45% { transform: scaleY(1.35); }
+  100% { transform: scaleY(1); }
+}
+
+/* Content area */
+.fluent-settings-content {
+  flex: 1;
+  padding: 24px 32px 24px 24px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.fluent-settings-content::-webkit-scrollbar {
+  display: none; /* Safari / Chrome / WebView2 */
+}
+
+.fluent-page-header {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.fluent-section-title {
+  margin: 16px 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Setting Card */
+.fluent-setting-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.fluent-setting-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.fluent-setting-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fluent-setting-description {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.fluent-setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Settings Expander */
+.fluent-setting-expander {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.fluent-setting-expander-header {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease;
+  box-sizing: border-box;
+  will-change: background-color; /* Force GPU compositing layer to prevent Chromium rendering bug on transparent backdrop */
+}
+
+.fluent-setting-expander-header:hover {
+  background-color: var(--bg-hover, rgba(128, 128, 128, 0.08));
+}
+
+.fluent-setting-expander-header.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.fluent-setting-expander.disabled {
+  opacity: 0.7;
+}
+
+.fluent-setting-expander-header.disabled {
+  cursor: not-allowed !important;
+}
+
+.fluent-setting-expander-header.disabled:hover {
+  background-color: var(--bg-panel) !important;
+}
+
+.fluent-setting-expander-header.disabled .fluent-chevron {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+
+.fluent-setting-expander-content {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: fluent-expander-reveal 0.22s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+  transform-origin: top;
+}
+
+.fluent-setting-expander-content:has(.fluent-setting-card) {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+/* Ensure controls in expander content look nested and clean */
+.fluent-setting-expander-content .fluent-setting-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 0;
+  margin-bottom: 0;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.fluent-setting-expander-content .fluent-setting-card:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.fluent-setting-expander:focus-within,
+.fluent-setting-card:focus-within {
+  position: relative;
+  z-index: 15;
+}
+
+/* Custom backgrounds / values style */
+/* Windows Fluent Hotkey Recorder */
+.fluent-hotkey-recorder {
+  display: inline-flex;
+  align-items: center;
+  height: 40px; /* multiple of 4 */
+  padding: 0 12px; /* multiple of 4 */
+  gap: 8px; /* multiple of 4 */
+  border-radius: 4px; /* multiple of 4 */
+  cursor: pointer;
+  box-sizing: border-box;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+  outline: none;
+  position: relative;
+  will-change: background-color; /* Force GPU layer to prevent Chromium rendering bug on transparent backdrop */
+}
+
+.fluent-hotkey-recorder:hover {
+  background-color: var(--bg-subtle-hover, rgba(128, 128, 128, 0.06));
+  border-color: rgba(128, 128, 128, 0.05); /* extremely thin and subtle border line */
+}
+
+.fluent-hotkey-recorder.recording {
+  background-color: var(--bg-subtle-active, rgba(128, 128, 128, 0.12));
+  border-color: var(--accent-color);
+}
+
+.fluent-hotkey-caps-list {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* multiple of 4, very small spacing */
+  height: 100%;
+}
+
+.fluent-hotkey-cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px; /* multiple of 4, exactly 80% of container height */
+  min-width: 32px; /* multiple of 4 */
+  padding: 0 12px; /* multiple of 4 */
+  border-radius: 4px; /* multiple of 4 */
+  background-color: var(--accent-color);
+  color: #ffffff !important;
+  font-size: 13px; /* enlarged font size */
+  font-weight: 600;
+  font-family: var(--fluent-font-family);
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); /* Windows 11 style keycap drop shadow */
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.fluent-hotkey-plus {
+  display: none; /* Removed completely */
+}
+
+.fluent-hotkey-not-set {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.fluent-hotkey-edit-icon {
+  color: var(--text-secondary);
+  opacity: 0.6;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.fluent-hotkey-recorder:hover .fluent-hotkey-edit-icon {
+  opacity: 1;
+  color: var(--text-primary);
+}
+
+.fluent-hotkey-recording-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-color);
+  animation: fluent-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes fluent-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* Custom form elements */
+.fluent-select {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  min-width: 120px;
+  transition: border-color 0.15s ease;
+}
+
+.fluent-select:focus {
+  border-color: var(--accent-color);
+}
+
+.fluent-input {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.fluent-input:hover {
+  border-color: var(--line-strong);
+}
+
+.fluent-input:focus {
+  border-color: var(--line-strong);
+  background-color: var(--bg-input);
+}
+
+.fluent-button {
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-button);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.fluent-button:hover {
+  background-color: var(--bg-subtle-hover);
+}
+
+.fluent-button:active {
+  background-color: var(--bg-subtle-active);
+  transform: scale(0.97);
+}
+
+.fluent-button-primary {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.fluent-button-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.fluent-button-primary:active {
+  transform: scale(0.97);
+}
+
+.fluent-textarea {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+  resize: vertical;
+}
+
+.fluent-textarea:focus {
+  border-color: var(--accent-color);
+}
+
+/* Custom Switch styling following Fluent standard */
+.fluent-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.fluent-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.fluent-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(120, 120, 120, 0.12);
+  border: 1px solid var(--text-secondary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+}
+
+.fluent-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-primary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.fluent-switch input:checked + .fluent-slider {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.fluent-switch input:checked + .fluent-slider:before {
+  transform: translateX(20px);
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.fluent-switch input:active + .fluent-slider:before {
+  width: 16px;
+}
+
+.fluent-switch input:checked:active + .fluent-slider:before {
+  width: 16px;
+  transform: translateX(16px);
+}
+
+/* Custom range slider */
+.fluent-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--accent-color), var(--accent-color)) 0/ var(--range-progress, 0%) 100% no-repeat,
+    rgba(0, 0, 0, 0.08);
+  outline: none;
+  cursor: pointer;
+}
+
+.dark-mode .fluent-range {
+  background:
+    linear-gradient(var(--accent-color), var(--accent-color)) 0/ var(--range-progress, 0%) 100% no-repeat,
+    rgba(255, 255, 255, 0.12);
+}
+
+.fluent-range::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+
+.fluent-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  border: 5px solid #ffffff;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  margin-top: -7px;
+  transition: border-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fluent-range:hover::-webkit-slider-thumb {
+  border-width: 3px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.fluent-range:active::-webkit-slider-thumb {
+  border-width: 5.8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Firefox Support */
+.fluent-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+}
+
+.dark-mode .fluent-range::-moz-range-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.fluent-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent-color);
+}
+
+.fluent-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  border: 5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: border-width 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.fluent-range:hover::-moz-range-thumb {
+  border-width: 3px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.fluent-range:active::-moz-range-thumb {
+  border-width: 5.8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Chevron animate */
+.fluent-chevron {
+  transition: transform 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.fluent-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+/* Modal window styling */
+.fluent-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.fluent-modal {
+  background: var(--bg-window);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fluent-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.fluent-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fluent-modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fluent-modal-row label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.fluent-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Toast styling for Settings Window */
+.fluent-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 2000;
+  animation: fluent-toast-fade-in 0.2s ease;
+}
+
+@keyframes fluent-toast-fade-in {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Fix theme support and overrides inside fluent window */
+.fluent-settings-layout select option {
+  background-color: var(--bg-panel);
+  color: var(--text-primary);
+}
+
+/* Integration with retro/classic styles if required */
+body[data-theme="retro"] .fluent-settings-layout {
+  --radius-panel: 0px !important;
+  --radius-card: 0px !important;
+  --radius-control: 0px !important;
+  border-radius: 0px !important;
+}
+
+/* Disable body rounded corners, borders and clipping for settings windows to align with native title bar */
+body.is-settings-window {
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  border-radius: 0px !important;
+  background: transparent !important;
+}
+
+body.is-settings-window::before {
+  display: none !important;
+}
+
+body.is-settings-window #root {
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  border-radius: 0px !important;
+}
+
+body.is-settings-window #root::before {
+  display: none !important;
+}
+
+/* Under Mica and Acrylic, make EVERY paint layer fully transparent so
+   the system-composed Mica backdrop is visible uniformly behind both
+   the native title bar and the webview client area. */
+body.is-settings-window.theme-mica,
+body.is-settings-window.theme-acrylic {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+body.is-settings-window.theme-mica #root,
+body.is-settings-window.theme-acrylic #root {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.is-settings-window.theme-mica .fluent-settings-layout,
+body.is-settings-window.theme-acrylic .fluent-settings-layout {
+  background-color: transparent !important;
+}
+
+@keyframes fluent-expander-reveal {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+/* Fluent NumberBox styles with popover vertical spinner panel */
+.fluent-number-box {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background-color: var(--bg-input);
+  overflow: visible !important;
+  height: 32px !important;
+  width: 80px !important; /* Designed compact */
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: text;
+}
+
+.fluent-number-box:hover {
+  border-color: var(--line-strong);
+  background-color: var(--bg-subtle-hover);
+}
+
+.fluent-number-box:focus-within {
+  border-color: var(--line-strong);
+  background-color: var(--bg-input);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fluent-number-box-input {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  text-align: left !important;
+  outline: none !important;
+  padding: 0 24px 0 10px !important; /* Extra right padding for spinners, 10px left padding */
+  box-sizing: border-box !important;
+}
+
+/* Static spinners (permanently visible, no hover interaction) */
+.fluent-number-box-static-spinners {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: absolute;
+  right: 6px;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  pointer-events: none; /* Clicking passes through to the input */
+  opacity: 0.6;
+}
+
+.fluent-number-box-static-spinners .static-chevron {
+  color: var(--text-secondary);
+}
+
+/* Floating vertical rounded rectangle popup window (completely covers static chevrons) */
+.fluent-number-box-popup {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff !important;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: -6px; /* Centered horizontally with static spinners: 14 - 40/2 = -6px */
+  top: -18px;  /* Centered vertically: (32 - 68)/2 = -18px */
+  width: 40px;
+  height: 68px;
+  box-sizing: border-box;
+  z-index: 999; /* Float on top of everything */
+  animation: fluent-popup-fade-in 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.dark-mode .fluent-number-box-popup {
+  background-color: #2c2c2c !important;
+}
+
+@keyframes fluent-popup-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Interactive popup buttons */
+.fluent-number-box-popup-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: calc(50% - 1px) !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: var(--text-primary) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  transition: background 0.1s ease !important;
+}
+
+.fluent-number-box-popup-btn:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
+.dark-mode .fluent-number-box-popup-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.fluent-number-box-popup-btn:active {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark-mode .fluent-number-box-popup-btn:active {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Fluent Native Checkboxes styling using Accent Color */
+input[type="checkbox"]:not(.cb) {
+  accent-color: var(--accent-color) !important;
+}
+
+/* Also style checkboxes with the .cb class if they are not inside switch toggles */
+label:not(.switch) > input[type="checkbox"].cb {
+  accent-color: var(--accent-color) !important;
+}
+
+/* AI Connection Model Library Management - Fluent 2 styles */
+.fluent-model-list {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.fluent-model-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.fluent-model-item:last-child {
+  border-bottom: none;
+}
+
+.fluent-model-item:hover {
+  background-color: var(--bg-subtle-hover);
+}
+
+/* Status Indicator Dot with Glow Effect */
+.status-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-indicator-dot.success {
+  background-color: #4CAF50;
+  box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
+}
+
+.status-indicator-dot.error {
+  background-color: #F44336;
+  box-shadow: 0 0 6px rgba(244, 67, 54, 0.5);
+}
+
+.status-indicator-dot.loading {
+  background-color: #FF9800;
+  box-shadow: 0 0 6px rgba(255, 152, 0, 0.5);
+  animation: pulse-glow 1.5s infinite ease-in-out;
+}
+
+.status-indicator-dot.idle {
+  background-color: #999999;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 4px rgba(255, 152, 0, 0.3);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.8);
+  }
+}
+
+/* Flat Icon Buttons for row actions */
+.fluent-model-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.15s ease;
+}
+
+.fluent-model-item:hover .fluent-model-action-btn {
+  opacity: 1;
+}
+
+.fluent-model-action-btn:hover {
+  background-color: var(--bg-subtle-hover);
+  border-color: var(--line-soft);
+  color: var(--text-primary);
+}
+
+.fluent-model-action-btn.delete-btn:hover {
+  background-color: rgba(244, 67, 54, 0.08);
+  border-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+/* Full Width Add Model Card at the bottom */
+.fluent-model-add-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: transparent;
+  border: 1px dashed var(--line-soft);
+  border-radius: 4px;
+  margin-top: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.fluent-model-add-card:hover {
+  background-color: var(--bg-subtle-hover);
+  border-color: var(--line-strong);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.fluent-model-add-card:active {
+  transform: translateY(0);
+}
+
