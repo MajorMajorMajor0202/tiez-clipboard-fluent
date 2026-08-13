@@ -1111,7 +1111,7 @@ const App = () => {
       <main
         className={`main-content${chatMode ? " file-transfer-mode" : ""}${effectiveShowTagManager ? " tag-manager-mode" : ""}`}
         style={{ 
-          overflowY: 'hidden',
+          overflow: 'hidden',
           padding: effectiveShowTagManager ? '0' : undefined
         }}
         onWheel={handleMainWheel}
