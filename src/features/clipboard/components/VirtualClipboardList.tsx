@@ -92,7 +92,17 @@ const VirtualClipboardList = React.forwardRef<VirtualClipboardListHandle, Virtua
 
         // Keep keyboard selection visible even when the item is only in overscan
         React.useEffect(() => {
-            if (!isKeyboardMode || selectedIndex < 0) return;
+            if (!isKeyboardMode) return;
+
+            // If selecting any pinned item (selectedIndex < 0) or the first unpinned item (selectedIndex === 0),
+            // scroll to the absolute top of the container to keep the header and top gap fully visible.
+            if (selectedIndex <= 0) {
+                virtuosoRef.current?.scrollTo({
+                    top: 0,
+                    behavior: 'auto'
+                });
+                return;
+            }
 
             const range = visibleRangeRef.current;
             const edgeBuffer = 1;
