@@ -42,6 +42,28 @@ pub fn has_sensitive_tag(tags: &[String]) -> bool {
         .any(|t| SENSITIVE_TAGS.iter().any(|s| s.eq_ignore_ascii_case(t)))
 }
 
+pub fn normalize_tag(tag: &str) -> String {
+    let lower = tag.trim().to_lowercase();
+    if lower == "sensitive" || lower == "敏感" {
+        "sensitive".to_string()
+    } else if lower == "password" || lower == "密码" || lower == "密碼" {
+        "password".to_string()
+    } else {
+        tag.trim().to_string()
+    }
+}
+
+pub fn get_tag_aliases(tag: &str) -> Vec<String> {
+    let lower = tag.trim().to_lowercase();
+    if lower == "sensitive" || lower == "敏感" {
+        vec!["sensitive".to_string(), "敏感".to_string()]
+    } else if lower == "password" || lower == "密码" || lower == "密碼" {
+        vec!["password".to_string(), "密码".to_string(), "密碼".to_string()]
+    } else {
+        vec![tag.trim().to_string()]
+    }
+}
+
 pub fn is_text_type(content_type: &str) -> bool {
     matches!(content_type, "text" | "code" | "url" | "rich_text")
 }

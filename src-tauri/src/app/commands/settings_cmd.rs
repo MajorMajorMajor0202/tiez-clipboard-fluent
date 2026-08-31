@@ -3,7 +3,7 @@ use crate::database::DbState;
 use crate::error::{AppError, AppResult};
 use crate::infrastructure::repository::settings_repo::SettingsRepository;
 use std::sync::atomic::Ordering;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 fn normalize_quick_paste_modifier(value: &str) -> &'static str {
     match value.trim().to_ascii_lowercase().as_str() {
@@ -27,6 +27,7 @@ pub fn set_sequential_mode(
     let _ = db_state
         .settings_repo
         .set("app.sequential_mode", &enabled.to_string());
+    let _ = app_handle.emit("settings-changed", ());
     let _ = crate::app::commands::hotkey_cmd::sync_registered_hotkeys(&app_handle);
 }
 
@@ -45,6 +46,7 @@ pub fn set_sequential_hotkey(
         .settings_repo
         .set("app.sequential_hotkey", &hotkey)
         .map_err(AppError::from)?;
+    let _ = app_handle.emit("settings-changed", ());
     crate::app::commands::hotkey_cmd::sync_registered_hotkeys(&app_handle)
 }
 
@@ -63,6 +65,7 @@ pub fn set_rich_paste_hotkey(
         .settings_repo
         .set("app.rich_paste_hotkey", &hotkey)
         .map_err(AppError::from)?;
+    let _ = app_handle.emit("settings-changed", ());
     crate::app::commands::hotkey_cmd::sync_registered_hotkeys(&app_handle)
 }
 
@@ -81,6 +84,7 @@ pub fn set_search_hotkey(
         .settings_repo
         .set("app.search_hotkey", &hotkey)
         .map_err(AppError::from)?;
+    let _ = app_handle.emit("settings-changed", ());
     crate::app::commands::hotkey_cmd::sync_registered_hotkeys(&app_handle)
 }
 
@@ -95,10 +99,12 @@ pub fn set_deduplication(
     let _ = db_state
         .settings_repo
         .set("app.deduplicate", &enabled.to_string());
+    let _ = app_handle.emit("settings-changed", ());
 }
 
 #[tauri::command]
 pub fn save_setting(
+    app_handle: AppHandle,
     db_state: State<'_, DbState>,
     settings_state: State<'_, crate::app_state::SettingsState>,
     key: String,
@@ -176,13 +182,33 @@ pub fn save_setting(
                 *guard = value.clone();
             }
         }
+        "app.deduplicate" => {
+            settings_state
+                .deduplicate
+                .store(value == "true", Ordering::Relaxed);
+        }
+        "file_transfer_auto_copy" => {
+            settings_state
+                .auto_copy_file
+                .store(value == "true", Ordering::Relaxed);
+        }
+        "file_transfer_auto_close" => {
+            settings_state
+                .file_server_auto_close
+                .store(value == "true", Ordering::Relaxed);
+        }
         _ => {}
     }
 
-    db_state
+    let res = db_state
         .settings_repo
         .set(&key, &value)
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
@@ -239,6 +265,7 @@ pub fn get_settings(
 
 #[tauri::command]
 pub fn set_file_server_auto_close(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
@@ -246,125 +273,175 @@ pub fn set_file_server_auto_close(
     state
         .file_server_auto_close
         .store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("file_transfer_auto_close", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
-pub fn set_file_transfer_auto_open(db_state: State<'_, DbState>, enabled: bool) -> AppResult<()> {
-    db_state
+pub fn set_file_transfer_auto_open(
+    app_handle: AppHandle,
+    db_state: State<'_, DbState>,
+    enabled: bool,
+) -> AppResult<()> {
+    let res = db_state
         .settings_repo
         .set("file_transfer_auto_open", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_arrow_key_selection(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.arrow_key_selection.store(enabled, Ordering::Relaxed);
+    let _ = app_handle.emit("settings-changed", ());
     Ok(())
 }
 
 #[tauri::command]
 pub fn set_persistence(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.persistent.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.persistent", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_capture_files(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.capture_files.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.capture_files", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_capture_rich_text(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.capture_rich_text.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.capture_rich_text", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_auto_copy_file(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.auto_copy_file.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set(
             "file_transfer_auto_copy",
             if enabled { "true" } else { "false" },
         )
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_silent_start(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.silent_start.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.silent_start", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_delete_after_paste(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.delete_after_paste.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.delete_after_paste", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_privacy_protection(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.privacy_protection.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.privacy_protection", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_privacy_protection_kinds(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     kinds: Vec<String>,
@@ -372,14 +449,19 @@ pub fn set_privacy_protection_kinds(
     let mut guard = state.privacy_protection_kinds.lock().unwrap();
     *guard = kinds.clone();
     let serialized = kinds.join(",");
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.privacy_protection_kinds", &serialized)
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_privacy_protection_custom_rules(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     rules: String,
@@ -391,51 +473,70 @@ pub fn set_privacy_protection_custom_rules(
         .collect::<Vec<_>>();
     let mut guard = state.privacy_protection_custom_rules.lock().unwrap();
     *guard = list;
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.privacy_protection_custom_rules", &rules)
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_cleanup_rules(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     rules: String,
 ) -> AppResult<()> {
     let mut guard = state.cleanup_rules.lock().unwrap();
     *guard = rules.clone();
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.cleanup_rules", &rules)
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_app_cleanup_policies(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     policies: String,
 ) -> AppResult<()> {
     let mut guard = state.app_cleanup_policies.lock().unwrap();
     *guard = policies.clone();
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.app_cleanup_policies", &policies)
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
 pub fn set_sound_enabled(
+    app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
     db_state: State<'_, DbState>,
     enabled: bool,
 ) -> AppResult<()> {
     state.sound_enabled.store(enabled, Ordering::Relaxed);
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.sound_enabled", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
@@ -570,10 +671,14 @@ pub fn set_tray_visible(
         let _ = tray.set_visible(visible);
     }
     let db_state = app_handle.state::<DbState>();
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.hide_tray_icon", &(!visible).to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
@@ -584,10 +689,14 @@ pub fn set_edge_docking(
 ) -> AppResult<()> {
     state.edge_docking.store(enabled, Ordering::Relaxed);
     let db_state = app_handle.state::<DbState>();
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.edge_docking", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }
 
 #[tauri::command]
@@ -598,8 +707,12 @@ pub fn set_follow_mouse(
 ) -> AppResult<()> {
     state.follow_mouse.store(enabled, Ordering::Relaxed);
     let db_state = app_handle.state::<DbState>();
-    db_state
+    let res = db_state
         .settings_repo
         .set("app.follow_mouse", &enabled.to_string())
-        .map_err(AppError::from)
+        .map_err(AppError::from);
+    if res.is_ok() {
+        let _ = app_handle.emit("settings-changed", ());
+    }
+    res
 }

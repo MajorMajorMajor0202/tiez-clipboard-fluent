@@ -1,6 +1,6 @@
 use crate::database::{
     calc_image_hash, calc_text_hash, has_sensitive_tag, is_text_type, save_image_to_file,
-    ENCRYPT_PREFIX,
+    normalize_tag, ENCRYPT_PREFIX,
 };
 use crate::domain::models::ClipboardEntry;
 use crate::infrastructure::encryption;
@@ -376,13 +376,12 @@ impl SqliteClipboardRepository {
         let mut seen: HashSet<String> = HashSet::new();
         let mut cleaned_tags: Vec<String> = Vec::new();
         for tag in &entry.tags {
-            let t = tag.trim();
+            let t = normalize_tag(tag);
             if t.is_empty() {
                 continue;
             }
-            let t_owned = t.to_string();
-            if seen.insert(t_owned.clone()) {
-                cleaned_tags.push(t_owned);
+            if seen.insert(t.clone()) {
+                cleaned_tags.push(t);
             }
         }
 

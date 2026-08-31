@@ -1230,7 +1230,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={persistent}
-                        onChange={(e) => setPersistent(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setPersistent(val);
+                          invoke('set_persistence', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>
@@ -1285,7 +1289,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={deduplicate}
-                        onChange={(e) => setDeduplicate(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setDeduplicate(val);
+                          invoke('set_deduplication', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>
@@ -1300,7 +1308,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={captureFiles}
-                        onChange={(e) => setCaptureFiles(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setCaptureFiles(val);
+                          invoke('set_capture_files', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>
@@ -1315,7 +1327,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={captureRichText}
-                        onChange={(e) => setCaptureRichText(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setCaptureRichText(val);
+                          invoke('set_capture_rich_text', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>
@@ -1709,7 +1725,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={fileTransferAutoOpen}
-                        onChange={(e) => setFileTransferAutoOpen(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setFileTransferAutoOpen(val);
+                          invoke('set_file_transfer_auto_open', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>
@@ -1724,7 +1744,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={fileServerAutoClose}
-                        onChange={(e) => setFileServerAutoClose(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setFileServerAutoClose(val);
+                          invoke('set_file_server_auto_close', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>
@@ -1739,7 +1763,11 @@ const SettingsWindow = () => {
                       <input
                         type="checkbox"
                         checked={fileTransferAutoCopy}
-                        onChange={(e) => setFileTransferAutoCopy(e.target.checked)}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setFileTransferAutoCopy(val);
+                          invoke('set_auto_copy_file', { enabled: val }).catch(console.error);
+                        }}
                       />
                       <span className="fluent-slider" />
                     </label>

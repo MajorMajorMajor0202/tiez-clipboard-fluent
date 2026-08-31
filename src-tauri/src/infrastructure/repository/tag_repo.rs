@@ -1,4 +1,4 @@
-use crate::database::ENCRYPT_PREFIX;
+use crate::database::{ENCRYPT_PREFIX, normalize_tag, get_tag_aliases};
 use crate::domain::models::ClipboardEntry;
 use crate::infrastructure::encryption;
 use rusqlite::{params, Connection};
@@ -115,7 +115,8 @@ impl TagRepository for SqliteTagRepository {
         let mut tag_counts: HashMap<String, i32> = HashMap::new();
         for row in rows {
             if let Ok((tag, count)) = row {
-                tag_counts.insert(tag, count);
+                let norm = normalize_tag(&tag);
+                *tag_counts.entry(norm).or_insert(0) += count;
             }
         }
 
@@ -129,7 +130,8 @@ impl TagRepository for SqliteTagRepository {
 
         for row in saved_rows {
             if let Ok(name) = row {
-                tag_counts.entry(name).or_insert(0);
+                let norm = normalize_tag(&name);
+                tag_counts.entry(norm).or_insert(0);
             }
         }
 
@@ -242,16 +244,20 @@ impl TagRepository for SqliteTagRepository {
 
     fn get_entries_by_tag(&self, tag: &str) -> Result<Vec<ClipboardEntry>, String> {
         let conn = self.conn.lock().map_err(|e| e.to_string())?;
-        let mut stmt = conn.prepare(
+        let aliases = get_tag_aliases(tag);
+        let placeholders: Vec<String> = (1..=aliases.len()).map(|i| format!("?{}", i)).collect();
+        let query = format!(
             "SELECT ch.id, ch.content_type, ch.content, ch.html_content, ch.source_app, ch.timestamp, ch.preview, ch.is_pinned, ch.tags, ch.use_count, ch.is_external, ch.pinned_order, ch.source_app_path 
              FROM clipboard_history ch
              INNER JOIN entry_tags et ON ch.id = et.entry_id
-             WHERE et.tag = ? 
+             WHERE et.tag IN ({})
              ORDER BY ch.is_pinned DESC, ch.pinned_order DESC, ch.timestamp DESC",
-        ).map_err(|e| e.to_string())?;
+            placeholders.join(",")
+        );
+        let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
 
         let rows = stmt
-            .query_map([tag], |row| {
+            .query_map(rusqlite::params_from_iter(aliases.iter()), |row| {
                 let tags_str: String = row.get(8).unwrap_or_else(|_| "[]".to_string());
                 let tags: Vec<String> = serde_json::from_str(&tags_str).unwrap_or_default();
                 let content_raw: String = row.get(2)?;
@@ -294,13 +300,12 @@ impl TagRepository for SqliteTagRepository {
         let mut seen: HashSet<String> = HashSet::new();
         let mut cleaned: Vec<String> = Vec::new();
         for tag in tags {
-            let t = tag.trim();
+            let t = normalize_tag(&tag);
             if t.is_empty() {
                 continue;
             }
-            let t_owned = t.to_string();
-            if seen.insert(t_owned.clone()) {
-                cleaned.push(t_owned);
+            if seen.insert(t.clone()) {
+                cleaned.push(t);
             }
         }
 
