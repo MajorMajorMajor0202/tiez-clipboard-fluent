@@ -79,6 +79,7 @@ fn main() {
             app::commands::set_sequential_hotkey,
             app::commands::set_rich_paste_hotkey,
             app::commands::set_search_hotkey,
+            app::commands::set_strip_newline_hotkey,
             app::commands::set_deduplication,
             app::commands::save_setting,
             app::commands::set_ignore_blur,

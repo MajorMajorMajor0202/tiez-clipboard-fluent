@@ -1401,3 +1401,182 @@ pub fn paste_latest_rich(app_handle: tauri::AppHandle) {
         }
     });
 }
+
+#[cfg(target_os = "windows")]
+pub fn send_copy_keystroke() {
+    unsafe {
+        use windows::Win32::UI::Input::KeyboardAndMouse::{
+            MapVirtualKeyW, SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT,
+            KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE, MAPVK_VK_TO_VSC, VK_C, VK_CONTROL,
+            VK_LWIN, VK_MENU, VK_RWIN, VK_SHIFT,
+        };
+
+        let release_modifiers = [
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: VK_LWIN,
+                        dwFlags: KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: VK_RWIN,
+                        dwFlags: KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: VK_MENU,
+                        dwFlags: KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: VK_SHIFT,
+                        dwFlags: KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: VK_CONTROL,
+                        dwFlags: KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+        ];
+        SendInput(&release_modifiers, std::mem::size_of::<INPUT>() as i32);
+        std::thread::sleep(std::time::Duration::from_millis(30));
+
+        let c_scan = MapVirtualKeyW(VK_C.0 as u32, MAPVK_VK_TO_VSC) as u16;
+        let ctrl_scan = MapVirtualKeyW(VK_CONTROL.0 as u32, MAPVK_VK_TO_VSC) as u16;
+
+        let inputs = [
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
+                        wScan: ctrl_scan,
+                        dwFlags: KEYEVENTF_SCANCODE,
+                        ..Default::default()
+                    },
+                },
+            },
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
+                        wScan: c_scan,
+                        dwFlags: KEYEVENTF_SCANCODE,
+                        ..Default::default()
+                    },
+                },
+            },
+        ];
+        SendInput(&inputs, std::mem::size_of::<INPUT>() as i32);
+        std::thread::sleep(std::time::Duration::from_millis(30));
+
+        let inputs_up = [
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
+                        wScan: c_scan,
+                        dwFlags: KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+            INPUT {
+                r#type: INPUT_KEYBOARD,
+                Anonymous: INPUT_0 {
+                    ki: KEYBDINPUT {
+                        wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
+                        wScan: ctrl_scan,
+                        dwFlags: KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP,
+                        ..Default::default()
+                    },
+                },
+            },
+        ];
+        SendInput(&inputs_up, std::mem::size_of::<INPUT>() as i32);
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn send_copy_keystroke() {}
+
+pub async fn copy_and_strip_newlines(app_handle: tauri::AppHandle) {
+    let was_paused = crate::CLIPBOARD_MONITOR_PAUSED.swap(true, Ordering::Relaxed);
+    let initial_seq = crate::infrastructure::windows_api::win_clipboard::get_clipboard_sequence_number();
+
+    #[cfg(target_os = "windows")]
+    send_copy_keystroke();
+
+    let mut updated = false;
+    for _ in 0..15 {
+        tokio::time::sleep(std::time::Duration::from_millis(25)).await;
+        let cur_seq = crate::infrastructure::windows_api::win_clipboard::get_clipboard_sequence_number();
+        if cur_seq != initial_seq {
+            updated = true;
+            break;
+        }
+    }
+
+    if !updated {
+        crate::CLIPBOARD_MONITOR_PAUSED.store(was_paused, Ordering::Relaxed);
+        return;
+    }
+
+    tokio::time::sleep(std::time::Duration::from_millis(30)).await;
+
+    let mut text_opt = None;
+    for _ in 0..5 {
+        if let Ok(mut cb) = arboard::Clipboard::new() {
+            if let Ok(t) = cb.get_text() {
+                text_opt = Some(t);
+                break;
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+    }
+
+    crate::CLIPBOARD_MONITOR_PAUSED.store(was_paused, Ordering::Relaxed);
+
+    if let Some(text) = text_opt {
+        if !text.is_empty() {
+            let cleaned = text.replace("\r\n", "").replace('\r', "").replace('\n', "");
+            for _ in 0..5 {
+                if let Ok(mut cb) = arboard::Clipboard::new() {
+                    if cb.set_text(cleaned.clone()).is_ok() {
+                        break;
+                    }
+                }
+                tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+            }
+            let _ = app_handle.emit("toast", "已复制并去除换行");
+        }
+    }
+}
+

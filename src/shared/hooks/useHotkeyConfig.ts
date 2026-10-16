@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
-type HotkeyMode = "main" | "sequential" | "rich" | "search";
+type HotkeyMode = "main" | "sequential" | "rich" | "search" | "strip_newline";
 
 interface UseHotkeyConfigOptions {
   hotkey: string;
@@ -13,6 +13,8 @@ interface UseHotkeyConfigOptions {
   setRichPasteHotkey: (val: string) => void;
   searchHotkey: string;
   setSearchHotkey: (val: string) => void;
+  stripNewlineHotkey: string;
+  setStripNewlineHotkey: (val: string) => void;
   sequentialMode: boolean;
   isRecording: boolean;
   setIsRecording: (val: boolean) => void;
@@ -22,6 +24,8 @@ interface UseHotkeyConfigOptions {
   setIsRecordingRich: (val: boolean) => void;
   isRecordingSearch: boolean;
   setIsRecordingSearch: (val: boolean) => void;
+  isRecordingStripNewline: boolean;
+  setIsRecordingStripNewline: (val: boolean) => void;
   saveAppSetting: (type: string, value: string) => void;
   t: (key: string) => string;
   pushToast: (msg: string, duration?: number) => number;
@@ -36,6 +40,8 @@ export const useHotkeyConfig = ({
   setRichPasteHotkey,
   searchHotkey,
   setSearchHotkey,
+  stripNewlineHotkey,
+  setStripNewlineHotkey,
   sequentialMode,
   isRecording,
   setIsRecording,
@@ -45,6 +51,8 @@ export const useHotkeyConfig = ({
   setIsRecordingRich,
   isRecordingSearch,
   setIsRecordingSearch,
+  isRecordingStripNewline,
+  setIsRecordingStripNewline,
   saveAppSetting,
   t,
   pushToast
@@ -64,6 +72,9 @@ export const useHotkeyConfig = ({
       if (mode !== "search" && newHotkey === searchHotkey) {
         conflicts.push(t("search_hotkey_label"));
       }
+      if (mode !== "strip_newline" && newHotkey === stripNewlineHotkey) {
+        conflicts.push(t("strip_newline_hotkey_label"));
+      }
 
       if (conflicts.length > 0) {
         const msg = t("hotkey_conflict_toast").replace("{name}", conflicts[0]);
@@ -72,7 +83,7 @@ export const useHotkeyConfig = ({
       }
       return false;
     },
-    [hotkey, sequentialMode, sequentialHotkey, richPasteHotkey, searchHotkey, t, pushToast]
+    [hotkey, sequentialMode, sequentialHotkey, richPasteHotkey, searchHotkey, stripNewlineHotkey, t, pushToast]
   );
 
   const updateHotkey = useCallback(
@@ -206,18 +217,52 @@ export const useHotkeyConfig = ({
     ]
   );
 
+  const updateStripNewlineHotkey = useCallback(
+    async (newHotkey: string) => {
+      const hasConflict = checkHotkeyConflict(newHotkey, "strip_newline");
+      if (hasConflict) {
+        setIsRecordingStripNewline(false);
+        return;
+      }
+
+      if (newHotkey) {
+        try {
+          await invoke<boolean>("test_hotkey_available", { hotkey: newHotkey });
+        } catch (err) {
+          const errorMsg = `❌ ${newHotkey}: ${err || "快捷键被占用"}`;
+          pushToast(errorMsg, 5000);
+          setIsRecordingStripNewline(false);
+          return;
+        }
+      }
+
+      setStripNewlineHotkey(newHotkey);
+      saveAppSetting("strip_newline_hotkey", newHotkey);
+      await invoke("set_strip_newline_hotkey", { hotkey: newHotkey }).catch(console.error);
+      setIsRecordingStripNewline(false);
+    },
+    [
+      checkHotkeyConflict,
+      pushToast,
+      saveAppSetting,
+      setStripNewlineHotkey,
+      setIsRecordingStripNewline
+    ]
+  );
+
   useEffect(() => {
     invoke("set_recording_mode", {
       enabled: isRecording || isRecordingSequential || isRecordingRich
-        || isRecordingSearch
+        || isRecordingSearch || isRecordingStripNewline
     }).catch(console.error);
 
-    if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch) {
+    if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch || isRecordingStripNewline) {
       const unlisten = listen<string>("hotkey-recorded", (event) => {
         if (isRecording) updateHotkey(event.payload);
         if (isRecordingSequential) updateSequentialHotkey(event.payload);
         if (isRecordingRich) updateRichPasteHotkey(event.payload);
         if (isRecordingSearch) updateSearchHotkey(event.payload);
+        if (isRecordingStripNewline) updateStripNewlineHotkey(event.payload);
       });
 
       const unlistenCancel = listen("recording-cancelled", () => {
@@ -225,6 +270,7 @@ export const useHotkeyConfig = ({
         setIsRecordingSequential(false);
         setIsRecordingRich(false);
         setIsRecordingSearch(false);
+        setIsRecordingStripNewline(false);
       });
 
       return () => {
@@ -237,14 +283,17 @@ export const useHotkeyConfig = ({
     isRecordingSequential,
     isRecordingRich,
     isRecordingSearch,
+    isRecordingStripNewline,
     setIsRecording,
     setIsRecordingSequential,
     setIsRecordingRich,
     setIsRecordingSearch,
+    setIsRecordingStripNewline,
     updateHotkey,
     updateSequentialHotkey,
     updateRichPasteHotkey,
-    updateSearchHotkey
+    updateSearchHotkey,
+    updateStripNewlineHotkey
   ]);
 
   return {
@@ -252,6 +301,7 @@ export const useHotkeyConfig = ({
     updateHotkey,
     updateSequentialHotkey,
     updateRichPasteHotkey,
-    updateSearchHotkey
+    updateSearchHotkey,
+    updateStripNewlineHotkey
   };
 };

@@ -41,6 +41,9 @@ pub(crate) fn sync_registered_hotkeys(app_handle: &AppHandle) -> AppResult<()> {
     let search_hotkey = settings.search_hotkey.lock().unwrap().clone();
     register_shortcut(app_handle, &search_hotkey);
 
+    let strip_newline_hotkey = settings.strip_newline_hotkey.lock().unwrap().clone();
+    register_shortcut(app_handle, &strip_newline_hotkey);
+
     Ok(())
 }
 

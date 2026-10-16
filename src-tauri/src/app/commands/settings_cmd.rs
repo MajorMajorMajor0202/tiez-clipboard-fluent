@@ -89,6 +89,25 @@ pub fn set_search_hotkey(
 }
 
 #[tauri::command]
+pub fn set_strip_newline_hotkey(
+    app_handle: AppHandle,
+    state: State<'_, SettingsState>,
+    hotkey: String,
+) -> AppResult<()> {
+    if let Ok(mut guard) = state.strip_newline_hotkey.lock() {
+        *guard = hotkey.clone();
+    }
+
+    let db_state = app_handle.state::<DbState>();
+    db_state
+        .settings_repo
+        .set("app.strip_newline_hotkey", &hotkey)
+        .map_err(AppError::from)?;
+    let _ = app_handle.emit("settings-changed", ());
+    crate::app::commands::hotkey_cmd::sync_registered_hotkeys(&app_handle)
+}
+
+#[tauri::command]
 pub fn set_deduplication(
     app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
@@ -623,6 +642,11 @@ pub fn reset_settings(
         .get("app.search_hotkey")
         .unwrap_or(Some("Alt+F".to_string()))
         .unwrap_or("Alt+F".to_string());
+    let strip_newline_hotkey = state
+        .settings_repo
+        .get("app.strip_newline_hotkey")
+        .unwrap_or(Some("Alt+Shift+C".to_string()))
+        .unwrap_or("Alt+Shift+C".to_string());
     let quick_paste_modifier = state
         .settings_repo
         .get("app.quick_paste_modifier")
@@ -647,6 +671,10 @@ pub fn reset_settings(
     {
         let mut guard = settings_state.search_hotkey.lock().unwrap();
         *guard = search_hotkey.clone();
+    }
+    {
+        let mut guard = settings_state.strip_newline_hotkey.lock().unwrap();
+        *guard = strip_newline_hotkey.clone();
     }
     {
         let mut guard = settings_state.quick_paste_modifier.lock().unwrap();

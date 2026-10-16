@@ -86,6 +86,8 @@ export interface AppState {
   setRichPasteHotkey: StateSetter<string>;
   searchHotkey: string;
   setSearchHotkey: StateSetter<string>;
+  stripNewlineHotkey: string;
+  setStripNewlineHotkey: StateSetter<string>;
   quickPasteModifier: QuickPasteModifier;
   setQuickPasteModifier: StateSetter<QuickPasteModifier>;
   sequentialMode: boolean;
@@ -98,6 +100,8 @@ export interface AppState {
   setIsRecordingRich: StateSetter<boolean>;
   isRecordingSearch: boolean;
   setIsRecordingSearch: StateSetter<boolean>;
+  isRecordingStripNewline: boolean;
+  setIsRecordingStripNewline: StateSetter<boolean>;
   deleteAfterPaste: boolean;
   setDeleteAfterPaste: StateSetter<boolean>;
   moveToTopAfterPaste: boolean;

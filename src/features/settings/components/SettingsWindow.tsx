@@ -194,6 +194,8 @@ const SettingsWindow = () => {
     setRichPasteHotkey,
     searchHotkey,
     setSearchHotkey,
+    stripNewlineHotkey,
+    setStripNewlineHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
     sequentialMode,
@@ -206,6 +208,8 @@ const SettingsWindow = () => {
     setIsRecordingRich,
     isRecordingSearch,
     setIsRecordingSearch,
+    isRecordingStripNewline,
+    setIsRecordingStripNewline,
     emojiPanelEnabled,
     setEmojiPanelEnabled,
     tagManagerEnabled,
@@ -252,7 +256,7 @@ const SettingsWindow = () => {
   const [editingProfile, setEditingProfile] = useState<EditableAiProfile | null>(null);
   const [profileStatuses, setProfileStatuses] = useState<AiProfileStatusMap>({});
   const [showAppSelector, setShowAppSelector] = useState<string | null>(null);
-  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | null>(null);
+  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
   const tagManagerSizeRef = useRef<{ width: number; height: number } | null>(null);
@@ -340,6 +344,7 @@ const SettingsWindow = () => {
     setSequentialHotkey,
     setRichPasteHotkey,
     setSearchHotkey,
+    setStripNewlineHotkey,
     setQuickPasteModifier,
     setSequentialModeState,
     setSoundEnabled,
@@ -586,7 +591,8 @@ const SettingsWindow = () => {
     updateHotkey,
     updateSequentialHotkey,
     updateRichPasteHotkey,
-    updateSearchHotkey
+    updateSearchHotkey,
+    updateStripNewlineHotkey
   } = useHotkeyConfig({
     hotkey,
     setHotkey,
@@ -596,6 +602,8 @@ const SettingsWindow = () => {
     setRichPasteHotkey,
     searchHotkey,
     setSearchHotkey,
+    stripNewlineHotkey,
+    setStripNewlineHotkey,
     sequentialMode,
     isRecording,
     setIsRecording,
@@ -605,6 +613,8 @@ const SettingsWindow = () => {
     setIsRecordingRich,
     isRecordingSearch,
     setIsRecordingSearch,
+    isRecordingStripNewline,
+    setIsRecordingStripNewline,
     saveAppSetting,
     t,
     pushToast
@@ -1200,6 +1210,24 @@ const SettingsWindow = () => {
                       style={{ cursor: 'pointer' }}
                     >
                       {renderHotkeyCaps(richPasteHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+
+                  {/* Strip newline copy hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('strip_newline_hotkey_label') || '无换行复制'}</span>
+                      <span className="fluent-setting-description">
+                        {t('strip_newline_hotkey_desc') || '选中文本后触发此快捷键，自动复制并清除内容中的全部换行符'}
+                      </span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('strip_newline')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(stripNewlineHotkey)}
                       <Edit3 size={14} className="fluent-hotkey-edit-icon" />
                     </div>
                   </div>
@@ -2681,13 +2709,15 @@ const SettingsWindow = () => {
           showHotkeyModal === 'main' ? hotkey :
           showHotkeyModal === 'search' ? searchHotkey :
           showHotkeyModal === 'rich' ? richPasteHotkey :
-          showHotkeyModal === 'sequential' ? sequentialHotkey : ""
+          showHotkeyModal === 'sequential' ? sequentialHotkey :
+          showHotkeyModal === 'strip_newline' ? stripNewlineHotkey : ""
         }
         defaultValue={
           showHotkeyModal === 'main' ? "Alt+C" :
           showHotkeyModal === 'search' ? "Alt+F" :
           showHotkeyModal === 'rich' ? "Ctrl+Shift+Z" :
-          showHotkeyModal === 'sequential' ? "Alt+V" : ""
+          showHotkeyModal === 'sequential' ? "Alt+V" :
+          showHotkeyModal === 'strip_newline' ? "Alt+Shift+C" : ""
         }
         t={t}
         onClose={() => setShowHotkeyModal(null)}
@@ -2696,6 +2726,7 @@ const SettingsWindow = () => {
           if (showHotkeyModal === 'search') updateSearchHotkey(val);
           if (showHotkeyModal === 'rich') updateRichPasteHotkey(val);
           if (showHotkeyModal === 'sequential') updateSequentialHotkey(val);
+          if (showHotkeyModal === 'strip_newline') updateStripNewlineHotkey(val);
         }}
       />
 

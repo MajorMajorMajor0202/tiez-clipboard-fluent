@@ -193,6 +193,7 @@ pub struct StartupSettings {
     pub sequential_hotkey: String,
     pub rich_paste_hotkey: String,
     pub search_hotkey: String,
+    pub strip_newline_hotkey: String,
     pub quick_paste_modifier: String,
     pub sound_enabled: bool,
     pub hide_tray_icon: bool,
@@ -285,6 +286,10 @@ fn load_settings(repo: &impl SettingsRepository) -> StartupSettings {
             .get("app.search_hotkey")
             .unwrap_or(Some("Alt+F".to_string()))
             .unwrap_or("Alt+F".to_string()),
+        strip_newline_hotkey: repo
+            .get("app.strip_newline_hotkey")
+            .unwrap_or(Some("Alt+Shift+C".to_string()))
+            .unwrap_or("Alt+Shift+C".to_string()),
         quick_paste_modifier: repo
             .get("app.quick_paste_modifier")
             .unwrap_or(Some("disabled".to_string()))
@@ -386,6 +391,7 @@ fn setup_state(
         sequential_paste_hotkey: std::sync::Mutex::new(s.sequential_hotkey.clone()),
         rich_paste_hotkey: std::sync::Mutex::new(s.rich_paste_hotkey.clone()),
         search_hotkey: std::sync::Mutex::new(s.search_hotkey.clone()),
+        strip_newline_hotkey: std::sync::Mutex::new(s.strip_newline_hotkey.clone()),
         quick_paste_modifier: std::sync::Mutex::new(s.quick_paste_modifier.clone()),
         sound_enabled: AtomicBool::new(s.sound_enabled),
         hide_tray_icon: AtomicBool::new(s.hide_tray_icon),
@@ -1260,6 +1266,20 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
         if shortcut == &search_s {
             toggle_window(app);
             let _ = app.emit("focus-search-input", ());
+        }
+    }
+
+    if let Ok(strip_s) = {
+        let val = settings.strip_newline_hotkey.lock().unwrap().clone();
+        val.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super").parse::<Shortcut>()
+    } {
+        if shortcut == &strip_s {
+            tauri::async_runtime::spawn({
+                let app = app.clone();
+                async move {
+                    crate::services::clipboard_ops::copy_and_strip_newlines(app).await;
+                }
+            });
         }
     }
 }
