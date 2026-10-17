@@ -95,6 +95,8 @@ const SettingsWindow = () => {
     setSilentStart,
     showSourceAppIcon,
     setShowSourceAppIcon,
+    doubleClickToPaste,
+    setDoubleClickToPaste,
     deleteAfterPaste,
     setDeleteAfterPaste,
     moveToTopAfterPaste,
@@ -1414,8 +1416,27 @@ const SettingsWindow = () => {
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
                     <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">双击自动执行粘贴</span>
-                      <span className="fluent-setting-description">在主列表双击某条历史后，自动退回原焦点输入框并模拟快捷键粘贴</span>
+                      <span className="fluent-setting-title">双击执行粘贴（单击仅选中）</span>
+                      <span className="fluent-setting-description">开启后，单击条目仅高亮选中并激活右侧工具栏操作，双击直接执行粘贴；关闭则恢复单击直接粘贴</span>
+                    </div>
+                    <label className="fluent-switch">
+                      <input
+                        type="checkbox"
+                        checked={doubleClickToPaste}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setDoubleClickToPaste(val);
+                          saveAppSetting('double_click_to_paste', val.toString());
+                        }}
+                      />
+                      <span className="fluent-slider" />
+                    </label>
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">修饰键快速粘贴数字槽位</span>
+                      <span className="fluent-setting-description">按住设定的修饰键并敲击数字键，可直接将置顶或前几项内容粘贴到原输入框</span>
                     </div>
                     <FluentDropdown
                       options={[

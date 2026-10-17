@@ -199,6 +199,8 @@ export const useAppState = (): AppState => {
   });
   const [activeTabId, setActiveTabId] = useState<string>("clipboard");
   const [editingTabFlyoutId, setEditingTabFlyoutId] = useState<number | null>(null);
+  const [doubleClickToPaste, setDoubleClickToPaste] = useState(true);
+  const [editingContentId, setEditingContentId] = useState<number | null>(null);
 
   return {
     showSettings,
@@ -466,6 +468,10 @@ export const useAppState = (): AppState => {
     quickTabAssignSeconds,
     setQuickTabAssignSeconds,
     quickTabAssignModifier,
-    setQuickTabAssignModifier
+    setQuickTabAssignModifier,
+    doubleClickToPaste,
+    setDoubleClickToPaste,
+    editingContentId,
+    setEditingContentId
   };
 };

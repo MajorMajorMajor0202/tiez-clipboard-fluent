@@ -10,7 +10,6 @@ import {
     Eye,
     EyeOff,
     ExternalLink,
-    Tag,
     X,
     FileText,
     Image as ImageIcon,
@@ -33,7 +32,6 @@ import {
     Check,
     Trash2,
     Edit3,
-    MoreHorizontal,
     Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -707,13 +705,11 @@ const ClipboardItem = ({
     onOpen,
     onTogglePin,
     onDelete,
-    onToggleTagEditor,
     onTagInput,
     onTagAdd,
     onTagPick,
     onTagEditCancel,
     onTagDelete,
-    onToggleTabFlyout,
     onTabFlyoutCancel,
     onToggleItemTab,
     onAddNewTabAndAssign,
@@ -735,6 +731,10 @@ const ClipboardItem = ({
     isMultiSelectActive = false,
     onMultiSelect,
     onItemContentUpdated,
+    doubleClickToPaste = true,
+    isEditingContent: propIsEditingContent,
+    onSaveContentEdit,
+    onCancelContentEdit,
     dragControls: _dragControls,
     id,
     compactMode,
@@ -748,7 +748,12 @@ const ClipboardItem = ({
     const tabNewInputRef = useRef<HTMLInputElement>(null);
     const editInputRef = useRef<HTMLTextAreaElement>(null);
     const isDraggingRef = useRef(false);
-    const [isEditingContent, setIsEditingContent] = useState(false);
+    const [localIsEditingContent, setLocalIsEditingContent] = useState(false);
+    const isEditingContent = propIsEditingContent !== undefined ? propIsEditingContent : localIsEditingContent;
+    const setIsEditingContent = useCallback((val: boolean) => {
+        setLocalIsEditingContent(val);
+        if (!val) onCancelContentEdit?.();
+    }, [onCancelContentEdit]);
     const [editContentVal, setEditContentVal] = useState(item.content);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
     const [moreMenuPosition, setMoreMenuPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
@@ -884,29 +889,6 @@ const ClipboardItem = ({
         };
     }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent]);
 
-    const handleToggleMoreMenu = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (isMoreMenuOpen) {
-            setIsMoreMenuOpen(false);
-            if (!isMultiSelectActive && !isEditingContent) {
-                setIgnoreBlurSafe(false);
-            }
-            return;
-        }
-
-        // Close tag and tab flyouts
-        onTagEditCancel?.();
-        onTabFlyoutCancel?.();
-
-        // Close any other open menus first
-        window.dispatchEvent(
-            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: item.id } })
-        );
-
-        setIsMoreMenuOpen(true);
-        setIgnoreBlurSafe(true);
-    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent, onTagEditCancel, onTabFlyoutCancel, item.id]);
-
     const handleContextMenu = useCallback((e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
         if (isEditingTags) {
@@ -937,40 +919,23 @@ const ClipboardItem = ({
         onSelect();
     }, [isEditingTags, onTagEditCancel, onTabFlyoutCancel, onSelect, item.id]);
 
-    const handleToggleTagEditor = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setIsMoreMenuOpen(false);
-        onTabFlyoutCancel?.();
-        window.dispatchEvent(
-            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: -1 } })
-        );
-        onToggleTagEditor(e);
-    }, [onToggleTagEditor, onTabFlyoutCancel]);
-
-    const handleToggleTabFlyout = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setIsMoreMenuOpen(false);
-        onTagEditCancel?.();
-        window.dispatchEvent(
-            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: -1 } })
-        );
-        onToggleTabFlyout?.(e);
-    }, [onToggleTabFlyout, onTagEditCancel]);
-
     const handleSaveContentEdit = useCallback(async () => {
         const trimmed = editContentVal;
         if (trimmed === item.content) {
-            setIsEditingContent(false);
+            setLocalIsEditingContent(false);
+            onCancelContentEdit?.();
             return;
         }
         try {
             await invoke("update_item_content", { id: item.id, newContent: trimmed });
             onItemContentUpdated?.(item.id, trimmed);
-            setIsEditingContent(false);
+            onSaveContentEdit?.(trimmed);
+            setLocalIsEditingContent(false);
+            onCancelContentEdit?.();
         } catch (err) {
             console.error("Failed to update item content:", err);
         }
-    }, [editContentVal, item.content, item.id, onItemContentUpdated]);
+    }, [editContentVal, item.content, item.id, onItemContentUpdated, onSaveContentEdit, onCancelContentEdit]);
 
     useEffect(() => {
         if (isEditingContent) {
@@ -1057,16 +1022,17 @@ const ClipboardItem = ({
     }, [tagSuggestIndex, pickableTagSuggestions]);
 
     const updatePosition = useCallback(() => {
-        if (!isEditingTags || !tagButtonRef.current || !onTagEditCancel) return;
+        const anchorEl = tagButtonRef.current || itemRef.current;
+        if (!isEditingTags || !anchorEl || !onTagEditCancel) return;
         
-        if (!document.body.contains(tagButtonRef.current)) {
+        if (!document.body.contains(anchorEl)) {
             onTagEditCancel();
             return;
         }
 
-        const rect = tagButtonRef.current.getBoundingClientRect();
+        const rect = anchorEl.getBoundingClientRect();
         
-        const scrollContainer = tagButtonRef.current.closest(".fluent-scrollbar-host");
+        const scrollContainer = anchorEl.closest(".fluent-scrollbar-host");
         if (scrollContainer) {
             const containerRect = scrollContainer.getBoundingClientRect();
             const isButtonInViewport = 
@@ -1097,7 +1063,9 @@ const ClipboardItem = ({
         const isAbove = spaceBelow < flyoutHeight;
         
         const flyoutWidth = 192;
-        let left = rect.left + rect.width / 2 - flyoutWidth / 2;
+        let left = tagButtonRef.current
+            ? (rect.left + rect.width / 2 - flyoutWidth / 2)
+            : (rect.right - flyoutWidth - 12);
         
         if (left + flyoutWidth > window.innerWidth - 12) {
             left = window.innerWidth - flyoutWidth - 12;
@@ -1164,19 +1132,16 @@ const ClipboardItem = ({
         return availableCustomTabs.filter((t) => t.name.toLowerCase().includes(query));
     }, [availableCustomTabs, newTabNameInput]);
 
-    const hasAnyTab = useMemo(() => {
-        return assignedTabIds.length > 0;
-    }, [assignedTabIds]);
-
     const updateTabPosition = useCallback(() => {
-        if (!isTabFlyoutOpen || !tabButtonRef.current || !onTabFlyoutCancel) return;
-        if (!tabButtonRef.current.isConnected) {
+        const anchorEl = tabButtonRef.current || itemRef.current;
+        if (!isTabFlyoutOpen || !anchorEl || !onTabFlyoutCancel) return;
+        if (!anchorEl.isConnected) {
             onTabFlyoutCancel();
             return;
         }
 
-        const rect = tabButtonRef.current.getBoundingClientRect();
-        const scrollContainer = tabButtonRef.current.closest(".fluent-scrollbar-host");
+        const rect = anchorEl.getBoundingClientRect();
+        const scrollContainer = anchorEl.closest(".fluent-scrollbar-host");
         if (scrollContainer) {
             const containerRect = scrollContainer.getBoundingClientRect();
             const isButtonInViewport =
@@ -1204,7 +1169,9 @@ const ClipboardItem = ({
         const spaceBelow = window.innerHeight - rect.bottom;
         const isAbove = spaceBelow < flyoutHeight;
         const flyoutWidth = 192;
-        let left = rect.left + rect.width / 2 - flyoutWidth / 2;
+        let left = tabButtonRef.current
+            ? (rect.left + rect.width / 2 - flyoutWidth / 2)
+            : (rect.right - flyoutWidth - 12);
 
         if (left + flyoutWidth > window.innerWidth - 12) {
             left = window.innerWidth - flyoutWidth - 12;
@@ -2064,9 +2031,24 @@ const ClipboardItem = ({
                     return;
                 }
 
+                if (doubleClickToPaste) {
+                    onSelect();
+                } else {
+                    void hideCompactPreview();
+                    onCopy(false);
+                    onSelect();
+                }
+            }}
+            onDoubleClick={(e) => {
+                if (!doubleClickToPaste) return;
+                if (isEditingTags || isEditingContent) return;
+                const target = e.target as HTMLElement;
+                if (target.closest('button, input, textarea, [role="button"], .item-inline-editor, .secondary-actions-menu')) {
+                    return;
+                }
+                if (isDraggingRef.current) return;
                 void hideCompactPreview();
                 onCopy(false);
-                onSelect();
             }}
             onContextMenu={handleContextMenu}
             onMouseEnter={(e) => {
@@ -2146,38 +2128,6 @@ const ClipboardItem = ({
                 </div>
 
                 <div className="item-meta-right">
-                    <div className="item-actions">
-                        <FluentTooltip text={t('more_actions') || '更多选项'}>
-                            <button
-                                ref={moreButtonRef}
-                                className={`btn-icon-ghost more-btn ${isMoreMenuOpen ? "active" : ""}`}
-                                onClick={handleToggleMoreMenu}
-                            >
-                                <MoreHorizontal size={14} />
-                            </button>
-                        </FluentTooltip>
-
-                        <FluentTooltip text={t('add_to_tab') || '添加到标签页'}>
-                            <button
-                                ref={tabButtonRef}
-                                className={`btn-icon-ghost tab-btn ${isTabFlyoutOpen || hasAnyTab ? 'active' : ''}`}
-                                onClick={handleToggleTabFlyout}
-                            >
-                                <FolderPlus size={13} />
-                            </button>
-                        </FluentTooltip>
-
-                        <FluentTooltip text={t('tags') || '标签'}>
-                            <button
-                                ref={tagButtonRef}
-                                className={`btn-icon-ghost tag-btn ${isEditingTags || (item.tags && item.tags.length > 0) ? 'active' : ''}`}
-                                onClick={handleToggleTagEditor}
-                            >
-                                <Tag size={13} />
-                            </button>
-                        </FluentTooltip>
-                    </div>
-
                     <div className="item-meta-right-info">
                         {quickPasteHint && item.is_pinned && (
                             <span
@@ -2881,6 +2831,8 @@ const ClipboardItem = ({
 
 export default memo(ClipboardItem, (prevProps, nextProps) => {
     return prevProps.isSelected === nextProps.isSelected &&
+        prevProps.doubleClickToPaste === nextProps.doubleClickToPaste &&
+        prevProps.isEditingContent === nextProps.isEditingContent &&
         prevProps.isMultiSelected === nextProps.isMultiSelected &&
         prevProps.isMultiSelectActive === nextProps.isMultiSelectActive &&
         prevProps.index === nextProps.index &&

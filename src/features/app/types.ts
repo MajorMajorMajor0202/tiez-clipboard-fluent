@@ -289,6 +289,10 @@ export interface AppState {
   setActiveTabId: StateSetter<string>;
   editingTabFlyoutId: number | null;
   setEditingTabFlyoutId: StateSetter<number | null>;
+  doubleClickToPaste: boolean;
+  setDoubleClickToPaste: StateSetter<boolean>;
+  editingContentId: number | null;
+  setEditingContentId: StateSetter<number | null>;
 }
 
 export interface TabItem {

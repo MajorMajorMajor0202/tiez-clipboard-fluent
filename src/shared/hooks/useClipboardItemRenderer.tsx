@@ -36,6 +36,10 @@ interface UseClipboardItemRendererOptions {
   t: (key: string) => string;
   showSourceAppIcon: boolean;
   compactMode: boolean;
+  doubleClickToPaste?: boolean;
+  editingContentId?: number | null;
+  onSaveContentEdit?: (id: number, newContent: string) => void;
+  onCancelContentEdit?: () => void;
   richTextSnapshotPreview: boolean;
   sensitiveMaskPrefixVisible: number;
   sensitiveMaskSuffixVisible: number;
@@ -97,6 +101,10 @@ export const useClipboardItemRenderer = ({
   t,
   showSourceAppIcon,
   compactMode,
+  doubleClickToPaste,
+  editingContentId,
+  onSaveContentEdit,
+  onCancelContentEdit,
   richTextSnapshotPreview,
   sensitiveMaskPrefixVisible,
   sensitiveMaskSuffixVisible,
@@ -153,6 +161,10 @@ export const useClipboardItemRenderer = ({
           t={t}
           showSourceAppIcon={showSourceAppIcon}
           compactMode={compactMode}
+          doubleClickToPaste={doubleClickToPaste}
+          isEditingContent={editingContentId === item.id}
+          onSaveContentEdit={(newContent) => onSaveContentEdit?.(item.id, newContent)}
+          onCancelContentEdit={onCancelContentEdit}
           richTextSnapshotPreview={richTextSnapshotPreview}
           sensitiveMaskPrefixVisible={sensitiveMaskPrefixVisible}
           sensitiveMaskSuffixVisible={sensitiveMaskSuffixVisible}
@@ -292,6 +304,8 @@ export const useClipboardItemRenderer = ({
       t,
       showSourceAppIcon,
       compactMode,
+      doubleClickToPaste,
+      editingContentId,
       richTextSnapshotPreview,
       sensitiveMaskPrefixVisible,
       sensitiveMaskSuffixVisible,

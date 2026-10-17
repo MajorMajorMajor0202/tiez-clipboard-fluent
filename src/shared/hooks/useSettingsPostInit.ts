@@ -99,6 +99,7 @@ interface UseSettingsPostInitOptions {
   setSearchHotkey: (val: string) => void;
   setStripNewlineHotkey: (val: string) => void;
   setQuickPasteModifier: (val: QuickPasteModifier) => void;
+  setDoubleClickToPaste?: (val: boolean) => void;
   setQuickTabAssignEnabled?: (val: boolean) => void;
   setQuickTabAssignSeconds?: (val: number) => void;
   setQuickTabAssignModifier?: (val: string) => void;
@@ -189,6 +190,7 @@ export const useSettingsPostInit = ({
   setSearchHotkey,
   setStripNewlineHotkey,
   setQuickPasteModifier,
+  setDoubleClickToPaste,
   setQuickTabAssignEnabled,
   setQuickTabAssignSeconds,
   setQuickTabAssignModifier,
@@ -332,6 +334,7 @@ export const useSettingsPostInit = ({
 
 
     // These have false as default, so check for 'true'
+    setDoubleClickToPaste?.(settings["app.double_click_to_paste"] !== "false");
     setDeleteAfterPaste(settings["app.delete_after_paste"] === "true");
     setMoveToTopAfterPaste(settings["app.move_to_top_after_paste"] !== "false");
     setHideTrayIcon(settings["app.hide_tray_icon"] === "true");

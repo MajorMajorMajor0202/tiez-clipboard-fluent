@@ -352,7 +352,11 @@ const App = () => {
     activeTabId,
     setActiveTabId,
     editingTabFlyoutId,
-    setEditingTabFlyoutId
+    setEditingTabFlyoutId,
+    doubleClickToPaste,
+    setDoubleClickToPaste,
+    editingContentId,
+    setEditingContentId
   } = appState;
 
   // --- Auto Update Logic ---
@@ -752,6 +756,7 @@ const App = () => {
     setAiAssignedProfileTask,
     setAiAssignedProfileMouthpiece,
     setAiAssignedProfileTranslate,
+    setDoubleClickToPaste,
     setSettingsLoaded
   });
 
@@ -1706,6 +1711,13 @@ const App = () => {
     t,
     showSourceAppIcon,
     compactMode,
+    doubleClickToPaste,
+    editingContentId,
+    onSaveContentEdit: (id, newContent) => {
+      handleItemContentUpdated(id, newContent);
+      setEditingContentId(null);
+    },
+    onCancelContentEdit: () => setEditingContentId(null),
     richTextSnapshotPreview,
     sensitiveMaskPrefixVisible,
     sensitiveMaskSuffixVisible,
@@ -1866,6 +1878,81 @@ const App = () => {
     setSelectedIndex(targetIndex);
   }, [selectedIndex, filteredHistory, pinnedItems, handlePinnedReorder, setHistory, setSelectedIndex]);
 
+  const isSelectedItemSensitive = useMemo(() => {
+    if (!selectedItem) return false;
+    return (selectedItem.tags || []).some((tg) => {
+      const lower = tg.toLowerCase();
+      return lower === "sensitive" || lower === "敏感" || lower === "password" || lower === "密码";
+    });
+  }, [selectedItem]);
+
+  const isSelectedItemTabAssigned = useMemo(() => {
+    if (!selectedItem) return false;
+    return Object.values(tabAssignments).some((ids) => ids.includes(selectedItem.id));
+  }, [selectedItem, tabAssignments]);
+
+  const handleRailCopy = useCallback(() => {
+    if (!selectedItem) return;
+    copyToClipboard(
+      selectedItem.id,
+      selectedItem.content,
+      selectedItem.content_type,
+      false
+    );
+  }, [selectedItem, copyToClipboard]);
+
+  const handleRailEditContent = useCallback(() => {
+    if (!selectedItem) return;
+    setEditingContentId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
+  }, [selectedItem, setEditingContentId]);
+
+  const handleRailOpenContent = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!selectedItem) return;
+    openContent(selectedItem);
+  }, [selectedItem, openContent]);
+
+  const handleRailAssignTab = useCallback(() => {
+    if (!selectedItem) return;
+    setEditingTabFlyoutId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
+    setEditingTagsId(null);
+  }, [selectedItem, setEditingTabFlyoutId, setEditingTagsId]);
+
+  const handleRailAssignTag = useCallback(() => {
+    if (!selectedItem) return;
+    setEditingTagsId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
+    setEditingTabFlyoutId(null);
+    setTagInput("");
+  }, [selectedItem, setEditingTagsId, setEditingTabFlyoutId, setTagInput]);
+
+  const handleRailToggleReveal = useCallback(() => {
+    if (!selectedItem) return;
+    setRevealedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(selectedItem.id)) {
+        next.delete(selectedItem.id);
+      } else {
+        next.add(selectedItem.id);
+      }
+      return next;
+    });
+  }, [selectedItem, setRevealedIds]);
+
+  const handleRailAIAction = useCallback(() => {
+    if (!selectedItem) return;
+    setAiOptionsOpenId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
+  }, [selectedItem, setAiOptionsOpenId]);
+
+  const handleRailDeleteSelectedItem = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!selectedItem) return;
+    if (isSelectedItemLocked) {
+      pushToast("已锁定的条目受保护，无法删除。请先解锁。");
+      return;
+    }
+    deleteEntry(e || ({ stopPropagation: () => {} } as any), selectedItem.id);
+  }, [selectedItem, isSelectedItemLocked, pushToast, deleteEntry]);
+
   return (
     <div
       className={`app-container ${entranceActive ? "window-entrance" : ""}`}
@@ -1953,13 +2040,31 @@ const App = () => {
             setAddEntryContent("");
           }}
           clearHistory={clearHistory}
+          hasSelectedItem={!!selectedItem}
+          onCopySelectedItem={handleRailCopy}
+          onEditContent={handleRailEditContent}
+          isEditingContent={selectedItem ? editingContentId === selectedItem.id : false}
+          onOpenContent={handleRailOpenContent}
+          onAssignTab={handleRailAssignTab}
+          isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id : false}
+          isTabAssigned={isSelectedItemTabAssigned}
+          onAssignTag={handleRailAssignTag}
+          isEditingTags={selectedItem ? editingTagsId === selectedItem.id : false}
+          hasTags={Boolean(selectedItem?.tags && selectedItem.tags.length > 0)}
           onTogglePin={handleRailTogglePin}
+          isPinned={!!selectedItem?.is_pinned}
           onToggleLock={handleRailToggleLock}
+          isLocked={isSelectedItemLocked}
           onMoveUp={handleRailMoveUp}
           onMoveDown={handleRailMoveDown}
-          hasSelectedItem={!!selectedItem}
-          isPinned={!!selectedItem?.is_pinned}
-          isLocked={isSelectedItemLocked}
+          onToggleReveal={handleRailToggleReveal}
+          isRevealed={selectedItem ? revealedIds.has(selectedItem.id) : false}
+          hasSensitiveTag={isSelectedItemSensitive}
+          onAIAction={handleRailAIAction}
+          isAIOpen={selectedItem ? aiOptionsOpenId === selectedItem.id : false}
+          isAIProcessing={selectedItem ? processingAiId === selectedItem.id : false}
+          canAI={aiEnabled && !!selectedItem && selectedItem.content_type === "text"}
+          onDeleteSelectedItem={handleRailDeleteSelectedItem}
           showTagManager={effectiveShowTagManager}
           setShowTagManager={setShowTagManager}
           tagManagerEnabled={tagManagerEnabled}

@@ -62,6 +62,10 @@ export interface ClipboardItemProps {
   isMultiSelected?: boolean;
   isMultiSelectActive?: boolean;
   onMultiSelect?: (id: number, index: number, modifiers: { ctrl: boolean; shift: boolean }) => void;
+  doubleClickToPaste?: boolean;
+  isEditingContent?: boolean;
+  onSaveContentEdit?: (newContent: string) => void;
+  onCancelContentEdit?: () => void;
   onItemContentUpdated?: (id: number, newContent: string) => void;
   dragControls?: DragControls;
   id?: string;
