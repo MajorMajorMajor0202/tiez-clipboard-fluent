@@ -51,6 +51,7 @@ import { getSourceAppIcon, peekSourceAppIcon } from "../../../shared/lib/sourceA
 import { registerCompactPreviewControls } from "../lib/compactPreviewControls";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 
+const CLOSE_SECONDARY_MENUS_EVENT = "tiez-close-secondary-menus";
 const COMPACT_PREVIEW_LABEL = "compact-preview";
 const RICH_IMAGE_FALLBACK_PREFIX = "<!--TIEZ_RICH_IMAGE:";
 const RICH_IMAGE_FALLBACK_SUFFIX = "-->";
@@ -761,6 +762,16 @@ const ClipboardItem = ({
         setEditContentVal(item.content);
     }, [item.content]);
 
+    useEffect(() => {
+        const handleCloseOthers = (e: any) => {
+            if (e.detail?.exceptItemId !== item.id) {
+                setIsMoreMenuOpen(false);
+            }
+        };
+        window.addEventListener(CLOSE_SECONDARY_MENUS_EVENT, handleCloseOthers);
+        return () => window.removeEventListener(CLOSE_SECONDARY_MENUS_EVENT, handleCloseOthers);
+    }, [item.id]);
+
     const handleToggleMoreMenu = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (isMoreMenuOpen) {
@@ -770,15 +781,21 @@ const ClipboardItem = ({
             }
             return;
         }
+
+        // Close any other open menus first
+        window.dispatchEvent(
+            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: item.id } })
+        );
+
         const rect = moreButtonRef.current?.getBoundingClientRect();
         if (rect) {
             const menuWidth = 145;
             const menuHeight = 200;
-            let left = rect.right - menuWidth;
-            if (left < 8) left = 8;
+            let left = rect.left;
             if (left + menuWidth > window.innerWidth - 8) {
                 left = window.innerWidth - menuWidth - 8;
             }
+            if (left < 8) left = 8;
             const spaceBelow = window.innerHeight - rect.bottom;
             const isAbove = spaceBelow < menuHeight;
             if (isAbove) {
@@ -789,7 +806,7 @@ const ClipboardItem = ({
         }
         setIsMoreMenuOpen(true);
         setIgnoreBlurSafe(true);
-    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent]);
+    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent, item.id]);
 
     const handleContextMenu = useCallback((e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
@@ -806,6 +823,11 @@ const ClipboardItem = ({
         void hideCompactPreview();
         e.preventDefault();
         e.stopPropagation();
+
+        // Close any other open menus first!
+        window.dispatchEvent(
+            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: item.id } })
+        );
 
         const menuWidth = 145;
         const menuHeight = 200;
@@ -826,12 +848,12 @@ const ClipboardItem = ({
         setIsMoreMenuOpen(true);
         setIgnoreBlurSafe(true);
         onSelect();
-    }, [isEditingTags, onTagEditCancel, onSelect]);
+    }, [isEditingTags, onTagEditCancel, onSelect, item.id]);
 
     useEffect(() => {
         if (!isMoreMenuOpen) return;
         const handleDown = (e: MouseEvent) => {
-            if (e.button !== 0) return;
+            if (e.button !== 0 && e.type !== "contextmenu") return;
             const target = e.target as HTMLElement;
             if (target.closest('.secondary-actions-menu') || moreButtonRef.current?.contains(target)) return;
             setIsMoreMenuOpen(false);
@@ -857,10 +879,12 @@ const ClipboardItem = ({
         };
 
         document.addEventListener("mousedown", handleDown, true);
+        document.addEventListener("contextmenu", handleDown, true);
         document.addEventListener("keydown", handleKeyDown, true);
         window.addEventListener("wheel", handleScroll, { capture: true, passive: true });
         return () => {
             document.removeEventListener("mousedown", handleDown, true);
+            document.removeEventListener("contextmenu", handleDown, true);
             document.removeEventListener("keydown", handleKeyDown, true);
             window.removeEventListener("wheel", handleScroll, true);
         };
@@ -1764,7 +1788,7 @@ const ClipboardItem = ({
             animate={{ marginBottom: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
+            className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${isMoreMenuOpen ? "has-open-menu" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
             draggable={!isEditingTags && !isEditingContent}
             onDragStart={(e: any) => {
                 const target = e.target as HTMLElement;
@@ -1910,10 +1934,6 @@ const ClipboardItem = ({
             <div className="item-meta">
                 <div className="item-meta-left">
                     <div className="app-info">
-                        {item.is_pinned && <Pin size={10} style={{ color: 'var(--accent-color)', marginRight: '-2px' }} />}
-                        {showSourceAppIcon
-                            ? renderSourceAppIcon(sourceAppIcon, item.content_type, item.source_app)
-                            : getIcon(item.content_type)}
                         {item.is_pinned && (
                             <FluentTooltip text={t('unpin') || '取消置顶'}>
                                 <button
@@ -1928,12 +1948,37 @@ const ClipboardItem = ({
                                 </button>
                             </FluentTooltip>
                         )}
+                        {showSourceAppIcon
+                            ? renderSourceAppIcon(sourceAppIcon, item.content_type, item.source_app)
+                            : getIcon(item.content_type)}
                         <span>{item.source_app}</span>
                     </div>
                 </div>
 
                 <div className="item-meta-right">
+                    <div className="item-meta-right-info">
+                        {quickPasteHint && item.is_pinned && (
+                            <span
+                                className="quick-paste-hint"
+                                title={`${t('quick_paste_modifier')}: ${quickPasteHint.combo}`}
+                            >
+                                {quickPasteHint.combo}
+                            </span>
+                        )}
+                        <span>{getConciseTime(item.timestamp, language)}</span>
+                    </div>
+
                     <div className="item-actions">
+                        <FluentTooltip text={t('more_actions') || '更多选项'}>
+                            <button
+                                ref={moreButtonRef}
+                                className={`btn-icon-ghost more-btn ${isMoreMenuOpen ? "active" : ""}`}
+                                onClick={handleToggleMoreMenu}
+                            >
+                                <MoreHorizontal size={14} />
+                            </button>
+                        </FluentTooltip>
+
                         <FluentTooltip text={t('add_to_tab') || '添加到标签页'}>
                             <button
                                 ref={tabButtonRef}
@@ -1953,27 +1998,6 @@ const ClipboardItem = ({
                                 <Tag size={13} />
                             </button>
                         </FluentTooltip>
-
-                        <FluentTooltip text={t('more_actions') || '更多选项'}>
-                            <button
-                                ref={moreButtonRef}
-                                className={`btn-icon-ghost more-btn ${isMoreMenuOpen ? "active" : ""}`}
-                                onClick={handleToggleMoreMenu}
-                            >
-                                <MoreHorizontal size={14} />
-                            </button>
-                        </FluentTooltip>
-                    </div>
-                    <div className="item-meta-right-info">
-                        {quickPasteHint && item.is_pinned && (
-                            <span
-                                className="quick-paste-hint"
-                                title={`${t('quick_paste_modifier')}: ${quickPasteHint.combo}`}
-                            >
-                                {quickPasteHint.combo}
-                            </span>
-                        )}
-                        <span>{getConciseTime(item.timestamp, language)}</span>
                     </div>
                 </div>
             </div>

@@ -220,7 +220,8 @@
     border-color: transparent;
 }
 
-.history-item.compact:hover .item-actions {
+.history-item.compact:hover .item-actions,
+.history-item.compact.has-open-menu .item-actions {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
