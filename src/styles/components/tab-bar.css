@@ -31,34 +31,47 @@
   display: none;
 }
 
-/* Tab button item - Pure text or icon with subtle hover feedback */
+/* Tab button item - outer container */
 .fluent-tab-item {
   position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 0 8px 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.fluent-tab-item:first-child {
+  margin-left: 0;
+}
+
+/* Tab content wrapper: Houses text or icon, vertically centered, receives hover background */
+.fluent-tab-content {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 4px 8px 7px 8px;
+  padding: 4px 8px;
   font-family: var(--fluent-font-family, system-ui);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
   color: var(--text-secondary, #666);
   background: transparent;
-  border: none;
-  /* All border-radii <= 4px */
   border-radius: 4px;
-  box-shadow: none;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
-  outline: none;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 /* Icon-only first tab (clipboard / history) */
-.fluent-tab-item.tab-icon-only {
-  padding: 4px 8px 7px 8px;
+.fluent-tab-item.tab-icon-only .fluent-tab-content {
+  padding: 4px 8px;
   min-width: 32px;
 }
 
@@ -66,21 +79,18 @@
   display: block;
 }
 
-.fluent-tab-item:first-child {
-  margin-left: 0;
-}
-
-.fluent-tab-item:hover {
+/* Hover & Active background applied ONLY to .fluent-tab-content */
+.fluent-tab-item:hover .fluent-tab-content {
   background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.05));
   color: var(--text-primary, #000);
 }
 
-.fluent-tab-item:active {
+.fluent-tab-item:active .fluent-tab-content {
   background: var(--bg-subtle-active, rgba(0, 0, 0, 0.08));
   opacity: 0.85;
 }
 
-.fluent-tab-item.active {
+.fluent-tab-item.active .fluent-tab-content {
   color: var(--text-primary, #000);
   font-weight: 500;
 }
@@ -101,7 +111,7 @@
   color: var(--accent-color, #2f6fed);
 }
 
-/* Accent Underline Indicator — Original dimensions (16px x 3px), centered via left calc without CSS transform conflict */
+/* Accent Underline Indicator — Original dimensions (16px x 3px), centered below hover box with clean separation */
 .fluent-tab-indicator {
   position: absolute;
   bottom: 0px;

@@ -181,15 +181,17 @@ export const FluentTabBar = ({
                 title={isFirstTab ? tab.name || (t ? t("clipboard") || "剪贴板" : "剪贴板") : undefined}
                 aria-label={tab.name}
               >
-                {isFirstTab ? (
-                  <Clipboard size={14} strokeWidth={2.2} className="fluent-tab-icon" />
-                ) : (
-                  <span>{tab.name}</span>
-                )}
+                <span className="fluent-tab-content">
+                  {isFirstTab ? (
+                    <Clipboard size={14} strokeWidth={2.2} className="fluent-tab-icon" />
+                  ) : (
+                    <span>{tab.name}</span>
+                  )}
 
-                {typeof tab.count === "number" && tab.count > 0 && (
-                  <span className="fluent-tab-badge">{tab.count}</span>
-                )}
+                  {typeof tab.count === "number" && tab.count > 0 && (
+                    <span className="fluent-tab-badge">{tab.count}</span>
+                  )}
+                </span>
 
                 {/* Accent Underline Indicator - follows active tab smoothly */}
                 {isActive && (
