@@ -10,6 +10,8 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { getTagColor, getTagTextColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
+import FluentTabBar from "./FluentTabBar";
+import type { TabItem } from "../types";
 
 interface AppHeaderProps {
   t: (key: string) => string;
@@ -36,6 +38,14 @@ interface AppHeaderProps {
   setTypeFilter: (val: string | null) => void;
   onBack: () => void;
   tagColors?: Record<string, string>;
+  tabs?: TabItem[];
+  activeTabId?: string;
+  onSelectTab?: (tabId: string) => void;
+  onAddTab?: (name: string) => void;
+  onDeleteTab?: (tabId: string) => void;
+  onDropItemOnTab?: (itemId: number, tabName: string) => void;
+  onDropExternalFilesOnTab?: (paths: string[], tabIdOrName: string) => void;
+  onDropExternalTextOnTab?: (text: string, tabIdOrName: string) => void;
 }
 
 const AppHeader = ({
@@ -62,7 +72,15 @@ const AppHeader = ({
   typeFilter: _typeFilter,
   setTypeFilter: _setTypeFilter,
   onBack,
-  tagColors
+  tagColors,
+  tabs,
+  activeTabId,
+  onSelectTab,
+  onAddTab,
+  onDeleteTab,
+  onDropItemOnTab,
+  onDropExternalFilesOnTab,
+  onDropExternalTextOnTab
 }: AppHeaderProps) => {
 
   return (
@@ -201,6 +219,17 @@ const AppHeader = ({
                   )}
                 </AnimatePresence>
               </div>
+              <FluentTabBar
+                tabs={tabs || []}
+                activeTabId={activeTabId || "clipboard"}
+                onSelectTab={onSelectTab || (() => {})}
+                onAddTab={onAddTab}
+                onDeleteTab={onDeleteTab}
+                onDropItemOnTab={onDropItemOnTab}
+                onDropExternalFilesOnTab={onDropExternalFilesOnTab}
+                onDropExternalTextOnTab={onDropExternalTextOnTab}
+                t={t}
+              />
             </div>
           </motion.div>
         )}

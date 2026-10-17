@@ -11,14 +11,14 @@
 }
 
 .fluent-right-rail {
-  width: 44px;
+  width: 45px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: var(--bg-toolbar, rgba(255, 255, 255, 0.7));
   border-left: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
-  padding: 4px 2px 8px 2px;
+  padding: 6px 0 8px 0;
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none;
@@ -37,27 +37,11 @@
   flex-shrink: 0;
 }
 
-.rail-tabs-scroll {
-  max-height: 150px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  width: 100%;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 2px 0;
-}
-
-.rail-tabs-scroll::-webkit-scrollbar {
-  display: none;
-}
-
 .rail-actions-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,7 +49,7 @@
   width: 100%;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 2px 0;
+  padding: 0;
 }
 
 .rail-actions-scroll::-webkit-scrollbar {
@@ -83,10 +67,9 @@
   padding-top: 4px;
 }
 
-.rail-btn,
-.rail-tab-btn {
+.rail-btn {
   position: relative;
-  width: 34px;
+  width: 32px;
   height: 32px;
   border-radius: 4px;
   border: 1px solid transparent;
@@ -98,7 +81,7 @@
   cursor: pointer;
   outline: none;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
   box-sizing: border-box;
   transition:
     background 0.15s ease,
@@ -109,20 +92,17 @@
   app-region: no-drag !important;
 }
 
-.rail-btn:hover,
-.rail-tab-btn:hover {
+.rail-btn:hover {
   background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.05));
   color: var(--text-primary, #000);
 }
 
-.rail-btn:active,
-.rail-tab-btn:active {
+.rail-btn:active {
   background: var(--bg-subtle-active, rgba(0, 0, 0, 0.08));
   transform: scale(0.96);
 }
 
-.rail-btn.active,
-.rail-tab-btn.active {
+.rail-btn.active {
   color: var(--accent-color, #0078d4);
   background: rgba(var(--accent-rgb, 0, 120, 212), 0.12);
 }
@@ -138,39 +118,10 @@
   pointer-events: none;
 }
 
-/* Accent Indicator for Active Tab in Vertical Rail */
-.rail-tab-indicator {
-  position: absolute;
-  left: 1px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 16px;
-  border-radius: 2px;
-  background: var(--accent-color, #0078d4);
-  pointer-events: none;
-}
-
-/* Tab Drag Target Hover */
-.rail-tab-btn.drag-target-hover {
-  background: rgba(var(--accent-rgb, 0, 120, 212), 0.18) !important;
-  border: 1px dashed var(--accent-color, #0078d4) !important;
-}
-
-.rail-tab-chip {
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  max-width: 26px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .rail-divider {
-  width: 22px;
+  width: 24px;
   height: 1px;
   background: var(--border-color, rgba(128, 128, 128, 0.2));
-  margin: 4px 0;
+  margin: 4px auto;
   flex-shrink: 0;
 }

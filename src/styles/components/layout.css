@@ -399,6 +399,16 @@ select.search-input option {
   display: none;
 }
 
+.virtual-list-wrapper .fluent-scrollbar {
+  right: 0;
+  width: 6px;
+}
+
+.virtual-list-wrapper .fluent-scrollbar--active .fluent-scrollbar__thumb {
+  right: 0;
+  width: 5px;
+}
+
 .history-item {
   position: relative;
   padding: 8px 12px;
@@ -417,7 +427,7 @@ select.search-input option {
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.18s ease;
-  margin: 0 16px 2px 16px;
+  margin: 0 6px 2px 12px;
   height: 100%;
   overflow: visible;
   display: flex;

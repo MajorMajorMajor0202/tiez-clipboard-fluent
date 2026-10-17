@@ -1895,6 +1895,14 @@ const App = () => {
         typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}
         onBack={handleHeaderBack}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        onAddTab={handleAddTab}
+        onDeleteTab={handleDeleteTab}
+        onDropItemOnTab={handleDropItemOnTab}
+        onDropExternalFilesOnTab={handleDropExternalFilesOnTab}
+        onDropExternalTextOnTab={handleDropExternalTextOnTab}
       />
 
       <div className="app-body-container">
@@ -1940,14 +1948,6 @@ const App = () => {
         </main>
 
         <FluentRightRail
-          tabs={tabs}
-          activeTabId={activeTabId}
-          onSelectTab={setActiveTabId}
-          onAddTab={handleAddTab}
-          onDeleteTab={handleDeleteTab}
-          onDropItemOnTab={handleDropItemOnTab}
-          onDropExternalFilesOnTab={handleDropExternalFilesOnTab}
-          onDropExternalTextOnTab={handleDropExternalTextOnTab}
           onOpenAddEntry={() => {
             setIsAddEntryModalOpen(true);
             setAddEntryContent("");
