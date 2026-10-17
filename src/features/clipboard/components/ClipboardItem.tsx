@@ -747,6 +747,7 @@ const ClipboardItem = ({
     const [isEditingContent, setIsEditingContent] = useState(false);
     const [editContentVal, setEditContentVal] = useState(item.content);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+    const [moreMenuPosition, setMoreMenuPosition] = useState<{ top?: number; bottom?: number; left: number } | null>(null);
     const moreButtonRef = useRef<HTMLButtonElement>(null);
     const [flyoutPosition, setFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
     const [tabFlyoutPosition, setTabFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
@@ -760,16 +761,110 @@ const ClipboardItem = ({
         setEditContentVal(item.content);
     }, [item.content]);
 
+    const handleToggleMoreMenu = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isMoreMenuOpen) {
+            setIsMoreMenuOpen(false);
+            if (!isMultiSelectActive && !isEditingContent) {
+                setIgnoreBlurSafe(false);
+            }
+            return;
+        }
+        const rect = moreButtonRef.current?.getBoundingClientRect();
+        if (rect) {
+            const menuWidth = 145;
+            const menuHeight = 200;
+            let left = rect.right - menuWidth;
+            if (left < 8) left = 8;
+            if (left + menuWidth > window.innerWidth - 8) {
+                left = window.innerWidth - menuWidth - 8;
+            }
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const isAbove = spaceBelow < menuHeight;
+            if (isAbove) {
+                setMoreMenuPosition({ bottom: window.innerHeight - rect.top + 4, left });
+            } else {
+                setMoreMenuPosition({ top: rect.bottom + 4, left });
+            }
+        }
+        setIsMoreMenuOpen(true);
+        setIgnoreBlurSafe(true);
+    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent]);
+
+    const handleContextMenu = useCallback((e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (isEditingTags) {
+            if (target.closest(".tag-edit-anchor")) return;
+            e.preventDefault();
+            e.stopPropagation();
+            onTagEditCancel?.();
+            return;
+        }
+        if (target.closest('button, input, textarea, [role="button"], .item-inline-editor')) {
+            return;
+        }
+        void hideCompactPreview();
+        e.preventDefault();
+        e.stopPropagation();
+
+        const menuWidth = 145;
+        const menuHeight = 200;
+        let left = e.clientX;
+        if (left + menuWidth > window.innerWidth - 8) {
+            left = window.innerWidth - menuWidth - 8;
+        }
+        if (left < 8) left = 8;
+
+        const spaceBelow = window.innerHeight - e.clientY;
+        const isAbove = spaceBelow < menuHeight;
+        if (isAbove) {
+            setMoreMenuPosition({ bottom: window.innerHeight - e.clientY + 4, left });
+        } else {
+            setMoreMenuPosition({ top: e.clientY + 4, left });
+        }
+
+        setIsMoreMenuOpen(true);
+        setIgnoreBlurSafe(true);
+        onSelect();
+    }, [isEditingTags, onTagEditCancel, onSelect]);
+
     useEffect(() => {
         if (!isMoreMenuOpen) return;
         const handleDown = (e: MouseEvent) => {
+            if (e.button !== 0) return;
             const target = e.target as HTMLElement;
             if (target.closest('.secondary-actions-menu') || moreButtonRef.current?.contains(target)) return;
             setIsMoreMenuOpen(false);
+            if (!isMultiSelectActive && !isEditingContent) {
+                setIgnoreBlurSafe(false);
+            }
         };
-        document.addEventListener("mousedown", handleDown);
-        return () => document.removeEventListener("mousedown", handleDown);
-    }, [isMoreMenuOpen]);
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setIsMoreMenuOpen(false);
+                if (!isMultiSelectActive && !isEditingContent) {
+                    setIgnoreBlurSafe(false);
+                }
+            }
+        };
+        const handleScroll = (e: Event) => {
+            const target = e.target as HTMLElement;
+            if (target.closest?.('.secondary-actions-menu')) return;
+            setIsMoreMenuOpen(false);
+            if (!isMultiSelectActive && !isEditingContent) {
+                setIgnoreBlurSafe(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleDown, true);
+        document.addEventListener("keydown", handleKeyDown, true);
+        window.addEventListener("wheel", handleScroll, { capture: true, passive: true });
+        return () => {
+            document.removeEventListener("mousedown", handleDown, true);
+            document.removeEventListener("keydown", handleKeyDown, true);
+            window.removeEventListener("wheel", handleScroll, true);
+        };
+    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent]);
 
     const handleSaveContentEdit = useCallback(async () => {
         const trimmed = editContentVal;
@@ -1673,13 +1768,17 @@ const ClipboardItem = ({
             draggable={!isEditingTags && !isEditingContent}
             onDragStart={(e: any) => {
                 const target = e.target as HTMLElement;
-                if (target.closest('button, input, textarea, [role="button"], a, .tag-edit-flyout, .item-inline-editor')) {
+                if (target.closest('button, input, textarea, [role="button"], a, .tag-edit-flyout, .item-inline-editor, .secondary-actions-menu')) {
                     e.preventDefault();
                     return;
                 }
                 isDraggingRef.current = true;
                 setIgnoreBlurSafe(true);
                 void hideCompactPreview();
+
+                // Store in window for 100% reliable internal drop transfer in Tauri WebView2
+                (window as any).__tiezDraggedItemId = item.id;
+
                 const dt = e.dataTransfer;
                 if (dt) {
                     if (item.content_type === "rich_text" && item.html_content) {
@@ -1692,14 +1791,17 @@ const ClipboardItem = ({
                     } else {
                         dt.setData("text/plain", item.content);
                     }
-                    dt.setData("application/x-tiez-item", String(item.id));
+                    try {
+                        dt.setData("application/x-tiez-item", String(item.id));
+                    } catch {}
                     dt.effectAllowed = "copyMove";
                 }
             }}
             onDragEnd={() => {
                 setTimeout(() => {
                     isDraggingRef.current = false;
-                }, 100);
+                    (window as any).__tiezDraggedItemId = null;
+                }, 150);
                 if (!isMultiSelectActive && !isEditingContent) {
                     setIgnoreBlurSafe(false);
                 }
@@ -1720,22 +1822,26 @@ const ClipboardItem = ({
                     return;
                 }
 
-                if (target.closest('button, input, textarea, [role="button"], a, .item-inline-editor')) {
+                if (target.closest('button, input, textarea, [role="button"], a, .item-inline-editor, .secondary-actions-menu')) {
                     return;
                 }
 
                 const isModifier = e.ctrlKey || e.metaKey || e.shiftKey;
+                // If it's a modifier click (Ctrl/Shift) or multi-selection mode:
+                // Only preventDefault if not already selected, so dragging an already selected item works
                 if (isModifier || isMultiSelectActive) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onMultiSelect?.(item.id, index, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey });
-                    return;
+                    if (!isMultiSelected) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onMultiSelect?.(item.id, index, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey });
+                        return;
+                    }
                 }
             }}
             onClick={(e) => {
                 if (isEditingTags || isEditingContent) return;
                 const target = e.target as HTMLElement;
-                if (target.closest('button, input, textarea, [role="button"], .item-inline-editor')) {
+                if (target.closest('button, input, textarea, [role="button"], .item-inline-editor, .secondary-actions-menu')) {
                     return;
                 }
                 if (target.closest('a')) {
@@ -1755,28 +1861,7 @@ const ClipboardItem = ({
                 onCopy(false);
                 onSelect();
             }}
-            onContextMenu={(e) => {
-                const target = e.target as HTMLElement;
-                if (isEditingTags) {
-                    if (target.closest(".tag-edit-anchor")) return;
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onTagEditCancel?.();
-                    return;
-                }
-                if (target.closest('button, input, textarea, [role="button"], .item-inline-editor')) {
-                    return;
-                }
-                void hideCompactPreview();
-                e.preventDefault();
-                // Prevent link navigation on right-click too
-                if (target.closest('a')) {
-                    e.stopPropagation();
-                }
-                onCopy(true); // Formatted text for right-click
-
-                onSelect();
-            }}
+            onContextMenu={handleContextMenu}
             onMouseEnter={(e) => {
                 if (!compactPreviewEnabled) return;
                 // Don't show preview if AI options are open to avoid interference
@@ -1829,140 +1914,53 @@ const ClipboardItem = ({
                         {showSourceAppIcon
                             ? renderSourceAppIcon(sourceAppIcon, item.content_type, item.source_app)
                             : getIcon(item.content_type)}
+                        {item.is_pinned && (
+                            <FluentTooltip text={t('unpin') || '取消置顶'}>
+                                <button
+                                    type="button"
+                                    className="item-pinned-badge-btn"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onTogglePin(e);
+                                    }}
+                                >
+                                    <Pin size={10} style={{ color: 'var(--accent-color)' }} />
+                                </button>
+                            </FluentTooltip>
+                        )}
                         <span>{item.source_app}</span>
                     </div>
                 </div>
 
                 <div className="item-meta-right">
                     <div className="item-actions">
-                        <FluentTooltip text={item.is_pinned ? t('unpin') : t('pin')}>
+                        <FluentTooltip text={t('add_to_tab') || '添加到标签页'}>
                             <button
-                                className={`btn-icon-ghost ${item.is_pinned ? "active" : ""}`}
-                                onClick={onTogglePin}
+                                ref={tabButtonRef}
+                                className={`btn-icon-ghost tab-btn ${hasAnyTab ? 'active' : ''}`}
+                                onClick={onToggleTabFlyout}
                             >
-                                {item.is_pinned ? <PinOff size={12} /> : <Pin size={12} />}
+                                <FolderPlus size={13} />
                             </button>
                         </FluentTooltip>
 
-                        <div className="secondary-menu-container" style={{ position: "relative" }}>
-                            <FluentTooltip text={t('more_actions') || '更多选项'}>
-                                <button
-                                    ref={moreButtonRef}
-                                    className={`btn-icon-ghost ${isMoreMenuOpen ? "active" : ""}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsMoreMenuOpen((prev) => !prev);
-                                    }}
-                                >
-                                    <MoreHorizontal size={14} />
-                                </button>
-                            </FluentTooltip>
+                        <FluentTooltip text={t('tags') || '标签'}>
+                            <button
+                                ref={tagButtonRef}
+                                className={`btn-icon-ghost tag-btn ${isEditingTags || (item.tags && item.tags.length > 0) ? 'active' : ''}`}
+                                onClick={onToggleTagEditor}
+                            >
+                                <Tag size={13} />
+                            </button>
+                        </FluentTooltip>
 
-                            {isMoreMenuOpen && (
-                                <div
-                                    className="secondary-actions-menu"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <button
-                                        type="button"
-                                        className="secondary-menu-item"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setIsMoreMenuOpen(false);
-                                            setIsEditingContent(true);
-                                            setEditContentVal(item.content);
-                                        }}
-                                    >
-                                        <Edit3 size={12} />
-                                        <span>{t('edit_content') || '编辑内容'}</span>
-                                    </button>
-
-                                    <button
-                                        ref={tabButtonRef}
-                                        type="button"
-                                        className={`secondary-menu-item ${hasAnyTab ? 'active' : ''}`}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setIsMoreMenuOpen(false);
-                                            onToggleTabFlyout?.(e);
-                                        }}
-                                    >
-                                        <FolderPlus size={12} />
-                                        <span>{t('add_to_tab') || '添加到标签页'}</span>
-                                    </button>
-
-                                    <button
-                                        ref={tagButtonRef}
-                                        type="button"
-                                        className="secondary-menu-item"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setIsMoreMenuOpen(false);
-                                            onToggleTagEditor?.(e);
-                                        }}
-                                    >
-                                        <Tag size={12} />
-                                        <span>{t('tags') || '标签'}</span>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="secondary-menu-item"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setIsMoreMenuOpen(false);
-                                            onOpen(e);
-                                        }}
-                                    >
-                                        <ExternalLink size={12} />
-                                        <span>{t('open') || '外部打开'}</span>
-                                    </button>
-
-                                    {item.tags?.some(tag => {
-                                        const l = tag.toLowerCase();
-                                        return l === 'sensitive' || l === '敏感' || l === 'password' || l === '密码' || l === '密碼';
-                                    }) && (
-                                        <button
-                                            type="button"
-                                            className="secondary-menu-item"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsMoreMenuOpen(false);
-                                                onToggleReveal(e);
-                                            }}
-                                        >
-                                            {isRevealed ? <EyeOff size={12} /> : <Eye size={12} />}
-                                            <span>{isRevealed ? t('hide') : t('reveal')}</span>
-                                        </button>
-                                    )}
-
-                                    {(item.content_type === 'text' || item.content_type === 'rich_text') && aiEnabled && (
-                                        <button
-                                            type="button"
-                                            className="secondary-menu-item"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsMoreMenuOpen(false);
-                                                if (!isAIProcessing) {
-                                                    if (!showAIOptions) {
-                                                        hideCompactPreview();
-                                                    }
-                                                    setLocalAiOptionsOpen((prev) => !prev);
-                                                    onAIOptionsToggle?.();
-                                                }
-                                            }}
-                                        >
-                                            {isAIProcessing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                            <span>{t('ai_assistant') || 'AI 助手'}</span>
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <FluentTooltip text={t('delete')}>
-                            <button className="btn-icon-ghost" onClick={onDelete}>
-                                <X size={15} strokeWidth={1.5} />
+                        <FluentTooltip text={t('more_actions') || '更多选项'}>
+                            <button
+                                ref={moreButtonRef}
+                                className={`btn-icon-ghost more-btn ${isMoreMenuOpen ? "active" : ""}`}
+                                onClick={handleToggleMoreMenu}
+                            >
+                                <MoreHorizontal size={14} />
                             </button>
                         </FluentTooltip>
                     </div>
@@ -2539,6 +2537,125 @@ const ClipboardItem = ({
                             })
                         )}
                     </div>
+                </div>,
+                document.body
+            )}
+
+            {isMoreMenuOpen && moreMenuPosition && createPortal(
+                <div
+                    className="secondary-actions-menu"
+                    style={{
+                        top: moreMenuPosition.top !== undefined ? `${moreMenuPosition.top}px` : undefined,
+                        bottom: moreMenuPosition.bottom !== undefined ? `${moreMenuPosition.bottom}px` : undefined,
+                        left: `${moreMenuPosition.left}px`
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button
+                        type="button"
+                        className="secondary-menu-item"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMoreMenuOpen(false);
+                            if (!isMultiSelectActive && !isEditingContent) {
+                                setIgnoreBlurSafe(false);
+                            }
+                            onTogglePin(e);
+                        }}
+                    >
+                        {item.is_pinned ? <PinOff size={13} /> : <Pin size={13} />}
+                        <span>{item.is_pinned ? (t('unpin') || '取消置顶') : (t('pin') || '置顶')}</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="secondary-menu-item"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMoreMenuOpen(false);
+                            setIsEditingContent(true);
+                            setEditContentVal(item.content);
+                        }}
+                    >
+                        <Edit3 size={13} />
+                        <span>{t('edit_content') || '编辑内容'}</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="secondary-menu-item"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMoreMenuOpen(false);
+                            if (!isMultiSelectActive && !isEditingContent) {
+                                setIgnoreBlurSafe(false);
+                            }
+                            onOpen(e);
+                        }}
+                    >
+                        <ExternalLink size={13} />
+                        <span>{t('open') || '外部打开'}</span>
+                    </button>
+
+                    {item.tags?.some(tag => {
+                        const l = tag.toLowerCase();
+                        return l === 'sensitive' || l === '敏感' || l === 'password' || l === '密码' || l === '密碼';
+                    }) && (
+                        <button
+                            type="button"
+                            className="secondary-menu-item"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMoreMenuOpen(false);
+                                if (!isMultiSelectActive && !isEditingContent) {
+                                    setIgnoreBlurSafe(false);
+                                }
+                                onToggleReveal(e);
+                            }}
+                        >
+                            {isRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
+                            <span>{isRevealed ? t('hide') : t('reveal')}</span>
+                        </button>
+                    )}
+
+                    {(item.content_type === 'text' || item.content_type === 'rich_text') && aiEnabled && (
+                        <button
+                            type="button"
+                            className="secondary-menu-item"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMoreMenuOpen(false);
+                                if (!isAIProcessing) {
+                                    if (!showAIOptions) {
+                                        hideCompactPreview();
+                                    }
+                                    setLocalAiOptionsOpen((prev) => !prev);
+                                    onAIOptionsToggle?.();
+                                }
+                            }}
+                        >
+                            {isAIProcessing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                            <span>{t('ai_assistant') || 'AI 助手'}</span>
+                        </button>
+                    )}
+
+                    <div className="secondary-menu-divider" />
+
+                    <button
+                        type="button"
+                        className="secondary-menu-item danger"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMoreMenuOpen(false);
+                            if (!isMultiSelectActive && !isEditingContent) {
+                                setIgnoreBlurSafe(false);
+                            }
+                            onDelete(e);
+                        }}
+                    >
+                        <Trash2 size={13} />
+                        <span>{t('delete') || '删除'}</span>
+                    </button>
                 </div>,
                 document.body
             )}

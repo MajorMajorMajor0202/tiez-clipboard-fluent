@@ -1266,9 +1266,12 @@ const App = () => {
   }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
 
   const handleDropItemOnTab = useCallback((itemId: number, tabName: string) => {
-    const itemsToAdd = selectedItemIds.has(itemId) && selectedItemIds.size > 1
-      ? Array.from(selectedItemIds)
-      : [itemId];
+    const draggedList = (window as any).__tiezDraggedItemIds;
+    const itemsToAdd = (Array.isArray(draggedList) && draggedList.length > 0)
+      ? draggedList
+      : (selectedItemIds.has(itemId) && selectedItemIds.size > 1
+          ? Array.from(selectedItemIds)
+          : [itemId]);
 
     for (const id of itemsToAdd) {
       const item = history.find((h) => h.id === id);
@@ -1287,6 +1290,8 @@ const App = () => {
     } else {
       pushToast(t("tab_added").replace("{name}", tabName));
     }
+    (window as any).__tiezDraggedItemIds = null;
+    (window as any).__tiezDraggedItemId = null;
   }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
 
   const handleConfirmAddEntry = useCallback(async () => {

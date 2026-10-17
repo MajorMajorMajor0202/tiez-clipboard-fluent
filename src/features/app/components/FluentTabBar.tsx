@@ -213,14 +213,19 @@ export const FluentTabBar = ({
                 className={`fluent-tab-item ${isActive ? "active" : ""} ${
                   isFirstTab ? "tab-icon-only" : ""
                 } ${isDragTarget ? "drag-target-hover" : ""}`}
+                onDragEnter={(e) => {
+                  if (isFirstTab || tab.isBuiltin) return;
+                  e.preventDefault();
+                  if (dragOverTabId !== tab.id) {
+                    setDragOverTabId(tab.id);
+                  }
+                }}
                 onDragOver={(e) => {
                   if (isFirstTab || tab.isBuiltin) return;
-                  if (e.dataTransfer.types.includes("application/x-tiez-item")) {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "copy";
-                    if (dragOverTabId !== tab.id) {
-                      setDragOverTabId(tab.id);
-                    }
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "copy";
+                  if (dragOverTabId !== tab.id) {
+                    setDragOverTabId(tab.id);
                   }
                 }}
                 onDragLeave={(e) => {
@@ -232,14 +237,18 @@ export const FluentTabBar = ({
                 onDrop={(e) => {
                   if (isFirstTab || tab.isBuiltin) return;
                   e.preventDefault();
+                  e.stopPropagation();
                   setDragOverTabId(null);
-                  const idStr = e.dataTransfer.getData("application/x-tiez-item");
-                  if (idStr && onDropItemOnTab) {
-                    const id = parseInt(idStr, 10);
-                    if (!isNaN(id)) {
-                      onDropItemOnTab(id, tab.name);
-                    }
+                  let idStr = "";
+                  try {
+                    idStr = e.dataTransfer.getData("application/x-tiez-item");
+                  } catch {}
+                  const fallbackId = (window as any).__tiezDraggedItemId;
+                  const finalId = idStr ? parseInt(idStr, 10) : (typeof fallbackId === "number" ? fallbackId : NaN);
+                  if (!isNaN(finalId) && onDropItemOnTab) {
+                    onDropItemOnTab(finalId, tab.name);
                   }
+                  (window as any).__tiezDraggedItemId = null;
                 }}
                 onClick={() => {
                   onSelectTab(tab.id);
