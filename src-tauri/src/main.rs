@@ -18,6 +18,8 @@ use crate::app::setup;
 use crate::global_state::*;
 use std::sync::atomic::Ordering;
 
+use tauri::Manager;
+
 fn main() {
     // 显式安装 rustls 的 crypto provider，防止 rumqttc 因缺少 provider 而 panic
     let _ = rustls::crypto::ring::default_provider().install_default();
@@ -42,7 +44,13 @@ fn main() {
                 .build(),
         )
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(w) = app.get_webview_window("main") {
+                let _ = w.show();
+                let _ = w.unminimize();
+                let _ = w.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--minimized"]),
