@@ -5,17 +5,29 @@ interface UseFilteredHistoryOptions {
   history: ClipboardEntry[];
   search: string;
   typeFilter: string | null;
+  activeTabId?: string;
+  tabName?: string;
 }
 
 export const useFilteredHistory = ({
   history,
   search,
-  typeFilter
+  typeFilter,
+  activeTabId,
+  tabName
 }: UseFilteredHistoryOptions) => {
   return useMemo(() => {
     const lowerSearch = search.toLowerCase();
 
     const filtered = history.filter((item) => {
+      // Filter by active Tab if selected
+      if (activeTabId && activeTabId !== "clipboard") {
+        const matchesTab =
+          item.tab_id === activeTabId ||
+          (tabName && item.tags?.some((t) => t.toLowerCase() === tabName.toLowerCase()));
+        if (!matchesTab) return false;
+      }
+
       if (typeFilter && item.content_type !== typeFilter) {
         return false;
       }
@@ -75,5 +87,5 @@ export const useFilteredHistory = ({
       }
       return b.timestamp - a.timestamp;
     });
-  }, [history, search, typeFilter]);
+  }, [history, search, typeFilter, activeTabId, tabName]);
 };

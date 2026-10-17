@@ -279,4 +279,17 @@ export interface AppState {
   setProcessingAiId: StateSetter<number | null>;
   typeFilter: string | null;
   setTypeFilter: StateSetter<string | null>;
+  tabs: TabItem[];
+  setTabs: StateSetter<TabItem[]>;
+  activeTabId: string;
+  setActiveTabId: StateSetter<string>;
+  showDebugWindow: boolean;
+  setShowDebugWindow: StateSetter<boolean>;
+}
+
+export interface TabItem {
+  id: string;
+  name: string;
+  isBuiltin?: boolean;
+  count?: number;
 }

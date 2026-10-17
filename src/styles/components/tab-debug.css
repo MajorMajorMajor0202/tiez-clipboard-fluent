@@ -1,0 +1,199 @@
+/* Tab Debug Window Styles */
+
+.tab-debug-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: debug-fade-in 0.2s ease-out;
+}
+
+.tab-debug-window {
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  background: var(--bg-window, #ffffff);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2), 0 0 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--text-primary, #1f1f1f);
+  font-family: var(--fluent-font-family, system-ui);
+}
+
+.dark-mode .tab-debug-window {
+  background: #252525;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  color: #f0f0f0;
+}
+
+.tab-debug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  background: var(--bg-toolbar, rgba(0, 0, 0, 0.02));
+}
+
+.tab-debug-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-debug-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab-debug-close-btn:hover {
+  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.06));
+  color: var(--text-primary);
+}
+
+.tab-debug-content {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.tab-debug-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.03));
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
+}
+
+.tab-debug-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #666);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tab-debug-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tab-debug-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  background: var(--bg-panel, #ffffff);
+  color: var(--text-primary, #333);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dark-mode .tab-debug-btn {
+  background: #333333;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+.tab-debug-btn:hover {
+  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.06));
+  border-color: var(--accent-color, #2f6fed);
+}
+
+.tab-debug-btn.primary {
+  background: var(--accent-color, #2f6fed);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.tab-debug-btn.primary:hover {
+  filter: brightness(1.1);
+}
+
+.tab-debug-btn.active {
+  background: var(--accent-color, #2f6fed);
+  color: #ffffff;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.tab-debug-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.tab-debug-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.15));
+  background: var(--bg-panel, #ffffff);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.dark-mode .tab-debug-input {
+  background: #2f2f2f;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.tab-debug-input:focus {
+  border-color: var(--accent-color, #2f6fed);
+}
+
+.tab-debug-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  background: var(--accent-soft, rgba(47, 111, 237, 0.15));
+  color: var(--accent-color, #2f6fed);
+  font-family: monospace;
+}
+
+@keyframes debug-fade-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}

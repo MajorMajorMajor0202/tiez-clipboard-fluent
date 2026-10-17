@@ -7,7 +7,8 @@ import type {
   DefaultAppsMap,
   InstalledAppOption,
   QuickPasteModifier,
-  SettingsSubpage
+  SettingsSubpage,
+  TabItem
 } from "../types";
 import { DEFAULT_CLOUD_SYNC_CONTENT_PREFS } from "../types";
 import type { AiProfile, AppCleanupPolicy } from "../../settings/types";
@@ -183,6 +184,16 @@ export const useAppState = (): AppState => {
   const [aiAssignedProfileTranslate, setAiAssignedProfileTranslate] = useState("default");
   const [processingAiId, setProcessingAiId] = useState<number | null>(null);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [tabs, setTabs] = useState<TabItem[]>([
+    { id: "clipboard", name: "剪贴板", isBuiltin: true },
+    { id: "release", name: "本次发布" },
+    { id: "reimburse", name: "报销资料" },
+    { id: "notes", name: "便签" },
+    { id: "code_snippets", name: "常用代码" },
+    { id: "temp", name: "临时暂存" }
+  ]);
+  const [activeTabId, setActiveTabId] = useState<string>("clipboard");
+  const [showDebugWindow, setShowDebugWindow] = useState<boolean>(false);
 
   return {
     showSettings,
@@ -440,6 +451,12 @@ export const useAppState = (): AppState => {
     processingAiId,
     setProcessingAiId,
     typeFilter,
-    setTypeFilter
+    setTypeFilter,
+    tabs,
+    setTabs,
+    activeTabId,
+    setActiveTabId,
+    showDebugWindow,
+    setShowDebugWindow
   };
 };

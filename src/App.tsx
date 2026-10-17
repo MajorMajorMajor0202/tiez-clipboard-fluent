@@ -43,6 +43,7 @@ import { useAnnouncements } from "./shared/hooks/useAnnouncements";
 import { useOverlays } from "./shared/hooks/useOverlays";
 import { useAutoUpdate } from "./shared/hooks/useAutoUpdate";
 import UpdateDialog from "./shared/components/UpdateDialog";
+import TabDebugWindow from "./features/app/components/TabDebugWindow";
 import type { ClipboardEntry } from "./shared/types";
 import type { QuickPasteHint, VirtualClipboardListHandle } from "./features/clipboard/types";
 
@@ -325,7 +326,13 @@ const App = () => {
     processingAiId,
     setProcessingAiId,
     typeFilter,
-    setTypeFilter
+    setTypeFilter,
+    tabs,
+    setTabs,
+    activeTabId,
+    setActiveTabId,
+    showDebugWindow,
+    setShowDebugWindow
   } = appState;
 
   // --- Auto Update Logic ---
@@ -541,6 +548,12 @@ const App = () => {
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && (event.key === 'D' || event.key === 'd')) {
+        event.preventDefault();
+        setShowDebugWindow((prev) => !prev);
+        return;
+      }
+
       if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch) return;
       if (!hotkey || hotkey === t('not_set')) return;
 
@@ -989,10 +1002,13 @@ const App = () => {
   };
   */
 
+  const activeTab = tabs.find((t) => t.id === activeTabId);
   const filteredHistory = useFilteredHistory({
     history,
     search,
-    typeFilter
+    typeFilter,
+    activeTabId,
+    tabName: activeTab?.name
   });
 
   const effectiveHasMore = hasMore && filteredHistory.length >= PAGE_SIZE;
@@ -1107,6 +1123,11 @@ const App = () => {
         setTypeFilter={setTypeFilter}
         onBack={handleHeaderBack}
         onToggleChat={handleToggleHeaderChat}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        onAddTab={() => setShowDebugWindow(true)}
+        onOpenDebugWindow={() => setShowDebugWindow(true)}
       />
 
 
@@ -1172,6 +1193,19 @@ const App = () => {
         status={updateStatus}
         onUpdate={updateStatus === "ready" ? onApplyUpdate : onStartDownload}
         onClose={closeUpdateDialog}
+      />
+
+      <TabDebugWindow
+        isOpen={showDebugWindow}
+        onClose={() => setShowDebugWindow(false)}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onSelectTab={setActiveTabId}
+        setTabs={setTabs}
+        history={history}
+        setHistory={setHistory}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
       />
     </div >
   );

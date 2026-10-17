@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, type RefObject } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -10,11 +10,14 @@ import {
   Smile,
   Tag,
   Trash2,
-  X
+  X,
+  Bug
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { getTagColor, getTagTextColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
+import FluentTabBar from "./FluentTabBar";
+import type { TabItem } from "../types";
 
 interface AppHeaderProps {
   t: (key: string) => string;
@@ -49,6 +52,11 @@ interface AppHeaderProps {
   onBack: () => void;
   onToggleChat: () => void;
   tagColors?: Record<string, string>;
+  tabs?: TabItem[];
+  activeTabId?: string;
+  onSelectTab?: (tabId: string) => void;
+  onAddTab?: () => void;
+  onOpenDebugWindow?: () => void;
 }
 
 const AppHeader = ({
@@ -78,61 +86,17 @@ const AppHeader = ({
   setEditingTagsId,
   theme,
   settingsTitle,
-  typeFilter,
-  setTypeFilter,
+  typeFilter: _typeFilter,
+  setTypeFilter: _setTypeFilter,
   onBack,
   onToggleChat,
-  tagColors
+  tagColors,
+  tabs,
+  activeTabId,
+  onSelectTab,
+  onAddTab,
+  onOpenDebugWindow
 }: AppHeaderProps) => {
-  const getTypeName = (type: string) => {
-    switch (type) {
-      case "code": return t('type_code');
-      case "link":
-      case "url": return t('type_url');
-      case "file": return t('type_file');
-      case "image": return t('type_image');
-      case "video": return t('type_video');
-      case "rich_text": return t('type_rich_text');
-      default: return t('type_text') || 'Text';
-    }
-  };
-
-  // Shared indicator for type filter — slides between active buttons
-  const filterBarRef = useRef<HTMLDivElement>(null);
-  const [indicatorRect, setIndicatorRect] = useState<{ left: number; width: number } | null>(null);
-  const prevFilter = useRef<string | null>(null);
-
-  const updateIndicator = useCallback(() => {
-    if (!filterBarRef.current || !typeFilter) {
-      setIndicatorRect(null);
-      return;
-    }
-    const activeBtn = filterBarRef.current.querySelector('.type-filter-btn.active') as HTMLElement | null;
-    if (!activeBtn) {
-      setIndicatorRect(null);
-      return;
-    }
-    const barRect = filterBarRef.current.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    setIndicatorRect({
-      left: btnRect.left - barRect.left + (btnRect.width - 16) / 2,
-      width: 16,
-    });
-  }, [typeFilter]);
-
-  useEffect(() => {
-    updateIndicator();
-  }, [updateIndicator]);
-
-  // Re-measure on resize
-  useEffect(() => {
-    if (!filterBarRef.current) return;
-    const observer = new ResizeObserver(() => {
-      updateIndicator();
-    });
-    observer.observe(filterBarRef.current);
-    return () => observer.disconnect();
-  }, [updateIndicator]);
 
   const handleOpenSettings = useCallback(async () => {
     try {
@@ -174,16 +138,6 @@ const AppHeader = ({
     }
   }, [t, isWindowPinned]);
 
-  // Segoe Fluent Icons — official Microsoft icon codepoints
-  const FILTER_ICONS: Record<string, string> = {
-    text:      '',  // TextDocument
-    image:     '',  // Photo
-    file:      '',  // Document
-    url:       '',  // Link
-    code:      '',  // Code
-    video:     '',  // Video
-    rich_text: '',  // FontColor
-  };
 
   return (
   <header className={`window-drag-region ${(showSettings || showTagManager || showEmojiPanel) ? 'subpage-header' : ''}`}>
@@ -241,6 +195,13 @@ const AppHeader = ({
               <FluentTooltip text={t('emoji_panel') || '表情包'}>
                 <button className="btn-icon-ghost" onClick={() => setShowEmojiPanel(true)}>
                   <Smile size={16} />
+                </button>
+              </FluentTooltip>
+            )}
+            {onOpenDebugWindow && (
+              <FluentTooltip text="Tab 调试窗口">
+                <button className="btn-icon-ghost" onClick={onOpenDebugWindow}>
+                  <Bug size={16} />
                 </button>
               </FluentTooltip>
             )}
@@ -359,60 +320,13 @@ const AppHeader = ({
                   )}
                 </AnimatePresence>
               </div>
-              <div
-                ref={filterBarRef}
-                className="hide-scrollbar"
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  gap: '8px',
-                  padding: '8px 0 12px 0',
-                  overflowX: 'auto',
-                  overflowY: 'clip',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none'
-                }}
-                onWheel={(e) => {
-                  if (e.deltaY !== 0) {
-                    e.currentTarget.scrollLeft += e.deltaY;
-                  }
-                }}
-              >
-                {['text', 'image', 'file', 'url', 'code', 'video', 'rich_text'].map(t => (
-                  <FluentTooltip key={t} text={getTypeName(t)}>
-                    <button
-                      className={`type-filter-btn ${typeFilter === t ? 'active' : ''}`}
-                      onClick={(e) => {
-                        const target = e.currentTarget;
-                        prevFilter.current = typeFilter;
-                        const nextFilter = typeFilter === t ? null : t;
-                        setTypeFilter(nextFilter);
-                        
-                        if (nextFilter && filterBarRef.current) {
-                          const barRect = filterBarRef.current.getBoundingClientRect();
-                          const btnRect = target.getBoundingClientRect();
-                          setIndicatorRect({
-                            left: btnRect.left - barRect.left + (btnRect.width - 16) / 2,
-                            width: 16,
-                          });
-                        } else {
-                          setIndicatorRect(null);
-                        }
-                      }}
-                    >
-                      <span className="type-filter-icon">{FILTER_ICONS[t]}</span>
-                    </button>
-                  </FluentTooltip>
-                ))}
-                {indicatorRect && (
-                  <div
-                    className="type-filter-indicator"
-                    style={{ transform: `translateX(${indicatorRect.left}px)` }}
-                  >
-                    <div key={typeFilter || 'none'} className="type-filter-indicator-inner" />
-                  </div>
-                )}
-              </div>
+              <FluentTabBar
+                tabs={tabs || []}
+                activeTabId={activeTabId || "clipboard"}
+                onSelectTab={onSelectTab || (() => {})}
+                onAddTab={onAddTab}
+                t={t}
+              />
 
             </div>
           </motion.div>
