@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { Copy, Trash2, FolderPlus, X, Folder } from "lucide-react";
 import ToastContainer from "./shared/components/ToastContainer";
 import ConfirmDialog from "./shared/components/ConfirmDialog";
 
@@ -357,6 +358,40 @@ const App = () => {
   const tagColors = useTagColors();
   const [dbTags, setDbTags] = useState<string[]>([]);
   const [entranceActive, setEntranceActive] = useState(false);
+
+  // Multi-select & Batch Operations
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
+  const [isBatchTabDropdownOpen, setIsBatchTabDropdownOpen] = useState(false);
+  const lastSelectedIndexRef = useRef<number | null>(null);
+
+  // Manual Item Add Modal
+  const [isAddEntryModalOpen, setIsAddEntryModalOpen] = useState(false);
+  const [addEntryContent, setAddEntryContent] = useState("");
+
+  useEffect(() => {
+    if (selectedItemIds.size > 0 || isAddEntryModalOpen) {
+      invoke("set_ignore_blur", { ignore: true }).catch(() => {});
+    } else {
+      invoke("set_ignore_blur", { ignore: false }).catch(() => {});
+    }
+  }, [selectedItemIds.size, isAddEntryModalOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (selectedItemIds.size > 0) {
+          setSelectedItemIds(new Set());
+          lastSelectedIndexRef.current = null;
+          setIsBatchTabDropdownOpen(false);
+        }
+        if (isAddEntryModalOpen) {
+          setIsAddEntryModalOpen(false);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedItemIds.size, isAddEntryModalOpen]);
 
   useEffect(() => {
     // Initial entrance on mount
@@ -1144,6 +1179,129 @@ const App = () => {
     pushToast(t("tab_created_and_assigned").replace("{name}", trimmed));
   }, [tabs, setTabs, history, handleUpdateTags, pushToast, t]);
 
+  const handleMultiSelect = useCallback((id: number, index: number, modifiers: { ctrl: boolean; shift: boolean }) => {
+    setSelectedItemIds(prev => {
+      const next = new Set(prev);
+      if (modifiers.shift && lastSelectedIndexRef.current !== null) {
+        const start = Math.min(lastSelectedIndexRef.current, index);
+        const end = Math.max(lastSelectedIndexRef.current, index);
+        for (let i = start; i <= end; i++) {
+          const item = filteredHistory[i];
+          if (item) next.add(item.id);
+        }
+      } else if (modifiers.ctrl) {
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        lastSelectedIndexRef.current = index;
+      } else {
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        lastSelectedIndexRef.current = index;
+      }
+      return next;
+    });
+  }, [filteredHistory]);
+
+  const handleItemContentUpdated = useCallback((id: number, newContent: string) => {
+    setHistory(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, content: newContent, preview: newContent.slice(0, 500) } : item
+      )
+    );
+    pushToast(t("item_updated"));
+  }, [setHistory, pushToast, t]);
+
+  const handleBatchCopy = useCallback(async () => {
+    const selectedItems = filteredHistory.filter(item => selectedItemIds.has(item.id));
+    if (selectedItems.length === 0) return;
+    const combined = selectedItems.map(item => item.content).join("\n");
+    try {
+      await invoke("copy_to_clipboard", {
+        content: combined,
+        contentType: "text",
+        paste: false,
+        id: selectedItems[0].id,
+        deleteAfterUse: false,
+        pasteWithFormat: false,
+        moveToTop: false
+      });
+      pushToast(t("batch_copied").replace("{count}", String(selectedItems.length)));
+      setSelectedItemIds(new Set());
+      lastSelectedIndexRef.current = null;
+    } catch (err) {
+      console.error("Batch copy failed:", err);
+    }
+  }, [filteredHistory, selectedItemIds, pushToast, t]);
+
+  const handleBatchDelete = useCallback(() => {
+    const count = selectedItemIds.size;
+    if (count === 0) return;
+    openConfirm({
+      title: t("delete_selected"),
+      message: (t("batch_delete_confirm") || "确定要删除选中的 {count} 个条目吗？").replace("{count}", String(count)),
+      onConfirm: async () => {
+        for (const id of selectedItemIds) {
+          try {
+            await invoke("delete_clipboard_entry", { id });
+          } catch (e) {
+            console.error("Failed to delete item", id, e);
+          }
+        }
+        setHistory((prev) => prev.filter((item) => !selectedItemIds.has(item.id)));
+        pushToast(t("batch_deleted").replace("{count}", String(count)));
+        setSelectedItemIds(new Set());
+        lastSelectedIndexRef.current = null;
+      }
+    });
+  }, [selectedItemIds, openConfirm, t, setHistory, pushToast]);
+
+  const handleBatchAddToTab = useCallback((tabName: string) => {
+    const ids = Array.from(selectedItemIds);
+    if (ids.length === 0) return;
+    for (const id of ids) {
+      const item = history.find(h => h.id === id);
+      if (item) {
+        const currentTags = item.tags || [];
+        if (!currentTags.includes(tabName)) {
+          handleUpdateTags(id, [...currentTags, tabName]);
+        }
+      }
+    }
+    invoke("create_new_tag", { tagName: tabName }).catch(() => {});
+    pushToast(t("batch_added_to_tab").replace("{count}", String(ids.length)).replace("{name}", tabName));
+    setSelectedItemIds(new Set());
+    lastSelectedIndexRef.current = null;
+    setIsBatchTabDropdownOpen(false);
+  }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
+
+  const handleConfirmAddEntry = useCallback(async () => {
+    const trimmed = addEntryContent.trim();
+    if (!trimmed) {
+      setIsAddEntryModalOpen(false);
+      return;
+    }
+    try {
+      const autoTags = activeTab && activeTab.id !== "clipboard" && activeTab.name ? [activeTab.name] : [];
+      await invoke("add_manual_item", {
+        content: trimmed,
+        contentType: "text",
+        tags: autoTags
+      });
+      pushToast(t("entry_added"));
+      setIsAddEntryModalOpen(false);
+      setAddEntryContent("");
+      fetchHistory(true);
+    } catch (err) {
+      console.error("Failed to add entry:", err);
+    }
+  }, [addEntryContent, activeTab, pushToast, t, fetchHistory]);
+
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
     revealedIds,
@@ -1160,6 +1318,9 @@ const App = () => {
     onToggleItemTab: handleToggleItemInTab,
     onAddNewTabAndAssign: handleAddNewTabAndAssign,
     onDeleteTab: handleDeleteTab,
+    selectedItemIds,
+    onMultiSelect: handleMultiSelect,
+    onItemContentUpdated: handleItemContentUpdated,
     theme,
     language,
     t,
@@ -1229,6 +1390,10 @@ const App = () => {
         onSelectTab={setActiveTabId}
         onAddTab={handleAddTab}
         onDeleteTab={handleDeleteTab}
+        onOpenAddEntry={() => {
+          setIsAddEntryModalOpen(true);
+          setAddEntryContent("");
+        }}
       />
 
 
@@ -1272,6 +1437,134 @@ const App = () => {
           language={language}
         />
       </main>
+
+      {/* Floating Batch Action Bar */}
+      {selectedItemIds.size > 0 && (
+        <div className="fluent-batch-bar">
+          <span className="fluent-batch-bar-count">
+            {t("selected_count")} {selectedItemIds.size}
+          </span>
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              className="fluent-batch-btn"
+              onClick={() => setIsBatchTabDropdownOpen((prev) => !prev)}
+            >
+              <FolderPlus size={12} />
+              <span>{t("add_to_tab")}</span>
+            </button>
+            {isBatchTabDropdownOpen && (
+              <div className="fluent-batch-dropdown">
+                {tabs.filter((tab) => !tab.isBuiltin && tab.id !== "clipboard").length === 0 ? (
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)", padding: "4px 8px" }}>
+                    {t("no_custom_tabs")}
+                  </div>
+                ) : (
+                  tabs
+                    .filter((tab) => !tab.isBuiltin && tab.id !== "clipboard")
+                    .map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        className="fluent-batch-dropdown-item"
+                        onClick={() => handleBatchAddToTab(tab.name)}
+                      >
+                        <Folder size={11} />
+                        <span>{tab.name}</span>
+                      </button>
+                    ))
+                )}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            className="fluent-batch-btn"
+            onClick={handleBatchCopy}
+            title={t("copy_selected")}
+          >
+            <Copy size={12} />
+            <span>{t("copy_selected")}</span>
+          </button>
+          <button
+            type="button"
+            className="fluent-batch-btn danger"
+            onClick={handleBatchDelete}
+            title={t("delete_selected")}
+          >
+            <Trash2 size={12} />
+            <span>{t("delete_selected")}</span>
+          </button>
+          <button
+            type="button"
+            className="fluent-batch-btn"
+            onClick={() => {
+              setSelectedItemIds(new Set());
+              lastSelectedIndexRef.current = null;
+              setIsBatchTabDropdownOpen(false);
+            }}
+            title={t("abort")}
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Manual Entry Creation Modal */}
+      {isAddEntryModalOpen && (
+        <div
+          className="fluent-modal-overlay"
+          onClick={() => setIsAddEntryModalOpen(false)}
+        >
+          <div
+            className="fluent-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="fluent-modal-header">
+              <span>{t("add_item")}</span>
+              <button
+                type="button"
+                className="btn-icon-ghost"
+                onClick={() => setIsAddEntryModalOpen(false)}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <textarea
+              autoFocus
+              className="fluent-modal-textarea"
+              placeholder={t("add_entry_placeholder") || "输入要添加的内容..."}
+              value={addEntryContent}
+              onChange={(e) => setAddEntryContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                  e.preventDefault();
+                  handleConfirmAddEntry();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  setIsAddEntryModalOpen(false);
+                }
+              }}
+            />
+            <div className="fluent-modal-footer">
+              <button
+                type="button"
+                className="fluent-btn-secondary"
+                onClick={() => setIsAddEntryModalOpen(false)}
+              >
+                {t("cancel") || "取消"}
+              </button>
+              <button
+                type="button"
+                className="fluent-btn-primary"
+                onClick={handleConfirmAddEntry}
+              >
+                {t("create_btn") || "创建"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ToastContainer toasts={toasts} />
 

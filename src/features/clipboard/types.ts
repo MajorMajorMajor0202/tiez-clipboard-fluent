@@ -56,6 +56,11 @@ export interface ClipboardItemProps {
   onAIAction?: (type: string) => void;
   onAIOptionsToggle?: () => void;
   onInputSubmit?: (val: string) => void;
+  index?: number;
+  isMultiSelected?: boolean;
+  isMultiSelectActive?: boolean;
+  onMultiSelect?: (id: number, index: number, modifiers: { ctrl: boolean; shift: boolean }) => void;
+  onItemContentUpdated?: (id: number, newContent: string) => void;
   dragControls?: DragControls;
   id?: string;
   disableLayout?: boolean;

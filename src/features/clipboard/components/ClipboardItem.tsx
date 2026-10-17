@@ -27,12 +27,12 @@ import {
     Files,
     ImageOff,
     FileQuestion,
-    GripVertical,
     Search,
     FolderPlus,
     Folder,
     Check,
-    Trash2
+    Trash2,
+    Edit3
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClipboardItemProps } from "../types";
@@ -725,7 +725,12 @@ const ClipboardItem = ({
     sensitiveMaskSuffixVisible = 3,
     sensitiveMaskEmailDomain = false,
     quickPasteHint,
-    dragControls,
+    index = 0,
+    isMultiSelected = false,
+    isMultiSelectActive = false,
+    onMultiSelect,
+    onItemContentUpdated,
+    dragControls: _dragControls,
     id,
     compactMode,
     className,
@@ -736,6 +741,10 @@ const ClipboardItem = ({
     const tagButtonRef = useRef<HTMLButtonElement>(null);
     const tabButtonRef = useRef<HTMLButtonElement>(null);
     const tabNewInputRef = useRef<HTMLInputElement>(null);
+    const editInputRef = useRef<HTMLTextAreaElement>(null);
+    const isDraggingRef = useRef(false);
+    const [isEditingContent, setIsEditingContent] = useState(false);
+    const [editContentVal, setEditContentVal] = useState(item.content);
     const [flyoutPosition, setFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
     const [tabFlyoutPosition, setTabFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
     const [newTabNameInput, setNewTabNameInput] = useState("");
@@ -743,6 +752,37 @@ const ClipboardItem = ({
     const [localAiOptionsOpen, setLocalAiOptionsOpen] = useState(!!aiOptionsOpen);
     const [snapshotFailed, setSnapshotFailed] = useState(false);
     const [richImageFallbackFailed, setRichImageFallbackFailed] = useState(false);
+
+    useEffect(() => {
+        setEditContentVal(item.content);
+    }, [item.content]);
+
+    const handleSaveContentEdit = useCallback(async () => {
+        const trimmed = editContentVal;
+        if (trimmed === item.content) {
+            setIsEditingContent(false);
+            return;
+        }
+        try {
+            await invoke("update_item_content", { id: item.id, newContent: trimmed });
+            onItemContentUpdated?.(item.id, trimmed);
+            setIsEditingContent(false);
+        } catch (err) {
+            console.error("Failed to update item content:", err);
+        }
+    }, [editContentVal, item.content, item.id, onItemContentUpdated]);
+
+    useEffect(() => {
+        if (isEditingContent) {
+            setIgnoreBlurSafe(true);
+            setTimeout(() => {
+                editInputRef.current?.focus();
+            }, 50);
+        } else if (!isMultiSelectActive) {
+            setIgnoreBlurSafe(false);
+        }
+    }, [isEditingContent, isMultiSelectActive]);
+
     const [videoLoadError, setVideoLoadError] = useState(false);
     const [snapshotOverflows, setSnapshotOverflows] = useState(false);
     const [richTextOverflows, setRichTextOverflows] = useState(false);
@@ -1607,14 +1647,48 @@ const ClipboardItem = ({
             animate={{ marginBottom: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className={`history-item ${isSelected ? "selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
+            className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
+            draggable={!isEditingTags && !isEditingContent}
+            onDragStart={(e: any) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('button, input, textarea, [role="button"], a, .tag-edit-flyout, .item-inline-editor')) {
+                    e.preventDefault();
+                    return;
+                }
+                isDraggingRef.current = true;
+                setIgnoreBlurSafe(true);
+                void hideCompactPreview();
+                const dt = e.dataTransfer;
+                if (dt) {
+                    if (item.content_type === "rich_text" && item.html_content) {
+                        dt.setData("text/plain", item.preview || item.content);
+                        dt.setData("text/html", item.html_content);
+                    } else if (item.content_type === "file") {
+                        dt.setData("text/plain", item.content);
+                        const uriList = filePaths.map((p) => `file:///${p.replace(/\\/g, '/')}`).join('\r\n');
+                        if (uriList) dt.setData("text/uri-list", uriList);
+                    } else {
+                        dt.setData("text/plain", item.content);
+                    }
+                    dt.setData("application/x-tiez-item", String(item.id));
+                    dt.effectAllowed = "copyMove";
+                }
+            }}
+            onDragEnd={() => {
+                setTimeout(() => {
+                    isDraggingRef.current = false;
+                }, 100);
+                if (!isMultiSelectActive && !isEditingContent) {
+                    setIgnoreBlurSafe(false);
+                }
+            }}
             onMouseDown={(e) => {
                 const target = e.target as HTMLElement;
                 if (e.button !== 0) return;
 
                 if (isEditingTags) {
                     if (target.closest(".tag-edit-flyout")) return;
-                    if (target.closest('button, input, textarea, [role="button"], .drag-handle')) {
+                    if (target.closest('button, input, textarea, [role="button"]')) {
                         return;
                     }
                     if (target.closest('a')) return;
@@ -1624,32 +1698,40 @@ const ClipboardItem = ({
                     return;
                 }
 
-                if (target.closest('button, input, textarea, [role="button"], .drag-handle')) {
+                if (target.closest('button, input, textarea, [role="button"], a, .item-inline-editor')) {
                     return;
                 }
-                if (target.closest('a')) {
+
+                const isModifier = e.ctrlKey || e.metaKey || e.shiftKey;
+                if (isModifier || isMultiSelectActive) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMultiSelect?.(item.id, index, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey });
                     return;
                 }
-                // e.preventDefault() stops macOS from transferring key-window focus to TieZ
-                // when the user clicks on a clipboard item, including pinned mode.
-                // Without this, the first click activates TieZ and the original input
-                // target loses focus before we dispatch the paste keystroke.
-                e.preventDefault();
-                void hideCompactPreview();
-                onCopy(false); // Plain text by default
-                onSelect();
             }}
             onClick={(e) => {
-                if (isEditingTags) return;
+                if (isEditingTags || isEditingContent) return;
                 const target = e.target as HTMLElement;
-                if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
+                if (target.closest('button, input, textarea, [role="button"], .item-inline-editor')) {
                     return;
                 }
-                // Prevent link navigation - we want to copy, not open links
                 if (target.closest('a')) {
                     e.preventDefault();
                 }
-                // Copy is handled on mousedown so the source app keeps focus.
+                if (isDraggingRef.current) return;
+
+                const isModifier = e.ctrlKey || e.metaKey || e.shiftKey;
+                if (isModifier || isMultiSelectActive) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMultiSelect?.(item.id, index, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey });
+                    return;
+                }
+
+                void hideCompactPreview();
+                onCopy(false);
+                onSelect();
             }}
             onContextMenu={(e) => {
                 const target = e.target as HTMLElement;
@@ -1660,7 +1742,7 @@ const ClipboardItem = ({
                     onTagEditCancel?.();
                     return;
                 }
-                if (target.closest('button') || target.closest('input') || target.closest('textarea')) {
+                if (target.closest('button, input, textarea, [role="button"], .item-inline-editor')) {
                     return;
                 }
                 void hideCompactPreview();
@@ -1720,24 +1802,8 @@ const ClipboardItem = ({
         >
             <div className="item-meta">
                 <div className="item-meta-left">
-                    {dragControls && (
-                        <div
-                            className="drag-handle"
-                            onPointerDown={(e) => dragControls.start(e)}
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                                cursor: 'grab',
-                                opacity: 0.5,
-                                display: 'flex',
-                                alignItems: 'center',
-                                touchAction: 'none'
-                            }}
-                        >
-                            <GripVertical size={14} />
-                        </div>
-                    )}
                     <div className="app-info">
-                        {item.is_pinned && !dragControls && <Pin size={10} style={{ color: 'var(--accent-color)', marginRight: '-2px' }} />}
+                        {item.is_pinned && <Pin size={10} style={{ color: 'var(--accent-color)', marginRight: '-2px' }} />}
                         {showSourceAppIcon
                             ? renderSourceAppIcon(sourceAppIcon, item.content_type, item.source_app)
                             : getIcon(item.content_type)}
@@ -1774,6 +1840,18 @@ const ClipboardItem = ({
                                 onClick={onTogglePin}
                             >
                                 {item.is_pinned ? <PinOff size={12} /> : <Pin size={12} />}
+                            </button>
+                        </FluentTooltip>
+                        <FluentTooltip text={t('edit_content') || '编辑内容'}>
+                            <button
+                                className={`btn-icon-ghost ${isEditingContent ? "active" : ""}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsEditingContent((prev) => !prev);
+                                    setEditContentVal(item.content);
+                                }}
+                            >
+                                <Edit3 size={12} />
                             </button>
                         </FluentTooltip>
                         <FluentTooltip text={t('add_to_tab')}>
@@ -1845,7 +1923,51 @@ const ClipboardItem = ({
                 )
             }
             <div className={`content-preview-shell${overlayTagsInPreview ? ' has-overlay-tags' : ''}`}>
-                {item.content_type === "image" ? (
+                {isEditingContent ? (
+                    <div className="item-inline-editor" onClick={(e) => e.stopPropagation()}>
+                        <textarea
+                            ref={editInputRef}
+                            className="item-inline-textarea"
+                            value={editContentVal}
+                            onChange={(e) => setEditContentVal(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    setIsEditingContent(false);
+                                    setEditContentVal(item.content);
+                                } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                    e.preventDefault();
+                                    handleSaveContentEdit();
+                                }
+                            }}
+                            autoFocus
+                            rows={3}
+                        />
+                        <div className="item-inline-editor-actions">
+                            <button
+                                type="button"
+                                className="fluent-btn-secondary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsEditingContent(false);
+                                    setEditContentVal(item.content);
+                                }}
+                            >
+                                {t('cancel') || '取消'}
+                            </button>
+                            <button
+                                type="button"
+                                className="fluent-btn-primary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSaveContentEdit();
+                                }}
+                            >
+                                {t('save') || '保存'}
+                            </button>
+                        </div>
+                    </div>
+                ) : item.content_type === "image" ? (
                     <div style={{ position: 'relative' }}>
                         {item.is_external && item.file_preview_exists === false ? (
                             <div className="image-preview error-placeholder" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', height: '100px', fontSize: '12px' }}>
@@ -2361,6 +2483,9 @@ const ClipboardItem = ({
 
 export default memo(ClipboardItem, (prevProps, nextProps) => {
     return prevProps.isSelected === nextProps.isSelected &&
+        prevProps.isMultiSelected === nextProps.isMultiSelected &&
+        prevProps.isMultiSelectActive === nextProps.isMultiSelectActive &&
+        prevProps.index === nextProps.index &&
         prevProps.item.id === nextProps.item.id &&
         prevProps.item.content_type === nextProps.item.content_type &&
         prevProps.item.timestamp === nextProps.item.timestamp &&

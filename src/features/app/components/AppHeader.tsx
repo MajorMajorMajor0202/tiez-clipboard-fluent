@@ -5,6 +5,7 @@ import {
   MessageSquare,
   Pin,
   PinOff,
+  Plus,
   Search,
   Settings as SettingsIcon,
   Smile,
@@ -33,6 +34,7 @@ interface AppHeaderProps {
   isWindowPinned: boolean;
   setIsWindowPinned: (val: boolean) => void;
   clearHistory: () => void;
+  onOpenAddEntry?: () => void;
   showSearchBox: boolean;
   search: string;
   setSearch: (val: string) => void;
@@ -72,6 +74,7 @@ const AppHeader = ({
   isWindowPinned,
   setIsWindowPinned,
   clearHistory,
+  onOpenAddEntry,
   showSearchBox,
   search,
   setSearch,
@@ -178,6 +181,13 @@ const AppHeader = ({
 
         {!showSettings && !showTagManager && !showEmojiPanel && (
           <>
+            {onOpenAddEntry && (
+              <FluentTooltip text={t('add_item')}>
+                <button className="btn-icon-ghost" onClick={onOpenAddEntry}>
+                  <Plus size={16} />
+                </button>
+              </FluentTooltip>
+            )}
             <FluentTooltip text={t('clear_history')}>
               <button className="btn-icon-ghost" onClick={clearHistory}>
                 <Trash2 size={16} />

@@ -578,4 +578,228 @@
   padding: 10px 4px;
 }
 
+/* Multi-select Item State (Fluent style, strictly no checkbox) */
+.history-item.multi-selected {
+  border-color: var(--accent-color) !important;
+  background: var(--bg-hover, rgba(128, 128, 128, 0.16)) !important;
+  outline: 1.5px solid var(--accent-color);
+  outline-offset: -1px;
+}
+
+/* Inline Item Content Editor */
+.item-inline-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.item-inline-textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 6px 8px;
+  font-size: var(--clipboard-item-font-size, 12px);
+  font-family: var(--content-font-family, inherit);
+  color: var(--text-primary);
+  background: var(--bg-input, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.item-inline-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Fluent Action Buttons (Strictly <= 4px border-radius) */
+.fluent-btn-primary {
+  background: var(--accent-color, #0078d4);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.fluent-btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.fluent-btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.fluent-btn-secondary:hover {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.1));
+}
+
+/* Floating Batch Action Bar */
+.fluent-batch-bar {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-element, #ffffff);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+  z-index: 9999;
+}
+
+.fluent-batch-bar-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.fluent-batch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.2));
+  background: var(--bg-element, transparent);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.fluent-batch-btn:hover {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
+  border-color: var(--border-color, rgba(128, 128, 128, 0.35));
+}
+
+.fluent-batch-btn.danger {
+  color: #ff4d4f;
+  border-color: rgba(255, 77, 79, 0.3);
+}
+
+.fluent-batch-btn.danger:hover {
+  background: rgba(255, 77, 79, 0.12);
+  border-color: #ff4d4f;
+}
+
+.fluent-batch-dropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-element, #ffffff);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 130px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 10000;
+}
+
+.fluent-batch-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: var(--text-primary);
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.fluent-batch-dropdown-item:hover {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
+}
+
+/* Fluent Modal Overlay & Dialog */
+.fluent-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+}
+
+.fluent-modal {
+  width: 90%;
+  max-width: 440px;
+  background: var(--bg-element, #fff);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fluent-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fluent-modal-textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.fluent-modal-textarea:focus {
+  border-color: var(--accent-color);
+}
+
+.fluent-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+
 

@@ -26,6 +26,9 @@ interface UseClipboardItemRendererOptions {
   onToggleItemTab?: (itemId: number, tabName: string) => void;
   onAddNewTabAndAssign?: (itemId: number, tabName: string) => void;
   onDeleteTab?: (tabId: string) => void;
+  selectedItemIds?: Set<number>;
+  onMultiSelect?: (id: number, index: number, modifiers: { ctrl: boolean; shift: boolean }) => void;
+  onItemContentUpdated?: (id: number, newContent: string) => void;
   theme: string;
   language: Locale;
   t: (key: string) => string;
@@ -82,6 +85,9 @@ export const useClipboardItemRenderer = ({
   onToggleItemTab,
   onAddNewTabAndAssign,
   onDeleteTab,
+  selectedItemIds,
+  onMultiSelect,
+  onItemContentUpdated,
   theme,
   language,
   t,
@@ -250,6 +256,11 @@ export const useClipboardItemRenderer = ({
               "task"
             )
           }
+          index={index}
+          isMultiSelected={selectedItemIds?.has(item.id)}
+          isMultiSelectActive={Boolean(selectedItemIds && selectedItemIds.size > 0)}
+          onMultiSelect={onMultiSelect}
+          onItemContentUpdated={onItemContentUpdated}
           dragControls={dragControls}
           disableLayout={disableLayout}
         />
@@ -292,6 +303,9 @@ export const useClipboardItemRenderer = ({
       onToggleItemTab,
       onAddNewTabAndAssign,
       onDeleteTab,
+      selectedItemIds,
+      onMultiSelect,
+      onItemContentUpdated,
       setTagInput,
       handleUpdateTags,
       handleAIAction
