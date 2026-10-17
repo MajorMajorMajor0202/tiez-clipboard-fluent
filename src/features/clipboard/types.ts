@@ -19,6 +19,7 @@ export interface ClipboardItemProps {
   /** Tags used elsewhere in history; shown as quick-pick when editing tags */
   tagSuggestions?: string[];
   tabs?: TabItem[];
+  activeTabId?: string;
   isTabFlyoutOpen?: boolean;
   theme: string;
   language: Locale;

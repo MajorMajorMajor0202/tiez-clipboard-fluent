@@ -21,6 +21,7 @@ interface UseClipboardItemRendererOptions {
   allTags: string[];
   tagColors: Record<string, string>;
   tabs?: TabItem[];
+  activeTabId?: string;
   editingTabFlyoutId?: number | null;
   setEditingTabFlyoutId?: Dispatch<SetStateAction<number | null>>;
   onToggleItemTab?: (itemId: number, tabName: string) => void;
@@ -80,6 +81,7 @@ export const useClipboardItemRenderer = ({
   allTags,
   tagColors,
   tabs = [],
+  activeTabId,
   editingTabFlyoutId,
   setEditingTabFlyoutId,
   onToggleItemTab,
@@ -137,6 +139,7 @@ export const useClipboardItemRenderer = ({
           isRevealed={revealedIds.has(item.id)}
           isEditingTags={isEditingTags}
           tabs={tabs}
+          activeTabId={activeTabId}
           isTabFlyoutOpen={isTabFlyoutOpen}
           tagInput={isEditingTags ? tagInput : ""}
           tagSuggestions={isEditingTags ? allTags : EMPTY_TAG_SUGGESTIONS}
@@ -275,6 +278,7 @@ export const useClipboardItemRenderer = ({
       editingTagsId,
       editingTabFlyoutId,
       tabs,
+      activeTabId,
       tagInput,
       allTags,
       tagColors,

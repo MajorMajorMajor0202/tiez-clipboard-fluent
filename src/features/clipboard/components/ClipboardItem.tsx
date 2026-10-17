@@ -691,6 +691,7 @@ const ClipboardItem = ({
     isRevealed,
     isEditingTags,
     tabs = [],
+    activeTabId,
     isTabFlyoutOpen = false,
     tagInput,
     tagSuggestions = [],
@@ -1874,6 +1875,118 @@ const ClipboardItem = ({
                         return;
                     }
                 }
+
+                // Pointer drag tracking to tab (100% reliable, independent of OS OLE hooks)
+                const startX = e.clientX;
+                const startY = e.clientY;
+                let isCardDragging = false;
+                let avatarEl: HTMLDivElement | null = null;
+                let currentHoveredTabId: string | null = null;
+
+                const onMouseMove = (moveE: MouseEvent) => {
+                    const dist = Math.hypot(moveE.clientX - startX, moveE.clientY - startY);
+                    if (!isCardDragging && dist > 5) {
+                        isCardDragging = true;
+                        isDraggingRef.current = true;
+                        setIgnoreBlurSafe(true);
+                        void hideCompactPreview();
+
+                        avatarEl = document.createElement('div');
+                        avatarEl.className = 'tiez-drag-avatar';
+                        const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
+                        const isMulti = isMultiSelected && selectedSet && selectedSet.size > 1;
+                        const count = isMulti ? selectedSet.size : 1;
+                        const rawSnippet = (item.preview || item.content || '剪贴板条目').trim().replace(/\s+/g, ' ');
+                        const snippet = rawSnippet.length > 14 ? rawSnippet.slice(0, 14) + '...' : rawSnippet;
+                        const label = isMulti ? `${count} 项` : snippet;
+                        avatarEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg><span>${label}</span>`;
+                        avatarEl.style.left = `${moveE.clientX}px`;
+                        avatarEl.style.top = `${moveE.clientY}px`;
+                        document.body.appendChild(avatarEl);
+                    }
+
+                    if (isCardDragging && avatarEl) {
+                        avatarEl.style.left = `${moveE.clientX}px`;
+                        avatarEl.style.top = `${moveE.clientY}px`;
+
+                        const elUnder = document.elementFromPoint(moveE.clientX, moveE.clientY);
+                        const tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
+                        const tabId = tabBtn?.getAttribute('data-tab-id') || null;
+
+                        if (tabId !== currentHoveredTabId) {
+                            if (currentHoveredTabId) {
+                                document.querySelector(`.fluent-tab-item[data-tab-id="${currentHoveredTabId}"]`)?.classList.remove('drag-target-hover');
+                            }
+                            if (tabId) {
+                                const targetTab = tabs?.find(t => t.id === tabId);
+                                const isFirst = targetTab?.id === 'clipboard';
+                                const droppable = (!isFirst && !targetTab?.isBuiltin) || (isFirst && activeTabId !== 'clipboard');
+                                if (droppable) {
+                                    tabBtn?.classList.add('drag-target-hover');
+                                    currentHoveredTabId = tabId;
+                                } else {
+                                    currentHoveredTabId = null;
+                                }
+                            } else {
+                                currentHoveredTabId = null;
+                            }
+                        }
+                    }
+                };
+
+                const onMouseUp = (upE: MouseEvent) => {
+                    window.removeEventListener('mousemove', onMouseMove, true);
+                    window.removeEventListener('mouseup', onMouseUp, true);
+
+                    if (avatarEl) {
+                        avatarEl.remove();
+                        avatarEl = null;
+                    }
+
+                    if (currentHoveredTabId) {
+                        document.querySelector(`.fluent-tab-item[data-tab-id="${currentHoveredTabId}"]`)?.classList.remove('drag-target-hover');
+                    }
+
+                    if (isCardDragging) {
+                        upE.preventDefault();
+                        upE.stopPropagation();
+
+                        const elUnder = document.elementFromPoint(upE.clientX, upE.clientY);
+                        const tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
+                        const finalTabId = tabBtn?.getAttribute('data-tab-id') || currentHoveredTabId;
+
+                        if (finalTabId) {
+                            const targetTab = tabs?.find(t => t.id === finalTabId);
+                            if (targetTab) {
+                                const isFirst = targetTab.id === 'clipboard';
+                                const droppable = (!isFirst && !targetTab.isBuiltin) || (isFirst && activeTabId !== 'clipboard');
+                                if (droppable) {
+                                    const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
+                                    if (selectedSet && selectedSet.has(item.id) && selectedSet.size > 1) {
+                                        (window as any).__tiezDraggedItemIds = Array.from(selectedSet);
+                                    } else {
+                                        (window as any).__tiezDraggedItemIds = [item.id];
+                                    }
+                                    window.dispatchEvent(new CustomEvent('tiez-card-dropped-on-tab', {
+                                        detail: { itemId: item.id, tabName: targetTab.name }
+                                    }));
+                                }
+                            }
+                        }
+
+                        setTimeout(() => {
+                            isDraggingRef.current = false;
+                            (window as any).__tiezDraggedItemId = null;
+                            (window as any).__tiezDraggedItemIds = null;
+                            if (!isMultiSelectActive && !isEditingContent) {
+                                setIgnoreBlurSafe(false);
+                            }
+                        }, 150);
+                    }
+                };
+
+                window.addEventListener('mousemove', onMouseMove, true);
+                window.addEventListener('mouseup', onMouseUp, true);
             }}
             onClick={(e) => {
                 if (isEditingTags || isEditingContent) return;

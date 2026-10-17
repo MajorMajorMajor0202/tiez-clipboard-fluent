@@ -1322,6 +1322,19 @@ const App = () => {
     (window as any).__tiezDraggedItemId = null;
   }, [selectedItemIds, history, tabs, activeTabId, handleUpdateTags, pushToast, t]);
 
+  useEffect(() => {
+    const handleCardDrop = (e: Event) => {
+      const customE = e as CustomEvent<{ itemId: number; tabName: string }>;
+      if (customE.detail) {
+        handleDropItemOnTab(customE.detail.itemId, customE.detail.tabName);
+      }
+    };
+    window.addEventListener("tiez-card-dropped-on-tab", handleCardDrop);
+    return () => {
+      window.removeEventListener("tiez-card-dropped-on-tab", handleCardDrop);
+    };
+  }, [handleDropItemOnTab]);
+
   const handleConfirmAddEntry = useCallback(async () => {
     const trimmed = addEntryContent.trim();
     if (!trimmed) {
@@ -1355,6 +1368,7 @@ const App = () => {
     allTags,
     tagColors,
     tabs,
+    activeTabId,
     editingTabFlyoutId,
     setEditingTabFlyoutId,
     onToggleItemTab: handleToggleItemInTab,

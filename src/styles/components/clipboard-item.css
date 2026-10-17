@@ -411,12 +411,10 @@
 
 .tag-edit-flyout {
   width: 192px; /* multiple of 4 */
-  background: var(--flyout-background, var(--bg-element));
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 4px; /* 4px rounded corner */
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.08);
-  backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
-  -webkit-backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
   padding: 8px; /* multiple of 4 */
   display: flex;
   flex-direction: column;
@@ -424,9 +422,29 @@
   box-sizing: border-box;
 }
 
+:root.dark-mode .tag-edit-flyout,
+body.dark-mode .tag-edit-flyout,
 .dark-mode .tag-edit-flyout {
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #202020 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Tab Assignment Flyout - Zero Transparency, Pure Solid */
+.tab-assign-flyout {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.16) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root.dark-mode .tab-assign-flyout,
+body.dark-mode .tab-assign-flyout,
+.dark-mode .tab-assign-flyout {
+  background: #202020 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Mimics homepage search wrapper */
@@ -532,21 +550,89 @@
   text-overflow: ellipsis;
 }
 
-/* Tab items inside tag-edit-flyout */
+/* Tab items inside tag-edit-flyout / tab-assign-flyout */
 .tag-flyout-suggest-item .tab-flyout-item-icon {
   flex-shrink: 0;
-  opacity: 0.65;
+  color: #555555;
+  opacity: 0.85;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+:root.dark-mode .tag-flyout-suggest-item .tab-flyout-item-icon,
+body.dark-mode .tag-flyout-suggest-item .tab-flyout-item-icon,
+.dark-mode .tag-flyout-suggest-item .tab-flyout-item-icon {
+  color: #b0b0b0 !important;
+}
+
+.tag-flyout-suggest-item:hover .tab-flyout-item-icon {
+  color: #1a1a1a;
+  opacity: 1;
+}
+
+:root.dark-mode .tag-flyout-suggest-item:hover .tab-flyout-item-icon,
+body.dark-mode .tag-flyout-suggest-item:hover .tab-flyout-item-icon,
+.dark-mode .tag-flyout-suggest-item:hover .tab-flyout-item-icon {
+  color: #ffffff !important;
 }
 
 .tag-flyout-suggest-item.active .tab-flyout-item-icon {
   opacity: 1;
-  color: var(--accent-color, #2f6fed);
+  color: var(--accent-color, #2f6fed) !important;
 }
 
 .tag-flyout-suggest-item .tab-flyout-check {
   margin-left: auto;
   color: var(--accent-color, #2f6fed);
   flex-shrink: 0;
+}
+
+/* Floating Drag Avatar following cursor for pointer drag-to-tab */
+.tiez-drag-avatar {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid var(--accent-color, #2f6fed);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translate(-50%, -120%);
+  user-select: none;
+  animation: dragAvatarPop 0.1s cubic-bezier(0, 0, 0.2, 1);
+}
+
+:root.dark-mode .tiez-drag-avatar,
+body.dark-mode .tiez-drag-avatar,
+.dark-mode .tiez-drag-avatar {
+  background: #252525 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+.tiez-drag-avatar svg {
+  flex-shrink: 0;
+  color: var(--accent-color, #2f6fed);
+}
+
+@keyframes dragAvatarPop {
+  from {
+    transform: translate(-50%, -100%) scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -120%) scale(1);
+    opacity: 1;
+  }
 }
 
 .tag-flyout-item-delete {
@@ -651,23 +737,29 @@
   background: var(--bg-hover, rgba(128, 128, 128, 0.1));
 }
 
-/* Secondary Actions Menu (...) */
+/* Secondary Actions Menu (...) - 100% Solid, No Transparency */
 .secondary-actions-menu {
   position: fixed;
-  background: var(--bg-element, #ffffff);
-  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.16) !important;
   border-radius: 4px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
   padding: 4px;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 145px;
   z-index: 100000;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   user-select: none;
   animation: secondaryMenuFadeIn 0.1s cubic-bezier(0, 0, 0.2, 1);
+}
+
+:root.dark-mode .secondary-actions-menu,
+body.dark-mode .secondary-actions-menu,
+.dark-mode .secondary-actions-menu {
+  background: #202020 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 @keyframes secondaryMenuFadeIn {
@@ -683,8 +775,14 @@
 
 .secondary-menu-divider {
   height: 1px;
-  background: var(--border-color, rgba(128, 128, 128, 0.18));
+  background: rgba(0, 0, 0, 0.1);
   margin: 3px 2px;
+}
+
+:root.dark-mode .secondary-menu-divider,
+body.dark-mode .secondary-menu-divider,
+.dark-mode .secondary-menu-divider {
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .secondary-menu-item {
@@ -694,7 +792,7 @@
   padding: 6px 10px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #1a1a1a;
   background: transparent;
   border: none;
   border-radius: 4px;
@@ -705,17 +803,29 @@
   transition: background 0.12s ease;
 }
 
+:root.dark-mode .secondary-menu-item,
+body.dark-mode .secondary-menu-item,
+.dark-mode .secondary-menu-item {
+  color: #f0f0f0 !important;
+}
+
 .secondary-menu-item:hover {
-  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
+  background: rgba(0, 0, 0, 0.06);
+}
+
+:root.dark-mode .secondary-menu-item:hover,
+body.dark-mode .secondary-menu-item:hover,
+.dark-mode .secondary-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 .secondary-menu-item.danger {
-  color: var(--error-color, #e05252);
+  color: #e05252 !important;
 }
 
 .secondary-menu-item.danger:hover {
-  background: rgba(224, 82, 82, 0.12);
-  color: var(--error-color, #e05252);
+  background: rgba(224, 82, 82, 0.12) !important;
+  color: #ff5252 !important;
 }
 
 .secondary-menu-item svg {
