@@ -283,6 +283,8 @@ export interface AppState {
   setTabs: StateSetter<TabItem[]>;
   activeTabId: string;
   setActiveTabId: StateSetter<string>;
+  editingTabFlyoutId: number | null;
+  setEditingTabFlyoutId: StateSetter<number | null>;
 }
 
 export interface TabItem {

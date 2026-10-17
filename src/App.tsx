@@ -47,7 +47,7 @@ import type { ClipboardEntry } from "./shared/types";
 import type { QuickPasteHint, VirtualClipboardListHandle } from "./features/clipboard/types";
 
 
-import type { QuickPasteModifier } from "./features/app/types";
+import type { QuickPasteModifier, TabItem } from "./features/app/types";
 import {
   forceHideCompactPreviewWindow,
   isCompactPreviewWindowSupported,
@@ -327,8 +327,11 @@ const App = () => {
     typeFilter,
     setTypeFilter,
     tabs,
+    setTabs,
     activeTabId,
-    setActiveTabId
+    setActiveTabId,
+    editingTabFlyoutId,
+    setEditingTabFlyoutId
   } = appState;
 
   // --- Auto Update Logic ---
@@ -1039,6 +1042,108 @@ const App = () => {
   });
 
 
+  const tabsWithCount = useMemo(() => {
+    return tabs.map((tab) => {
+      if (tab.id === "clipboard") {
+        return { ...tab, count: undefined };
+      }
+      const count = history.filter(
+        (item) =>
+          item.tab_id === tab.id ||
+          (tab.name && item.tags?.some((t) => t.toLowerCase() === tab.name.toLowerCase()))
+      ).length;
+      return { ...tab, count };
+    });
+  }, [tabs, history]);
+
+  const handleAddTab = useCallback((name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const existing = tabs.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing) {
+      setActiveTabId(existing.id);
+      return;
+    }
+    const newTab: TabItem = {
+      id: `tab_${Date.now()}`,
+      name: trimmed
+    };
+    const nextTabs = [...tabs, newTab];
+    setTabs(nextTabs);
+    setActiveTabId(newTab.id);
+    try {
+      localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
+      invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
+    } catch (e) {
+      console.error("Failed to save tabs", e);
+    }
+    pushToast(t("tab_created") || `已创建标签页: ${trimmed}`);
+  }, [tabs, setTabs, setActiveTabId, t, pushToast]);
+
+  const handleDeleteTab = useCallback((tabId: string) => {
+    const tabToDelete = tabs.find((t) => t.id === tabId);
+    if (!tabToDelete || tabToDelete.isBuiltin) return;
+    const nextTabs = tabs.filter((t) => t.id !== tabId);
+    setTabs(nextTabs);
+    if (activeTabId === tabId) {
+      setActiveTabId("clipboard");
+    }
+    try {
+      localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
+      invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
+    } catch (e) {
+      console.error("Failed to save tabs", e);
+    }
+    pushToast(t("tab_deleted") || `已删除标签页: ${tabToDelete.name}`);
+  }, [tabs, setTabs, activeTabId, setActiveTabId, t, pushToast]);
+
+  const handleToggleItemInTab = useCallback((itemId: number, tabName: string) => {
+    const item = history.find((h) => h.id === itemId);
+    if (!item) return;
+    const currentTags = item.tags || [];
+    const isIn = currentTags.includes(tabName);
+    let nextTags: string[];
+    if (isIn) {
+      nextTags = currentTags.filter((t) => t !== tabName);
+      pushToast(`已从「${tabName}」移除`);
+    } else {
+      nextTags = [...currentTags, tabName];
+      invoke("create_new_tag", { tagName: tabName }).catch(() => {});
+      pushToast(`已加入「${tabName}」`);
+    }
+    handleUpdateTags(itemId, nextTags);
+  }, [history, handleUpdateTags, pushToast]);
+
+  const handleAddNewTabAndAssign = useCallback((itemId: number, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    let targetTab = tabs.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
+    let nextTabs = tabs;
+    if (!targetTab) {
+      targetTab = {
+        id: `tab_${Date.now()}`,
+        name: trimmed
+      };
+      nextTabs = [...tabs, targetTab];
+      setTabs(nextTabs);
+      try {
+        localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
+        invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
+      } catch (e) {
+        console.error("Failed to save tabs", e);
+      }
+    }
+    const item = history.find((h) => h.id === itemId);
+    if (item) {
+      const currentTags = item.tags || [];
+      if (!currentTags.includes(trimmed)) {
+        handleUpdateTags(itemId, [...currentTags, trimmed]);
+        invoke("create_new_tag", { tagName: trimmed }).catch(() => {});
+      }
+    }
+    pushToast(`已创建并加入「${trimmed}」`);
+  }, [tabs, setTabs, history, handleUpdateTags, pushToast]);
+
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
     revealedIds,
@@ -1049,6 +1154,11 @@ const App = () => {
     tagInput,
     allTags,
     tagColors,
+    tabs,
+    editingTabFlyoutId,
+    setEditingTabFlyoutId,
+    onToggleItemTab: handleToggleItemInTab,
+    onAddNewTabAndAssign: handleAddNewTabAndAssign,
     theme,
     language,
     t,
@@ -1113,9 +1223,11 @@ const App = () => {
         setTypeFilter={setTypeFilter}
         onBack={handleHeaderBack}
         onToggleChat={handleToggleHeaderChat}
-        tabs={tabs}
+        tabs={tabsWithCount}
         activeTabId={activeTabId}
         onSelectTab={setActiveTabId}
+        onAddTab={handleAddTab}
+        onDeleteTab={handleDeleteTab}
       />
 
 

@@ -184,15 +184,30 @@ export const useAppState = (): AppState => {
   const [aiAssignedProfileTranslate, setAiAssignedProfileTranslate] = useState("default");
   const [processingAiId, setProcessingAiId] = useState<number | null>(null);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
-  const [tabs, setTabs] = useState<TabItem[]>([
-    { id: "clipboard", name: "剪贴板", isBuiltin: true },
-    { id: "release", name: "本次发布" },
-    { id: "reimburse", name: "报销资料" },
-    { id: "notes", name: "便签" },
-    { id: "code_snippets", name: "常用代码" },
-    { id: "temp", name: "临时暂存" }
-  ]);
+  const [tabs, setTabs] = useState<TabItem[]>(() => {
+    try {
+      const saved = localStorage.getItem("tiez_custom_tabs");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const custom = parsed.filter((t: TabItem) => t.id !== "clipboard");
+          return [{ id: "clipboard", name: "剪贴板", isBuiltin: true }, ...custom];
+        }
+      }
+    } catch (e) {
+      console.error("Error reading saved tabs", e);
+    }
+    return [
+      { id: "clipboard", name: "剪贴板", isBuiltin: true },
+      { id: "release", name: "本次发布" },
+      { id: "reimburse", name: "报销资料" },
+      { id: "notes", name: "便签" },
+      { id: "code_snippets", name: "常用代码" },
+      { id: "temp", name: "临时暂存" }
+    ];
+  });
   const [activeTabId, setActiveTabId] = useState<string>("clipboard");
+  const [editingTabFlyoutId, setEditingTabFlyoutId] = useState<number | null>(null);
 
   return {
     showSettings,
@@ -454,6 +469,8 @@ export const useAppState = (): AppState => {
     tabs,
     setTabs,
     activeTabId,
-    setActiveTabId
+    setActiveTabId,
+    editingTabFlyoutId,
+    setEditingTabFlyoutId
   };
 };

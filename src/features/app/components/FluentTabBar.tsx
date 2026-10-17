@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, LayoutGroup } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus, Clipboard } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clipboard, X, Check } from "lucide-react";
 import type { TabItem } from "../types";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 
@@ -8,7 +8,8 @@ interface FluentTabBarProps {
   tabs: TabItem[];
   activeTabId: string;
   onSelectTab: (tabId: string) => void;
-  onAddTab?: () => void;
+  onAddTab?: (name: string) => void;
+  onDeleteTab?: (tabId: string) => void;
   t?: (key: string) => string;
 }
 
@@ -17,13 +18,26 @@ export const FluentTabBar = ({
   activeTabId,
   onSelectTab,
   onAddTab,
+  onDeleteTab,
   t
 }: FluentTabBarProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
+  const newTabInputRef = useRef<HTMLInputElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isCreatingTab, setIsCreatingTab] = useState(false);
+  const [newTabName, setNewTabName] = useState("");
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleConfirmCreate = () => {
+    const trimmed = newTabName.trim();
+    if (trimmed && onAddTab) {
+      onAddTab(trimmed);
+    }
+    setIsCreatingTab(false);
+    setNewTabName("");
+  };
 
   // Measure scrollability
   const updateScrollBounds = useCallback(() => {
@@ -191,6 +205,19 @@ export const FluentTabBar = ({
                   {typeof tab.count === "number" && tab.count > 0 && (
                     <span className="fluent-tab-badge">{tab.count}</span>
                   )}
+
+                  {!isFirstTab && onDeleteTab && (
+                    <span
+                      className="fluent-tab-close-btn"
+                      title={t ? t("delete_tab") || "删除标签页" : "删除标签页"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteTab(tab.id);
+                      }}
+                    >
+                      <X size={10} strokeWidth={2} />
+                    </span>
+                  )}
                 </span>
 
                 {/* Accent Underline Indicator - follows active tab smoothly */}
@@ -211,18 +238,71 @@ export const FluentTabBar = ({
           })}
         </LayoutGroup>
 
-        {/* Add Tab Button */}
-        {onAddTab && (
-          <FluentTooltip text={t ? t("add_tab") || "新建材料集" : "新建材料集"}>
+        {/* Add Tab Button / Inline Create */}
+        {isCreatingTab ? (
+          <div className="fluent-tab-create-box">
+            <input
+              ref={newTabInputRef}
+              type="text"
+              className="fluent-tab-create-input"
+              placeholder={t ? t("tab_name_placeholder") || "标签页名称..." : "标签页名称..."}
+              value={newTabName}
+              onChange={(e) => setNewTabName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleConfirmCreate();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  setIsCreatingTab(false);
+                  setNewTabName("");
+                }
+              }}
+              autoFocus
+            />
+            <button
+              type="button"
+              className="fluent-tab-create-btn confirm"
+              onClick={handleConfirmCreate}
+              title={t ? t("confirm") || "确定" : "确定"}
+            >
+              <Check size={12} strokeWidth={2.4} />
+            </button>
+            <button
+              type="button"
+              className="fluent-tab-create-btn cancel"
+              onClick={() => {
+                setIsCreatingTab(false);
+                setNewTabName("");
+              }}
+              title={t ? t("cancel") || "取消" : "取消"}
+            >
+              <X size={12} strokeWidth={2.4} />
+            </button>
+          </div>
+        ) : onAddTab ? (
+          <FluentTooltip text={t ? t("add_tab") || "新建标签页" : "新建标签页"}>
             <button
               type="button"
               className="fluent-tab-add-btn"
-              onClick={onAddTab}
+              onClick={() => {
+                setIsCreatingTab(true);
+                setNewTabName("");
+                setTimeout(() => {
+                  newTabInputRef.current?.focus();
+                  if (trackRef.current) {
+                    trackRef.current.scrollTo({
+                      left: trackRef.current.scrollWidth,
+                      behavior: "smooth"
+                    });
+                  }
+                }, 50);
+              }}
             >
               <Plus size={14} />
             </button>
           </FluentTooltip>
-        )}
+        ) : null}
       </div>
 
       {/* Edge gradient mask right */}

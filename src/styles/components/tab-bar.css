@@ -124,6 +124,36 @@
   z-index: 2;
 }
 
+/* Close/Delete button on hoverable tab items */
+.fluent-tab-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  margin-left: 3px;
+  opacity: 0;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.fluent-tab-item:hover .fluent-tab-close-btn {
+  opacity: 0.65;
+}
+
+.fluent-tab-close-btn:hover {
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary, #000);
+}
+
+.dark-mode .fluent-tab-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
 /* Add Tab Button */
 .fluent-tab-add-btn {
   display: inline-flex;
@@ -144,6 +174,57 @@
 .fluent-tab-add-btn:hover {
   background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.05));
   color: var(--text-primary, #000);
+}
+
+/* Inline Create Tab Input Box */
+.fluent-tab-create-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--bg-element, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--accent-color, #2f6fed);
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin-left: 2px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.fluent-tab-create-input {
+  width: 90px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #000);
+  font-family: var(--fluent-font-family, system-ui);
+  font-size: 12px;
+  outline: none;
+  padding: 0 2px;
+}
+
+.fluent-tab-create-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fluent-tab-create-btn:hover {
+  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.08));
+  color: var(--text-primary, #000);
+}
+
+.fluent-tab-create-btn.confirm:hover {
+  color: var(--accent-color, #2f6fed);
 }
 
 /* Paging floating buttons — Small <= 4px rounded corner matching user specifications */

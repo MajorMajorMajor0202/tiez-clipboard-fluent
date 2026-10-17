@@ -8,6 +8,7 @@ import ClipboardItem from "../../features/clipboard/components/ClipboardItem";
 import type { QuickPasteHint } from "../../features/clipboard/types";
 import type { ClipboardEntry } from "../types";
 import type { Locale } from "../types";
+import type { TabItem } from "../../features/app/types";
 
 interface UseClipboardItemRendererOptions {
   privacyProtection: boolean;
@@ -19,6 +20,11 @@ interface UseClipboardItemRendererOptions {
   tagInput: string;
   allTags: string[];
   tagColors: Record<string, string>;
+  tabs?: TabItem[];
+  editingTabFlyoutId?: number | null;
+  setEditingTabFlyoutId?: Dispatch<SetStateAction<number | null>>;
+  onToggleItemTab?: (itemId: number, tabName: string) => void;
+  onAddNewTabAndAssign?: (itemId: number, tabName: string) => void;
   theme: string;
   language: Locale;
   t: (key: string) => string;
@@ -69,6 +75,11 @@ export const useClipboardItemRenderer = ({
   tagInput,
   allTags,
   tagColors,
+  tabs = [],
+  editingTabFlyoutId,
+  setEditingTabFlyoutId,
+  onToggleItemTab,
+  onAddNewTabAndAssign,
   theme,
   language,
   t,
@@ -105,6 +116,7 @@ export const useClipboardItemRenderer = ({
         hasSensitiveTag &&
         !revealedIds.has(item.id);
       const isEditingTags = editingTagsId === item.id;
+      const isTabFlyoutOpen = editingTabFlyoutId === item.id;
 
       return (
         <ClipboardItem
@@ -116,6 +128,8 @@ export const useClipboardItemRenderer = ({
           isSensitiveHidden={!!isSensitiveHidden}
           isRevealed={revealedIds.has(item.id)}
           isEditingTags={isEditingTags}
+          tabs={tabs}
+          isTabFlyoutOpen={isTabFlyoutOpen}
           tagInput={isEditingTags ? tagInput : ""}
           tagSuggestions={isEditingTags ? allTags : EMPTY_TAG_SUGGESTIONS}
           tagColors={tagColors}
@@ -154,6 +168,7 @@ export const useClipboardItemRenderer = ({
               setEditingTagsId(null);
             } else {
               setEditingTagsId(item.id);
+              setEditingTabFlyoutId?.(null);
               setTagInput("");
             }
           }}
@@ -200,6 +215,24 @@ export const useClipboardItemRenderer = ({
           onTagDelete={(tag) => {
             handleUpdateTags(item.id, item.tags ? item.tags.filter((t) => t !== tag) : []);
           }}
+          onToggleTabFlyout={(e) => {
+            e.stopPropagation();
+            if (editingTabFlyoutId === item.id) {
+              setEditingTabFlyoutId?.(null);
+            } else {
+              setEditingTabFlyoutId?.(item.id);
+              setEditingTagsId(null);
+            }
+          }}
+          onTabFlyoutCancel={() => {
+            setEditingTabFlyoutId?.(null);
+          }}
+          onToggleItemTab={(tabName) => {
+            onToggleItemTab?.(item.id, tabName);
+          }}
+          onAddNewTabAndAssign={(tabName) => {
+            onAddNewTabAndAssign?.(item.id, tabName);
+          }}
           isAIProcessing={processingAiId === item.id}
           aiEnabled={aiEnabled}
           aiOptionsOpen={aiOptionsOpenId === item.id}
@@ -226,6 +259,8 @@ export const useClipboardItemRenderer = ({
       selectedIndex,
       isWindowPinned,
       editingTagsId,
+      editingTabFlyoutId,
+      tabs,
       tagInput,
       allTags,
       tagColors,
@@ -250,6 +285,9 @@ export const useClipboardItemRenderer = ({
       togglePin,
       deleteEntry,
       setEditingTagsId,
+      setEditingTabFlyoutId,
+      onToggleItemTab,
+      onAddNewTabAndAssign,
       setTagInput,
       handleUpdateTags,
       handleAIAction

@@ -28,7 +28,11 @@ import {
     ImageOff,
     FileQuestion,
     GripVertical,
-    Search
+    Search,
+    FolderPlus,
+    Folder,
+    Check,
+    Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClipboardItemProps } from "../types";
@@ -684,6 +688,8 @@ const ClipboardItem = ({
     isSensitiveHidden,
     isRevealed,
     isEditingTags,
+    tabs = [],
+    isTabFlyoutOpen = false,
     tagInput,
     tagSuggestions = [],
     theme,
@@ -702,6 +708,10 @@ const ClipboardItem = ({
     onTagPick,
     onTagEditCancel,
     onTagDelete,
+    onToggleTabFlyout,
+    onTabFlyoutCancel,
+    onToggleItemTab,
+    onAddNewTabAndAssign,
     onAIAction,
     onInputSubmit,
     aiEnabled,
@@ -723,7 +733,11 @@ const ClipboardItem = ({
     const itemRef = useRef<HTMLDivElement | null>(null);
     const tagInputRef = useRef<HTMLInputElement>(null);
     const tagButtonRef = useRef<HTMLButtonElement>(null);
+    const tabButtonRef = useRef<HTMLButtonElement>(null);
+    const tabNewInputRef = useRef<HTMLInputElement>(null);
     const [flyoutPosition, setFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
+    const [tabFlyoutPosition, setTabFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
+    const [newTabNameInput, setNewTabNameInput] = useState("");
     const [localTagInput, setLocalTagInput] = useState(tagInput);
     const [localAiOptionsOpen, setLocalAiOptionsOpen] = useState(!!aiOptionsOpen);
     const [snapshotFailed, setSnapshotFailed] = useState(false);
@@ -890,6 +904,107 @@ const ClipboardItem = ({
         document.addEventListener("mousedown", handleOutsideClick, true);
         return () => document.removeEventListener("mousedown", handleOutsideClick, true);
     }, [isEditingTags, onTagEditCancel]);
+
+    const availableCustomTabs = useMemo(() => {
+        return (tabs || []).filter((t) => !t.isBuiltin && t.id !== "clipboard");
+    }, [tabs]);
+
+    const hasAnyTab = useMemo(() => {
+        return availableCustomTabs.some((t) => item.tags?.includes(t.name) || item.tab_id === t.id);
+    }, [availableCustomTabs, item.tags, item.tab_id]);
+
+    const updateTabPosition = useCallback(() => {
+        if (!isTabFlyoutOpen || !tabButtonRef.current || !onTabFlyoutCancel) return;
+        if (!tabButtonRef.current.isConnected) {
+            onTabFlyoutCancel();
+            return;
+        }
+
+        const rect = tabButtonRef.current.getBoundingClientRect();
+        const scrollContainer = tabButtonRef.current.closest(".fluent-scrollbar-host");
+        if (scrollContainer) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const isButtonInViewport =
+                rect.bottom > containerRect.top &&
+                rect.top < containerRect.bottom &&
+                rect.right > containerRect.left &&
+                rect.left < containerRect.right;
+            if (!isButtonInViewport) {
+                onTabFlyoutCancel();
+                return;
+            }
+        } else {
+            const isButtonInViewport =
+                rect.bottom > 0 &&
+                rect.top < window.innerHeight &&
+                rect.right > 0 &&
+                rect.left < window.innerWidth;
+            if (!isButtonInViewport) {
+                onTabFlyoutCancel();
+                return;
+            }
+        }
+
+        const flyoutHeight = 180;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const isAbove = spaceBelow < flyoutHeight;
+        const flyoutWidth = 204;
+        let left = rect.left + rect.width / 2 - flyoutWidth / 2;
+
+        if (left + flyoutWidth > window.innerWidth - 12) {
+            left = window.innerWidth - flyoutWidth - 12;
+        }
+        if (left < 12) left = 12;
+
+        setTabFlyoutPosition((prev) => {
+            const next = isAbove
+                ? { bottom: window.innerHeight - rect.top + 4, left, isAbove: true }
+                : { top: rect.bottom + 4, left, isAbove: false };
+
+            if (prev &&
+                prev.left === next.left &&
+                prev.isAbove === next.isAbove &&
+                prev.top === next.top &&
+                prev.bottom === next.bottom) {
+                return prev;
+            }
+            return next;
+        });
+    }, [isTabFlyoutOpen, onTabFlyoutCancel]);
+
+    useEffect(() => {
+        if (!isTabFlyoutOpen) return;
+
+        let active = true;
+        const tick = () => {
+            if (!active) return;
+            updateTabPosition();
+            requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+        return () => {
+            active = false;
+        };
+    }, [isTabFlyoutOpen, updateTabPosition]);
+
+    useEffect(() => {
+        if (!isTabFlyoutOpen || !onTabFlyoutCancel) return;
+
+        const handleOutsideClick = (e: MouseEvent) => {
+            if (e.button !== 0) return;
+            const target = e.target as HTMLElement;
+            if (target.closest(".tab-assign-flyout")) return;
+            if (tabButtonRef.current && tabButtonRef.current.contains(target)) return;
+
+            onTabFlyoutCancel();
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick, true);
+        return () => document.removeEventListener("mousedown", handleOutsideClick, true);
+    }, [isTabFlyoutOpen, onTabFlyoutCancel]);
 
     const sensitivePreview = useMemo(
         () => formatSensitivePreview(item.content, item.content_type, {
@@ -1654,6 +1769,18 @@ const ClipboardItem = ({
                                 {item.is_pinned ? <PinOff size={12} /> : <Pin size={12} />}
                             </button>
                         </FluentTooltip>
+                        <FluentTooltip text={t('add_to_tab') || '添加到标签页'}>
+                            <button
+                                ref={tabButtonRef}
+                                className={`btn-icon-ghost ${isTabFlyoutOpen ? "tag-editing-active" : (hasAnyTab ? "active" : "")}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleTabFlyout?.(e);
+                                }}
+                            >
+                                <FolderPlus size={12} />
+                            </button>
+                        </FluentTooltip>
                         <FluentTooltip text="Tags">
                             <button
                                 ref={tagButtonRef}
@@ -2127,6 +2254,99 @@ const ClipboardItem = ({
                 </div>,
                 document.body
             )}
+
+            {isTabFlyoutOpen && tabFlyoutPosition && createPortal(
+                <div
+                    className="tab-assign-flyout"
+                    style={{
+                        position: 'fixed',
+                        left: `${tabFlyoutPosition.left}px`,
+                        ...(tabFlyoutPosition.top !== undefined ? { top: `${tabFlyoutPosition.top}px` } : { bottom: `${tabFlyoutPosition.bottom}px` }),
+                        zIndex: 99999,
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="tab-flyout-header">
+                        <FolderPlus size={13} className="tab-flyout-header-icon" />
+                        <span>{t('add_to_tab') || '添加到标签页'}</span>
+                    </div>
+
+                    <div className="tab-flyout-list hide-scrollbar" onWheel={(e) => e.stopPropagation()}>
+                        {availableCustomTabs.length === 0 ? (
+                            <div className="tab-flyout-empty">{t('no_custom_tabs') || '暂无自定义标签页'}</div>
+                        ) : (
+                            availableCustomTabs.map((cTab) => {
+                                const isIn = item.tags?.includes(cTab.name) || item.tab_id === cTab.id;
+                                return (
+                                    <button
+                                        key={cTab.id}
+                                        type="button"
+                                        className={`tab-flyout-item ${isIn ? 'active' : ''}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onToggleItemTab?.(cTab.name);
+                                        }}
+                                    >
+                                        <Folder size={12} className="tab-flyout-item-icon" />
+                                        <span className="tab-flyout-item-name">{cTab.name}</span>
+                                        {isIn && <Check size={12} className="tab-flyout-check" />}
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    <div className="tab-flyout-create-section">
+                        <div className="tab-flyout-input-wrapper">
+                            <input
+                                ref={tabNewInputRef}
+                                type="text"
+                                className="tab-flyout-input"
+                                placeholder={t('new_tab_name_placeholder') || '新标签页名称...'}
+                                value={newTabNameInput}
+                                onChange={(e) => setNewTabNameInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const trimmed = newTabNameInput.trim();
+                                        if (trimmed) {
+                                            onAddNewTabAndAssign?.(trimmed);
+                                            setNewTabNameInput("");
+                                            onTabFlyoutCancel?.();
+                                        }
+                                    } else if (e.key === 'Escape') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        onTabFlyoutCancel?.();
+                                    }
+                                }}
+                                onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                                onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                                autoFocus
+                            />
+                            <button
+                                type="button"
+                                className="tab-flyout-add-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const trimmed = newTabNameInput.trim();
+                                    if (trimmed) {
+                                        onAddNewTabAndAssign?.(trimmed);
+                                        setNewTabNameInput("");
+                                        onTabFlyoutCancel?.();
+                                    }
+                                }}
+                                title={t('create_and_add') || '新建并加入'}
+                            >
+                                <Plus size={12} strokeWidth={2.4} />
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </motion.div >
     );
 };
@@ -2147,6 +2367,8 @@ export default memo(ClipboardItem, (prevProps, nextProps) => {
         prevProps.item.tags === nextProps.item.tags &&
         prevProps.isRevealed === nextProps.isRevealed &&
         prevProps.isEditingTags === nextProps.isEditingTags &&
+        prevProps.isTabFlyoutOpen === nextProps.isTabFlyoutOpen &&
+        prevProps.tabs === nextProps.tabs &&
         prevProps.isAIProcessing === nextProps.isAIProcessing &&
         prevProps.aiOptionsOpen === nextProps.aiOptionsOpen &&
         prevProps.aiEnabled === nextProps.aiEnabled &&

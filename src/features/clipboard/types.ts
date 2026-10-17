@@ -1,6 +1,7 @@
 import type { MouseEvent, ReactNode } from "react";
 import type { DragControls } from "framer-motion";
 import type { ClipboardEntry, Locale } from "../../shared/types";
+import type { TabItem } from "../app/types";
 
 export interface QuickPasteHint {
   slot: number;
@@ -17,6 +18,8 @@ export interface ClipboardItemProps {
   tagInput: string;
   /** Tags used elsewhere in history; shown as quick-pick when editing tags */
   tagSuggestions?: string[];
+  tabs?: TabItem[];
+  isTabFlyoutOpen?: boolean;
   theme: string;
   language: Locale;
   t: (key: string) => string;
@@ -45,6 +48,10 @@ export interface ClipboardItemProps {
   /** Close tag editor without adding (e.g. Escape) */
   onTagEditCancel?: () => void;
   onTagDelete: (tag: string) => void;
+  onToggleTabFlyout?: (e: MouseEvent) => void;
+  onTabFlyoutCancel?: () => void;
+  onToggleItemTab?: (tabName: string) => void;
+  onAddNewTabAndAssign?: (tabName: string) => void;
   onAIAction?: (type: string) => void;
   onAIOptionsToggle?: () => void;
   onInputSubmit?: (val: string) => void;
