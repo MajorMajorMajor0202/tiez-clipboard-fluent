@@ -1,40 +1,24 @@
-import { useCallback, type RefObject } from "react";
+import type { RefObject } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
-  MessageSquare,
   Pin,
   PinOff,
-  Plus,
   Search,
-  Settings as SettingsIcon,
-  Smile,
-  Tag,
-  Trash2,
   X
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { getTagColor, getTagTextColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
-import FluentTabBar from "./FluentTabBar";
-import type { TabItem } from "../types";
 
 interface AppHeaderProps {
   t: (key: string) => string;
   showSettings: boolean;
-  setShowSettings: (val: boolean) => void;
   showTagManager: boolean;
-  setShowTagManager: (val: boolean) => void;
   tagManagerEnabled: boolean;
   showEmojiPanel: boolean;
-  setShowEmojiPanel: (val: boolean) => void;
-  emojiPanelEnabled: boolean;
-  chatMode: boolean;
-  fileServerEnabled: boolean;
   isWindowPinned: boolean;
   setIsWindowPinned: (val: boolean) => void;
-  clearHistory: () => void;
-  onOpenAddEntry?: () => void;
   showSearchBox: boolean;
   search: string;
   setSearch: (val: string) => void;
@@ -51,33 +35,17 @@ interface AppHeaderProps {
   typeFilter: string | null;
   setTypeFilter: (val: string | null) => void;
   onBack: () => void;
-  onToggleChat: () => void;
   tagColors?: Record<string, string>;
-  tabs?: TabItem[];
-  activeTabId?: string;
-  onSelectTab?: (tabId: string) => void;
-  onAddTab?: (name: string) => void;
-  onDeleteTab?: (tabId: string) => void;
-  onDropItemOnTab?: (itemId: number, tabName: string) => void;
-  onDropExternalFilesOnTab?: (paths: string[], tabIdOrName: string) => void;
-  onDropExternalTextOnTab?: (text: string, tabIdOrName: string) => void;
 }
 
 const AppHeader = ({
   t,
   showSettings,
   showTagManager,
-  setShowTagManager,
   tagManagerEnabled,
   showEmojiPanel,
-  setShowEmojiPanel,
-  emojiPanelEnabled,
-  chatMode,
-  fileServerEnabled,
   isWindowPinned,
   setIsWindowPinned,
-  clearHistory,
-  onOpenAddEntry,
   showSearchBox,
   search,
   setSearch,
@@ -94,58 +62,8 @@ const AppHeader = ({
   typeFilter: _typeFilter,
   setTypeFilter: _setTypeFilter,
   onBack,
-  onToggleChat,
-  tagColors,
-  tabs,
-  activeTabId,
-  onSelectTab,
-  onAddTab,
-  onDeleteTab,
-  onDropItemOnTab,
-  onDropExternalFilesOnTab,
-  onDropExternalTextOnTab
+  tagColors
 }: AppHeaderProps) => {
-
-  const handleOpenSettings = useCallback(async () => {
-    try {
-      const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
-      const existing = await WebviewWindow.getByLabel("settings");
-      if (existing) {
-        await invoke("hide_window_cmd", { restore_focus: false }).catch(console.error);
-        await existing.setAlwaysOnTop(isWindowPinned);
-        await existing.show();
-        await existing.setFocus();
-      } else {
-        const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
-        const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
-        const isDark = document.documentElement.classList.contains("dark-mode");
-        const themeParam = `&theme=${encodeURIComponent(theme || "retro")}`;
-        const colorModeParam = `&color_mode=${isDark ? "dark" : "light"}`;
-        const win = new WebviewWindow("settings", {
-          url: `index.html?window=settings${accentParam}${themeParam}${colorModeParam}`,
-          title: t('settings') || "Settings",
-          width: 780,
-          height: 560,
-          resizable: true,
-          decorations: true,
-          transparent: true,
-          backgroundColor: "#00000000",
-          skipTaskbar: false,
-          visible: false,
-          alwaysOnTop: isWindowPinned,
-        });
-        win.once("tauri://created", () => {
-          invoke("hide_window_cmd", { restore_focus: false })
-            .then(() => win.show())
-            .then(() => win.setFocus())
-            .catch(console.error);
-        });
-      }
-    } catch (err) {
-      console.error("Failed to open settings window:", err);
-    }
-  }, [t, isWindowPinned]);
-
 
   return (
   <header className={(showSettings || showTagManager || showEmojiPanel) ? 'subpage-header' : ''}>
@@ -171,7 +89,7 @@ const AppHeader = ({
         </div>
       </div>
       <div className="header-actions window-no-drag">
-        {/* Pin Button - Always visible but single instance */}
+        {/* Pin Window Button */}
         <FluentTooltip text={t('pin')}>
           <button
             className={`btn-icon-ghost ${isWindowPinned ? 'active' : ''}`}
@@ -185,51 +103,6 @@ const AppHeader = ({
           </button>
         </FluentTooltip>
 
-        {!showSettings && !showTagManager && !showEmojiPanel && (
-          <>
-            {onOpenAddEntry && (
-              <FluentTooltip text={t('add_item')}>
-                <button className="btn-icon-ghost" onClick={onOpenAddEntry}>
-                  <Plus size={16} />
-                </button>
-              </FluentTooltip>
-            )}
-            <FluentTooltip text={t('clear_history')}>
-              <button className="btn-icon-ghost" onClick={clearHistory}>
-                <Trash2 size={16} />
-              </button>
-            </FluentTooltip>
-            {tagManagerEnabled && (
-              <FluentTooltip text={t('tag_manager') || '标签管理'}>
-                <button className="btn-icon-ghost" onClick={() => setShowTagManager(true)}>
-                  <Tag size={16} />
-                </button>
-              </FluentTooltip>
-            )}
-            {emojiPanelEnabled && (
-              <FluentTooltip text={t('emoji_panel') || '表情包'}>
-                <button className="btn-icon-ghost" onClick={() => setShowEmojiPanel(true)}>
-                  <Smile size={16} />
-                </button>
-              </FluentTooltip>
-            )}
-            <FluentTooltip text={t('settings')}>
-              <button className="btn-icon-ghost" onClick={handleOpenSettings}>
-                <SettingsIcon size={16} />
-              </button>
-            </FluentTooltip>
-          </>
-        )}
-        {fileServerEnabled && (
-          <FluentTooltip text="Chat">
-            <button
-              className={`btn-icon-ghost header-chat-btn ${chatMode && showSettings ? 'active' : ''}`}
-              onClick={onToggleChat}
-            >
-              <MessageSquare size={16} />
-            </button>
-          </FluentTooltip>
-        )}
         <FluentTooltip text={t('hide')}>
           <button className="btn-icon-ghost" onClick={async () => {
             invoke("hide_window_cmd").catch(console.error);
@@ -328,18 +201,6 @@ const AppHeader = ({
                   )}
                 </AnimatePresence>
               </div>
-              <FluentTabBar
-                tabs={tabs || []}
-                activeTabId={activeTabId || "clipboard"}
-                onSelectTab={onSelectTab || (() => {})}
-                onAddTab={onAddTab}
-                onDeleteTab={onDeleteTab}
-                onDropItemOnTab={onDropItemOnTab}
-                onDropExternalFilesOnTab={onDropExternalFilesOnTab}
-                onDropExternalTextOnTab={onDropExternalTextOnTab}
-                t={t}
-              />
-
             </div>
           </motion.div>
         )}

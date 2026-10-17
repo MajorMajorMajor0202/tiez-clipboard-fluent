@@ -33,7 +33,8 @@ import {
     Check,
     Trash2,
     Edit3,
-    MoreHorizontal
+    MoreHorizontal,
+    Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClipboardItemProps } from "../types";
@@ -2128,6 +2129,13 @@ const ClipboardItem = ({
                                 >
                                     <Pin size={10} style={{ color: 'var(--accent-color)' }} />
                                 </button>
+                            </FluentTooltip>
+                        )}
+                        {item.tags?.some(tag => tag.toLowerCase() === 'locked' || tag === '已锁定') && (
+                            <FluentTooltip text="已锁定保护 (防清空/防删除)">
+                                <span className="item-pinned-badge-btn" style={{ cursor: 'default' }}>
+                                    <Lock size={10} style={{ color: 'var(--accent-color)' }} />
+                                </span>
                             </FluentTooltip>
                         )}
                         {showSourceAppIcon

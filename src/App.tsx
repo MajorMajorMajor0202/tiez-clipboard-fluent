@@ -10,6 +10,7 @@ import FluentTooltip from "./shared/components/FluentTooltip";
 import { translations } from "./locales";
 import AppHeader from "./features/app/components/AppHeader";
 import AppMainContent from "./features/app/components/AppMainContent";
+import FluentRightRail from "./features/app/components/FluentRightRail";
 import { useAppState } from "./features/app/hooks/useAppState";
 import { useDebounce } from "./shared/hooks/useDebounce";
 import { useHistoryFetch } from "./shared/hooks/useHistoryFetch";
@@ -1726,6 +1727,144 @@ const App = () => {
     handleAIAction
   });
 
+  const selectedItem = useMemo(() => {
+    if (selectedIndex >= 0 && selectedIndex < filteredHistory.length) {
+      return filteredHistory[selectedIndex];
+    }
+    return null;
+  }, [selectedIndex, filteredHistory]);
+
+  const isSelectedItemLocked = useMemo(() => {
+    return !!selectedItem?.tags?.some(tag => tag.toLowerCase() === "locked" || tag === "已锁定");
+  }, [selectedItem]);
+
+  const handleOpenSettings = useCallback(async () => {
+    try {
+      const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+      const existing = await WebviewWindow.getByLabel("settings");
+      if (existing) {
+        await invoke("hide_window_cmd", { restore_focus: false }).catch(console.error);
+        await existing.setAlwaysOnTop(isWindowPinned);
+        await existing.show();
+        await existing.setFocus();
+      } else {
+        const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
+        const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
+        const isDark = document.documentElement.classList.contains("dark-mode");
+        const themeParam = `&theme=${encodeURIComponent(theme || "retro")}`;
+        const colorModeParam = `&color_mode=${isDark ? "dark" : "light"}`;
+        const win = new WebviewWindow("settings", {
+          url: `index.html?window=settings${accentParam}${themeParam}${colorModeParam}`,
+          title: t('settings') || "Settings",
+          width: 780,
+          height: 560,
+          resizable: true,
+          decorations: true,
+          transparent: true,
+          backgroundColor: "#00000000",
+          skipTaskbar: false,
+          visible: false,
+          alwaysOnTop: isWindowPinned,
+        });
+        win.once("tauri://created", () => {
+          invoke("hide_window_cmd", { restore_focus: false })
+            .then(() => win.show())
+            .then(() => win.setFocus())
+            .catch(console.error);
+        });
+      }
+    } catch (err) {
+      console.error("Failed to open settings window:", err);
+    }
+  }, [t, isWindowPinned, theme]);
+
+  const handleRailTogglePin = useCallback((e: React.MouseEvent) => {
+    if (!selectedItem) {
+      pushToast(t("select_item_first") || "请先在列表中选中一个条目");
+      return;
+    }
+    togglePin(e, selectedItem.id, selectedItem.is_pinned);
+  }, [selectedItem, togglePin, pushToast, t]);
+
+  const handleRailToggleLock = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!selectedItem) {
+      pushToast(t("select_item_first") || "请先在列表中选中一个条目");
+      return;
+    }
+    const currentTags = selectedItem.tags || [];
+    const isCurrentlyLocked = currentTags.some(tg => tg.toLowerCase() === "locked" || tg === "已锁定");
+    let nextTags: string[];
+    if (isCurrentlyLocked) {
+      nextTags = currentTags.filter(tg => tg.toLowerCase() !== "locked" && tg !== "已锁定");
+      pushToast("已解除锁定保护");
+    } else {
+      nextTags = [...currentTags, "已锁定"];
+      if (!selectedItem.is_pinned) {
+        await invoke("toggle_clipboard_pin", { id: selectedItem.id, isPinned: true }).catch(console.error);
+      }
+      pushToast("已锁定并保护条目 (防清空/防删除)");
+    }
+    handleUpdateTags(selectedItem.id, nextTags);
+  }, [selectedItem, handleUpdateTags, pushToast, t]);
+
+  const handleRailMoveUp = useCallback(() => {
+    if (selectedIndex <= 0 || !filteredHistory.length) return;
+    const targetIndex = selectedIndex - 1;
+    const currentItem = filteredHistory[selectedIndex];
+    const targetItem = filteredHistory[targetIndex];
+
+    if (currentItem.is_pinned && targetItem.is_pinned) {
+      const pinnedIds = pinnedItems.map(item => item.id);
+      const cIdx = pinnedIds.indexOf(currentItem.id);
+      const tIdx = pinnedIds.indexOf(targetItem.id);
+      if (cIdx !== -1 && tIdx !== -1) {
+        const newOrder = [...pinnedIds];
+        [newOrder[cIdx], newOrder[tIdx]] = [newOrder[tIdx], newOrder[cIdx]];
+        handlePinnedReorder(newOrder);
+      }
+    } else {
+      setHistory(prev => {
+        const next = [...prev];
+        const idxA = next.findIndex(item => item.id === currentItem.id);
+        const idxB = next.findIndex(item => item.id === targetItem.id);
+        if (idxA !== -1 && idxB !== -1) {
+          [next[idxA], next[idxB]] = [next[idxB], next[idxA]];
+        }
+        return next;
+      });
+    }
+    setSelectedIndex(targetIndex);
+  }, [selectedIndex, filteredHistory, pinnedItems, handlePinnedReorder, setHistory, setSelectedIndex]);
+
+  const handleRailMoveDown = useCallback(() => {
+    if (selectedIndex < 0 || selectedIndex >= filteredHistory.length - 1) return;
+    const targetIndex = selectedIndex + 1;
+    const currentItem = filteredHistory[selectedIndex];
+    const targetItem = filteredHistory[targetIndex];
+
+    if (currentItem.is_pinned && targetItem.is_pinned) {
+      const pinnedIds = pinnedItems.map(item => item.id);
+      const cIdx = pinnedIds.indexOf(currentItem.id);
+      const tIdx = pinnedIds.indexOf(targetItem.id);
+      if (cIdx !== -1 && tIdx !== -1) {
+        const newOrder = [...pinnedIds];
+        [newOrder[cIdx], newOrder[tIdx]] = [newOrder[tIdx], newOrder[cIdx]];
+        handlePinnedReorder(newOrder);
+      }
+    } else {
+      setHistory(prev => {
+        const next = [...prev];
+        const idxA = next.findIndex(item => item.id === currentItem.id);
+        const idxB = next.findIndex(item => item.id === targetItem.id);
+        if (idxA !== -1 && idxB !== -1) {
+          [next[idxA], next[idxB]] = [next[idxB], next[idxA]];
+        }
+        return next;
+      });
+    }
+    setSelectedIndex(targetIndex);
+  }, [selectedIndex, filteredHistory, pinnedItems, handlePinnedReorder, setHistory, setSelectedIndex]);
 
   return (
     <div
@@ -1734,18 +1873,11 @@ const App = () => {
       <AppHeader
         t={t}
         showSettings={showSettings}
-        setShowSettings={setShowSettings}
         showTagManager={effectiveShowTagManager}
-        setShowTagManager={setShowTagManager}
         tagManagerEnabled={tagManagerEnabled}
         showEmojiPanel={effectiveShowEmojiPanel}
-        setShowEmojiPanel={setShowEmojiPanel}
-        emojiPanelEnabled={emojiPanelEnabled}
-        chatMode={chatMode}
-        fileServerEnabled={fileServerEnabled}
         isWindowPinned={isWindowPinned}
         setIsWindowPinned={setIsWindowPinned}
-        clearHistory={clearHistory}
         showSearchBox={showSearchBox}
         search={search}
         setSearch={setSearch}
@@ -1763,62 +1895,84 @@ const App = () => {
         typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}
         onBack={handleHeaderBack}
-        onToggleChat={handleToggleHeaderChat}
-        tabs={tabs}
-        activeTabId={activeTabId}
-        onSelectTab={setActiveTabId}
-        onAddTab={handleAddTab}
-        onDeleteTab={handleDeleteTab}
-        onDropItemOnTab={handleDropItemOnTab}
-        onDropExternalFilesOnTab={handleDropExternalFilesOnTab}
-        onDropExternalTextOnTab={handleDropExternalTextOnTab}
-        onOpenAddEntry={() => {
-          setIsAddEntryModalOpen(true);
-          setAddEntryContent("");
-        }}
       />
 
+      <div className="app-body-container">
+        <main
+          className={`main-content${chatMode ? " file-transfer-mode" : ""}${effectiveShowTagManager ? " tag-manager-mode" : ""}`}
+          style={{ 
+            overflow: 'hidden',
+            padding: effectiveShowTagManager ? '0' : undefined
+          }}
+          onWheel={handleMainWheel}
+        >
+          <AppMainContent
+            t={t}
+            theme={theme}
+            showTagManager={effectiveShowTagManager}
+            tagManagerEnabled={tagManagerEnabled}
+            showEmojiPanel={effectiveShowEmojiPanel}
+            chatMode={chatMode}
+            localIp={localIp}
+            actualPort={actualPort}
+            emojiFavorites={emojiFavorites}
+            setEmojiFavorites={setEmojiFavorites}
+            emojiPanelTab={emojiPanelTab}
+            setEmojiPanelTab={setEmojiPanelTab}
+            saveSetting={saveSetting}
+            filteredHistory={filteredHistory}
+            search={search}
+            typeFilter={typeFilter}
+            pinnedItems={pinnedItems}
+            unpinnedItems={unpinnedItems}
+            compactMode={compactMode}
+            selectedIndex={selectedIndex}
+            isKeyboardMode={isKeyboardMode}
+            virtualListRef={virtualListRef}
+            handlePinnedReorder={handlePinnedReorder}
+            renderItemContent={renderItemContent}
+            loadMoreHistory={loadMoreHistory}
+            handleListScroll={handleListScroll}
+            hasMore={effectiveHasMore}
+            isLoadingMore={isLoadingMore}
+            language={language}
+          />
+        </main>
 
-      <main
-        className={`main-content${chatMode ? " file-transfer-mode" : ""}${effectiveShowTagManager ? " tag-manager-mode" : ""}`}
-        style={{ 
-          overflow: 'hidden',
-          padding: effectiveShowTagManager ? '0' : undefined
-        }}
-        onWheel={handleMainWheel}
-      >
-        <AppMainContent
-          t={t}
-          theme={theme}
+        <FluentRightRail
+          tabs={tabs}
+          activeTabId={activeTabId}
+          onSelectTab={setActiveTabId}
+          onAddTab={handleAddTab}
+          onDeleteTab={handleDeleteTab}
+          onDropItemOnTab={handleDropItemOnTab}
+          onDropExternalFilesOnTab={handleDropExternalFilesOnTab}
+          onDropExternalTextOnTab={handleDropExternalTextOnTab}
+          onOpenAddEntry={() => {
+            setIsAddEntryModalOpen(true);
+            setAddEntryContent("");
+          }}
+          clearHistory={clearHistory}
+          onTogglePin={handleRailTogglePin}
+          onToggleLock={handleRailToggleLock}
+          onMoveUp={handleRailMoveUp}
+          onMoveDown={handleRailMoveDown}
+          hasSelectedItem={!!selectedItem}
+          isPinned={!!selectedItem?.is_pinned}
+          isLocked={isSelectedItemLocked}
           showTagManager={effectiveShowTagManager}
+          setShowTagManager={setShowTagManager}
           tagManagerEnabled={tagManagerEnabled}
           showEmojiPanel={effectiveShowEmojiPanel}
+          setShowEmojiPanel={setShowEmojiPanel}
+          emojiPanelEnabled={emojiPanelEnabled}
           chatMode={chatMode}
-          localIp={localIp}
-          actualPort={actualPort}
-          emojiFavorites={emojiFavorites}
-          setEmojiFavorites={setEmojiFavorites}
-          emojiPanelTab={emojiPanelTab}
-          setEmojiPanelTab={setEmojiPanelTab}
-          saveSetting={saveSetting}
-          filteredHistory={filteredHistory}
-          search={search}
-          typeFilter={typeFilter}
-          pinnedItems={pinnedItems}
-          unpinnedItems={unpinnedItems}
-          compactMode={compactMode}
-          selectedIndex={selectedIndex}
-          isKeyboardMode={isKeyboardMode}
-          virtualListRef={virtualListRef}
-          handlePinnedReorder={handlePinnedReorder}
-          renderItemContent={renderItemContent}
-          loadMoreHistory={loadMoreHistory}
-          handleListScroll={handleListScroll}
-          hasMore={effectiveHasMore}
-          isLoadingMore={isLoadingMore}
-          language={language}
+          fileServerEnabled={fileServerEnabled}
+          onToggleChat={handleToggleHeaderChat}
+          onOpenSettings={handleOpenSettings}
+          t={t}
         />
-      </main>
+      </div>
 
       {/* Floating Batch Action Bar (Pure icons, strictly no button boxes/text, no copy option) */}
       {selectedItemIds.size > 0 && (

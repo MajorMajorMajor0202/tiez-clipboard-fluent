@@ -1,0 +1,176 @@
+/* Fluent Right Rail & CopyQ Layout Styles */
+
+.app-body-container {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.fluent-right-rail {
+  width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-toolbar, rgba(255, 255, 255, 0.7));
+  border-left: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  padding: 4px 2px 8px 2px;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 10;
+  -webkit-app-region: no-drag !important;
+  app-region: no-drag !important;
+  overflow: hidden;
+}
+
+.rail-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.rail-tabs-scroll {
+  max-height: 150px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.rail-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.rail-actions-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.rail-actions-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.rail-bottom-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.rail-btn,
+.rail-tab-btn {
+  position: relative;
+  width: 34px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary, #666);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+  -webkit-app-region: no-drag !important;
+  app-region: no-drag !important;
+}
+
+.rail-btn:hover,
+.rail-tab-btn:hover {
+  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.05));
+  color: var(--text-primary, #000);
+}
+
+.rail-btn:active,
+.rail-tab-btn:active {
+  background: var(--bg-subtle-active, rgba(0, 0, 0, 0.08));
+  transform: scale(0.96);
+}
+
+.rail-btn.active,
+.rail-tab-btn.active {
+  color: var(--accent-color, #0078d4);
+  background: rgba(var(--accent-rgb, 0, 120, 212), 0.12);
+}
+
+.rail-btn-danger:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+.rail-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Accent Indicator for Active Tab in Vertical Rail */
+.rail-tab-indicator {
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--accent-color, #0078d4);
+  pointer-events: none;
+}
+
+/* Tab Drag Target Hover */
+.rail-tab-btn.drag-target-hover {
+  background: rgba(var(--accent-rgb, 0, 120, 212), 0.18) !important;
+  border: 1px dashed var(--accent-color, #0078d4) !important;
+}
+
+.rail-tab-chip {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  max-width: 26px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-divider {
+  width: 22px;
+  height: 1px;
+  background: var(--border-color, rgba(128, 128, 128, 0.2));
+  margin: 4px 0;
+  flex-shrink: 0;
+}
