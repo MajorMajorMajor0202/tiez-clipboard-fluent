@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { motion, LayoutGroup } from "framer-motion";
+import { ChevronLeft, ChevronRight, Plus, Clipboard } from "lucide-react";
 import type { TabItem } from "../types";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 
@@ -24,45 +25,19 @@ export const FluentTabBar = ({
   const [isHovering, setIsHovering] = useState(false);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Underline indicator geometry
-  const [indicatorRect, setIndicatorRect] = useState<{ left: number; width: number } | null>(null);
-
   // Measure scrollability
   const updateScrollBounds = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    // Buffer of 2px for subpixel rendering differences
     setCanScrollLeft(scrollLeft > 2);
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 2);
   }, []);
 
-  // Update underline indicator position
-  const updateIndicator = useCallback(() => {
-    const el = trackRef.current;
-    if (!el || !activeTabId) {
-      setIndicatorRect(null);
-      return;
-    }
-    const activeBtn = el.querySelector(`.fluent-tab-item[data-tab-id="${activeTabId}"]`) as HTMLElement | null;
-    if (!activeBtn) {
-      setIndicatorRect(null);
-      return;
-    }
-    const trackRect = el.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    const indicatorWidth = 16;
-    setIndicatorRect({
-      left: btnRect.left - trackRect.left + (btnRect.width - indicatorWidth) / 2 + el.scrollLeft,
-      width: indicatorWidth
-    });
-  }, [activeTabId]);
-
-  // Handle scroll and resize
+  // Handle scroll and resize bounds
   useEffect(() => {
     updateScrollBounds();
-    updateIndicator();
-  }, [tabs, activeTabId, updateScrollBounds, updateIndicator]);
+  }, [tabs, activeTabId, updateScrollBounds]);
 
   useEffect(() => {
     const el = trackRef.current;
@@ -70,13 +45,11 @@ export const FluentTabBar = ({
 
     const handleScroll = () => {
       updateScrollBounds();
-      updateIndicator();
     };
 
     el.addEventListener("scroll", handleScroll, { passive: true });
     const observer = new ResizeObserver(() => {
       updateScrollBounds();
-      updateIndicator();
     });
     observer.observe(el);
 
@@ -84,7 +57,7 @@ export const FluentTabBar = ({
       el.removeEventListener("scroll", handleScroll);
       observer.disconnect();
     };
-  }, [updateScrollBounds, updateIndicator]);
+  }, [updateScrollBounds]);
 
   // Auto-hide controls when hover is inactive
   const resetHoverTimer = useCallback(() => {
@@ -110,7 +83,6 @@ export const FluentTabBar = ({
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
     }
-    // Smoothly hide on mouse leave
     hoverTimerRef.current = setTimeout(() => {
       setIsHovering(false);
     }, 300);
@@ -171,37 +143,70 @@ export const FluentTabBar = ({
         className="fluent-tab-track hide-scrollbar"
         onWheel={handleWheel}
       >
-        {tabs.map((tab) => {
-          const isActive = tab.id === activeTabId;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              data-tab-id={tab.id}
-              className={`fluent-tab-item ${isActive ? "active" : ""}`}
-              onClick={() => {
-                onSelectTab(tab.id);
-                // Ensure the clicked tab scrolls smoothly into visible view
-                const el = trackRef.current;
-                const btn = el?.querySelector(`.fluent-tab-item[data-tab-id="${tab.id}"]`) as HTMLElement | null;
-                if (el && btn) {
-                  const trackRect = el.getBoundingClientRect();
-                  const btnRect = btn.getBoundingClientRect();
-                  if (btnRect.left < trackRect.left + 30) {
-                    el.scrollBy({ left: btnRect.left - trackRect.left - 40, behavior: "smooth" });
-                  } else if (btnRect.right > trackRect.right - 30) {
-                    el.scrollBy({ left: btnRect.right - trackRect.right + 40, behavior: "smooth" });
+        <LayoutGroup id="fluent-tabs">
+          {tabs.map((tab, index) => {
+            const isActive = tab.id === activeTabId;
+            const isFirstTab = index === 0 || tab.id === "clipboard";
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                data-tab-id={tab.id}
+                className={`fluent-tab-item ${isActive ? "active" : ""} ${
+                  isFirstTab ? "tab-icon-only" : ""
+                }`}
+                onClick={() => {
+                  onSelectTab(tab.id);
+                  // Ensure clicked tab is scrolled into view
+                  const el = trackRef.current;
+                  const btn = el?.querySelector(
+                    `.fluent-tab-item[data-tab-id="${tab.id}"]`
+                  ) as HTMLElement | null;
+                  if (el && btn) {
+                    const trackRect = el.getBoundingClientRect();
+                    const btnRect = btn.getBoundingClientRect();
+                    if (btnRect.left < trackRect.left + 24) {
+                      el.scrollBy({
+                        left: btnRect.left - trackRect.left - 32,
+                        behavior: "smooth"
+                      });
+                    } else if (btnRect.right > trackRect.right - 24) {
+                      el.scrollBy({
+                        left: btnRect.right - trackRect.right + 32,
+                        behavior: "smooth"
+                      });
+                    }
                   }
-                }
-              }}
-            >
-              <span>{tab.name}</span>
-              {typeof tab.count === "number" && tab.count > 0 && (
-                <span className="fluent-tab-badge">{tab.count}</span>
-              )}
-            </button>
-          );
-        })}
+                }}
+                title={isFirstTab ? tab.name || (t ? t("clipboard") || "剪贴板" : "剪贴板") : undefined}
+                aria-label={tab.name}
+              >
+                {isFirstTab ? (
+                  <Clipboard size={14} strokeWidth={2.2} className="fluent-tab-icon" />
+                ) : (
+                  <span>{tab.name}</span>
+                )}
+
+                {typeof tab.count === "number" && tab.count > 0 && (
+                  <span className="fluent-tab-badge">{tab.count}</span>
+                )}
+
+                {/* Accent Underline Indicator - follows active tab smoothly */}
+                {isActive && (
+                  <motion.div
+                    layoutId="fluent-tab-active-indicator"
+                    className="fluent-tab-indicator"
+                    transition={{
+                      type: "spring",
+                      stiffness: 480,
+                      damping: 36
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </LayoutGroup>
 
         {/* Add Tab Button */}
         {onAddTab && (
@@ -214,19 +219,6 @@ export const FluentTabBar = ({
               <Plus size={14} />
             </button>
           </FluentTooltip>
-        )}
-
-        {/* Animated Accent Underline Indicator */}
-        {indicatorRect && (
-          <div
-            className="fluent-tab-indicator"
-            style={{
-              transform: `translateX(${indicatorRect.left}px)`,
-              width: `${indicatorRect.width}px`
-            }}
-          >
-            <div className="fluent-tab-indicator-inner" />
-          </div>
         )}
       </div>
 

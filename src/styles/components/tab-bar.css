@@ -5,7 +5,7 @@
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 4px 0 8px 0;
+  padding: 2px 0 4px 0;
   user-select: none;
   box-sizing: border-box;
 }
@@ -14,14 +14,15 @@
 .fluent-tab-track {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
   scroll-behavior: smooth;
-  padding: 2px 24px 4px 24px;
+  /* Aligns first item directly with the content list below */
+  padding: 2px 0 4px 0;
   box-sizing: border-box;
 }
 
@@ -29,14 +30,14 @@
   display: none;
 }
 
-/* Tab button item - Pure text label with capsule hover feedback */
+/* Tab button item - Pure text or icon with subtle hover feedback */
 .fluent-tab-item {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 4px 8px;
   font-family: var(--fluent-font-family, system-ui);
   font-size: 13px;
   font-weight: 500;
@@ -44,13 +45,28 @@
   color: var(--text-secondary, #666);
   background: transparent;
   border: none;
-  border-radius: 6px;
+  /* All border-radii <= 4px */
+  border-radius: 4px;
   box-shadow: none;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
   outline: none;
+}
+
+/* Icon-only first tab (clipboard / history) */
+.fluent-tab-item.tab-icon-only {
+  padding: 4px 7px;
+  min-width: 28px;
+}
+
+.fluent-tab-item.tab-icon-only .fluent-tab-icon {
+  display: block;
+}
+
+.fluent-tab-item:first-child {
+  margin-left: 0;
 }
 
 .fluent-tab-item:hover {
@@ -72,8 +88,8 @@
 .fluent-tab-badge {
   font-size: 10px;
   font-weight: 500;
-  padding: 0 4px;
-  border-radius: 8px;
+  padding: 0 3px;
+  border-radius: 3px;
   background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.06));
   color: var(--text-muted, #888);
   margin-left: 2px;
@@ -84,26 +100,18 @@
   color: var(--accent-color, #2f6fed);
 }
 
-/* Accent Underline Indicator — Fluent Stretch Animation */
+/* Accent Underline Indicator — positioned right below the tab item content */
 .fluent-tab-indicator {
   position: absolute;
   bottom: 0px;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 16px;
-  height: 3px;
-  z-index: 5;
-  pointer-events: none;
-  background: transparent;
-  transition: transform 0.24s cubic-bezier(0.85, 0, 0.15, 1);
-}
-
-.fluent-tab-indicator-inner {
-  width: 100%;
-  height: 100%;
+  height: 2.5px;
   border-radius: 2px;
   background: var(--accent-color, #2f6fed);
-  transform-origin: center;
-  animation: fluent-stretch-horizontal 0.22s cubic-bezier(0.85, 0, 0.15, 1);
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Add Tab Button */
@@ -111,9 +119,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
   border: none;
   background: transparent;
   color: var(--text-secondary, #666);
@@ -128,7 +136,7 @@
   color: var(--text-primary, #000);
 }
 
-/* Paging floating buttons — Pill / Capsule styling matching Win11 Emoji panel */
+/* Paging floating buttons — Small <= 4px rounded corner matching user specifications */
 .fluent-tab-nav-btn {
   position: absolute;
   top: 50%;
@@ -138,17 +146,17 @@
   align-items: center;
   justify-content: center;
   width: 18px;
-  height: 28px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.06);
+  height: 24px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
   color: var(--text-primary, #222);
   cursor: pointer;
   outline: none;
-  transition: opacity 0.22s cubic-bezier(0.1, 0.9, 0.2, 1),
+  transition: opacity 0.2s cubic-bezier(0.1, 0.9, 0.2, 1),
               transform 0.15s ease,
               background 0.15s ease,
               box-shadow 0.15s ease;
@@ -156,24 +164,24 @@
 }
 
 .dark-mode .fluent-tab-nav-btn {
-  background: rgba(45, 45, 45, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  background: rgba(45, 45, 45, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   color: #f0f0f0;
 }
 
 .fluent-tab-nav-btn.nav-left {
-  left: 2px;
+  left: -2px;
 }
 
 .fluent-tab-nav-btn.nav-right {
-  right: 2px;
+  right: -2px;
 }
 
 .fluent-tab-nav-btn.nav-hidden {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-50%) scale(0.85);
+  transform: translateY(-50%) scale(0.9);
 }
 
 .fluent-tab-nav-btn.nav-visible {
@@ -184,17 +192,16 @@
 
 .fluent-tab-nav-btn:hover {
   background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
-  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
 }
 
 .dark-mode .fluent-tab-nav-btn:hover {
   background: rgba(60, 60, 60, 0.98);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .fluent-tab-nav-btn:active {
-  transform: translateY(-50%) scale(0.92);
+  transform: translateY(-50%) scale(0.94);
 }
 
 /* Subtle edge gradient masks to fade items under paging buttons */
@@ -202,7 +209,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 28px;
+  width: 20px;
   pointer-events: none;
   z-index: 10;
   transition: opacity 0.2s ease;
