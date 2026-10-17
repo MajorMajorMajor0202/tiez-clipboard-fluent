@@ -1956,18 +1956,6 @@ const ClipboardItem = ({
                 </div>
 
                 <div className="item-meta-right">
-                    <div className="item-meta-right-info">
-                        {quickPasteHint && item.is_pinned && (
-                            <span
-                                className="quick-paste-hint"
-                                title={`${t('quick_paste_modifier')}: ${quickPasteHint.combo}`}
-                            >
-                                {quickPasteHint.combo}
-                            </span>
-                        )}
-                        <span>{getConciseTime(item.timestamp, language)}</span>
-                    </div>
-
                     <div className="item-actions">
                         <FluentTooltip text={t('more_actions') || '更多选项'}>
                             <button
@@ -1998,6 +1986,18 @@ const ClipboardItem = ({
                                 <Tag size={13} />
                             </button>
                         </FluentTooltip>
+                    </div>
+
+                    <div className="item-meta-right-info">
+                        {quickPasteHint && item.is_pinned && (
+                            <span
+                                className="quick-paste-hint"
+                                title={`${t('quick_paste_modifier')}: ${quickPasteHint.combo}`}
+                            >
+                                {quickPasteHint.combo}
+                            </span>
+                        )}
+                        <span>{getConciseTime(item.timestamp, language)}</span>
                     </div>
                 </div>
             </div>
