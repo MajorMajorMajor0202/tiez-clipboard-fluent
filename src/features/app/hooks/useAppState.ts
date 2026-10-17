@@ -20,18 +20,6 @@ export const useAppState = (): AppState => {
   const [settingsSubpage, setSettingsSubpage] = useState<SettingsSubpage>("home");
   const [showTagManager, setShowTagManager] = useState(false);
   const [tagManagerEnabled, setTagManagerEnabled] = useState(true);
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
-    general: true,
-    clipboard: true,
-    advanced: true,
-    appearance: true,
-    sync: true,
-    cloud_sync: true,
-    ai: true,
-    file_transfer: true,
-    default_apps: true,
-    data: true
-  });
   const [history, setHistory] = useState<ClipboardEntry[]>([]);
   const [search, setSearch] = useState("");
   const [isComposing, setIsComposing] = useState(false);
@@ -221,8 +209,6 @@ export const useAppState = (): AppState => {
     setShowTagManager,
     tagManagerEnabled,
     setTagManagerEnabled,
-    collapsedGroups,
-    setCollapsedGroups,
     history,
     setHistory,
     search,

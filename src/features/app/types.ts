@@ -32,8 +32,6 @@ export interface AppState {
   setShowTagManager: StateSetter<boolean>;
   tagManagerEnabled: boolean;
   setTagManagerEnabled: StateSetter<boolean>;
-  collapsedGroups: Record<string, boolean>;
-  setCollapsedGroups: StateSetter<Record<string, boolean>>;
   history: ClipboardEntry[];
   setHistory: StateSetter<ClipboardEntry[]>;
   search: string;

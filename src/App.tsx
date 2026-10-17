@@ -31,7 +31,6 @@ import { useAppBootstrap } from "./shared/hooks/useAppBootstrap";
 import { useAppActions } from "./shared/hooks/useAppActions";
 import { useNavigationSync } from "./shared/hooks/useNavigationSync";
 import { useContextMenuBlock } from "./shared/hooks/useContextMenuBlock";
-import { useSettingsPanelReset } from "./shared/hooks/useSettingsPanelReset";
 import { useTagManagerRefresh } from "./shared/hooks/useTagManagerRefresh";
 import { useAiActions } from "./shared/hooks/useAiActions";
 import { matchesHotkey } from "./shared/hooks/useHotkeyMatching";
@@ -151,7 +150,6 @@ const App = () => {
     setShowTagManager,
     tagManagerEnabled,
     setTagManagerEnabled,
-    setCollapsedGroups,
     history,
     setHistory,
     search,
@@ -966,8 +964,6 @@ const App = () => {
   }, [history, quickPasteModifier]);
 
   useToastListener({ pushToast });
-
-  useSettingsPanelReset({ showSettings, setCollapsedGroups, setSettingsSubpage });
 
   useTagManagerRefresh({
     showTagManager: effectiveShowTagManager,

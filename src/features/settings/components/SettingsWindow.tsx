@@ -32,8 +32,7 @@ import { THEMES, getThemeLabel, supportsCustomBackground, supportsSurfaceOpacity
 
 import type { Locale } from "../../../shared/types";
 import type { QuickPasteModifier } from "../../app/types";
-import type { AiProfile, EditableAiProfile, AiProfileStatusMap } from "../../settings/types";
-import type { CloudSyncStatusPayload } from "./groups/CloudSyncSettingsGroup";
+import type { AiProfile, EditableAiProfile, AiProfileStatusMap, CloudSyncStatusPayload } from "../../settings/types";
 
 // Modals & Panels
 import AppSelectorModal from "./AppSelectorModal";
