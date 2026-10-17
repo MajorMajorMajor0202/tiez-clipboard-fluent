@@ -32,7 +32,8 @@ import {
     FolderPlus,
     Folder,
     Check,
-    Plus
+    Plus,
+    Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClipboardItemProps } from "../types";
@@ -712,6 +713,7 @@ const ClipboardItem = ({
     onTabFlyoutCancel,
     onToggleItemTab,
     onAddNewTabAndAssign,
+    onDeleteTab,
     onAIAction,
     onInputSubmit,
     aiEnabled,
@@ -2291,6 +2293,16 @@ const ClipboardItem = ({
                                         <Folder size={12} className="tab-flyout-item-icon" />
                                         <span className="tab-flyout-item-name">{cTab.name}</span>
                                         {isIn && <Check size={12} className="tab-flyout-check" />}
+                                        <span
+                                            className="tab-flyout-item-delete"
+                                            title={t('delete_tab') || '删除此标签页'}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDeleteTab?.(cTab.id);
+                                            }}
+                                        >
+                                            <Trash2 size={11} />
+                                        </span>
                                     </button>
                                 );
                             })

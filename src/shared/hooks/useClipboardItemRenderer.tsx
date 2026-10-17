@@ -25,6 +25,7 @@ interface UseClipboardItemRendererOptions {
   setEditingTabFlyoutId?: Dispatch<SetStateAction<number | null>>;
   onToggleItemTab?: (itemId: number, tabName: string) => void;
   onAddNewTabAndAssign?: (itemId: number, tabName: string) => void;
+  onDeleteTab?: (tabId: string) => void;
   theme: string;
   language: Locale;
   t: (key: string) => string;
@@ -80,6 +81,7 @@ export const useClipboardItemRenderer = ({
   setEditingTabFlyoutId,
   onToggleItemTab,
   onAddNewTabAndAssign,
+  onDeleteTab,
   theme,
   language,
   t,
@@ -233,6 +235,7 @@ export const useClipboardItemRenderer = ({
           onAddNewTabAndAssign={(tabName) => {
             onAddNewTabAndAssign?.(item.id, tabName);
           }}
+          onDeleteTab={onDeleteTab}
           isAIProcessing={processingAiId === item.id}
           aiEnabled={aiEnabled}
           aiOptionsOpen={aiOptionsOpenId === item.id}
@@ -288,6 +291,7 @@ export const useClipboardItemRenderer = ({
       setEditingTabFlyoutId,
       onToggleItemTab,
       onAddNewTabAndAssign,
+      onDeleteTab,
       setTagInput,
       handleUpdateTags,
       handleAIAction

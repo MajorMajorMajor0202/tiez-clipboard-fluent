@@ -1159,6 +1159,7 @@ const App = () => {
     setEditingTabFlyoutId,
     onToggleItemTab: handleToggleItemInTab,
     onAddNewTabAndAssign: handleAddNewTabAndAssign,
+    onDeleteTab: handleDeleteTab,
     theme,
     language,
     t,

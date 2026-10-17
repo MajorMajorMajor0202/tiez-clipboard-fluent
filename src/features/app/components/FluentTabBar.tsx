@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, LayoutGroup } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus, Clipboard, X, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clipboard, Plus, Trash2 } from "lucide-react";
 import type { TabItem } from "../types";
-import FluentTooltip from "../../../shared/components/FluentTooltip";
 
 interface FluentTabBarProps {
   tabs: TabItem[];
@@ -22,21 +22,53 @@ export const FluentTabBar = ({
   t
 }: FluentTabBarProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
-  const newTabInputRef = useRef<HTMLInputElement>(null);
+  const dialogInputRef = useRef<HTMLInputElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const [isCreatingTab, setIsCreatingTab] = useState(false);
-  const [newTabName, setNewTabName] = useState("");
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    tabId?: string;
+    tabName?: string;
+    isBuiltin?: boolean;
+  } | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [dialogTabName, setDialogTabName] = useState("");
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleConfirmCreate = () => {
-    const trimmed = newTabName.trim();
+  // Close context menu on outside click or escape
+  useEffect(() => {
+    if (!contextMenu) return;
+    const handleDown = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest(".fluent-tab-context-menu")) return;
+      setContextMenu(null);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setContextMenu(null);
+    };
+    document.addEventListener("mousedown", handleDown);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleDown);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [contextMenu]);
+
+  const handleOpenCreateDialog = () => {
+    setContextMenu(null);
+    setDialogTabName("");
+    setIsCreateDialogOpen(true);
+    setTimeout(() => dialogInputRef.current?.focus(), 50);
+  };
+
+  const handleConfirmCreateDialog = () => {
+    const trimmed = dialogTabName.trim();
     if (trimmed && onAddTab) {
       onAddTab(trimmed);
     }
-    setIsCreatingTab(false);
-    setNewTabName("");
+    setIsCreateDialogOpen(false);
+    setDialogTabName("");
   };
 
   // Measure scrollability
@@ -124,6 +156,14 @@ export const FluentTabBar = ({
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setContextMenu({
+          x: e.clientX,
+          y: e.clientY,
+          isBuiltin: true
+        });
+      }}
     >
       {/* Left Paging Floating Button */}
       <button
@@ -192,6 +232,17 @@ export const FluentTabBar = ({
                     }
                   }
                 }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setContextMenu({
+                    x: e.clientX,
+                    y: e.clientY,
+                    tabId: tab.id,
+                    tabName: tab.name,
+                    isBuiltin: isFirstTab || tab.isBuiltin
+                  });
+                }}
                 title={isFirstTab ? tab.name || (t ? t("clipboard") || "剪贴板" : "剪贴板") : undefined}
                 aria-label={tab.name}
               >
@@ -204,19 +255,6 @@ export const FluentTabBar = ({
 
                   {typeof tab.count === "number" && tab.count > 0 && (
                     <span className="fluent-tab-badge">{tab.count}</span>
-                  )}
-
-                  {!isFirstTab && onDeleteTab && (
-                    <span
-                      className="fluent-tab-close-btn"
-                      title={t ? t("delete_tab") || "删除标签页" : "删除标签页"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteTab(tab.id);
-                      }}
-                    >
-                      <X size={10} strokeWidth={2} />
-                    </span>
                   )}
                 </span>
 
@@ -237,72 +275,6 @@ export const FluentTabBar = ({
             );
           })}
         </LayoutGroup>
-
-        {/* Add Tab Button / Inline Create */}
-        {isCreatingTab ? (
-          <div className="fluent-tab-create-box">
-            <input
-              ref={newTabInputRef}
-              type="text"
-              className="fluent-tab-create-input"
-              placeholder={t ? t("tab_name_placeholder") || "标签页名称..." : "标签页名称..."}
-              value={newTabName}
-              onChange={(e) => setNewTabName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleConfirmCreate();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  setIsCreatingTab(false);
-                  setNewTabName("");
-                }
-              }}
-              autoFocus
-            />
-            <button
-              type="button"
-              className="fluent-tab-create-btn confirm"
-              onClick={handleConfirmCreate}
-              title={t ? t("confirm") || "确定" : "确定"}
-            >
-              <Check size={12} strokeWidth={2.4} />
-            </button>
-            <button
-              type="button"
-              className="fluent-tab-create-btn cancel"
-              onClick={() => {
-                setIsCreatingTab(false);
-                setNewTabName("");
-              }}
-              title={t ? t("cancel") || "取消" : "取消"}
-            >
-              <X size={12} strokeWidth={2.4} />
-            </button>
-          </div>
-        ) : onAddTab ? (
-          <FluentTooltip text={t ? t("add_tab") || "新建标签页" : "新建标签页"}>
-            <button
-              type="button"
-              className="fluent-tab-add-btn"
-              onClick={() => {
-                setIsCreatingTab(true);
-                setNewTabName("");
-                setTimeout(() => {
-                  newTabInputRef.current?.focus();
-                  if (trackRef.current) {
-                    trackRef.current.scrollTo({
-                      left: trackRef.current.scrollWidth,
-                      behavior: "smooth"
-                    });
-                  }
-                }, 50);
-              }}
-            >
-              <Plus size={14} />
-            </button>
-          </FluentTooltip>
-        ) : null}
       </div>
 
       {/* Edge gradient mask right */}
@@ -330,6 +302,91 @@ export const FluentTabBar = ({
       >
         <ChevronRight size={13} strokeWidth={2.6} />
       </button>
+
+      {/* Right-click Context Menu */}
+      {contextMenu && createPortal(
+        <div
+          className="fluent-tab-context-menu"
+          style={{
+            left: `${Math.min(contextMenu.x, window.innerWidth - 150)}px`,
+            top: `${Math.min(contextMenu.y, window.innerHeight - 80)}px`
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="fluent-tab-context-item"
+            onClick={handleOpenCreateDialog}
+          >
+            <Plus size={13} />
+            <span>{t ? t("new_tab") || "新建标签页..." : "新建标签页..."}</span>
+          </button>
+          {contextMenu.tabId && !contextMenu.isBuiltin && onDeleteTab && (
+            <button
+              type="button"
+              className="fluent-tab-context-item danger"
+              onClick={() => {
+                const id = contextMenu.tabId!;
+                setContextMenu(null);
+                onDeleteTab(id);
+              }}
+            >
+              <Trash2 size={13} />
+              <span>{t ? t("delete_tab") || "删除此标签页" : "删除此标签页"}</span>
+            </button>
+          )}
+        </div>,
+        document.body
+      )}
+
+      {/* Tab Creation Dialog */}
+      {isCreateDialogOpen && createPortal(
+        <div
+          className="fluent-tab-dialog-overlay"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setIsCreateDialogOpen(false);
+          }}
+        >
+          <div className="fluent-tab-dialog" onMouseDown={(e) => e.stopPropagation()}>
+            <div className="fluent-tab-dialog-title">{t ? t("create_new_tab") || "新建标签页" : "新建标签页"}</div>
+            <input
+              ref={dialogInputRef}
+              type="text"
+              className="fluent-tab-dialog-input"
+              placeholder={t ? t("tab_name_placeholder") || "输入标签集名称..." : "输入标签集名称..."}
+              value={dialogTabName}
+              onChange={(e) => setDialogTabName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleConfirmCreateDialog();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  setIsCreateDialogOpen(false);
+                }
+              }}
+              autoFocus
+            />
+            <div className="fluent-tab-dialog-actions">
+              <button
+                type="button"
+                className="fluent-tab-dialog-btn"
+                onClick={() => setIsCreateDialogOpen(false)}
+              >
+                {t ? t("cancel") || "取消" : "取消"}
+              </button>
+              <button
+                type="button"
+                className="fluent-tab-dialog-btn primary"
+                onClick={handleConfirmCreateDialog}
+              >
+                {t ? t("confirm") || "确定" : "确定"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

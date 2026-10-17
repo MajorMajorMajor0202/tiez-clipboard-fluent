@@ -631,6 +631,31 @@
   color: var(--accent-color, #2f6fed);
 }
 
+.tab-flyout-item-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  opacity: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+  margin-left: 2px;
+}
+
+.tab-flyout-item:hover .tab-flyout-item-delete {
+  opacity: 0.6;
+}
+
+.tab-flyout-item-delete:hover {
+  opacity: 1 !important;
+  color: #ff4d4f !important;
+  background: rgba(255, 77, 79, 0.12);
+}
+
 .tab-flyout-create-section {
   padding-top: 6px;
   border-top: 1px solid rgba(128, 128, 128, 0.12);

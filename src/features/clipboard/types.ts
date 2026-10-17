@@ -52,6 +52,7 @@ export interface ClipboardItemProps {
   onTabFlyoutCancel?: () => void;
   onToggleItemTab?: (tabName: string) => void;
   onAddNewTabAndAssign?: (tabName: string) => void;
+  onDeleteTab?: (tabId: string) => void;
   onAIAction?: (type: string) => void;
   onAIOptionsToggle?: () => void;
   onInputSubmit?: (val: string) => void;
