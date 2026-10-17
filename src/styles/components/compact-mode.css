@@ -221,10 +221,15 @@
 }
 
 .history-item.compact:hover .item-actions,
-.history-item.compact.has-open-menu .item-actions {
-    opacity: 1;
-    visibility: visible;
+.history-item.compact.has-open-menu .item-actions,
+.history-item.compact.tag-editing .item-actions,
+.history-item.compact.tab-editing .item-actions,
+.history-item.compact.active-menu-card .item-actions,
+.history-item.compact.actions-visible .item-actions {
+    opacity: 1 !important;
+    visibility: visible !important;
     transform: translateY(0);
+    pointer-events: auto !important;
 }
 
 /* Button Icons - Default/Modern Style */

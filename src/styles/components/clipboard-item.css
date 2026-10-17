@@ -348,9 +348,13 @@
 .history-item:hover .item-actions,
 .history-item.selected .item-actions,
 .history-item.tag-editing .item-actions,
-.history-item.has-open-menu .item-actions {
-  opacity: 1;
-  visibility: visible;
+.history-item.tab-editing .item-actions,
+.history-item.has-open-menu .item-actions,
+.history-item.active-menu-card .item-actions,
+.history-item.actions-visible .item-actions {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .item-actions .btn-icon {
@@ -364,6 +368,14 @@
   padding: 2px;
   height: 20px;
   width: 20px;
+  border-radius: 4px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.item-actions .btn-icon-ghost.active {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.16)) !important;
+  color: var(--accent-color, #2f6fed) !important;
+  opacity: 1 !important;
 }
 
 .item-meta-right {
@@ -753,6 +765,8 @@ body.dark-mode .tiez-drag-avatar,
   flex-direction: column;
   gap: 2px;
   min-width: 145px;
+  width: 145px;
+  box-sizing: border-box;
   z-index: 100000;
   user-select: none;
   animation: secondaryMenuFadeIn 0.1s cubic-bezier(0, 0, 0.2, 1);

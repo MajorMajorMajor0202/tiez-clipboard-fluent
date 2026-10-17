@@ -750,7 +750,7 @@ const ClipboardItem = ({
     const [isEditingContent, setIsEditingContent] = useState(false);
     const [editContentVal, setEditContentVal] = useState(item.content);
     const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-    const [moreMenuPosition, setMoreMenuPosition] = useState<{ top?: number; bottom?: number; left: number } | null>(null);
+    const [moreMenuPosition, setMoreMenuPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
     const moreButtonRef = useRef<HTMLButtonElement>(null);
     const [flyoutPosition, setFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
     const [tabFlyoutPosition, setTabFlyoutPosition] = useState<{ top?: number; bottom?: number; left: number; isAbove: boolean } | null>(null);
@@ -774,6 +774,115 @@ const ClipboardItem = ({
         return () => window.removeEventListener(CLOSE_SECONDARY_MENUS_EVENT, handleCloseOthers);
     }, [item.id]);
 
+    const updateMoreMenuPosition = useCallback(() => {
+        if (!isMoreMenuOpen || !moreButtonRef.current) return;
+        if (!document.body.contains(moreButtonRef.current)) {
+            setIsMoreMenuOpen(false);
+            return;
+        }
+
+        const rect = moreButtonRef.current.getBoundingClientRect();
+        const scrollContainer = moreButtonRef.current.closest(".fluent-scrollbar-host");
+        if (scrollContainer) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const isButtonInViewport =
+                rect.bottom > containerRect.top &&
+                rect.top < containerRect.bottom &&
+                rect.right > containerRect.left &&
+                rect.left < containerRect.right;
+            if (!isButtonInViewport) {
+                setIsMoreMenuOpen(false);
+                return;
+            }
+        } else {
+            const isButtonInViewport =
+                rect.bottom > 0 &&
+                rect.top < window.innerHeight &&
+                rect.right > 0 &&
+                rect.left < window.innerWidth;
+            if (!isButtonInViewport) {
+                setIsMoreMenuOpen(false);
+                return;
+            }
+        }
+
+        const menuHeight = 180;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const isAbove = spaceBelow < menuHeight;
+        const menuWidth = 145;
+        let left = rect.left + rect.width / 2 - menuWidth / 2;
+
+        if (left + menuWidth > window.innerWidth - 12) {
+            left = window.innerWidth - menuWidth - 12;
+        }
+        if (left < 12) left = 12;
+
+        setMoreMenuPosition((prev) => {
+            const next = isAbove
+                ? { bottom: window.innerHeight - rect.top + 4, left, isAbove: true }
+                : { top: rect.bottom + 4, left, isAbove: false };
+
+            if (prev &&
+                prev.left === next.left &&
+                prev.isAbove === next.isAbove &&
+                prev.top === next.top &&
+                prev.bottom === next.bottom) {
+                return prev;
+            }
+            return next;
+        });
+    }, [isMoreMenuOpen]);
+
+    useEffect(() => {
+        if (!isMoreMenuOpen) return;
+
+        let active = true;
+        const tick = () => {
+            if (!active) return;
+            updateMoreMenuPosition();
+            requestAnimationFrame(tick);
+        };
+
+        requestAnimationFrame(tick);
+        return () => {
+            active = false;
+        };
+    }, [isMoreMenuOpen, updateMoreMenuPosition]);
+
+    useEffect(() => {
+        if (!isMoreMenuOpen) return;
+
+        const handleOutsideClick = (e: MouseEvent) => {
+            if (e.button !== 0 && e.type !== "contextmenu") return;
+            const target = e.target as HTMLElement;
+            if (target.closest(".secondary-actions-menu")) return;
+            if (moreButtonRef.current && moreButtonRef.current.contains(target)) return;
+
+            setIsMoreMenuOpen(false);
+            if (!isMultiSelectActive && !isEditingContent) {
+                setIgnoreBlurSafe(false);
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsMoreMenuOpen(false);
+                if (!isMultiSelectActive && !isEditingContent) {
+                    setIgnoreBlurSafe(false);
+                }
+            }
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick, true);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick, true);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent]);
+
     const handleToggleMoreMenu = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (isMoreMenuOpen) {
@@ -784,113 +893,68 @@ const ClipboardItem = ({
             return;
         }
 
+        // Close tag and tab flyouts
+        onTagEditCancel?.();
+        onTabFlyoutCancel?.();
+
         // Close any other open menus first
         window.dispatchEvent(
             new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: item.id } })
         );
 
-        const rect = moreButtonRef.current?.getBoundingClientRect();
-        if (rect) {
-            const menuWidth = 145;
-            const menuHeight = 200;
-            let left = rect.left;
-            if (left + menuWidth > window.innerWidth - 8) {
-                left = window.innerWidth - menuWidth - 8;
-            }
-            if (left < 8) left = 8;
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const isAbove = spaceBelow < menuHeight;
-            if (isAbove) {
-                setMoreMenuPosition({ bottom: window.innerHeight - rect.top + 4, left });
-            } else {
-                setMoreMenuPosition({ top: rect.bottom + 4, left });
-            }
-        }
         setIsMoreMenuOpen(true);
         setIgnoreBlurSafe(true);
-    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent, item.id]);
+    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent, onTagEditCancel, onTabFlyoutCancel, item.id]);
 
     const handleContextMenu = useCallback((e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
         if (isEditingTags) {
-            if (target.closest(".tag-edit-anchor")) return;
+            if (target.closest(".tag-edit-anchor, .tag-edit-flyout")) return;
             e.preventDefault();
             e.stopPropagation();
             onTagEditCancel?.();
             return;
         }
-        if (target.closest('button, input, textarea, [role="button"], .item-inline-editor')) {
+        if (target.closest('button, input, textarea, [role="button"], .item-inline-editor, .tag-edit-flyout, .tab-assign-flyout')) {
             return;
         }
         void hideCompactPreview();
         e.preventDefault();
         e.stopPropagation();
 
-        // Close any other open menus first!
+        // Close tag & tab flyouts
+        onTagEditCancel?.();
+        onTabFlyoutCancel?.();
+
+        // Close other items' more menus
         window.dispatchEvent(
             new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: item.id } })
         );
 
-        const menuWidth = 145;
-        const menuHeight = 200;
-        let left = e.clientX;
-        if (left + menuWidth > window.innerWidth - 8) {
-            left = window.innerWidth - menuWidth - 8;
-        }
-        if (left < 8) left = 8;
-
-        const spaceBelow = window.innerHeight - e.clientY;
-        const isAbove = spaceBelow < menuHeight;
-        if (isAbove) {
-            setMoreMenuPosition({ bottom: window.innerHeight - e.clientY + 4, left });
-        } else {
-            setMoreMenuPosition({ top: e.clientY + 4, left });
-        }
-
         setIsMoreMenuOpen(true);
         setIgnoreBlurSafe(true);
         onSelect();
-    }, [isEditingTags, onTagEditCancel, onSelect, item.id]);
+    }, [isEditingTags, onTagEditCancel, onTabFlyoutCancel, onSelect, item.id]);
 
-    useEffect(() => {
-        if (!isMoreMenuOpen) return;
-        const handleDown = (e: MouseEvent) => {
-            if (e.button !== 0 && e.type !== "contextmenu") return;
-            const target = e.target as HTMLElement;
-            if (target.closest('.secondary-actions-menu') || moreButtonRef.current?.contains(target)) return;
-            setIsMoreMenuOpen(false);
-            if (!isMultiSelectActive && !isEditingContent) {
-                setIgnoreBlurSafe(false);
-            }
-        };
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                setIsMoreMenuOpen(false);
-                if (!isMultiSelectActive && !isEditingContent) {
-                    setIgnoreBlurSafe(false);
-                }
-            }
-        };
-        const handleScroll = (e: Event) => {
-            const target = e.target as HTMLElement;
-            if (target.closest?.('.secondary-actions-menu')) return;
-            setIsMoreMenuOpen(false);
-            if (!isMultiSelectActive && !isEditingContent) {
-                setIgnoreBlurSafe(false);
-            }
-        };
+    const handleToggleTagEditor = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsMoreMenuOpen(false);
+        onTabFlyoutCancel?.();
+        window.dispatchEvent(
+            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: -1 } })
+        );
+        onToggleTagEditor(e);
+    }, [onToggleTagEditor, onTabFlyoutCancel]);
 
-        document.addEventListener("mousedown", handleDown, true);
-        document.addEventListener("contextmenu", handleDown, true);
-        document.addEventListener("keydown", handleKeyDown, true);
-        window.addEventListener("wheel", handleScroll, { capture: true, passive: true });
-        return () => {
-            document.removeEventListener("mousedown", handleDown, true);
-            document.removeEventListener("contextmenu", handleDown, true);
-            document.removeEventListener("keydown", handleKeyDown, true);
-            window.removeEventListener("wheel", handleScroll, true);
-        };
-    }, [isMoreMenuOpen, isMultiSelectActive, isEditingContent]);
+    const handleToggleTabFlyout = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsMoreMenuOpen(false);
+        onTagEditCancel?.();
+        window.dispatchEvent(
+            new CustomEvent(CLOSE_SECONDARY_MENUS_EVENT, { detail: { exceptItemId: -1 } })
+        );
+        onToggleTabFlyout?.(e);
+    }, [onToggleTabFlyout, onTagEditCancel]);
 
     const handleSaveContentEdit = useCallback(async () => {
         const trimmed = editContentVal;
@@ -1780,6 +1844,8 @@ const ClipboardItem = ({
         </div>
     );
 
+    const isAnyFlyoutOpen = isEditingTags || isTabFlyoutOpen || isMoreMenuOpen;
+
     return (
         <motion.div
             ref={itemRef}
@@ -1790,7 +1856,7 @@ const ClipboardItem = ({
             animate={{ marginBottom: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${isMoreMenuOpen ? "has-open-menu" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
+            className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${isTabFlyoutOpen ? "tab-editing" : ""} ${isMoreMenuOpen ? "has-open-menu" : ""} ${isAnyFlyoutOpen ? "active-menu-card actions-visible" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
             draggable={false}
             onDragStart={(e: any) => {
                 e.preventDefault();
@@ -1799,15 +1865,19 @@ const ClipboardItem = ({
                 const target = e.target as HTMLElement;
                 if (e.button !== 0) return;
 
-                if (isEditingTags) {
-                    if (target.closest(".tag-edit-flyout")) return;
-                    if (target.closest('button, input, textarea, [role="button"]')) {
-                        return;
-                    }
-                    if (target.closest('a')) return;
+                if (isAnyFlyoutOpen) {
+                    if (target.closest(".tag-edit-flyout, .tab-assign-flyout, .secondary-actions-menu")) return;
+                    if (target.closest('button, input, textarea, [role="button"], a')) return;
                     e.preventDefault();
                     e.stopPropagation();
-                    onTagEditCancel?.();
+                    if (isEditingTags) onTagEditCancel?.();
+                    if (isTabFlyoutOpen) onTabFlyoutCancel?.();
+                    if (isMoreMenuOpen) {
+                        setIsMoreMenuOpen(false);
+                        if (!isMultiSelectActive && !isEditingContent) {
+                            setIgnoreBlurSafe(false);
+                        }
+                    }
                     return;
                 }
 
@@ -2082,8 +2152,8 @@ const ClipboardItem = ({
                         <FluentTooltip text={t('add_to_tab') || '添加到标签页'}>
                             <button
                                 ref={tabButtonRef}
-                                className={`btn-icon-ghost tab-btn ${hasAnyTab ? 'active' : ''}`}
-                                onClick={onToggleTabFlyout}
+                                className={`btn-icon-ghost tab-btn ${isTabFlyoutOpen || hasAnyTab ? 'active' : ''}`}
+                                onClick={handleToggleTabFlyout}
                             >
                                 <FolderPlus size={13} />
                             </button>
@@ -2093,7 +2163,7 @@ const ClipboardItem = ({
                             <button
                                 ref={tagButtonRef}
                                 className={`btn-icon-ghost tag-btn ${isEditingTags || (item.tags && item.tags.length > 0) ? 'active' : ''}`}
-                                onClick={onToggleTagEditor}
+                                onClick={handleToggleTagEditor}
                             >
                                 <Tag size={13} />
                             </button>
@@ -2681,10 +2751,12 @@ const ClipboardItem = ({
                 <div
                     className="secondary-actions-menu"
                     style={{
-                        top: moreMenuPosition.top !== undefined ? `${moreMenuPosition.top}px` : undefined,
-                        bottom: moreMenuPosition.bottom !== undefined ? `${moreMenuPosition.bottom}px` : undefined,
-                        left: `${moreMenuPosition.left}px`
+                        position: 'fixed',
+                        left: `${moreMenuPosition.left}px`,
+                        ...(moreMenuPosition.top !== undefined ? { top: `${moreMenuPosition.top}px` } : { bottom: `${moreMenuPosition.bottom}px` }),
+                        zIndex: 99999,
                     }}
+                    onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button
@@ -2819,6 +2891,7 @@ export default memo(ClipboardItem, (prevProps, nextProps) => {
         prevProps.isRevealed === nextProps.isRevealed &&
         prevProps.isEditingTags === nextProps.isEditingTags &&
         prevProps.isTabFlyoutOpen === nextProps.isTabFlyoutOpen &&
+        (prevProps.assignedTabIds || []).join(',') === (nextProps.assignedTabIds || []).join(',') &&
         prevProps.tabs === nextProps.tabs &&
         prevProps.isAIProcessing === nextProps.isAIProcessing &&
         prevProps.aiOptionsOpen === nextProps.aiOptionsOpen &&
