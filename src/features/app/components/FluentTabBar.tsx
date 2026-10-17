@@ -184,7 +184,7 @@ export const FluentTabBar = ({
     const fallbackId = (window as any).__tiezDraggedItemId;
     const finalId = idStr ? parseInt(idStr, 10) : (typeof fallbackId === "number" ? fallbackId : NaN);
     if (!isNaN(finalId) && onDropItemOnTab) {
-      onDropItemOnTab(finalId, tab.name);
+      onDropItemOnTab(finalId, tab.id);
     }
     (window as any).__tiezDraggedItemId = null;
   }, [onDropItemOnTab]);
@@ -343,9 +343,6 @@ export const FluentTabBar = ({
                     <span>{tab.name}</span>
                   )}
 
-                  {typeof tab.count === "number" && tab.count > 0 && (
-                    <span className="fluent-tab-badge">{tab.count}</span>
-                  )}
                 </span>
 
                 {/* Accent Underline Indicator - follows active tab smoothly */}

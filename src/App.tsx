@@ -588,8 +588,9 @@ const App = () => {
         set.add(toDisplayTag(tag));
       });
     });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [history, dbTags, effectiveShowTagManager, showTagFilter, editingTagsId, t]);
+    const customTabNames = new Set(tabs.filter((t) => t.id !== "clipboard").map((t) => t.name.toLowerCase()));
+    return Array.from(set).filter((tag) => !customTabNames.has(tag.toLowerCase())).sort((a, b) => a.localeCompare(b));
+  }, [history, dbTags, effectiveShowTagManager, showTagFilter, editingTagsId, tabs, t]);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -1041,14 +1042,66 @@ const App = () => {
   };
   */
 
+  const [tabAssignments, setTabAssignments] = useState<Record<string, number[]>>(() => {
+    try {
+      const saved = localStorage.getItem("tiez_tab_assignments");
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("Failed to load tab assignments", e);
+    }
+    return {};
+  });
+
+  const saveTabAssignments = useCallback((next: Record<string, number[]>) => {
+    try {
+      const str = JSON.stringify(next);
+      localStorage.setItem("tiez_tab_assignments", str);
+      invoke("save_setting", { key: "app.tab_assignments", val: str }).catch(console.error);
+    } catch (e) {
+      console.error("Failed to save tab assignments", e);
+    }
+  }, []);
+
   const activeTab = tabs.find((t) => t.id === activeTabId);
   const filteredHistory = useFilteredHistory({
     history,
     search,
     typeFilter,
     activeTabId,
-    tabName: activeTab?.name
+    tabAssignments
   });
+
+  // One-time cleanup & migration: migrate any tags matching tab names to tabAssignments, and remove the tag
+  useEffect(() => {
+    const customTabs = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard");
+    if (customTabs.length === 0 || history.length === 0) return;
+
+    let hasUpdates = false;
+    const nextAssignments = { ...tabAssignments };
+
+    customTabs.forEach((ct) => {
+      const matched = history.filter((h) => h.tags?.includes(ct.name));
+      if (matched.length > 0) {
+        const existingIds = new Set(nextAssignments[ct.id] || []);
+        matched.forEach((m) => existingIds.add(m.id));
+        nextAssignments[ct.id] = Array.from(existingIds);
+        hasUpdates = true;
+
+        matched.forEach((m) => {
+          const cleanTags = (m.tags || []).filter((tg) => tg !== ct.name);
+          handleUpdateTags(m.id, cleanTags);
+        });
+      }
+      invoke("delete_tag", { name: ct.name }).catch(() => {});
+    });
+
+    if (hasUpdates) {
+      setTabAssignments(nextAssignments);
+      saveTabAssignments(nextAssignments);
+    }
+  }, [tabs, history.length]);
 
   const effectiveHasMore = hasMore && filteredHistory.length >= PAGE_SIZE;
 
@@ -1087,21 +1140,6 @@ const App = () => {
     setSearch
   });
 
-
-  const tabsWithCount = useMemo(() => {
-    return tabs.map((tab) => {
-      if (tab.id === "clipboard") {
-        return { ...tab, count: undefined };
-      }
-      const count = history.filter(
-        (item) =>
-          item.tab_id === tab.id ||
-          (tab.name && item.tags?.some((t) => t.toLowerCase() === tab.name.toLowerCase()))
-      ).length;
-      return { ...tab, count };
-    });
-  }, [tabs, history]);
-
   const handleAddTab = useCallback((name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -1134,6 +1172,12 @@ const App = () => {
     if (activeTabId === tabId) {
       setActiveTabId("clipboard");
     }
+    setTabAssignments((prev) => {
+      const next = { ...prev };
+      delete next[tabId];
+      saveTabAssignments(next);
+      return next;
+    });
     try {
       localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
       invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
@@ -1141,24 +1185,26 @@ const App = () => {
       console.error("Failed to save tabs", e);
     }
     pushToast(t("tab_deleted").replace("{name}", tabToDelete.name));
-  }, [tabs, setTabs, activeTabId, setActiveTabId, t, pushToast]);
+  }, [tabs, setTabs, activeTabId, setActiveTabId, saveTabAssignments, t, pushToast]);
 
-  const handleToggleItemInTab = useCallback((itemId: number, tabName: string) => {
-    const item = history.find((h) => h.id === itemId);
-    if (!item) return;
-    const currentTags = item.tags || [];
-    const isIn = currentTags.includes(tabName);
-    let nextTags: string[];
-    if (isIn) {
-      nextTags = currentTags.filter((t) => t !== tabName);
-      pushToast(t("tab_removed").replace("{name}", tabName));
-    } else {
-      nextTags = [...currentTags, tabName];
-      invoke("create_new_tag", { tagName: tabName }).catch(() => {});
-      pushToast(t("tab_added").replace("{name}", tabName));
-    }
-    handleUpdateTags(itemId, nextTags);
-  }, [history, handleUpdateTags, pushToast, t]);
+  const handleToggleItemInTab = useCallback((itemId: number, tabIdOrName: string) => {
+    const targetTab = tabs.find((t) => t.id === tabIdOrName || t.name === tabIdOrName);
+    if (!targetTab) return;
+    const actualTabId = targetTab.id;
+    setTabAssignments((prev) => {
+      const list = prev[actualTabId] || [];
+      const exists = list.includes(itemId);
+      const nextList = exists ? list.filter((id) => id !== itemId) : [...list, itemId];
+      const next = { ...prev, [actualTabId]: nextList };
+      saveTabAssignments(next);
+      if (exists) {
+        pushToast(t("tab_removed").replace("{name}", targetTab.name));
+      } else {
+        pushToast(t("tab_added").replace("{name}", targetTab.name));
+      }
+      return next;
+    });
+  }, [tabs, saveTabAssignments, pushToast, t]);
 
   const handleAddNewTabAndAssign = useCallback((itemId: number, name: string) => {
     const trimmed = name.trim();
@@ -1179,16 +1225,16 @@ const App = () => {
         console.error("Failed to save tabs", e);
       }
     }
-    const item = history.find((h) => h.id === itemId);
-    if (item) {
-      const currentTags = item.tags || [];
-      if (!currentTags.includes(trimmed)) {
-        handleUpdateTags(itemId, [...currentTags, trimmed]);
-        invoke("create_new_tag", { tagName: trimmed }).catch(() => {});
-      }
-    }
+    const finalTab = targetTab;
+    setTabAssignments((prev) => {
+      const list = prev[finalTab.id] || [];
+      if (list.includes(itemId)) return prev;
+      const next = { ...prev, [finalTab.id]: [...list, itemId] };
+      saveTabAssignments(next);
+      return next;
+    });
     pushToast(t("tab_created_and_assigned").replace("{name}", trimmed));
-  }, [tabs, setTabs, history, handleUpdateTags, pushToast, t]);
+  }, [tabs, setTabs, saveTabAssignments, pushToast, t]);
 
   const handleMultiSelect = useCallback((id: number, index: number, modifiers: { ctrl: boolean; shift: boolean }) => {
     setSelectedItemIds(prev => {
@@ -1250,47 +1296,45 @@ const App = () => {
     });
   }, [selectedItemIds, openConfirm, t, setHistory, pushToast]);
 
-  const handleBatchAddToTab = useCallback((tabName: string) => {
+  const handleBatchAddToTab = useCallback((tabIdOrName: string) => {
     const ids = Array.from(selectedItemIds);
     if (ids.length === 0) return;
-    for (const id of ids) {
-      const item = history.find(h => h.id === id);
-      if (item) {
-        const currentTags = item.tags || [];
-        if (!currentTags.includes(tabName)) {
-          handleUpdateTags(id, [...currentTags, tabName]);
-        }
-      }
-    }
-    invoke("create_new_tag", { tagName: tabName }).catch(() => {});
-    pushToast(t("batch_added_to_tab").replace("{count}", String(ids.length)).replace("{name}", tabName));
+    const targetTab = tabs.find((t) => t.id === tabIdOrName || t.name === tabIdOrName);
+    if (!targetTab) return;
+    setTabAssignments((prev) => {
+      const currentList = prev[targetTab.id] || [];
+      const toAdd = ids.filter((id) => !currentList.includes(id));
+      const nextList = [...currentList, ...toAdd];
+      const next = { ...prev, [targetTab.id]: nextList };
+      saveTabAssignments(next);
+      return next;
+    });
+    pushToast(t("batch_added_to_tab").replace("{count}", String(ids.length)).replace("{name}", targetTab.name));
     setSelectedItemIds(new Set());
     lastSelectedIndexRef.current = null;
     setIsBatchTabDropdownOpen(false);
-  }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
+  }, [selectedItemIds, tabs, saveTabAssignments, pushToast, t]);
 
-  const handleDropItemOnTab = useCallback((itemId: number, tabName: string) => {
+  const handleDropItemOnTab = useCallback((itemId: number, targetTabIdOrName: string) => {
     const draggedList = (window as any).__tiezDraggedItemIds;
-    const itemsToAdd = (Array.isArray(draggedList) && draggedList.length > 0)
+    const itemsToAdd: number[] = (Array.isArray(draggedList) && draggedList.length > 0)
       ? draggedList
       : (selectedItemIds.has(itemId) && selectedItemIds.size > 1
           ? Array.from(selectedItemIds)
           : [itemId]);
 
-    const isClipboardTab = tabName === "clipboard" || tabName === t("clipboard") || tabName === "剪贴板";
+    const isClipboardTab = targetTabIdOrName === "clipboard" || targetTabIdOrName === t("clipboard") || targetTabIdOrName === "剪贴板";
     if (isClipboardTab) {
-      const currentTab = tabs.find((t) => t.id === activeTabId);
-      if (currentTab && currentTab.id !== "clipboard") {
-        for (const id of itemsToAdd) {
-          const item = history.find((h) => h.id === id);
-          if (item) {
-            const currentTags = item.tags || [];
-            if (currentTags.includes(currentTab.name)) {
-              handleUpdateTags(id, currentTags.filter((t) => t !== currentTab.name));
-            }
-          }
-        }
-        pushToast(t("tab_removed").replace("{name}", currentTab.name));
+      if (activeTabId && activeTabId !== "clipboard") {
+        const currentTab = tabs.find((t) => t.id === activeTabId);
+        setTabAssignments((prev) => {
+          const currentList = prev[activeTabId] || [];
+          const nextList = currentList.filter((id) => !itemsToAdd.includes(id));
+          const next = { ...prev, [activeTabId]: nextList };
+          saveTabAssignments(next);
+          return next;
+        });
+        pushToast(t("tab_removed").replace("{name}", currentTab?.name || ""));
         if (itemsToAdd.length > 1) {
           setSelectedItemIds(new Set());
           lastSelectedIndexRef.current = null;
@@ -1301,32 +1345,34 @@ const App = () => {
       return;
     }
 
-    for (const id of itemsToAdd) {
-      const item = history.find((h) => h.id === id);
-      if (item) {
-        const currentTags = item.tags || [];
-        if (!currentTags.includes(tabName)) {
-          handleUpdateTags(id, [...currentTags, tabName]);
-        }
-      }
-    }
-    invoke("create_new_tag", { tagName: tabName }).catch(() => {});
+    const targetTab = tabs.find((t) => t.id === targetTabIdOrName || t.name === targetTabIdOrName);
+    if (!targetTab) return;
+
+    setTabAssignments((prev) => {
+      const currentList = prev[targetTab.id] || [];
+      const toAdd = itemsToAdd.filter((id) => !currentList.includes(id));
+      const nextList = [...currentList, ...toAdd];
+      const next = { ...prev, [targetTab.id]: nextList };
+      saveTabAssignments(next);
+      return next;
+    });
+
     if (itemsToAdd.length > 1) {
-      pushToast(t("batch_added_to_tab").replace("{count}", String(itemsToAdd.length)).replace("{name}", tabName));
+      pushToast(t("batch_added_to_tab").replace("{count}", String(itemsToAdd.length)).replace("{name}", targetTab.name));
       setSelectedItemIds(new Set());
       lastSelectedIndexRef.current = null;
     } else {
-      pushToast(t("tab_added").replace("{name}", tabName));
+      pushToast(t("tab_added").replace("{name}", targetTab.name));
     }
     (window as any).__tiezDraggedItemIds = null;
     (window as any).__tiezDraggedItemId = null;
-  }, [selectedItemIds, history, tabs, activeTabId, handleUpdateTags, pushToast, t]);
+  }, [selectedItemIds, tabs, activeTabId, saveTabAssignments, pushToast, t]);
 
   useEffect(() => {
     const handleCardDrop = (e: Event) => {
-      const customE = e as CustomEvent<{ itemId: number; tabName: string }>;
+      const customE = e as CustomEvent<{ itemId: number; tabId?: string; tabName?: string }>;
       if (customE.detail) {
-        handleDropItemOnTab(customE.detail.itemId, customE.detail.tabName);
+        handleDropItemOnTab(customE.detail.itemId, customE.detail.tabId || customE.detail.tabName || "");
       }
     };
     window.addEventListener("tiez-card-dropped-on-tab", handleCardDrop);
@@ -1342,12 +1388,19 @@ const App = () => {
       return;
     }
     try {
-      const autoTags = activeTab && activeTab.id !== "clipboard" && activeTab.name ? [activeTab.name] : [];
-      await invoke("add_manual_item", {
+      const newId = await invoke<number>("add_manual_item", {
         content: trimmed,
         contentType: "text",
-        tags: autoTags
+        tags: []
       });
+      if (activeTab && activeTab.id !== "clipboard" && typeof newId === "number") {
+        setTabAssignments((prev) => {
+          const list = prev[activeTab.id] || [];
+          const next = { ...prev, [activeTab.id]: [newId, ...list] };
+          saveTabAssignments(next);
+          return next;
+        });
+      }
       pushToast(t("entry_added"));
       setIsAddEntryModalOpen(false);
       setAddEntryContent("");
@@ -1355,7 +1408,7 @@ const App = () => {
     } catch (err) {
       console.error("Failed to add entry:", err);
     }
-  }, [addEntryContent, activeTab, pushToast, t, fetchHistory]);
+  }, [addEntryContent, activeTab, saveTabAssignments, pushToast, t, fetchHistory]);
 
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
@@ -1368,6 +1421,7 @@ const App = () => {
     allTags,
     tagColors,
     tabs,
+    tabAssignments,
     activeTabId,
     editingTabFlyoutId,
     setEditingTabFlyoutId,
@@ -1441,7 +1495,7 @@ const App = () => {
         setTypeFilter={setTypeFilter}
         onBack={handleHeaderBack}
         onToggleChat={handleToggleHeaderChat}
-        tabs={tabsWithCount}
+        tabs={tabs}
         activeTabId={activeTabId}
         onSelectTab={setActiveTabId}
         onAddTab={handleAddTab}
@@ -1525,7 +1579,7 @@ const App = () => {
                         key={tab.id}
                         type="button"
                         className="fluent-batch-dropdown-item"
-                        onClick={() => handleBatchAddToTab(tab.name)}
+                        onClick={() => handleBatchAddToTab(tab.id)}
                       >
                         <Folder size={11} />
                         <span>{tab.name}</span>

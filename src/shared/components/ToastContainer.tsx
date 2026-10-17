@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { Check } from "lucide-react";
 import type { ToastItem } from "../types";
 
 interface ToastContainerProps {
@@ -11,12 +12,14 @@ const ToastContainer = ({ toasts }: ToastContainerProps) => (
       {toasts.map((toast) => (
         <motion.div
           key={toast.id}
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+          exit={{ opacity: 0, y: -8, scale: 0.95, transition: { duration: 0.15 } }}
+          transition={{ type: "spring", stiffness: 450, damping: 30 }}
           className="toast-item"
         >
-          {toast.msg}
+          <Check size={13} strokeWidth={2.6} className="toast-icon" />
+          <span className="toast-msg">{toast.msg}</span>
         </motion.div>
       ))}
     </AnimatePresence>

@@ -6,7 +6,7 @@ interface UseFilteredHistoryOptions {
   search: string;
   typeFilter: string | null;
   activeTabId?: string;
-  tabName?: string;
+  tabAssignments?: Record<string, number[]>;
 }
 
 export const useFilteredHistory = ({
@@ -14,18 +14,18 @@ export const useFilteredHistory = ({
   search,
   typeFilter,
   activeTabId,
-  tabName
+  tabAssignments
 }: UseFilteredHistoryOptions) => {
   return useMemo(() => {
     const lowerSearch = search.toLowerCase();
 
     const filtered = history.filter((item) => {
-      // Filter by active Tab if selected
+      // Filter by active Tab if selected (completely independent from tags)
       if (activeTabId && activeTabId !== "clipboard") {
-        const matchesTab =
-          item.tab_id === activeTabId ||
-          (tabName && item.tags?.some((t) => t.toLowerCase() === tabName.toLowerCase()));
-        if (!matchesTab) return false;
+        const allowedIds = tabAssignments?.[activeTabId];
+        if (!allowedIds || !allowedIds.includes(item.id)) {
+          return false;
+        }
       }
 
       if (typeFilter && item.content_type !== typeFilter) {
@@ -87,5 +87,5 @@ export const useFilteredHistory = ({
       }
       return b.timestamp - a.timestamp;
     });
-  }, [history, search, typeFilter, activeTabId, tabName]);
+  }, [history, search, typeFilter, activeTabId, tabAssignments]);
 };

@@ -1,26 +1,49 @@
-/* Toast System */
+/* Fluent Toast Notification System */
 .toast-container {
   position: fixed;
-  top: 60px;
+  top: 54px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10000;
+  z-index: 100000;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
   pointer-events: none;
 }
 
 .toast-item {
-  background: #fbfbfb;
-  color: var(--text-primary);
-  border: 2px solid var(--border-dark);
-  padding: 10px 16px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 700;
-  box-shadow: 6px 6px 0 var(--border-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px; /* Strictly <= 4px rounded corner */
+  padding: 6px 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
   pointer-events: auto;
-  min-width: 200px;
-  text-align: center;
+  user-select: none;
+  white-space: nowrap;
+}
+
+:root.dark-mode .toast-item,
+body.dark-mode .toast-item,
+.dark-mode .toast-item {
+  background: #252525 !important;
+  color: #f3f3f3 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.toast-item .toast-icon {
+  color: var(--accent-color, #2f6fed);
+  flex-shrink: 0;
+}
+
+.toast-item .toast-msg {
+  line-height: 1.4;
 }

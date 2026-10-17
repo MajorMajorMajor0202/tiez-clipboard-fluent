@@ -22,6 +22,7 @@ interface UseClipboardItemRendererOptions {
   tagColors: Record<string, string>;
   tabs?: TabItem[];
   activeTabId?: string;
+  tabAssignments?: Record<string, number[]>;
   editingTabFlyoutId?: number | null;
   setEditingTabFlyoutId?: Dispatch<SetStateAction<number | null>>;
   onToggleItemTab?: (itemId: number, tabName: string) => void;
@@ -82,6 +83,7 @@ export const useClipboardItemRenderer = ({
   tagColors,
   tabs = [],
   activeTabId,
+  tabAssignments,
   editingTabFlyoutId,
   setEditingTabFlyoutId,
   onToggleItemTab,
@@ -127,6 +129,7 @@ export const useClipboardItemRenderer = ({
         !revealedIds.has(item.id);
       const isEditingTags = editingTagsId === item.id;
       const isTabFlyoutOpen = editingTabFlyoutId === item.id;
+      const assignedTabIds = tabs.filter(t => tabAssignments?.[t.id]?.includes(item.id)).map(t => t.id);
 
       return (
         <ClipboardItem
@@ -140,6 +143,7 @@ export const useClipboardItemRenderer = ({
           isEditingTags={isEditingTags}
           tabs={tabs}
           activeTabId={activeTabId}
+          assignedTabIds={assignedTabIds}
           isTabFlyoutOpen={isTabFlyoutOpen}
           tagInput={isEditingTags ? tagInput : ""}
           tagSuggestions={isEditingTags ? allTags : EMPTY_TAG_SUGGESTIONS}
@@ -279,6 +283,7 @@ export const useClipboardItemRenderer = ({
       editingTabFlyoutId,
       tabs,
       activeTabId,
+      tabAssignments,
       tagInput,
       allTags,
       tagColors,

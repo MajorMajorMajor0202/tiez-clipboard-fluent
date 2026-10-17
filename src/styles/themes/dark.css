@@ -46,8 +46,3 @@
 :root.dark-mode .wt-expand-btn{
   color: #ededed;
 }
-
-.dark-mode .toast-item{
-  background: var(--bg-panel);
-  border-color: #000;
-}

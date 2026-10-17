@@ -108,27 +108,11 @@
 }
 
 .fluent-tab-item.drag-target-hover .fluent-tab-content {
-  background: var(--accent-soft, rgba(47, 111, 237, 0.22)) !important;
-  outline: 2px dashed var(--accent-color, #2f6fed);
-  outline-offset: -1px;
-  color: var(--accent-color, #2f6fed);
-  transform: scale(1.05);
-}
-
-/* Optional badge count */
-.fluent-tab-badge {
-  font-size: 10px;
-  font-weight: 500;
-  padding: 0 3px;
-  border-radius: 3px;
-  background: var(--bg-subtle-hover, rgba(0, 0, 0, 0.06));
-  color: var(--text-muted, #888);
-  margin-left: 2px;
-}
-
-.fluent-tab-item.active .fluent-tab-badge {
-  background: var(--accent-soft, rgba(47, 111, 237, 0.15));
-  color: var(--accent-color, #2f6fed);
+  background: var(--accent-soft, rgba(47, 111, 237, 0.16)) !important;
+  box-shadow: 0 0 0 1.5px var(--accent-color, #2f6fed) inset;
+  color: var(--accent-color, #2f6fed) !important;
+  transform: translateY(-1px);
+  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
 }
 
 /* Accent Underline Indicator — Original dimensions (16px x 3px), centered below hover box with clean separation */

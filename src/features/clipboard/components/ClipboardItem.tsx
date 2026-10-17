@@ -692,6 +692,7 @@ const ClipboardItem = ({
     isEditingTags,
     tabs = [],
     activeTabId,
+    assignedTabIds = [],
     isTabFlyoutOpen = false,
     tagInput,
     tagSuggestions = [],
@@ -1099,8 +1100,8 @@ const ClipboardItem = ({
     }, [availableCustomTabs, newTabNameInput]);
 
     const hasAnyTab = useMemo(() => {
-        return availableCustomTabs.some((t) => item.tags?.includes(t.name) || item.tab_id === t.id);
-    }, [availableCustomTabs, item.tags, item.tab_id]);
+        return assignedTabIds.length > 0;
+    }, [assignedTabIds]);
 
     const updateTabPosition = useCallback(() => {
         if (!isTabFlyoutOpen || !tabButtonRef.current || !onTabFlyoutCancel) return;
@@ -1790,59 +1791,9 @@ const ClipboardItem = ({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
             className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${isMoreMenuOpen ? "has-open-menu" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
-            draggable={!isEditingTags && !isEditingContent}
+            draggable={false}
             onDragStart={(e: any) => {
-                const target = e.target as HTMLElement;
-                if (target.closest('button, input, textarea, [role="button"], a, .tag-edit-flyout, .item-inline-editor, .secondary-actions-menu')) {
-                    e.preventDefault();
-                    return;
-                }
-                isDraggingRef.current = true;
-                setIgnoreBlurSafe(true);
-                void hideCompactPreview();
-
-                // Store in window for 100% reliable internal drop transfer in Tauri WebView2
-                (window as any).__tiezDraggedItemId = item.id;
-                const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
-                if (selectedSet && selectedSet.has(item.id) && selectedSet.size > 1) {
-                    (window as any).__tiezDraggedItemIds = Array.from(selectedSet);
-                } else if (isMultiSelected) {
-                    const fallbackList = (window as any).__tiezDraggedItemIds;
-                    if (!Array.isArray(fallbackList) || !fallbackList.includes(item.id)) {
-                        (window as any).__tiezDraggedItemIds = [item.id];
-                    }
-                } else {
-                    (window as any).__tiezDraggedItemIds = [item.id];
-                }
-
-                const dt = e.dataTransfer;
-                if (dt) {
-                    try {
-                        dt.setData("application/x-tiez-item", String(item.id));
-                        dt.setData("text/tiez-item-id", String(item.id));
-                    } catch {}
-                    if (item.content_type === "rich_text" && item.html_content) {
-                        dt.setData("text/plain", item.preview || item.content);
-                        dt.setData("text/html", item.html_content);
-                    } else if (item.content_type === "file") {
-                        dt.setData("text/plain", item.content);
-                        const uriList = filePaths.map((p) => `file:///${p.replace(/\\/g, '/')}`).join('\r\n');
-                        if (uriList) dt.setData("text/uri-list", uriList);
-                    } else {
-                        dt.setData("text/plain", item.content);
-                    }
-                    dt.effectAllowed = "copyMove";
-                }
-            }}
-            onDragEnd={() => {
-                setTimeout(() => {
-                    isDraggingRef.current = false;
-                    (window as any).__tiezDraggedItemId = null;
-                    (window as any).__tiezDraggedItemIds = null;
-                }, 150);
-                if (!isMultiSelectActive && !isEditingContent) {
-                    setIgnoreBlurSafe(false);
-                }
+                e.preventDefault();
             }}
             onMouseDown={(e) => {
                 const target = e.target as HTMLElement;
@@ -1860,7 +1811,7 @@ const ClipboardItem = ({
                     return;
                 }
 
-                if (target.closest('button, input, textarea, [role="button"], a, .item-inline-editor, .secondary-actions-menu')) {
+                if (target.closest('button, input, textarea, [role="button"], a, .item-inline-editor, .secondary-actions-menu, .tag-edit-flyout, .tab-assign-flyout')) {
                     return;
                 }
 
@@ -1883,6 +1834,22 @@ const ClipboardItem = ({
                 let avatarEl: HTMLDivElement | null = null;
                 let currentHoveredTabId: string | null = null;
 
+                const cleanup = () => {
+                    window.removeEventListener('mousemove', onMouseMove, true);
+                    window.removeEventListener('mouseup', onMouseUp, true);
+                    window.removeEventListener('blur', cleanup, true);
+                    if (avatarEl) {
+                        avatarEl.remove();
+                        avatarEl = null;
+                    }
+                    if (currentHoveredTabId) {
+                        document.querySelectorAll('.fluent-tab-item.drag-target-hover').forEach((el) => {
+                            el.classList.remove('drag-target-hover');
+                        });
+                        currentHoveredTabId = null;
+                    }
+                };
+
                 const onMouseMove = (moveE: MouseEvent) => {
                     const dist = Math.hypot(moveE.clientX - startX, moveE.clientY - startY);
                     if (!isCardDragging && dist > 5) {
@@ -1899,7 +1866,7 @@ const ClipboardItem = ({
                         const rawSnippet = (item.preview || item.content || '剪贴板条目').trim().replace(/\s+/g, ' ');
                         const snippet = rawSnippet.length > 14 ? rawSnippet.slice(0, 14) + '...' : rawSnippet;
                         const label = isMulti ? `${count} 项` : snippet;
-                        avatarEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg><span>${label}</span>`;
+                        avatarEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg><span>${label}</span>`;
                         avatarEl.style.left = `${moveE.clientX}px`;
                         avatarEl.style.top = `${moveE.clientY}px`;
                         document.body.appendChild(avatarEl);
@@ -1910,12 +1877,27 @@ const ClipboardItem = ({
                         avatarEl.style.top = `${moveE.clientY}px`;
 
                         const elUnder = document.elementFromPoint(moveE.clientX, moveE.clientY);
-                        const tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
+                        let tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
+                        if (!tabBtn) {
+                            const bar = elUnder?.closest('.fluent-tab-bar-container') || elUnder?.closest('.fluent-tab-track');
+                            if (bar) {
+                                const allBtns = Array.from(document.querySelectorAll<HTMLElement>('.fluent-tab-item'));
+                                for (const b of allBtns) {
+                                    const r = b.getBoundingClientRect();
+                                    if (moveE.clientX >= r.left && moveE.clientX <= r.right) {
+                                        tabBtn = b;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         const tabId = tabBtn?.getAttribute('data-tab-id') || null;
 
                         if (tabId !== currentHoveredTabId) {
                             if (currentHoveredTabId) {
-                                document.querySelector(`.fluent-tab-item[data-tab-id="${currentHoveredTabId}"]`)?.classList.remove('drag-target-hover');
+                                document.querySelectorAll('.fluent-tab-item.drag-target-hover').forEach((el) => {
+                                    el.classList.remove('drag-target-hover');
+                                });
                             }
                             if (tabId) {
                                 const targetTab = tabs?.find(t => t.id === tabId);
@@ -1935,24 +1917,27 @@ const ClipboardItem = ({
                 };
 
                 const onMouseUp = (upE: MouseEvent) => {
-                    window.removeEventListener('mousemove', onMouseMove, true);
-                    window.removeEventListener('mouseup', onMouseUp, true);
-
-                    if (avatarEl) {
-                        avatarEl.remove();
-                        avatarEl = null;
-                    }
-
-                    if (currentHoveredTabId) {
-                        document.querySelector(`.fluent-tab-item[data-tab-id="${currentHoveredTabId}"]`)?.classList.remove('drag-target-hover');
-                    }
+                    cleanup();
 
                     if (isCardDragging) {
                         upE.preventDefault();
                         upE.stopPropagation();
 
                         const elUnder = document.elementFromPoint(upE.clientX, upE.clientY);
-                        const tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
+                        let tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
+                        if (!tabBtn) {
+                            const bar = elUnder?.closest('.fluent-tab-bar-container') || elUnder?.closest('.fluent-tab-track');
+                            if (bar) {
+                                const allBtns = Array.from(document.querySelectorAll<HTMLElement>('.fluent-tab-item'));
+                                for (const b of allBtns) {
+                                    const r = b.getBoundingClientRect();
+                                    if (upE.clientX >= r.left && upE.clientX <= r.right) {
+                                        tabBtn = b;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         const finalTabId = tabBtn?.getAttribute('data-tab-id') || currentHoveredTabId;
 
                         if (finalTabId) {
@@ -1968,7 +1953,7 @@ const ClipboardItem = ({
                                         (window as any).__tiezDraggedItemIds = [item.id];
                                     }
                                     window.dispatchEvent(new CustomEvent('tiez-card-dropped-on-tab', {
-                                        detail: { itemId: item.id, tabName: targetTab.name }
+                                        detail: { itemId: item.id, tabId: targetTab.id, tabName: targetTab.name }
                                     }));
                                 }
                             }
@@ -1981,12 +1966,13 @@ const ClipboardItem = ({
                             if (!isMultiSelectActive && !isEditingContent) {
                                 setIgnoreBlurSafe(false);
                             }
-                        }, 150);
+                        }, 100);
                     }
                 };
 
                 window.addEventListener('mousemove', onMouseMove, true);
                 window.addEventListener('mouseup', onMouseUp, true);
+                window.addEventListener('blur', cleanup, true);
             }}
             onClick={(e) => {
                 if (isEditingTags || isEditingContent) return;
@@ -2635,7 +2621,7 @@ const ClipboardItem = ({
                                             (tab) => tab.name.toLowerCase() === trimmed.toLowerCase()
                                         );
                                         if (matched) {
-                                            onToggleItemTab?.(matched.name);
+                                            onToggleItemTab?.(matched.id);
                                         } else {
                                             onAddNewTabAndAssign?.(trimmed);
                                         }
@@ -2656,7 +2642,7 @@ const ClipboardItem = ({
                             <div className="tag-flyout-empty">{t('no_custom_tabs')}</div>
                         ) : (
                             filteredCustomTabs.map((cTab) => {
-                                const isIn = item.tags?.includes(cTab.name) || item.tab_id === cTab.id;
+                                const isIn = assignedTabIds.includes(cTab.id);
                                 return (
                                     <button
                                         key={cTab.id}
@@ -2666,7 +2652,7 @@ const ClipboardItem = ({
                                         className={`tag-flyout-suggest-item ${isIn ? 'active' : ''}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onToggleItemTab?.(cTab.name);
+                                            onToggleItemTab?.(cTab.id);
                                         }}
                                     >
                                         <Folder size={12} className="tab-flyout-item-icon" />

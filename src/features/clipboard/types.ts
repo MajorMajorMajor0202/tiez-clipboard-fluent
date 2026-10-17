@@ -20,6 +20,7 @@ export interface ClipboardItemProps {
   tagSuggestions?: string[];
   tabs?: TabItem[];
   activeTabId?: string;
+  assignedTabIds?: string[];
   isTabFlyoutOpen?: boolean;
   theme: string;
   language: Locale;
