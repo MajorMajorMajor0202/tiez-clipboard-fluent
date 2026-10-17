@@ -99,6 +99,13 @@
   font-weight: 500;
 }
 
+.fluent-tab-item.drag-target-hover .fluent-tab-content {
+  background: var(--accent-soft, rgba(47, 111, 237, 0.18)) !important;
+  outline: 1.5px dashed var(--accent-color, #2f6fed);
+  outline-offset: -1px;
+  color: var(--accent-color, #2f6fed);
+}
+
 /* Optional badge count */
 .fluent-tab-badge {
   font-size: 10px;

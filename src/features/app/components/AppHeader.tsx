@@ -58,6 +58,7 @@ interface AppHeaderProps {
   onSelectTab?: (tabId: string) => void;
   onAddTab?: (name: string) => void;
   onDeleteTab?: (tabId: string) => void;
+  onDropItemOnTab?: (itemId: number, tabName: string) => void;
 }
 
 const AppHeader = ({
@@ -97,7 +98,8 @@ const AppHeader = ({
   activeTabId,
   onSelectTab,
   onAddTab,
-  onDeleteTab
+  onDeleteTab,
+  onDropItemOnTab
 }: AppHeaderProps) => {
 
   const handleOpenSettings = useCallback(async () => {
@@ -328,6 +330,7 @@ const AppHeader = ({
                 onSelectTab={onSelectTab || (() => {})}
                 onAddTab={onAddTab}
                 onDeleteTab={onDeleteTab}
+                onDropItemOnTab={onDropItemOnTab}
                 t={t}
               />
 

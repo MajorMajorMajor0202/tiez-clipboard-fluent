@@ -10,6 +10,7 @@ interface FluentTabBarProps {
   onSelectTab: (tabId: string) => void;
   onAddTab?: (name: string) => void;
   onDeleteTab?: (tabId: string) => void;
+  onDropItemOnTab?: (itemId: number, tabName: string) => void;
   t?: (key: string) => string;
 }
 
@@ -19,10 +20,12 @@ export const FluentTabBar = ({
   onSelectTab,
   onAddTab,
   onDeleteTab,
+  onDropItemOnTab,
   t
 }: FluentTabBarProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const dialogInputRef = useRef<HTMLInputElement>(null);
+  const [dragOverTabId, setDragOverTabId] = useState<string | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -201,6 +204,7 @@ export const FluentTabBar = ({
           {tabs.map((tab, index) => {
             const isActive = tab.id === activeTabId;
             const isFirstTab = index === 0 || tab.id === "clipboard";
+            const isDragTarget = dragOverTabId === tab.id;
             return (
               <button
                 key={tab.id}
@@ -208,7 +212,35 @@ export const FluentTabBar = ({
                 data-tab-id={tab.id}
                 className={`fluent-tab-item ${isActive ? "active" : ""} ${
                   isFirstTab ? "tab-icon-only" : ""
-                }`}
+                } ${isDragTarget ? "drag-target-hover" : ""}`}
+                onDragOver={(e) => {
+                  if (isFirstTab || tab.isBuiltin) return;
+                  if (e.dataTransfer.types.includes("application/x-tiez-item")) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "copy";
+                    if (dragOverTabId !== tab.id) {
+                      setDragOverTabId(tab.id);
+                    }
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  if (dragOverTabId === tab.id) {
+                    setDragOverTabId(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  if (isFirstTab || tab.isBuiltin) return;
+                  e.preventDefault();
+                  setDragOverTabId(null);
+                  const idStr = e.dataTransfer.getData("application/x-tiez-item");
+                  if (idStr && onDropItemOnTab) {
+                    const id = parseInt(idStr, 10);
+                    if (!isNaN(id)) {
+                      onDropItemOnTab(id, tab.name);
+                    }
+                  }
+                }}
                 onClick={() => {
                   onSelectTab(tab.id);
                   // Ensure clicked tab is scrolled into view

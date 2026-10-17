@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Copy, Trash2, FolderPlus, X, Folder } from "lucide-react";
+import { Trash2, FolderPlus, X, Folder } from "lucide-react";
 import ToastContainer from "./shared/components/ToastContainer";
 import ConfirmDialog from "./shared/components/ConfirmDialog";
+import FluentTooltip from "./shared/components/FluentTooltip";
 
 import { translations } from "./locales";
 import AppHeader from "./features/app/components/AppHeader";
@@ -414,10 +415,16 @@ const App = () => {
 
     const unlistenShown = listen("window-shown", () => {
       setEntranceActive(true);
+      setSelectedItemIds(new Set());
+      lastSelectedIndexRef.current = null;
+      setIsBatchTabDropdownOpen(false);
     });
 
     const unlistenHidden = listen("window-hidden", () => {
       setEntranceActive(false);
+      setSelectedItemIds(new Set());
+      lastSelectedIndexRef.current = null;
+      setIsBatchTabDropdownOpen(false);
     });
 
     return () => {
@@ -1217,28 +1224,6 @@ const App = () => {
     pushToast(t("item_updated"));
   }, [setHistory, pushToast, t]);
 
-  const handleBatchCopy = useCallback(async () => {
-    const selectedItems = filteredHistory.filter(item => selectedItemIds.has(item.id));
-    if (selectedItems.length === 0) return;
-    const combined = selectedItems.map(item => item.content).join("\n");
-    try {
-      await invoke("copy_to_clipboard", {
-        content: combined,
-        contentType: "text",
-        paste: false,
-        id: selectedItems[0].id,
-        deleteAfterUse: false,
-        pasteWithFormat: false,
-        moveToTop: false
-      });
-      pushToast(t("batch_copied").replace("{count}", String(selectedItems.length)));
-      setSelectedItemIds(new Set());
-      lastSelectedIndexRef.current = null;
-    } catch (err) {
-      console.error("Batch copy failed:", err);
-    }
-  }, [filteredHistory, selectedItemIds, pushToast, t]);
-
   const handleBatchDelete = useCallback(() => {
     const count = selectedItemIds.size;
     if (count === 0) return;
@@ -1278,6 +1263,30 @@ const App = () => {
     setSelectedItemIds(new Set());
     lastSelectedIndexRef.current = null;
     setIsBatchTabDropdownOpen(false);
+  }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
+
+  const handleDropItemOnTab = useCallback((itemId: number, tabName: string) => {
+    const itemsToAdd = selectedItemIds.has(itemId) && selectedItemIds.size > 1
+      ? Array.from(selectedItemIds)
+      : [itemId];
+
+    for (const id of itemsToAdd) {
+      const item = history.find((h) => h.id === id);
+      if (item) {
+        const currentTags = item.tags || [];
+        if (!currentTags.includes(tabName)) {
+          handleUpdateTags(id, [...currentTags, tabName]);
+        }
+      }
+    }
+    invoke("create_new_tag", { tagName: tabName }).catch(() => {});
+    if (itemsToAdd.length > 1) {
+      pushToast(t("batch_added_to_tab").replace("{count}", String(itemsToAdd.length)).replace("{name}", tabName));
+      setSelectedItemIds(new Set());
+      lastSelectedIndexRef.current = null;
+    } else {
+      pushToast(t("tab_added").replace("{name}", tabName));
+    }
   }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
 
   const handleConfirmAddEntry = useCallback(async () => {
@@ -1390,6 +1399,7 @@ const App = () => {
         onSelectTab={setActiveTabId}
         onAddTab={handleAddTab}
         onDeleteTab={handleDeleteTab}
+        onDropItemOnTab={handleDropItemOnTab}
         onOpenAddEntry={() => {
           setIsAddEntryModalOpen(true);
           setAddEntryContent("");
@@ -1438,21 +1448,22 @@ const App = () => {
         />
       </main>
 
-      {/* Floating Batch Action Bar */}
+      {/* Floating Batch Action Bar (Pure icons, strictly no button boxes/text, no copy option) */}
       {selectedItemIds.size > 0 && (
         <div className="fluent-batch-bar">
           <span className="fluent-batch-bar-count">
-            {t("selected_count")} {selectedItemIds.size}
+            {selectedItemIds.size}
           </span>
           <div style={{ position: "relative" }}>
-            <button
-              type="button"
-              className="fluent-batch-btn"
-              onClick={() => setIsBatchTabDropdownOpen((prev) => !prev)}
-            >
-              <FolderPlus size={12} />
-              <span>{t("add_to_tab")}</span>
-            </button>
+            <FluentTooltip text={t("add_to_tab")}>
+              <button
+                type="button"
+                className="fluent-batch-icon-btn"
+                onClick={() => setIsBatchTabDropdownOpen((prev) => !prev)}
+              >
+                <FolderPlus size={15} />
+              </button>
+            </FluentTooltip>
             {isBatchTabDropdownOpen && (
               <div className="fluent-batch-dropdown">
                 {tabs.filter((tab) => !tab.isBuiltin && tab.id !== "clipboard").length === 0 ? (
@@ -1477,36 +1488,28 @@ const App = () => {
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className="fluent-batch-btn"
-            onClick={handleBatchCopy}
-            title={t("copy_selected")}
-          >
-            <Copy size={12} />
-            <span>{t("copy_selected")}</span>
-          </button>
-          <button
-            type="button"
-            className="fluent-batch-btn danger"
-            onClick={handleBatchDelete}
-            title={t("delete_selected")}
-          >
-            <Trash2 size={12} />
-            <span>{t("delete_selected")}</span>
-          </button>
-          <button
-            type="button"
-            className="fluent-batch-btn"
-            onClick={() => {
-              setSelectedItemIds(new Set());
-              lastSelectedIndexRef.current = null;
-              setIsBatchTabDropdownOpen(false);
-            }}
-            title={t("abort")}
-          >
-            <X size={12} />
-          </button>
+          <FluentTooltip text={t("delete_selected")}>
+            <button
+              type="button"
+              className="fluent-batch-icon-btn danger"
+              onClick={handleBatchDelete}
+            >
+              <Trash2 size={15} />
+            </button>
+          </FluentTooltip>
+          <FluentTooltip text={t("abort") || "取消"}>
+            <button
+              type="button"
+              className="fluent-batch-icon-btn"
+              onClick={() => {
+                setSelectedItemIds(new Set());
+                lastSelectedIndexRef.current = null;
+                setIsBatchTabDropdownOpen(false);
+              }}
+            >
+              <X size={15} />
+            </button>
+          </FluentTooltip>
         </div>
       )}
 

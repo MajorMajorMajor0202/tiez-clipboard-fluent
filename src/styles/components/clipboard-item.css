@@ -648,7 +648,53 @@
   background: var(--bg-hover, rgba(128, 128, 128, 0.1));
 }
 
-/* Floating Batch Action Bar */
+/* Secondary Actions Menu (...) */
+.secondary-actions-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-element, #ffffff);
+  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+  z-index: 10000;
+  backdrop-filter: blur(16px);
+}
+
+.secondary-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  white-space: nowrap;
+  transition: background 0.12s ease;
+}
+
+.secondary-menu-item:hover {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
+}
+
+.secondary-menu-item svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* Floating Batch Action Bar (Pure icons, strictly no button boxes/text) */
 .fluent-batch-bar {
   position: fixed;
   bottom: 14px;
@@ -656,8 +702,8 @@
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 4px;
+  padding: 4px 8px;
   background: var(--bg-element, #ffffff);
   border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
   border-radius: 4px;
@@ -667,41 +713,38 @@
 }
 
 .fluent-batch-bar-count {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin-right: 4px;
+  color: var(--accent-color, #0078d4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(128, 128, 128, 0.1);
+  margin-right: 2px;
   white-space: nowrap;
 }
 
-.fluent-batch-btn {
+.fluent-batch-icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  font-size: 11px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.2));
-  background: var(--bg-element, transparent);
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
   color: var(--text-primary);
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.fluent-batch-btn:hover {
-  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
-  border-color: var(--border-color, rgba(128, 128, 128, 0.35));
+.fluent-batch-icon-btn:hover {
+  background: var(--bg-hover, rgba(128, 128, 128, 0.15));
 }
 
-.fluent-batch-btn.danger {
+.fluent-batch-icon-btn.danger:hover {
+  background: rgba(255, 77, 79, 0.15);
   color: #ff4d4f;
-  border-color: rgba(255, 77, 79, 0.3);
-}
-
-.fluent-batch-btn.danger:hover {
-  background: rgba(255, 77, 79, 0.12);
-  border-color: #ff4d4f;
 }
 
 .fluent-batch-dropdown {
