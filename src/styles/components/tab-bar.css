@@ -37,7 +37,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 4px 8px 7px 8px;
   font-family: var(--fluent-font-family, system-ui);
   font-size: 13px;
   font-weight: 500;
@@ -57,8 +57,8 @@
 
 /* Icon-only first tab (clipboard / history) */
 .fluent-tab-item.tab-icon-only {
-  padding: 4px 7px;
-  min-width: 28px;
+  padding: 4px 8px 7px 8px;
+  min-width: 32px;
 }
 
 .fluent-tab-item.tab-icon-only .fluent-tab-icon {
@@ -100,14 +100,13 @@
   color: var(--accent-color, #2f6fed);
 }
 
-/* Accent Underline Indicator — positioned right below the tab item content */
+/* Accent Underline Indicator — Original dimensions (16px x 3px), centered via left calc without CSS transform conflict */
 .fluent-tab-indicator {
   position: absolute;
   bottom: 0px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: calc(50% - 8px);
   width: 16px;
-  height: 2.5px;
+  height: 3px;
   border-radius: 2px;
   background: var(--accent-color, #2f6fed);
   pointer-events: none;

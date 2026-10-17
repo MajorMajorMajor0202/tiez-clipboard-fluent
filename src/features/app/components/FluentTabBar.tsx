@@ -195,11 +195,12 @@ export const FluentTabBar = ({
                 {isActive && (
                   <motion.div
                     layoutId="fluent-tab-active-indicator"
+                    layout="position"
                     className="fluent-tab-indicator"
                     transition={{
                       type: "spring",
-                      stiffness: 480,
-                      damping: 36
+                      stiffness: 500,
+                      damping: 35
                     }}
                   />
                 )}
