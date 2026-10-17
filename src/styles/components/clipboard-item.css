@@ -529,109 +529,24 @@
   text-overflow: ellipsis;
 }
 
-/* Tab Assign Flyout — Small <= 4px corners */
-.tab-assign-flyout {
-  width: 204px;
-  background: var(--flyout-background, var(--bg-element));
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.08);
-  backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
-  -webkit-backdrop-filter: var(--flyout-backdrop-filter, blur(10px));
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  box-sizing: border-box;
-}
-
-.dark-mode .tab-assign-flyout {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.tab-flyout-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  padding: 0 2px 4px 2px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.12);
-}
-
-.tab-flyout-header-icon {
-  color: var(--accent-color, #2f6fed);
-  flex-shrink: 0;
-}
-
-.tab-flyout-list {
-  max-height: 140px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 1px 0;
-}
-
-.tab-flyout-empty {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-  padding: 10px 4px;
-}
-
-.tab-flyout-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  padding: 5px 6px;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-  box-sizing: border-box;
-  color: var(--text-primary);
-  transition: background 0.15s ease;
-}
-
-.tab-flyout-item:hover {
-  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
-}
-
-.tab-flyout-item.active {
-  background: var(--accent-soft, rgba(47, 111, 237, 0.1));
-  color: var(--accent-color, #2f6fed);
-}
-
-.tab-flyout-item-icon {
+/* Tab items inside tag-edit-flyout */
+.tag-flyout-suggest-item .tab-flyout-item-icon {
   flex-shrink: 0;
   opacity: 0.65;
 }
 
-.tab-flyout-item.active .tab-flyout-item-icon {
+.tag-flyout-suggest-item.active .tab-flyout-item-icon {
   opacity: 1;
   color: var(--accent-color, #2f6fed);
 }
 
-.tab-flyout-item-name {
-  flex: 1;
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tab-flyout-check {
-  flex-shrink: 0;
+.tag-flyout-suggest-item .tab-flyout-check {
+  margin-left: auto;
   color: var(--accent-color, #2f6fed);
+  flex-shrink: 0;
 }
 
-.tab-flyout-item-delete {
+.tag-flyout-item-delete {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -646,65 +561,21 @@
   margin-left: 2px;
 }
 
-.tab-flyout-item:hover .tab-flyout-item-delete {
+.tag-flyout-suggest-item:hover .tag-flyout-item-delete {
   opacity: 0.6;
 }
 
-.tab-flyout-item-delete:hover {
+.tag-flyout-item-delete:hover {
   opacity: 1 !important;
   color: #ff4d4f !important;
   background: rgba(255, 77, 79, 0.12);
 }
 
-.tab-flyout-create-section {
-  padding-top: 6px;
-  border-top: 1px solid rgba(128, 128, 128, 0.12);
-}
-
-.tab-flyout-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--bg-input);
-  border: var(--input-border, 1px solid rgba(128, 128, 128, 0.2));
-  border-radius: 4px;
-  padding: 2px 4px 2px 6px;
-  box-sizing: border-box;
-}
-
-.tab-flyout-input-wrapper:focus-within {
-  border-color: var(--accent-color, #2f6fed);
-}
-
-.tab-flyout-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  font-family: inherit;
+.tag-flyout-empty {
   font-size: 11px;
-  outline: none;
-  padding: 3px 0;
-  min-width: 0;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 10px 4px;
 }
 
-.tab-flyout-add-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
-  border: none;
-  background: var(--accent-color, #2f6fed);
-  color: #fff;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: opacity 0.15s ease;
-  padding: 0;
-}
-
-.tab-flyout-add-btn:hover {
-  opacity: 0.9;
-}
 

@@ -180,7 +180,7 @@ export const FluentTabBar = ({
           if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
         }}
         tabIndex={-1}
-        title="向左滚动"
+        title={t ? t("scroll_left") : "向左滚动"}
       >
         <ChevronLeft size={13} strokeWidth={2.6} />
       </button>
@@ -298,7 +298,7 @@ export const FluentTabBar = ({
           if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
         }}
         tabIndex={-1}
-        title="向右滚动"
+        title={t ? t("scroll_right") : "向右滚动"}
       >
         <ChevronRight size={13} strokeWidth={2.6} />
       </button>
@@ -319,7 +319,7 @@ export const FluentTabBar = ({
             onClick={handleOpenCreateDialog}
           >
             <Plus size={13} />
-            <span>{t ? t("new_tab") || "新建标签页..." : "新建标签页..."}</span>
+            <span>{t ? t("new_tab") : "新建标签页..."}</span>
           </button>
           {contextMenu.tabId && !contextMenu.isBuiltin && onDeleteTab && (
             <button
@@ -332,7 +332,7 @@ export const FluentTabBar = ({
               }}
             >
               <Trash2 size={13} />
-              <span>{t ? t("delete_tab") || "删除此标签页" : "删除此标签页"}</span>
+              <span>{t ? t("delete_tab") : "删除此标签页"}</span>
             </button>
           )}
         </div>,
@@ -348,12 +348,12 @@ export const FluentTabBar = ({
           }}
         >
           <div className="fluent-tab-dialog" onMouseDown={(e) => e.stopPropagation()}>
-            <div className="fluent-tab-dialog-title">{t ? t("create_new_tab") || "新建标签页" : "新建标签页"}</div>
+            <div className="fluent-tab-dialog-title">{t ? t("create_new_tab") : "新建标签页"}</div>
             <input
               ref={dialogInputRef}
               type="text"
               className="fluent-tab-dialog-input"
-              placeholder={t ? t("tab_name_placeholder") || "输入标签集名称..." : "输入标签集名称..."}
+              placeholder={t ? t("tab_name_placeholder") : "输入标签页名称..."}
               value={dialogTabName}
               onChange={(e) => setDialogTabName(e.target.value)}
               onKeyDown={(e) => {
@@ -373,14 +373,14 @@ export const FluentTabBar = ({
                 className="fluent-tab-dialog-btn"
                 onClick={() => setIsCreateDialogOpen(false)}
               >
-                {t ? t("cancel") || "取消" : "取消"}
+                {t ? t("cancel") : "取消"}
               </button>
               <button
                 type="button"
                 className="fluent-tab-dialog-btn primary"
                 onClick={handleConfirmCreateDialog}
               >
-                {t ? t("confirm") || "确定" : "确定"}
+                {t ? t("confirm") : "确定"}
               </button>
             </div>
           </div>

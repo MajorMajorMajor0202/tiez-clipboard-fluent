@@ -32,7 +32,6 @@ import {
     FolderPlus,
     Folder,
     Check,
-    Plus,
     Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -911,6 +910,12 @@ const ClipboardItem = ({
         return (tabs || []).filter((t) => !t.isBuiltin && t.id !== "clipboard");
     }, [tabs]);
 
+    const filteredCustomTabs = useMemo(() => {
+        const query = newTabNameInput.trim().toLowerCase();
+        if (!query) return availableCustomTabs;
+        return availableCustomTabs.filter((t) => t.name.toLowerCase().includes(query));
+    }, [availableCustomTabs, newTabNameInput]);
+
     const hasAnyTab = useMemo(() => {
         return availableCustomTabs.some((t) => item.tags?.includes(t.name) || item.tab_id === t.id);
     }, [availableCustomTabs, item.tags, item.tab_id]);
@@ -950,7 +955,7 @@ const ClipboardItem = ({
         const flyoutHeight = 180;
         const spaceBelow = window.innerHeight - rect.bottom;
         const isAbove = spaceBelow < flyoutHeight;
-        const flyoutWidth = 204;
+        const flyoutWidth = 192;
         let left = rect.left + rect.width / 2 - flyoutWidth / 2;
 
         if (left + flyoutWidth > window.innerWidth - 12) {
@@ -1771,7 +1776,7 @@ const ClipboardItem = ({
                                 {item.is_pinned ? <PinOff size={12} /> : <Pin size={12} />}
                             </button>
                         </FluentTooltip>
-                        <FluentTooltip text={t('add_to_tab') || '添加到标签页'}>
+                        <FluentTooltip text={t('add_to_tab')}>
                             <button
                                 ref={tabButtonRef}
                                 className={`btn-icon-ghost ${isTabFlyoutOpen ? "tag-editing-active" : (hasAnyTab ? "active" : "")}`}
@@ -1783,7 +1788,7 @@ const ClipboardItem = ({
                                 <FolderPlus size={12} />
                             </button>
                         </FluentTooltip>
-                        <FluentTooltip text="Tags">
+                        <FluentTooltip text={t('tags')}>
                             <button
                                 ref={tagButtonRef}
                                 className={`btn-icon-ghost ${isEditingTags ? "tag-editing-active" : (item.tags && item.tags.length > 0 ? "active" : "")}`}
@@ -2259,7 +2264,7 @@ const ClipboardItem = ({
 
             {isTabFlyoutOpen && tabFlyoutPosition && createPortal(
                 <div
-                    className="tab-assign-flyout"
+                    className="tag-edit-flyout tab-assign-flyout"
                     style={{
                         position: 'fixed',
                         left: `${tabFlyoutPosition.left}px`,
@@ -2269,33 +2274,72 @@ const ClipboardItem = ({
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="tab-flyout-header">
-                        <FolderPlus size={13} className="tab-flyout-header-icon" />
-                        <span>{t('add_to_tab') || '添加到标签页'}</span>
+                    <div className="tag-flyout-search-wrapper">
+                        <FolderPlus size={12} className="tag-flyout-search-icon" />
+                        <input
+                            ref={tabNewInputRef}
+                            type="text"
+                            className="tag-flyout-search-input"
+                            placeholder={t('enter_tab_name')}
+                            value={newTabNameInput}
+                            autoFocus
+                            onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
+                            onFocus={() => invoke('activate_window_focus').catch(console.error)}
+                            onChange={(e) => setNewTabNameInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onTabFlyoutCancel?.();
+                                } else if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const trimmed = newTabNameInput.trim();
+                                    if (trimmed) {
+                                        const matched = availableCustomTabs.find(
+                                            (tab) => tab.name.toLowerCase() === trimmed.toLowerCase()
+                                        );
+                                        if (matched) {
+                                            onToggleItemTab?.(matched.name);
+                                        } else {
+                                            onAddNewTabAndAssign?.(trimmed);
+                                        }
+                                        setNewTabNameInput("");
+                                        onTabFlyoutCancel?.();
+                                    }
+                                }
+                            }}
+                        />
                     </div>
 
-                    <div className="tab-flyout-list hide-scrollbar" onWheel={(e) => e.stopPropagation()}>
-                        {availableCustomTabs.length === 0 ? (
-                            <div className="tab-flyout-empty">{t('no_custom_tabs') || '暂无自定义标签页'}</div>
+                    <div
+                        className="tag-flyout-suggestions hide-scrollbar"
+                        role="listbox"
+                        onWheel={(e) => e.stopPropagation()}
+                    >
+                        {filteredCustomTabs.length === 0 ? (
+                            <div className="tag-flyout-empty">{t('no_custom_tabs')}</div>
                         ) : (
-                            availableCustomTabs.map((cTab) => {
+                            filteredCustomTabs.map((cTab) => {
                                 const isIn = item.tags?.includes(cTab.name) || item.tab_id === cTab.id;
                                 return (
                                     <button
                                         key={cTab.id}
                                         type="button"
-                                        className={`tab-flyout-item ${isIn ? 'active' : ''}`}
+                                        role="option"
+                                        aria-selected={isIn}
+                                        className={`tag-flyout-suggest-item ${isIn ? 'active' : ''}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onToggleItemTab?.(cTab.name);
                                         }}
                                     >
                                         <Folder size={12} className="tab-flyout-item-icon" />
-                                        <span className="tab-flyout-item-name">{cTab.name}</span>
+                                        <span className="tag-flyout-text">{cTab.name}</span>
                                         {isIn && <Check size={12} className="tab-flyout-check" />}
                                         <span
-                                            className="tab-flyout-item-delete"
-                                            title={t('delete_tab') || '删除此标签页'}
+                                            className="tag-flyout-item-delete"
+                                            title={t('delete_tab')}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onDeleteTab?.(cTab.id);
@@ -2307,54 +2351,6 @@ const ClipboardItem = ({
                                 );
                             })
                         )}
-                    </div>
-
-                    <div className="tab-flyout-create-section">
-                        <div className="tab-flyout-input-wrapper">
-                            <input
-                                ref={tabNewInputRef}
-                                type="text"
-                                className="tab-flyout-input"
-                                placeholder={t('new_tab_name_placeholder') || '新标签页名称...'}
-                                value={newTabNameInput}
-                                onChange={(e) => setNewTabNameInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        const trimmed = newTabNameInput.trim();
-                                        if (trimmed) {
-                                            onAddNewTabAndAssign?.(trimmed);
-                                            setNewTabNameInput("");
-                                            onTabFlyoutCancel?.();
-                                        }
-                                    } else if (e.key === 'Escape') {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        onTabFlyoutCancel?.();
-                                    }
-                                }}
-                                onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
-                                onFocus={() => invoke('activate_window_focus').catch(console.error)}
-                                autoFocus
-                            />
-                            <button
-                                type="button"
-                                className="tab-flyout-add-btn"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const trimmed = newTabNameInput.trim();
-                                    if (trimmed) {
-                                        onAddNewTabAndAssign?.(trimmed);
-                                        setNewTabNameInput("");
-                                        onTabFlyoutCancel?.();
-                                    }
-                                }}
-                                title={t('create_and_add') || '新建并加入'}
-                            >
-                                <Plus size={12} strokeWidth={2.4} />
-                            </button>
-                        </div>
                     </div>
                 </div>,
                 document.body

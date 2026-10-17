@@ -1077,7 +1077,7 @@ const App = () => {
     } catch (e) {
       console.error("Failed to save tabs", e);
     }
-    pushToast(t("tab_created") || `已创建标签页: ${trimmed}`);
+    pushToast(t("tab_created").replace("{name}", trimmed));
   }, [tabs, setTabs, setActiveTabId, t, pushToast]);
 
   const handleDeleteTab = useCallback((tabId: string) => {
@@ -1094,7 +1094,7 @@ const App = () => {
     } catch (e) {
       console.error("Failed to save tabs", e);
     }
-    pushToast(t("tab_deleted") || `已删除标签页: ${tabToDelete.name}`);
+    pushToast(t("tab_deleted").replace("{name}", tabToDelete.name));
   }, [tabs, setTabs, activeTabId, setActiveTabId, t, pushToast]);
 
   const handleToggleItemInTab = useCallback((itemId: number, tabName: string) => {
@@ -1105,14 +1105,14 @@ const App = () => {
     let nextTags: string[];
     if (isIn) {
       nextTags = currentTags.filter((t) => t !== tabName);
-      pushToast(`已从「${tabName}」移除`);
+      pushToast(t("tab_removed").replace("{name}", tabName));
     } else {
       nextTags = [...currentTags, tabName];
       invoke("create_new_tag", { tagName: tabName }).catch(() => {});
-      pushToast(`已加入「${tabName}」`);
+      pushToast(t("tab_added").replace("{name}", tabName));
     }
     handleUpdateTags(itemId, nextTags);
-  }, [history, handleUpdateTags, pushToast]);
+  }, [history, handleUpdateTags, pushToast, t]);
 
   const handleAddNewTabAndAssign = useCallback((itemId: number, name: string) => {
     const trimmed = name.trim();
@@ -1141,8 +1141,8 @@ const App = () => {
         invoke("create_new_tag", { tagName: trimmed }).catch(() => {});
       }
     }
-    pushToast(`已创建并加入「${trimmed}」`);
-  }, [tabs, setTabs, history, handleUpdateTags, pushToast]);
+    pushToast(t("tab_created_and_assigned").replace("{name}", trimmed));
+  }, [tabs, setTabs, history, handleUpdateTags, pushToast, t]);
 
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
