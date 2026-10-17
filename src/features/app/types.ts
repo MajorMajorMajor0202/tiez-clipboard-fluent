@@ -90,6 +90,12 @@ export interface AppState {
   setStripNewlineHotkey: StateSetter<string>;
   quickPasteModifier: QuickPasteModifier;
   setQuickPasteModifier: StateSetter<QuickPasteModifier>;
+  quickTabAssignEnabled: boolean;
+  setQuickTabAssignEnabled: StateSetter<boolean>;
+  quickTabAssignSeconds: number;
+  setQuickTabAssignSeconds: StateSetter<number>;
+  quickTabAssignModifier: string;
+  setQuickTabAssignModifier: StateSetter<string>;
   sequentialMode: boolean;
   setSequentialModeState: StateSetter<boolean>;
   isRecording: boolean;

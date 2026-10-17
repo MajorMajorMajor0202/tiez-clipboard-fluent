@@ -61,6 +61,9 @@ export const useAppState = (): AppState => {
   const [stripNewlineHotkey, setStripNewlineHotkey] = useState<string>("Alt+Shift+C");
   const [quickPasteModifier, setQuickPasteModifier] =
     useState<QuickPasteModifier>("disabled");
+  const [quickTabAssignEnabled, setQuickTabAssignEnabled] = useState<boolean>(true);
+  const [quickTabAssignSeconds, setQuickTabAssignSeconds] = useState<number>(5);
+  const [quickTabAssignModifier, setQuickTabAssignModifier] = useState<string>("ctrl+alt");
   const [sequentialMode, setSequentialModeState] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isRecordingSequential, setIsRecordingSequential] = useState(false);
@@ -471,6 +474,12 @@ export const useAppState = (): AppState => {
     activeTabId,
     setActiveTabId,
     editingTabFlyoutId,
-    setEditingTabFlyoutId
+    setEditingTabFlyoutId,
+    quickTabAssignEnabled,
+    setQuickTabAssignEnabled,
+    quickTabAssignSeconds,
+    setQuickTabAssignSeconds,
+    quickTabAssignModifier,
+    setQuickTabAssignModifier
   };
 };

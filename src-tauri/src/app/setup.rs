@@ -18,7 +18,7 @@ use crate::infrastructure::windows_ext::WindowExt;
 use crate::services::encryption_queue::init_encryption_queue;
 use crate::services::sensitive_align::spawn_sensitive_alignment;
 use std::ptr::null_mut;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::sync::{Mutex, OnceLock};
 use tauri::{App, AppHandle, Emitter, Manager};
 #[cfg(target_os = "windows")]
@@ -195,6 +195,9 @@ pub struct StartupSettings {
     pub search_hotkey: String,
     pub strip_newline_hotkey: String,
     pub quick_paste_modifier: String,
+    pub quick_tab_assign_enabled: bool,
+    pub quick_tab_assign_seconds: u32,
+    pub quick_tab_assign_modifier: String,
     pub sound_enabled: bool,
     pub hide_tray_icon: bool,
     pub edge_docking: bool,
@@ -294,6 +297,20 @@ fn load_settings(repo: &impl SettingsRepository) -> StartupSettings {
             .get("app.quick_paste_modifier")
             .unwrap_or(Some("disabled".to_string()))
             .unwrap_or("disabled".to_string()),
+        quick_tab_assign_enabled: repo
+            .get("app.quick_tab_assign_enabled")
+            .unwrap_or(Some("true".to_string()))
+            .map(|v| v != "false")
+            .unwrap_or(true),
+        quick_tab_assign_seconds: repo
+            .get("app.quick_tab_assign_seconds")
+            .unwrap_or(Some("5".to_string()))
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(5),
+        quick_tab_assign_modifier: repo
+            .get("app.quick_tab_assign_modifier")
+            .unwrap_or(Some("ctrl+alt".to_string()))
+            .unwrap_or("ctrl+alt".to_string()),
         sound_enabled: repo
             .get("app.sound_enabled")
             .unwrap_or(Some("false".to_string()))
@@ -393,6 +410,9 @@ fn setup_state(
         search_hotkey: std::sync::Mutex::new(s.search_hotkey.clone()),
         strip_newline_hotkey: std::sync::Mutex::new(s.strip_newline_hotkey.clone()),
         quick_paste_modifier: std::sync::Mutex::new(s.quick_paste_modifier.clone()),
+        quick_tab_assign_enabled: AtomicBool::new(s.quick_tab_assign_enabled),
+        quick_tab_assign_seconds: AtomicU32::new(s.quick_tab_assign_seconds),
+        quick_tab_assign_modifier: std::sync::Mutex::new(s.quick_tab_assign_modifier.clone()),
         sound_enabled: AtomicBool::new(s.sound_enabled),
         hide_tray_icon: AtomicBool::new(s.hide_tray_icon),
         edge_docking: AtomicBool::new(s.edge_docking),

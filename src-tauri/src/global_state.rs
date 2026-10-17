@@ -34,6 +34,9 @@ pub static LAST_SHOW_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 pub static HOOK_THREAD_ID: AtomicU32 = AtomicU32::new(0);
 pub static TASKBAR_CREATED_MSG: AtomicU32 = AtomicU32::new(0);
 pub static QUICK_PASTE_DIGIT_MASK: AtomicU32 = AtomicU32::new(0);
+pub static LAST_COPY_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
+pub static LAST_COPY_ITEM_ID: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
+pub static QUICK_TAB_ASSIGN_DIGIT_MASK: AtomicU32 = AtomicU32::new(0);
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DockPosition {

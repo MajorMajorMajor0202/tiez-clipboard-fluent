@@ -71,6 +71,24 @@ fn quick_paste_modifier_active(
     }
 }
 
+#[cfg(target_os = "windows")]
+fn quick_tab_assign_modifier_active(
+    modifier: &str,
+    ctrl_down: bool,
+    alt_down: bool,
+    shift_down: bool,
+    win_down: bool,
+) -> bool {
+    let m = modifier.trim().to_ascii_lowercase().replace(' ', "");
+    match m.as_str() {
+        "ctrl+alt" | "control+alt" | "alt+ctrl" => ctrl_down && alt_down && !shift_down && !win_down,
+        "alt+shift" | "shift+alt" => alt_down && shift_down && !ctrl_down && !win_down,
+        "ctrl+shift" | "control+shift" | "shift+ctrl" => ctrl_down && shift_down && !alt_down && !win_down,
+        "win+alt" | "alt+win" => win_down && alt_down && !ctrl_down && !shift_down,
+        _ => ctrl_down && alt_down && !shift_down && !win_down,
+    }
+}
+
 #[tauri::command]
 pub fn set_recording_mode(app_handle: AppHandle, enabled: bool) -> Result<(), String> {
     IS_RECORDING.store(enabled, Ordering::SeqCst);
@@ -318,6 +336,80 @@ pub unsafe extern "system" fn keyboard_proc(
                     }
 
                     return LRESULT(1);
+                }
+            }
+        }
+
+        // 4.5. Quick Tab Assign by Modifier+Number within N seconds after copy
+        {
+            let ctrl_down = (GetAsyncKeyState(VK_CONTROL.0 as i32) as u16 & 0x8000) != 0;
+            let alt_down = (GetAsyncKeyState(VK_MENU.0 as i32) as u16 & 0x8000) != 0;
+            let shift_down = (GetAsyncKeyState(VK_SHIFT.0 as i32) as u16 & 0x8000) != 0;
+            let win_down = (GetAsyncKeyState(VK_LWIN.0 as i32) as u16 & 0x8000) != 0
+                || (GetAsyncKeyState(VK_RWIN.0 as i32) as u16 & 0x8000) != 0;
+
+            if is_up
+                && matches!(
+                    vk,
+                    0x11 | 0xA2 | 0xA3 | 0x12 | 0xA4 | 0xA5 | 0x10 | 0xA0 | 0xA1 | 0x5B | 0x5C
+                )
+            {
+                QUICK_TAB_ASSIGN_DIGIT_MASK.store(0, Ordering::SeqCst);
+            }
+
+            if let Some(index) = quick_paste_index_from_vk(vk) {
+                let bit = 1u32 << index;
+
+                if is_up {
+                    let pressed_mask = QUICK_TAB_ASSIGN_DIGIT_MASK.fetch_and(!bit, Ordering::SeqCst);
+                    if pressed_mask & bit != 0 {
+                        return LRESULT(1);
+                    }
+                }
+
+                if is_down {
+                    if let Some(handle) = GLOBAL_APP_HANDLE.get() {
+                        let settings = handle.state::<SettingsState>();
+                        if settings.quick_tab_assign_enabled.load(Ordering::Relaxed) {
+                            let modifier = settings
+                                .quick_tab_assign_modifier
+                                .lock()
+                                .unwrap()
+                                .clone();
+                            if quick_tab_assign_modifier_active(
+                                &modifier,
+                                ctrl_down,
+                                alt_down,
+                                shift_down,
+                                win_down,
+                            ) {
+                                let seconds = settings.quick_tab_assign_seconds.load(Ordering::Relaxed);
+                                let now = std::time::SystemTime::now()
+                                    .duration_since(std::time::UNIX_EPOCH)
+                                    .unwrap_or_default()
+                                    .as_millis() as u64;
+                                let last_copy = LAST_COPY_TIMESTAMP.load(Ordering::Relaxed);
+                                let diff = now.saturating_sub(last_copy);
+                                if diff <= (seconds as u64) * 1000 {
+                                    let pressed_mask = QUICK_TAB_ASSIGN_DIGIT_MASK.fetch_or(bit, Ordering::SeqCst);
+                                    if pressed_mask & bit != 0 {
+                                        return LRESULT(1);
+                                    }
+
+                                    let item_id = LAST_COPY_ITEM_ID.load(Ordering::Relaxed);
+                                    let handle_clone = handle.clone();
+                                    tauri::async_runtime::spawn(async move {
+                                        let _ = handle_clone.emit("quick-assign-tab", serde_json::json!({
+                                            "index": index,
+                                            "itemId": item_id
+                                        }));
+                                    });
+
+                                    return LRESULT(1);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

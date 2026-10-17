@@ -596,6 +596,13 @@ impl PipelineStage for DistributionStage {
             .app_handle
             .emit("clipboard-updated", truncate_entry_for_ui(entry.clone()));
 
+        let now_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis() as u64;
+        crate::global_state::LAST_COPY_TIMESTAMP.store(now_ms, Ordering::Relaxed);
+        crate::global_state::LAST_COPY_ITEM_ID.store(entry.id, Ordering::Relaxed);
+
         if settings.persistent.load(Ordering::Relaxed) && entry.id > 0 {
             crate::services::cloud_sync::request_cloud_sync(ctx.app_handle.clone());
         }

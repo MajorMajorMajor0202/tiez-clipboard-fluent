@@ -201,6 +201,23 @@ pub fn save_setting(
                 *guard = value.clone();
             }
         }
+        "app.quick_tab_assign_enabled" => {
+            settings_state
+                .quick_tab_assign_enabled
+                .store(value != "false", Ordering::Relaxed);
+        }
+        "app.quick_tab_assign_seconds" => {
+            if let Ok(sec) = value.parse::<u32>() {
+                settings_state
+                    .quick_tab_assign_seconds
+                    .store(sec, Ordering::Relaxed);
+            }
+        }
+        "app.quick_tab_assign_modifier" => {
+            if let Ok(mut guard) = settings_state.quick_tab_assign_modifier.lock() {
+                *guard = value.trim().to_ascii_lowercase();
+            }
+        }
         "app.deduplicate" => {
             settings_state
                 .deduplicate

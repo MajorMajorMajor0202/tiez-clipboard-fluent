@@ -99,6 +99,9 @@ interface UseSettingsPostInitOptions {
   setSearchHotkey: (val: string) => void;
   setStripNewlineHotkey: (val: string) => void;
   setQuickPasteModifier: (val: QuickPasteModifier) => void;
+  setQuickTabAssignEnabled?: (val: boolean) => void;
+  setQuickTabAssignSeconds?: (val: number) => void;
+  setQuickTabAssignModifier?: (val: string) => void;
   setSequentialModeState: (val: boolean) => void;
   setSoundEnabled: (val: boolean) => void;
   setPasteSoundEnabled: (val: boolean) => void;
@@ -186,6 +189,9 @@ export const useSettingsPostInit = ({
   setSearchHotkey,
   setStripNewlineHotkey,
   setQuickPasteModifier,
+  setQuickTabAssignEnabled,
+  setQuickTabAssignSeconds,
+  setQuickTabAssignModifier,
   setSequentialModeState,
   setSoundEnabled,
   setPasteSoundEnabled,
@@ -386,6 +392,18 @@ export const useSettingsPostInit = ({
     if (settings["app.search_hotkey"] !== undefined) setSearchHotkey(settings["app.search_hotkey"]);
     if (settings["app.strip_newline_hotkey"] !== undefined) setStripNewlineHotkey(settings["app.strip_newline_hotkey"]);
     setQuickPasteModifier(normalizeQuickPasteModifier(settings["app.quick_paste_modifier"]));
+    if (settings["app.quick_tab_assign_enabled"] !== undefined && setQuickTabAssignEnabled) {
+      setQuickTabAssignEnabled(settings["app.quick_tab_assign_enabled"] === "true");
+    }
+    if (settings["app.quick_tab_assign_seconds"] && setQuickTabAssignSeconds) {
+      const parsed = parseInt(settings["app.quick_tab_assign_seconds"], 10);
+      if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 30) {
+        setQuickTabAssignSeconds(parsed);
+      }
+    }
+    if (settings["app.quick_tab_assign_modifier"] && setQuickTabAssignModifier) {
+      setQuickTabAssignModifier(settings["app.quick_tab_assign_modifier"]);
+    }
     if (settings["app.sequential_mode"] === "true") setSequentialModeState(true);
     if (settings["app.sound_enabled"] === "true") setSoundEnabled(true);
     setPasteSoundEnabled(settings["app.sound_paste_enabled"] !== "false");
@@ -531,6 +549,9 @@ export const useSettingsPostInit = ({
     setSearchHotkey,
     setStripNewlineHotkey,
     setQuickPasteModifier,
+    setQuickTabAssignEnabled,
+    setQuickTabAssignSeconds,
+    setQuickTabAssignModifier,
     setSequentialModeState,
     setSoundEnabled,
     setPasteSoundEnabled,

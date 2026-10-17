@@ -199,6 +199,15 @@ pub async fn copy_to_clipboard(
         content.len()
     );
 
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64;
+    crate::global_state::LAST_COPY_TIMESTAMP.store(now_ms, std::sync::atomic::Ordering::Relaxed);
+    if id != 0 {
+        crate::global_state::LAST_COPY_ITEM_ID.store(id, std::sync::atomic::Ordering::Relaxed);
+    }
+
     let mut html_content: Option<String> = None;
 
     // 0. Resolve full content if ID is provided and content is placeholder/truncated

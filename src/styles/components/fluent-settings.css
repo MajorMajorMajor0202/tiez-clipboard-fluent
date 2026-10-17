@@ -1021,3 +1021,102 @@ label:not(.switch) > input[type="checkbox"].cb {
   transform: translateY(0);
 }
 
+/* Quick Tab Assign Slots Grid & Cards */
+.quick-tab-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.quick-tab-slot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--line-soft);
+  background-color: var(--bg-card, rgba(0, 0, 0, 0.02));
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.dark-mode .quick-tab-slot-card {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.quick-tab-slot-card.assigned {
+  border-color: var(--line-strong, rgba(0, 0, 0, 0.15));
+  background-color: var(--bg-subtle, rgba(0, 0, 0, 0.04));
+}
+
+.dark-mode .quick-tab-slot-card.assigned {
+  border-color: rgba(255, 255, 255, 0.16);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.quick-tab-slot-card.empty {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.quick-tab-slot-hotkey {
+  display: flex;
+  align-items: center;
+}
+
+.quick-tab-key-cap {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono, Consolas, "Segoe UI Mono", monospace);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--line-soft);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.dark-mode .quick-tab-key-cap {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.quick-tab-slot-target {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.quick-tab-slot-icon {
+  flex-shrink: 0;
+  color: var(--accent-color, #0078d4);
+  opacity: 0.85;
+}
+
+.quick-tab-slot-card.empty .quick-tab-slot-icon {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.quick-tab-slot-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-tab-slot-name .unassigned-text {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-style: italic;
+}
+
+

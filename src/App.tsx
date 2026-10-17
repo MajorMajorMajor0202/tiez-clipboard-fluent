@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { listen, emit } from "@tauri-apps/api/event";
 import { Trash2, FolderPlus, X, Folder } from "lucide-react";
 import ToastContainer from "./shared/components/ToastContainer";
 import ConfirmDialog from "./shared/components/ConfirmDialog";
@@ -185,6 +185,12 @@ const App = () => {
     setStripNewlineHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
+    quickTabAssignEnabled,
+    setQuickTabAssignEnabled,
+    quickTabAssignSeconds,
+    setQuickTabAssignSeconds,
+    quickTabAssignModifier,
+    setQuickTabAssignModifier,
     setSequentialModeState,
     isRecording,
     isRecordingSequential,
@@ -634,6 +640,8 @@ const App = () => {
   useAnnouncements();
 
   const tagManagerSizeRef = useRef<{ width: number; height: number } | null>(null);
+  const lastCopiedItemIdRef = useRef<number | null>(null);
+  const lastCopiedTimestampRef = useRef<number>(0);
 
   const settings = useSettingsInit({
     setAppSettings,
@@ -716,6 +724,9 @@ const App = () => {
     setSearchHotkey,
     setStripNewlineHotkey,
     setQuickPasteModifier,
+    setQuickTabAssignEnabled,
+    setQuickTabAssignSeconds,
+    setQuickTabAssignModifier,
     setSequentialModeState,
     setSoundEnabled,
     setPasteSoundEnabled,
@@ -886,6 +897,8 @@ const App = () => {
 
   useClipboardEvents({
     onUpdated: (updatedItem) => {
+      lastCopiedItemIdRef.current = updatedItem.id;
+      lastCopiedTimestampRef.current = Date.now();
       setHistory(prev => {
         const withoutItem = prev.filter(item => item.id !== updatedItem.id);
         return insertHistoryItem(withoutItem, updatedItem);
@@ -1380,6 +1393,89 @@ const App = () => {
       window.removeEventListener("tiez-card-dropped-on-tab", handleCardDrop);
     };
   }, [handleDropItemOnTab]);
+
+  const handleQuickAssignToTab = useCallback((tabIndex: number, specificItemId?: number) => {
+    if (!quickTabAssignEnabled) return;
+    const customTabs = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard").slice(0, 10);
+    if (tabIndex < 0 || tabIndex >= customTabs.length) {
+      return;
+    }
+    const targetTab = customTabs[tabIndex];
+    const targetItemId = specificItemId ?? lastCopiedItemIdRef.current ?? history[0]?.id;
+    if (!targetItemId) return;
+
+    setTabAssignments((prev) => {
+      const currentList = prev[targetTab.id] || [];
+      if (currentList.includes(targetItemId)) {
+        pushToast(t("quick_tab_already_in_toast") ? t("quick_tab_already_in_toast").replace("{name}", targetTab.name) : `条目已在「${targetTab.name}」中`);
+        return prev;
+      }
+      const nextList = [...currentList, targetItemId];
+      const next = { ...prev, [targetTab.id]: nextList };
+      saveTabAssignments(next);
+      pushToast(t("quick_tab_assigned_toast") ? t("quick_tab_assigned_toast").replace("{name}", targetTab.name) : `已快速归类至「${targetTab.name}」`);
+      if (soundEnabled) {
+        emit("play-sound", "paste").catch(() => {});
+      }
+      return next;
+    });
+  }, [quickTabAssignEnabled, tabs, history, saveTabAssignments, pushToast, t, soundEnabled]);
+
+  useEffect(() => {
+    const unlistenPromise = listen<{ index: number; itemId?: number | null }>("quick-assign-tab", (event) => {
+      handleQuickAssignToTab(event.payload.index, event.payload.itemId ?? undefined);
+    });
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, [handleQuickAssignToTab]);
+
+  useEffect(() => {
+    if (!quickTabAssignEnabled) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement as HTMLElement | null;
+      if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.isContentEditable)) {
+        return;
+      }
+      const elapsed = Date.now() - lastCopiedTimestampRef.current;
+      if (elapsed > quickTabAssignSeconds * 1000) return;
+
+      const m = (quickTabAssignModifier || "ctrl+alt").trim().toLowerCase().replace(/\s+/g, "");
+      let modMatched = false;
+      if (m === "ctrl+alt" || m === "control+alt" || m === "alt+ctrl") {
+        modMatched = e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey;
+      } else if (m === "alt+shift" || m === "shift+alt") {
+        modMatched = e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey;
+      } else if (m === "ctrl+shift" || m === "control+shift" || m === "shift+ctrl") {
+        modMatched = e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey;
+      } else if (m === "win+alt" || m === "alt+win") {
+        modMatched = e.metaKey && e.altKey && !e.ctrlKey && !e.shiftKey;
+      }
+
+      if (!modMatched) return;
+
+      let index: number | null = null;
+      if (e.code === "Digit1" || e.code === "Numpad1") index = 0;
+      else if (e.code === "Digit2" || e.code === "Numpad2") index = 1;
+      else if (e.code === "Digit3" || e.code === "Numpad3") index = 2;
+      else if (e.code === "Digit4" || e.code === "Numpad4") index = 3;
+      else if (e.code === "Digit5" || e.code === "Numpad5") index = 4;
+      else if (e.code === "Digit6" || e.code === "Numpad6") index = 5;
+      else if (e.code === "Digit7" || e.code === "Numpad7") index = 6;
+      else if (e.code === "Digit8" || e.code === "Numpad8") index = 7;
+      else if (e.code === "Digit9" || e.code === "Numpad9") index = 8;
+      else if (e.code === "Digit0" || e.code === "Numpad0") index = 9;
+
+      if (index !== null) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleQuickAssignToTab(index);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [quickTabAssignEnabled, quickTabAssignSeconds, quickTabAssignModifier, handleQuickAssignToTab]);
 
   const handleConfirmAddEntry = useCallback(async () => {
     const trimmed = addEntryContent.trim();

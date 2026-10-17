@@ -13,7 +13,8 @@ import {
   Edit3,
   Activity,
   Trash2,
-  Plus
+  Plus,
+  Folder
 } from "lucide-react";
 import { translations } from "../../../locales";
 import { useAppState } from "../../app/hooks/useAppState";
@@ -198,6 +199,13 @@ const SettingsWindow = () => {
     setStripNewlineHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
+    tabs,
+    quickTabAssignEnabled,
+    setQuickTabAssignEnabled,
+    quickTabAssignSeconds,
+    setQuickTabAssignSeconds,
+    quickTabAssignModifier,
+    setQuickTabAssignModifier,
     sequentialMode,
     setSequentialModeState,
     isRecording,
@@ -346,6 +354,9 @@ const SettingsWindow = () => {
     setSearchHotkey,
     setStripNewlineHotkey,
     setQuickPasteModifier,
+    setQuickTabAssignEnabled,
+    setQuickTabAssignSeconds,
+    setQuickTabAssignModifier,
     setSequentialModeState,
     setSoundEnabled,
     setSoundVolume,
@@ -1494,6 +1505,119 @@ const SettingsWindow = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* Quick Tab Assign Expander */}
+            <div className="fluent-setting-expander">
+              <div
+                className={`fluent-setting-expander-header ${expandedCards['quickTabAssign'] ? 'expanded' : ''}`}
+                onClick={() => toggleExpander('quickTabAssign')}
+              >
+                <div className="fluent-setting-info">
+                  <span className="fluent-setting-title">{t('quick_tab_assign_title') || '复制后快速归类到标签页'}</span>
+                  <span className="fluent-setting-description">
+                    {t('quick_tab_assign_desc') || '每次复制东西之后的几秒内，可按下快捷键将刚复制的条目直接归入对应顺序的标签页（前10个）'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <label className="fluent-switch" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={quickTabAssignEnabled}
+                      onChange={(e) => {
+                        const val = e.target.checked;
+                        setQuickTabAssignEnabled(val);
+                        saveAppSetting('quick_tab_assign_enabled', String(val));
+                      }}
+                    />
+                    <span className="fluent-slider" />
+                  </label>
+                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['quickTabAssign'] ? 'expanded' : ''}`} />
+                </div>
+              </div>
+              {expandedCards['quickTabAssign'] && (
+                <div className="fluent-setting-expander-content">
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('quick_tab_assign_seconds_label') || '有效时间窗口 (秒)'}</span>
+                      <span className="fluent-setting-description">
+                        {t('quick_tab_assign_seconds_desc') || '复制发生后的指定秒数内按下快捷键生效 (1~30秒，默认5秒)'}
+                      </span>
+                    </div>
+                    <FluentNumberBox
+                      value={quickTabAssignSeconds}
+                      min={1}
+                      max={30}
+                      step={1}
+                      onChange={(v) => {
+                        const clamped = Math.min(30, Math.max(1, v));
+                        setQuickTabAssignSeconds(clamped);
+                        saveAppSetting('quick_tab_assign_seconds', String(clamped));
+                      }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('quick_tab_assign_modifier_label') || '快捷键修饰键'}</span>
+                      <span className="fluent-setting-description">
+                        {t('quick_tab_assign_modifier_desc') || '搭配数字键 1~9 和 0 触发对应位置的标签页'}
+                      </span>
+                    </div>
+                    <FluentDropdown
+                      options={[
+                        { id: "ctrl+alt", label: "Ctrl + Alt" },
+                        { id: "alt+shift", label: "Alt + Shift" },
+                        { id: "ctrl+shift", label: "Ctrl + Shift" },
+                        { id: "win+alt", label: "Win + Alt" }
+                      ]}
+                      value={quickTabAssignModifier}
+                      onChange={(val) => {
+                        setQuickTabAssignModifier(val);
+                        saveAppSetting('quick_tab_assign_modifier', val);
+                      }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card vertical">
+                    <div className="fluent-setting-info" style={{ marginBottom: '8px' }}>
+                      <span className="fluent-setting-title">{t('quick_tab_assign_slots_preview') || '快捷键与标签页映射预览'}</span>
+                      <span className="fluent-setting-description">
+                        前 10 个自定义标签页与按键的对应关系（系统内置的“剪贴板”主列表不参与快捷归类）
+                      </span>
+                    </div>
+                    <div className="quick-tab-slots-grid">
+                      {Array.from({ length: 10 }).map((_, idx) => {
+                        const digit = idx < 9 ? String(idx + 1) : "0";
+                        const customTabs = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard").slice(0, 10);
+                        const assignedTab = customTabs[idx];
+                        const modLabel =
+                          quickTabAssignModifier === "alt+shift"
+                            ? "Alt+Shift"
+                            : quickTabAssignModifier === "ctrl+shift"
+                            ? "Ctrl+Shift"
+                            : quickTabAssignModifier === "win+alt"
+                            ? "Win+Alt"
+                            : "Ctrl+Alt";
+
+                        return (
+                          <div key={idx} className={`quick-tab-slot-card ${assignedTab ? 'assigned' : 'empty'}`}>
+                            <div className="quick-tab-slot-hotkey">
+                              <span className="quick-tab-key-cap">{modLabel}+{digit}</span>
+                            </div>
+                            <div className="quick-tab-slot-target">
+                              <Folder size={12} className="quick-tab-slot-icon" />
+                              <span className="quick-tab-slot-name" title={assignedTab ? assignedTab.name : t('quick_tab_assign_unassigned') || '(未分配)'}>
+                                {assignedTab ? assignedTab.name : <span className="unassigned-text">{t('quick_tab_assign_unassigned') || '(未分配)'}</span>}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -1,7 +1,7 @@
 use crate::domain::models::ClipboardEntry;
 use crate::services::encryption_queue::EncryptionQueue;
 use std::collections::VecDeque;
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicBool, AtomicU32};
 use std::sync::Mutex;
 
 pub struct SettingsState {
@@ -25,6 +25,9 @@ pub struct SettingsState {
     pub search_hotkey: Mutex<String>,
     pub strip_newline_hotkey: Mutex<String>,
     pub quick_paste_modifier: Mutex<String>,
+    pub quick_tab_assign_enabled: AtomicBool,
+    pub quick_tab_assign_seconds: AtomicU32,
+    pub quick_tab_assign_modifier: Mutex<String>,
     pub sound_enabled: AtomicBool,
     pub hide_tray_icon: AtomicBool,
     pub edge_docking: AtomicBool,
