@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Trash2, FolderPlus, X, Folder } from "lucide-react";
 import ToastContainer from "./shared/components/ToastContainer";
 import ConfirmDialog from "./shared/components/ConfirmDialog";
@@ -122,6 +123,19 @@ const buildQuickPasteHintsById = (
     };
     return acc;
   }, {});
+};
+
+const resolveDropPaths = (payload: unknown): string[] => {
+  if (Array.isArray(payload)) {
+    return payload.filter((p): p is string => typeof p === "string");
+  }
+  if (payload && typeof payload === "object" && "paths" in payload) {
+    const maybePaths = (payload as { paths?: unknown }).paths;
+    if (Array.isArray(maybePaths)) {
+      return maybePaths.filter((p): p is string => typeof p === "string");
+    }
+  }
+  return [];
 };
 
 const App = () => {
@@ -1394,6 +1408,169 @@ const App = () => {
     };
   }, [handleDropItemOnTab]);
 
+  const handleDropExternalFilesOnTab = useCallback(async (paths: string[], targetTabIdOrName: string) => {
+    if (!paths || paths.length === 0) return;
+    const targetTab = tabs.find((t) => t.id === targetTabIdOrName || t.name === targetTabIdOrName) || tabs[0];
+    if (!targetTab) return;
+
+    const isBuiltinClipboard = targetTab.id === "clipboard" || targetTab.id === t("clipboard");
+    const createdIds: number[] = [];
+
+    for (const filePath of paths) {
+      const trimmed = filePath.trim();
+      if (!trimmed) continue;
+
+      const ext = trimmed.split(".").pop()?.toLowerCase() || "";
+      const isImage = ["png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "svg"].includes(ext);
+      const isVideo = ["mp4", "mkv", "avi", "mov", "wmv", "flv", "webm"].includes(ext);
+      const contentType = isImage ? "image" : isVideo ? "video" : "file";
+
+      try {
+        const newId = await invoke<number>("add_manual_item", {
+          content: trimmed,
+          contentType,
+          tags: []
+        });
+        if (typeof newId === "number") {
+          createdIds.push(newId);
+        }
+      } catch (err) {
+        console.error("Failed to add dropped file item:", err);
+      }
+    }
+
+    if (createdIds.length > 0) {
+      if (!isBuiltinClipboard) {
+        setTabAssignments((prev) => {
+          const currentList = prev[targetTab.id] || [];
+          const toAdd = createdIds.filter((id) => !currentList.includes(id));
+          const nextList = [...toAdd, ...currentList];
+          const next = { ...prev, [targetTab.id]: nextList };
+          saveTabAssignments(next);
+          return next;
+        });
+      }
+
+      fetchHistory(true);
+
+      if (soundEnabled) {
+        emit("play-sound", "paste").catch(() => {});
+      }
+
+      if (createdIds.length > 1) {
+        pushToast(t("batch_added_to_tab") ? t("batch_added_to_tab").replace("{count}", String(createdIds.length)).replace("{name}", targetTab.name) : `已批量添加 ${createdIds.length} 项至「${targetTab.name}」`);
+      } else {
+        pushToast(t("tab_added") ? t("tab_added").replace("{name}", targetTab.name) : `已加入「${targetTab.name}」`);
+      }
+    }
+  }, [tabs, saveTabAssignments, fetchHistory, soundEnabled, pushToast, t]);
+
+  const handleDropExternalTextOnTab = useCallback(async (text: string, targetTabIdOrName: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const targetTab = tabs.find((t) => t.id === targetTabIdOrName || t.name === targetTabIdOrName) || tabs[0];
+    if (!targetTab) return;
+
+    const isBuiltinClipboard = targetTab.id === "clipboard" || targetTab.id === t("clipboard");
+
+    try {
+      const newId = await invoke<number>("add_manual_item", {
+        content: trimmed,
+        contentType: "text",
+        tags: []
+      });
+
+      if (typeof newId === "number") {
+        if (!isBuiltinClipboard) {
+          setTabAssignments((prev) => {
+            const currentList = prev[targetTab.id] || [];
+            if (currentList.includes(newId)) return prev;
+            const next = { ...prev, [targetTab.id]: [newId, ...currentList] };
+            saveTabAssignments(next);
+            return next;
+          });
+        }
+
+        fetchHistory(true);
+
+        if (soundEnabled) {
+          emit("play-sound", "paste").catch(() => {});
+        }
+
+        pushToast(t("tab_added") ? t("tab_added").replace("{name}", targetTab.name) : `已加入「${targetTab.name}」`);
+      }
+    } catch (err) {
+      console.error("Failed to add dropped text item:", err);
+    }
+  }, [tabs, saveTabAssignments, fetchHistory, soundEnabled, pushToast, t]);
+
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    const lastHandledRef = { sig: "", time: 0 };
+
+    const handleDropPayload = (payload: unknown) => {
+      const paths = resolveDropPaths(payload);
+      if (!paths || paths.length === 0) return;
+
+      let pos: { x: number; y: number } | null = null;
+      if (payload && typeof payload === "object" && "position" in payload) {
+        const rawPos = (payload as { position?: { x: number; y: number } }).position;
+        if (rawPos && typeof rawPos.x === "number" && typeof rawPos.y === "number") {
+          pos = rawPos;
+        }
+      }
+
+      let targetTab: TabItem | null = null;
+      if (pos) {
+        let el = document.elementFromPoint(pos.x, pos.y);
+        let btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
+        if (!btn && window.devicePixelRatio && window.devicePixelRatio !== 1) {
+          el = document.elementFromPoint(pos.x / window.devicePixelRatio, pos.y / window.devicePixelRatio);
+          btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
+        }
+        if (btn) {
+          const tabId = btn.getAttribute("data-tab-id");
+          targetTab = tabs.find((t) => t.id === tabId) || null;
+        }
+
+        if (!targetTab) {
+          let bar = el?.closest(".fluent-tab-bar-container") as HTMLElement | null;
+          if (!bar && window.devicePixelRatio && window.devicePixelRatio !== 1) {
+            const el2 = document.elementFromPoint(pos.x / window.devicePixelRatio, pos.y / window.devicePixelRatio);
+            bar = el2?.closest(".fluent-tab-bar-container") as HTMLElement | null;
+          }
+          if (bar) {
+            targetTab = tabs.find((t) => t.id === activeTabId) || tabs[0] || null;
+          }
+        }
+      }
+
+      if (!targetTab) return;
+
+      const sig = `${paths.join("|")}@${targetTab.id}`;
+      const now = Date.now();
+      if (sig === lastHandledRef.sig && now - lastHandledRef.time < 1500) {
+        return;
+      }
+      lastHandledRef.sig = sig;
+      lastHandledRef.time = now;
+
+      handleDropExternalFilesOnTab(paths, targetTab.id);
+    };
+
+    const unlistenDrop = appWindow.listen("tauri://drag-drop", (e) => {
+      handleDropPayload(e.payload);
+    });
+    const unlistenFileDrop = appWindow.listen("tauri://file-drop", (e) => {
+      handleDropPayload(e.payload);
+    });
+
+    return () => {
+      unlistenDrop.then((f) => f());
+      unlistenFileDrop.then((f) => f());
+    };
+  }, [tabs, activeTabId, handleDropExternalFilesOnTab]);
+
   const handleQuickAssignToTab = useCallback((tabIndex: number, specificItemId?: number) => {
     if (!quickTabAssignEnabled) return;
     const customTabs = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard").slice(0, 10);
@@ -1597,6 +1774,8 @@ const App = () => {
         onAddTab={handleAddTab}
         onDeleteTab={handleDeleteTab}
         onDropItemOnTab={handleDropItemOnTab}
+        onDropExternalFilesOnTab={handleDropExternalFilesOnTab}
+        onDropExternalTextOnTab={handleDropExternalTextOnTab}
         onOpenAddEntry={() => {
           setIsAddEntryModalOpen(true);
           setAddEntryContent("");

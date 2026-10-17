@@ -11,6 +11,8 @@ interface FluentTabBarProps {
   onAddTab?: (name: string) => void;
   onDeleteTab?: (tabId: string) => void;
   onDropItemOnTab?: (itemId: number, tabName: string) => void;
+  onDropExternalFilesOnTab?: (paths: string[], tabIdOrName: string) => void;
+  onDropExternalTextOnTab?: (text: string, tabIdOrName: string) => void;
   t?: (key: string) => string;
 }
 
@@ -21,6 +23,8 @@ export const FluentTabBar = ({
   onAddTab,
   onDeleteTab,
   onDropItemOnTab,
+  onDropExternalFilesOnTab,
+  onDropExternalTextOnTab,
   t
 }: FluentTabBarProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -153,14 +157,9 @@ export const FluentTabBar = ({
     }
   }, [resetHoverTimer]);
 
-  const isDroppableTab = useCallback((tab: TabItem, index: number) => {
-    const isFirstTab = index === 0 || tab.id === "clipboard";
-    if (isFirstTab) {
-      // Allow dropping onto clipboard tab when viewing another custom tab (to move out/remove)
-      return activeTabId !== "clipboard";
-    }
-    return !tab.isBuiltin;
-  }, [activeTabId]);
+  const isDroppableTab = useCallback((_tab: TabItem, _index: number) => {
+    return true;
+  }, []);
 
   const resolveTabFromPoint = useCallback((x: number, y: number): { tab: TabItem; index: number } | null => {
     const el = document.elementFromPoint(x, y);
@@ -177,17 +176,45 @@ export const FluentTabBar = ({
     e.preventDefault();
     e.stopPropagation();
     setDragOverTabId(null);
+
+    // 1. Check for internal item drag
     let idStr = "";
     try {
       idStr = e.dataTransfer.getData("application/x-tiez-item") || e.dataTransfer.getData("text/tiez-item-id");
     } catch {}
     const fallbackId = (window as any).__tiezDraggedItemId;
     const finalId = idStr ? parseInt(idStr, 10) : (typeof fallbackId === "number" ? fallbackId : NaN);
-    if (!isNaN(finalId) && onDropItemOnTab) {
-      onDropItemOnTab(finalId, tab.id);
+    if (!isNaN(finalId)) {
+      if (onDropItemOnTab) {
+        onDropItemOnTab(finalId, tab.id);
+      }
+      (window as any).__tiezDraggedItemId = null;
+      return;
     }
-    (window as any).__tiezDraggedItemId = null;
-  }, [onDropItemOnTab]);
+
+    // 2. Check for external files dragged via HTML5
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const paths: string[] = Array.from(e.dataTransfer.files)
+        .map((f) => (f as any).path)
+        .filter((p): p is string => typeof p === "string" && p.length > 0);
+      if (paths.length > 0 && onDropExternalFilesOnTab) {
+        onDropExternalFilesOnTab(paths, tab.id);
+        return;
+      }
+      // If native paths not exposed via HTML5 DataTransfer, window tauri://drag-drop handles it
+    }
+
+    // 3. Check for external text / URLs
+    let droppedText = "";
+    try {
+      droppedText = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData("text/uri-list");
+    } catch {}
+
+    if (droppedText && droppedText.trim().length > 0 && onDropExternalTextOnTab) {
+      onDropExternalTextOnTab(droppedText.trim(), tab.id);
+      return;
+    }
+  }, [onDropItemOnTab, onDropExternalFilesOnTab, onDropExternalTextOnTab]);
 
   return (
     <div

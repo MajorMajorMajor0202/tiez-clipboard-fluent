@@ -1,5 +1,5 @@
 mod pipeline;
-mod utils;
+pub mod utils;
 
 use crate::app_state::SettingsState;
 pub use crate::database::DbState;

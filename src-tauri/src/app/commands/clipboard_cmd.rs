@@ -160,11 +160,20 @@ pub async fn add_manual_item(
     content_type: String,
     tags: Vec<String>,
 ) -> AppResult<i64> {
+    let final_content_type = if content_type.is_empty() || content_type == "text" {
+        crate::services::clipboard::utils::detect_content_type(&content)
+    } else {
+        content_type
+    };
+
     let preview = truncate_chars_with_suffix(&content, 200, "...");
+
+    let is_external = (final_content_type == "file" || final_content_type == "video" || final_content_type == "image")
+        && !content.starts_with("data:");
 
     let entry = database::ClipboardEntry {
         id: 0,
-        content_type,
+        content_type: final_content_type,
         content,
         html_content: None,
         source_app: "Manual".to_string(),
@@ -174,7 +183,7 @@ pub async fn add_manual_item(
         is_pinned: false,
         tags,
         use_count: 0,
-        is_external: false,
+        is_external,
         pinned_order: 0,
         file_preview_exists: true,
     };
