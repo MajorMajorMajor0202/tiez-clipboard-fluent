@@ -400,7 +400,7 @@ select.search-input option {
 }
 
 .virtual-list-wrapper .fluent-scrollbar {
-  right: 0;
+  right: 2px;
   width: 6px;
 }
 
@@ -427,7 +427,7 @@ select.search-input option {
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.18s ease;
-  margin: 0 6px 2px 12px;
+  margin: 0 12px 2px 12px;
   height: 100%;
   overflow: visible;
   display: flex;
