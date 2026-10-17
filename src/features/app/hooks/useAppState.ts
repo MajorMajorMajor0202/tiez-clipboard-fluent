@@ -193,7 +193,6 @@ export const useAppState = (): AppState => {
     { id: "temp", name: "临时暂存" }
   ]);
   const [activeTabId, setActiveTabId] = useState<string>("clipboard");
-  const [showDebugWindow, setShowDebugWindow] = useState<boolean>(false);
 
   return {
     showSettings,
@@ -455,8 +454,6 @@ export const useAppState = (): AppState => {
     tabs,
     setTabs,
     activeTabId,
-    setActiveTabId,
-    showDebugWindow,
-    setShowDebugWindow
+    setActiveTabId
   };
 };

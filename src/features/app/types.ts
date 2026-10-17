@@ -283,8 +283,6 @@ export interface AppState {
   setTabs: StateSetter<TabItem[]>;
   activeTabId: string;
   setActiveTabId: StateSetter<string>;
-  showDebugWindow: boolean;
-  setShowDebugWindow: StateSetter<boolean>;
 }
 
 export interface TabItem {

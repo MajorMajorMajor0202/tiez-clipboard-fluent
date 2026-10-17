@@ -10,8 +10,7 @@ import {
   Smile,
   Tag,
   Trash2,
-  X,
-  Bug
+  X
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { getTagColor, getTagTextColor } from "../../../shared/lib/utils";
@@ -56,7 +55,6 @@ interface AppHeaderProps {
   activeTabId?: string;
   onSelectTab?: (tabId: string) => void;
   onAddTab?: () => void;
-  onOpenDebugWindow?: () => void;
 }
 
 const AppHeader = ({
@@ -94,8 +92,7 @@ const AppHeader = ({
   tabs,
   activeTabId,
   onSelectTab,
-  onAddTab,
-  onOpenDebugWindow
+  onAddTab
 }: AppHeaderProps) => {
 
   const handleOpenSettings = useCallback(async () => {
@@ -195,13 +192,6 @@ const AppHeader = ({
               <FluentTooltip text={t('emoji_panel') || '表情包'}>
                 <button className="btn-icon-ghost" onClick={() => setShowEmojiPanel(true)}>
                   <Smile size={16} />
-                </button>
-              </FluentTooltip>
-            )}
-            {onOpenDebugWindow && (
-              <FluentTooltip text="Tab 调试窗口">
-                <button className="btn-icon-ghost" onClick={onOpenDebugWindow}>
-                  <Bug size={16} />
                 </button>
               </FluentTooltip>
             )}
