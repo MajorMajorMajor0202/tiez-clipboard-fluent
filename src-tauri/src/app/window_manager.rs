@@ -381,7 +381,7 @@ pub fn toggle_window(app: &AppHandle) {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_millis() as u64;
-        LAST_SHOW_TIMESTAMP.store(now, Ordering::Relaxed);
+        LAST_SHOW_TIMESTAMP.store(now + 1500, Ordering::Relaxed);
 
         let pinned = WINDOW_PINNED.load(Ordering::Relaxed);
         let _ = window.set_always_on_top(pinned);

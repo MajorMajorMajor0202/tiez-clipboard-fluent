@@ -507,6 +507,11 @@ fn setup_main_window(app: &App, s: &StartupSettings) {
         args.contains(&"--autostart".to_string()) || args.contains(&"--minimized".to_string());
     if !is_autostart || !s.silent_start {
         if let Some(window) = app.get_webview_window("main") {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64;
+            LAST_SHOW_TIMESTAMP.store(now + 2500, Ordering::Relaxed);
             let _ = window.show();
             let _ = window.set_focus();
             let _ = window.emit("window-shown", ());
@@ -1094,15 +1099,15 @@ fn setup_tray(app: &App, hide_tray: bool) {
             } = event
             {
                 if let Some(window) = tray.app_handle().get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.emit("window-shown", ());
-                    reapply_vibrancy(tray.app_handle());
-                    let _ = window.set_focus();
                     let now = std::time::SystemTime::now()
                         .duration_since(std::time::UNIX_EPOCH)
                         .unwrap()
                         .as_millis() as u64;
-                    LAST_SHOW_TIMESTAMP.store(now, Ordering::Relaxed);
+                    LAST_SHOW_TIMESTAMP.store(now + 1500, Ordering::Relaxed);
+                    let _ = window.show();
+                    let _ = window.emit("window-shown", ());
+                    reapply_vibrancy(tray.app_handle());
+                    let _ = window.set_focus();
                 }
             }
         })
@@ -1425,7 +1430,8 @@ fn handle_blur(window: &tauri::Window) {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
         .as_millis() as u64;
-    if now.saturating_sub(LAST_SHOW_TIMESTAMP.load(Ordering::Relaxed)) < 500 {
+    let last_show = LAST_SHOW_TIMESTAMP.load(Ordering::Relaxed);
+    if now <= last_show || now.saturating_sub(last_show) < 1500 {
         return;
     }
 
