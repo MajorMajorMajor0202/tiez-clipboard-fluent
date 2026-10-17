@@ -406,8 +406,12 @@ select.search-input option {
   border: var(--card-border);
   border-radius: var(--card-radius);
   color: var(--text-primary);
-  cursor: pointer;
+  cursor: grab;
   box-shadow: var(--card-shadow);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
   transition:
     background 0.18s ease,
     border-color 0.18s ease,
@@ -434,8 +438,15 @@ select.search-input option {
 }
 
 .history-item:active {
+  cursor: grabbing;
   transform: var(--card-active-transform);
   box-shadow: var(--card-active-shadow);
+}
+
+.history-item img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
 }
 
 .pinned-reorder.dragging .history-item,

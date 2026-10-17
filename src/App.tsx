@@ -370,6 +370,10 @@ const App = () => {
   const [addEntryContent, setAddEntryContent] = useState("");
 
   useEffect(() => {
+    (window as any).__tiezSelectedItemIds = selectedItemIds;
+  }, [selectedItemIds]);
+
+  useEffect(() => {
     if (selectedItemIds.size > 0 || isAddEntryModalOpen) {
       invoke("set_ignore_blur", { ignore: true }).catch(() => {});
     } else {
@@ -1273,6 +1277,30 @@ const App = () => {
           ? Array.from(selectedItemIds)
           : [itemId]);
 
+    const isClipboardTab = tabName === "clipboard" || tabName === t("clipboard") || tabName === "剪贴板";
+    if (isClipboardTab) {
+      const currentTab = tabs.find((t) => t.id === activeTabId);
+      if (currentTab && currentTab.id !== "clipboard") {
+        for (const id of itemsToAdd) {
+          const item = history.find((h) => h.id === id);
+          if (item) {
+            const currentTags = item.tags || [];
+            if (currentTags.includes(currentTab.name)) {
+              handleUpdateTags(id, currentTags.filter((t) => t !== currentTab.name));
+            }
+          }
+        }
+        pushToast(t("tab_removed").replace("{name}", currentTab.name));
+        if (itemsToAdd.length > 1) {
+          setSelectedItemIds(new Set());
+          lastSelectedIndexRef.current = null;
+        }
+      }
+      (window as any).__tiezDraggedItemIds = null;
+      (window as any).__tiezDraggedItemId = null;
+      return;
+    }
+
     for (const id of itemsToAdd) {
       const item = history.find((h) => h.id === id);
       if (item) {
@@ -1292,7 +1320,7 @@ const App = () => {
     }
     (window as any).__tiezDraggedItemIds = null;
     (window as any).__tiezDraggedItemId = null;
-  }, [selectedItemIds, history, handleUpdateTags, pushToast, t]);
+  }, [selectedItemIds, history, tabs, activeTabId, handleUpdateTags, pushToast, t]);
 
   const handleConfirmAddEntry = useCallback(async () => {
     const trimmed = addEntryContent.trim();

@@ -144,8 +144,8 @@ const AppHeader = ({
 
 
   return (
-  <header className={`window-drag-region ${(showSettings || showTagManager || showEmojiPanel) ? 'subpage-header' : ''}`}>
-    <div className="header-top">
+  <header className={(showSettings || showTagManager || showEmojiPanel) ? 'subpage-header' : ''}>
+    <div className="header-top window-drag-region" data-tauri-drag-region>
       <div className="header-leading">
         {(showSettings || showTagManager || showEmojiPanel) && (
           <FluentTooltip text={t('back') || '返回'}>

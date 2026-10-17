@@ -1802,9 +1802,24 @@ const ClipboardItem = ({
 
                 // Store in window for 100% reliable internal drop transfer in Tauri WebView2
                 (window as any).__tiezDraggedItemId = item.id;
+                const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
+                if (selectedSet && selectedSet.has(item.id) && selectedSet.size > 1) {
+                    (window as any).__tiezDraggedItemIds = Array.from(selectedSet);
+                } else if (isMultiSelected) {
+                    const fallbackList = (window as any).__tiezDraggedItemIds;
+                    if (!Array.isArray(fallbackList) || !fallbackList.includes(item.id)) {
+                        (window as any).__tiezDraggedItemIds = [item.id];
+                    }
+                } else {
+                    (window as any).__tiezDraggedItemIds = [item.id];
+                }
 
                 const dt = e.dataTransfer;
                 if (dt) {
+                    try {
+                        dt.setData("application/x-tiez-item", String(item.id));
+                        dt.setData("text/tiez-item-id", String(item.id));
+                    } catch {}
                     if (item.content_type === "rich_text" && item.html_content) {
                         dt.setData("text/plain", item.preview || item.content);
                         dt.setData("text/html", item.html_content);
@@ -1815,9 +1830,6 @@ const ClipboardItem = ({
                     } else {
                         dt.setData("text/plain", item.content);
                     }
-                    try {
-                        dt.setData("application/x-tiez-item", String(item.id));
-                    } catch {}
                     dt.effectAllowed = "copyMove";
                 }
             }}
@@ -1825,6 +1837,7 @@ const ClipboardItem = ({
                 setTimeout(() => {
                     isDraggingRef.current = false;
                     (window as any).__tiezDraggedItemId = null;
+                    (window as any).__tiezDraggedItemIds = null;
                 }, 150);
                 if (!isMultiSelectActive && !isEditingContent) {
                     setIgnoreBlurSafe(false);

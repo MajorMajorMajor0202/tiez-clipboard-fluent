@@ -153,12 +153,52 @@ export const FluentTabBar = ({
     }
   }, [resetHoverTimer]);
 
+  const isDroppableTab = useCallback((tab: TabItem, index: number) => {
+    const isFirstTab = index === 0 || tab.id === "clipboard";
+    if (isFirstTab) {
+      // Allow dropping onto clipboard tab when viewing another custom tab (to move out/remove)
+      return activeTabId !== "clipboard";
+    }
+    return !tab.isBuiltin;
+  }, [activeTabId]);
+
+  const resolveTabFromPoint = useCallback((x: number, y: number): { tab: TabItem; index: number } | null => {
+    const el = document.elementFromPoint(x, y);
+    const btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
+    const tabId = btn?.getAttribute("data-tab-id");
+    if (tabId) {
+      const idx = tabs.findIndex((t) => t.id === tabId);
+      if (idx >= 0) return { tab: tabs[idx], index: idx };
+    }
+    return null;
+  }, [tabs]);
+
+  const handlePerformDrop = useCallback((tab: TabItem, e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverTabId(null);
+    let idStr = "";
+    try {
+      idStr = e.dataTransfer.getData("application/x-tiez-item") || e.dataTransfer.getData("text/tiez-item-id");
+    } catch {}
+    const fallbackId = (window as any).__tiezDraggedItemId;
+    const finalId = idStr ? parseInt(idStr, 10) : (typeof fallbackId === "number" ? fallbackId : NaN);
+    if (!isNaN(finalId) && onDropItemOnTab) {
+      onDropItemOnTab(finalId, tab.name);
+    }
+    (window as any).__tiezDraggedItemId = null;
+  }, [onDropItemOnTab]);
+
   return (
     <div
       className="fluent-tab-bar-container window-no-drag"
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onDragLeave={(e) => {
+        if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+        setDragOverTabId(null);
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         setContextMenu({
@@ -199,12 +239,33 @@ export const FluentTabBar = ({
         ref={trackRef}
         className="fluent-tab-track hide-scrollbar"
         onWheel={handleWheel}
+        onDragOver={(e) => {
+          const resolved = resolveTabFromPoint(e.clientX, e.clientY);
+          if (resolved && isDroppableTab(resolved.tab, resolved.index)) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+            if (dragOverTabId !== resolved.tab.id) {
+              setDragOverTabId(resolved.tab.id);
+            }
+          }
+        }}
+        onDrop={(e) => {
+          const resolved = resolveTabFromPoint(e.clientX, e.clientY);
+          const targetTab = resolved?.tab || (dragOverTabId ? tabs.find((t) => t.id === dragOverTabId) : null);
+          if (targetTab) {
+            const idx = tabs.findIndex((t) => t.id === targetTab.id);
+            if (isDroppableTab(targetTab, idx)) {
+              handlePerformDrop(targetTab, e);
+            }
+          }
+        }}
       >
         <LayoutGroup id="fluent-tabs">
           {tabs.map((tab, index) => {
             const isActive = tab.id === activeTabId;
             const isFirstTab = index === 0 || tab.id === "clipboard";
             const isDragTarget = dragOverTabId === tab.id;
+            const canDrop = isDroppableTab(tab, index);
             return (
               <button
                 key={tab.id}
@@ -214,14 +275,14 @@ export const FluentTabBar = ({
                   isFirstTab ? "tab-icon-only" : ""
                 } ${isDragTarget ? "drag-target-hover" : ""}`}
                 onDragEnter={(e) => {
-                  if (isFirstTab || tab.isBuiltin) return;
+                  if (!canDrop) return;
                   e.preventDefault();
                   if (dragOverTabId !== tab.id) {
                     setDragOverTabId(tab.id);
                   }
                 }}
                 onDragOver={(e) => {
-                  if (isFirstTab || tab.isBuiltin) return;
+                  if (!canDrop) return;
                   e.preventDefault();
                   e.dataTransfer.dropEffect = "copy";
                   if (dragOverTabId !== tab.id) {
@@ -235,20 +296,8 @@ export const FluentTabBar = ({
                   }
                 }}
                 onDrop={(e) => {
-                  if (isFirstTab || tab.isBuiltin) return;
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDragOverTabId(null);
-                  let idStr = "";
-                  try {
-                    idStr = e.dataTransfer.getData("application/x-tiez-item");
-                  } catch {}
-                  const fallbackId = (window as any).__tiezDraggedItemId;
-                  const finalId = idStr ? parseInt(idStr, 10) : (typeof fallbackId === "number" ? fallbackId : NaN);
-                  if (!isNaN(finalId) && onDropItemOnTab) {
-                    onDropItemOnTab(finalId, tab.name);
-                  }
-                  (window as any).__tiezDraggedItemId = null;
+                  if (!canDrop) return;
+                  handlePerformDrop(tab, e);
                 }}
                 onClick={() => {
                   onSelectTab(tab.id);

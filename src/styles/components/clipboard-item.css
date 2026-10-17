@@ -59,6 +59,8 @@
   -webkit-box-orient: vertical;
   margin-top: 0;
   padding-top: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .content-preview-shell {
@@ -886,6 +888,16 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.item-inline-editor,
+.item-inline-textarea,
+.fluent-modal-textarea,
+.tag-flyout-input,
+.tag-edit-input {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  cursor: text !important;
 }
 
 
