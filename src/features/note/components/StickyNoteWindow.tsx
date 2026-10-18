@@ -23,25 +23,87 @@ marked.setOptions({
   breaks: true,
 });
 
+export type NoteBackdrop =
+  | "mica"
+  | "acrylic"
+  | "yellow"
+  | "green"
+  | "blue"
+  | "purple"
+  | "pink"
+  | "charcoal";
+
+export interface NoteThemeOption {
+  id: NoteBackdrop;
+  name: string;
+  dotColorLight: string;
+  dotColorDark: string;
+}
+
+export const NOTE_THEMES: NoteThemeOption[] = [
+  { id: "mica", name: "云母 (Mica)", dotColorLight: "rgba(255,255,255,0.85)", dotColorDark: "rgba(32,32,32,0.85)" },
+  { id: "acrylic", name: "亚克力 (Acrylic)", dotColorLight: "rgba(245,245,245,0.7)", dotColorDark: "rgba(24,24,24,0.7)" },
+  { id: "yellow", name: "便笺黄 (Yellow)", dotColorLight: "#FFF9C4", dotColorDark: "#3B331A" },
+  { id: "green", name: "薄荷绿 (Mint)", dotColorLight: "#E8F5E9", dotColorDark: "#1B3523" },
+  { id: "blue", name: "天空蓝 (Sky Blue)", dotColorLight: "#E3F2FD", dotColorDark: "#182B44" },
+  { id: "purple", name: "薰衣草 (Lavender)", dotColorLight: "#F3E5F5", dotColorDark: "#311C3B" },
+  { id: "pink", name: "樱花粉 (Rose)", dotColorLight: "#FCE4EC", dotColorDark: "#3C1B27" },
+  { id: "charcoal", name: "石板灰 (Slate)", dotColorLight: "#ECEFF1", dotColorDark: "#272B2E" },
+];
+
 export const StickyNoteWindow: React.FC = () => {
   const [item, setItem] = useState<ClipboardEntry | null>(null);
   const [content, setContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [isFocused, setIsFocused] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
   const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
+  const [backdrop, setBackdrop] = useState<NoteBackdrop>("mica");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 1. Load Note Data
+  // 1. Initial Load & Route Parameters
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const idParam = params.get("id");
     if (!idParam) return;
     const id = Number(idParam);
+
+    // Initial theme & dark mode detection
+    const colorModeParam = params.get("color_mode");
+    const savedMode = localStorage.getItem("tiez_color_mode") || "system";
+    let isDark = false;
+    if (colorModeParam === "dark") {
+      isDark = true;
+    } else if (savedMode === "dark") {
+      isDark = true;
+    } else if (savedMode === "light") {
+      isDark = false;
+    } else {
+      isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    setIsDarkMode(isDark);
+    document.documentElement.classList.toggle("dark-mode", isDark);
+    document.body.classList.toggle("dark-mode", isDark);
+    document.documentElement.classList.toggle("light-mode", !isDark);
+    document.body.classList.toggle("light-mode", !isDark);
+
+    // Load saved backdrop theme for this note
+    const savedBackdrop = localStorage.getItem(`note_backdrop_${id}`) as NoteBackdrop;
+    if (savedBackdrop && NOTE_THEMES.some((t) => t.id === savedBackdrop)) {
+      setBackdrop(savedBackdrop);
+    } else {
+      // Default to mica or app theme
+      const appTheme = localStorage.getItem("tiez_theme");
+      if (appTheme === "acrylic") {
+        setBackdrop("acrylic");
+      } else {
+        setBackdrop("mica");
+      }
+    }
 
     // Instant load from localStorage
     try {
@@ -73,34 +135,11 @@ export const StickyNoteWindow: React.FC = () => {
       });
   }, []);
 
-  // 2. Window Focus Tracking
-  useEffect(() => {
-    const appWindow = getCurrentWindow();
-    let unlistenFocus: (() => void) | undefined;
-
-    appWindow.onFocusChanged(({ payload: focused }) => {
-      setIsFocused(focused);
-    }).then((unlisten) => {
-      unlistenFocus = unlisten;
-    }).catch(() => {});
-
-    const handleFocus = () => setIsFocused(true);
-    const handleBlur = () => setIsFocused(false);
-
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("blur", handleBlur);
-
-    return () => {
-      unlistenFocus?.();
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("blur", handleBlur);
-    };
-  }, []);
-
-  // 3. System Theme & Dark Mode Sync
+  // 2. System Theme & Dark Mode Sync
   useEffect(() => {
     const handleThemeEvent = (event: { payload: string }) => {
       const isDark = event.payload === "dark";
+      setIsDarkMode(isDark);
       document.documentElement.classList.toggle("dark-mode", isDark);
       document.body.classList.toggle("dark-mode", isDark);
       document.documentElement.classList.toggle("light-mode", !isDark);
@@ -113,6 +152,7 @@ export const StickyNoteWindow: React.FC = () => {
     const handleMediaChange = (e: MediaQueryListEvent) => {
       const mode = localStorage.getItem("tiez_color_mode") || "system";
       if (mode === "system") {
+        setIsDarkMode(e.matches);
         document.documentElement.classList.toggle("dark-mode", e.matches);
         document.body.classList.toggle("dark-mode", e.matches);
         document.documentElement.classList.toggle("light-mode", !e.matches);
@@ -127,7 +167,7 @@ export const StickyNoteWindow: React.FC = () => {
     };
   }, []);
 
-  // 4. Auto-save content to database (debounced 350ms)
+  // 3. Auto-save content to database (debounced 350ms)
   const saveContent = useCallback((newText: string) => {
     if (!item) return;
     if (saveTimeoutRef.current) {
@@ -151,7 +191,7 @@ export const StickyNoteWindow: React.FC = () => {
     saveContent(val);
   };
 
-  // 5. Window Dragging Handler
+  // 4. Window Dragging Handler (fluent-stickies native drag style)
   const handleMouseDownDrag = useCallback(async (e: React.MouseEvent) => {
     if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, button, input, textarea")) {
       try {
@@ -162,18 +202,19 @@ export const StickyNoteWindow: React.FC = () => {
     }
   }, []);
 
-  // 6. Toggle Always On Top (Pin)
+  // 5. Toggle Always On Top (Pin)
   const handleTogglePin = async () => {
     try {
       const next = !isAlwaysOnTop;
       await getCurrentWindow().setAlwaysOnTop(next);
       setIsAlwaysOnTop(next);
+      if (contextMenu) setContextMenu(null);
     } catch (err) {
       console.error("Failed to toggle always on top", err);
     }
   };
 
-  // 7. Close Window
+  // 6. Close Window
   const handleClose = async () => {
     try {
       const win = getCurrentWindow();
@@ -187,21 +228,23 @@ export const StickyNoteWindow: React.FC = () => {
     }
   };
 
-  // 8. Delete Note
+  // 7. Delete Note
   const handleDelete = async () => {
     if (!item) return;
     try {
       await invoke("delete_clipboard_entry", { id: item.id });
       localStorage.removeItem(`note_entry_${item.id}`);
+      localStorage.removeItem(`note_backdrop_${item.id}`);
       await handleClose();
     } catch (err) {
       console.error("Failed to delete note", err);
     }
   };
 
-  // 9. Create Another Note
+  // 8. Create Another Note
   const handleCreateAnother = async () => {
     try {
+      if (contextMenu) setContextMenu(null);
       const newId = await invoke<number>("add_manual_item", {
         content: "# 新便笺\n\n",
         contentType: "note",
@@ -244,7 +287,52 @@ export const StickyNoteWindow: React.FC = () => {
     }
   };
 
-  // 10. Rendered Markdown HTML
+  // 9. Backdrop Theme Selection
+  const handleSelectBackdrop = (themeId: NoteBackdrop) => {
+    setBackdrop(themeId);
+    if (item) {
+      localStorage.setItem(`note_backdrop_${item.id}`, themeId);
+    }
+    setContextMenu(null);
+  };
+
+  // 10. Context Menu Handler
+  const handleContextMenu = (e: React.MouseEvent) => {
+    // If inside textarea and editing, allow default OS text context menu
+    if (isEditing && (e.target as HTMLElement).tagName === "TEXTAREA") {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    const menuWidth = 205;
+    const menuHeight = 250;
+    const x = Math.min(e.clientX, window.innerWidth - menuWidth - 8);
+    const y = Math.min(e.clientY, window.innerHeight - menuHeight - 8);
+    setContextMenu({ x: Math.max(8, x), y: Math.max(8, y) });
+  };
+
+  // Close context menu on outside click or Esc
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (contextMenu && !(e.target as HTMLElement).closest(".note-context-menu")) {
+        setContextMenu(null);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setContextMenu(null);
+      }
+    };
+    window.addEventListener("mousedown", handleOutsideClick);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", handleOutsideClick);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [contextMenu]);
+
+  // 11. Rendered Markdown HTML
   const parsedMarkdownHtml = useMemo(() => {
     if (!content || !content.trim()) return "";
     try {
@@ -255,7 +343,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   }, [content]);
 
-  // 11. Interactive checkbox click in preview mode
+  // 12. Interactive Checkbox Click in Preview Mode
   const handlePreviewClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "INPUT" && (target as HTMLInputElement).type === "checkbox") {
@@ -295,68 +383,64 @@ export const StickyNoteWindow: React.FC = () => {
     }
   }, [isEditing]);
 
-  const hasControlsVisible = isFocused || isHovered;
-
   return (
     <div
-      className={`note-window-root ${hasControlsVisible ? "is-focused" : ""}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="note-window-root"
+      onContextMenu={handleContextMenu}
     >
-      <div className="note-card" onMouseDown={handleMouseDownDrag}>
-        {/* Top Header Controls (Hidden when idle, automatically appears on focus/hover) */}
-        <header className="note-header" onMouseDown={handleMouseDownDrag}>
-          <div className="note-header-actions window-no-drag">
+      <div className={`note-card note-theme-${backdrop}`} onMouseDown={handleMouseDownDrag}>
+        {/* Windows 11 Fluent Stickies 32px Square Button TitleBar */}
+        <header className="note-titlebar" onMouseDown={handleMouseDownDrag}>
+          {/* Left: Pin / Always On Top (TitleBarSquareButtonStyle) */}
+          <button
+            type="button"
+            className={`note-titlebar-btn window-no-drag ${isAlwaysOnTop ? "is-pinned" : ""}`}
+            title={isAlwaysOnTop ? "取消置顶" : "置顶便笺"}
+            onClick={handleTogglePin}
+          >
+            {isAlwaysOnTop ? <PinOff size={14} /> : <Pin size={14} />}
+          </button>
+
+          {/* Center: Blank Drag Region */}
+          <div className="note-titlebar-drag" onMouseDown={handleMouseDownDrag} />
+
+          {/* Right: Actions */}
+          <div className="note-titlebar-actions window-no-drag">
+            {/* Toggle Preview / Edit */}
+            <button
+              type="button"
+              className={`note-titlebar-btn ${isEditing ? "active" : ""}`}
+              title={isEditing ? "预览 Markdown" : "编辑内容"}
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
+            </button>
+
             {/* New Note Button */}
             <button
               type="button"
-              className="note-btn"
+              className="note-titlebar-btn"
               title="新建便笺"
               onClick={handleCreateAnother}
             >
               <Plus size={15} strokeWidth={2.2} />
             </button>
 
-            {/* Toggle Preview / Edit Button */}
-            <button
-              type="button"
-              className={`note-btn ${isEditing ? "active" : ""}`}
-              title={isEditing ? "预览 Markdown" : "编辑内容"}
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
-            </button>
-          </div>
-
-          {/* Central Drag Region */}
-          <div className="note-drag-center" onMouseDown={handleMouseDownDrag} />
-
-          <div className="note-header-actions window-no-drag">
-            {/* Pin / Always On Top Button */}
-            <button
-              type="button"
-              className={`note-btn ${isAlwaysOnTop ? "active" : ""}`}
-              title={isAlwaysOnTop ? "取消置顶" : "置顶便笺"}
-              onClick={handleTogglePin}
-            >
-              {isAlwaysOnTop ? <PinOff size={14} /> : <Pin size={14} />}
-            </button>
-
             {/* Delete Note Button */}
             <button
               type="button"
-              className="note-btn"
+              className="note-titlebar-btn"
               title="删除便笺"
               onClick={handleDelete}
             >
               <Trash2 size={14} />
             </button>
 
-            {/* Close Window Button */}
+            {/* Close Window Button (Red Hover) */}
             <button
               type="button"
-              className="note-btn note-btn-close"
-              title="关闭"
+              className="note-titlebar-btn note-btn-close"
+              title="关闭 (保存)"
               onClick={handleClose}
             >
               <X size={15} />
@@ -382,7 +466,7 @@ export const StickyNoteWindow: React.FC = () => {
               onClick={handlePreviewClick}
               onDoubleClick={() => setIsEditing(true)}
               dangerouslySetInnerHTML={{
-                __html: parsedMarkdownHtml || '<div class="note-empty-hint">双击此处或点击上方编辑图标输入内容</div>',
+                __html: parsedMarkdownHtml || '<div class="note-empty-hint">双击此处或点击右上角编辑图标输入内容</div>',
               }}
             />
           )}
@@ -391,6 +475,64 @@ export const StickyNoteWindow: React.FC = () => {
           <FluentScrollbar scrollContainer={scrollHostEl} />
         </div>
       </div>
+
+      {/* Windows 11 Fluent Context Menu (Flyout) */}
+      {contextMenu && (
+        <div
+          className="note-context-menu"
+          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Always on top toggle */}
+          <div className="note-menu-item" onClick={handleTogglePin}>
+            <span className="note-menu-check">{isAlwaysOnTop ? "✓" : ""}</span>
+            <span>始终置顶</span>
+          </div>
+
+          <div className="note-menu-separator" />
+
+          {/* Backdrop Material & Palette Picker */}
+          <div className="note-menu-header">背景材质与颜色</div>
+          <div className="note-menu-palette">
+            {NOTE_THEMES.map((th) => (
+              <button
+                key={th.id}
+                type="button"
+                className={`note-palette-swatch ${backdrop === th.id ? "active" : ""}`}
+                title={th.name}
+                onClick={() => handleSelectBackdrop(th.id)}
+              >
+                <span
+                  className="swatch-color"
+                  style={{
+                    backgroundColor: isDarkMode ? th.dotColorDark : th.dotColorLight,
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="note-menu-separator" />
+
+          {/* New note */}
+          <div className="note-menu-item" onClick={handleCreateAnother}>
+            <Plus size={14} />
+            <span>新建便笺</span>
+          </div>
+
+          {/* Delete note */}
+          <div className="note-menu-item text-danger" onClick={handleDelete}>
+            <Trash2 size={14} />
+            <span>删除便笺</span>
+          </div>
+
+          {/* Close note */}
+          <div className="note-menu-item" onClick={handleClose}>
+            <X size={14} />
+            <span>关闭便笺</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
