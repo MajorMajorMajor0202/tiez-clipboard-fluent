@@ -43,6 +43,7 @@ interface AppHeaderProps {
   onSelectTab?: (tabId: string) => void;
   onAddTab?: (name: string) => void;
   onDeleteTab?: (tabId: string) => void;
+  onReorderTabs?: (tabs: TabItem[]) => void;
   onDropItemOnTab?: (itemId: number, tabName: string) => void;
   onDropExternalFilesOnTab?: (paths: string[], tabIdOrName: string) => void;
   onDropExternalTextOnTab?: (text: string, tabIdOrName: string) => void;
@@ -79,6 +80,7 @@ const AppHeader = ({
   onSelectTab,
   onAddTab,
   onDeleteTab,
+  onReorderTabs,
   onDropItemOnTab,
   onDropExternalFilesOnTab,
   onDropExternalTextOnTab,
@@ -233,6 +235,7 @@ const AppHeader = ({
           onSelectTab={onSelectTab || (() => {})}
           onAddTab={onAddTab}
           onDeleteTab={onDeleteTab}
+          onReorderTabs={onReorderTabs}
           onDropItemOnTab={onDropItemOnTab}
           onDropExternalFilesOnTab={onDropExternalFilesOnTab}
           onDropExternalTextOnTab={onDropExternalTextOnTab}

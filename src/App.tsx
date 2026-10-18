@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -1199,12 +1200,22 @@ const App = () => {
     setActiveTabId(newTab.id);
     try {
       localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
-      invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
+      invoke("save_setting", { key: "app.custom_tabs", value: JSON.stringify(nextTabs) }).catch(console.error);
     } catch (e) {
       console.error("Failed to save tabs", e);
     }
     pushToast(t("tab_created").replace("{name}", trimmed));
   }, [tabs, setTabs, setActiveTabId, t, pushToast]);
+
+  const handleReorderTabs = useCallback((nextTabs: TabItem[]) => {
+    setTabs(nextTabs);
+    try {
+      localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
+      invoke("save_setting", { key: "app.custom_tabs", value: JSON.stringify(nextTabs) }).catch(console.error);
+    } catch (e) {
+      console.error("Failed to save tabs", e);
+    }
+  }, [setTabs]);
 
   const handleDeleteTab = useCallback((tabId: string) => {
     const tabToDelete = tabs.find((t) => t.id === tabId);
@@ -1222,7 +1233,7 @@ const App = () => {
     });
     try {
       localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
-      invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
+      invoke("save_setting", { key: "app.custom_tabs", value: JSON.stringify(nextTabs) }).catch(console.error);
     } catch (e) {
       console.error("Failed to save tabs", e);
     }
@@ -1262,7 +1273,7 @@ const App = () => {
       setTabs(nextTabs);
       try {
         localStorage.setItem("tiez_custom_tabs", JSON.stringify(nextTabs));
-        invoke("save_setting", { key: "app.custom_tabs", val: JSON.stringify(nextTabs) }).catch(console.error);
+        invoke("save_setting", { key: "app.custom_tabs", value: JSON.stringify(nextTabs) }).catch(console.error);
       } catch (e) {
         console.error("Failed to save tabs", e);
       }
@@ -2077,6 +2088,7 @@ const App = () => {
         onSelectTab={setActiveTabId}
         onAddTab={handleAddTab}
         onDeleteTab={handleDeleteTab}
+        onReorderTabs={handleReorderTabs}
         onDropItemOnTab={handleDropItemOnTab}
         onDropExternalFilesOnTab={handleDropExternalFilesOnTab}
         onDropExternalTextOnTab={handleDropExternalTextOnTab}
@@ -2237,59 +2249,57 @@ const App = () => {
       )}
 
       {/* Manual Entry Creation Modal */}
-      {isAddEntryModalOpen && (
+      {isAddEntryModalOpen && createPortal(
         <div
-          className="fluent-modal-overlay"
+          className="modal-overlay"
           onClick={() => setIsAddEntryModalOpen(false)}
         >
           <div
-            className="fluent-modal"
+            className={`confirm-dialog tag-manager-dialog theme-${theme}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="fluent-modal-header">
-              <span>{t("add_item")}</span>
-              <button
-                type="button"
-                className="btn-icon-ghost"
-                onClick={() => setIsAddEntryModalOpen(false)}
-              >
-                <X size={14} />
-              </button>
+            <div className="confirm-dialog-upper">
+              <h3 className="confirm-dialog-title">{t("add_item") || "添加条目"}</h3>
+              <div className="modal-input-field" style={{ marginTop: "12px" }}>
+                <textarea
+                  className="tag-manager-textarea"
+                  value={addEntryContent}
+                  onChange={(e) => setAddEntryContent(e.target.value)}
+                  placeholder={t("input_content_placeholder") || t("add_entry_placeholder") || "输入要添加的内容..."}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      handleConfirmAddEntry();
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      setIsAddEntryModalOpen(false);
+                    }
+                  }}
+                />
+              </div>
             </div>
-            <textarea
-              autoFocus
-              className="fluent-modal-textarea"
-              placeholder={t("add_entry_placeholder") || "输入要添加的内容..."}
-              value={addEntryContent}
-              onChange={(e) => setAddEntryContent(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                  e.preventDefault();
-                  handleConfirmAddEntry();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  setIsAddEntryModalOpen(false);
-                }
-              }}
-            />
-            <div className="fluent-modal-footer">
-              <button
-                type="button"
-                className="fluent-btn-secondary"
-                onClick={() => setIsAddEntryModalOpen(false)}
-              >
-                {t("cancel") || "取消"}
-              </button>
-              <button
-                type="button"
-                className="fluent-btn-primary"
-                onClick={handleConfirmAddEntry}
-              >
-                {t("create_btn") || "创建"}
-              </button>
+            <div className="confirm-dialog-lower">
+              <div className="confirm-dialog-buttons">
+                <button
+                  type="button"
+                  className="confirm-dialog-button"
+                  onClick={() => setIsAddEntryModalOpen(false)}
+                >
+                  {t("cancel") || "取消"}
+                </button>
+                <button
+                  type="button"
+                  className="confirm-dialog-button primary"
+                  onClick={handleConfirmAddEntry}
+                >
+                  {t("confirm") || "确定"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <ToastContainer toasts={toasts} />

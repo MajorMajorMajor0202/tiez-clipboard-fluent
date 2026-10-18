@@ -1,7 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, LayoutGroup } from "framer-motion";
-import { ChevronLeft, ChevronRight, Clipboard, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpDown,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Clipboard,
+  Plus,
+  Trash2
+} from "lucide-react";
 import type { TabItem } from "../types";
 
 interface FluentTabBarProps {
@@ -10,6 +21,7 @@ interface FluentTabBarProps {
   onSelectTab: (tabId: string) => void;
   onAddTab?: (name: string) => void;
   onDeleteTab?: (tabId: string) => void;
+  onReorderTabs?: (tabs: TabItem[]) => void;
   onDropItemOnTab?: (itemId: number, tabName: string) => void;
   onDropExternalFilesOnTab?: (paths: string[], tabIdOrName: string) => void;
   onDropExternalTextOnTab?: (text: string, tabIdOrName: string) => void;
@@ -22,6 +34,7 @@ export const FluentTabBar = ({
   onSelectTab,
   onAddTab,
   onDeleteTab,
+  onReorderTabs,
   onDropItemOnTab,
   onDropExternalFilesOnTab,
   onDropExternalTextOnTab,
@@ -42,6 +55,8 @@ export const FluentTabBar = ({
   } | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [dialogTabName, setDialogTabName] = useState("");
+  const [isSortDialogOpen, setIsSortDialogOpen] = useState(false);
+  const [sortingTabs, setSortingTabs] = useState<TabItem[]>([]);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Close context menu on outside click or escape
@@ -76,6 +91,53 @@ export const FluentTabBar = ({
     }
     setIsCreateDialogOpen(false);
     setDialogTabName("");
+  };
+
+  const handleOpenSortDialog = () => {
+    setContextMenu(null);
+    const custom = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard");
+    setSortingTabs(custom);
+    setIsSortDialogOpen(true);
+  };
+
+  const handleMoveSortingTab = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= sortingTabs.length) return;
+    const next = [...sortingTabs];
+    const temp = next[index];
+    next[index] = next[targetIndex];
+    next[targetIndex] = temp;
+    setSortingTabs(next);
+  };
+
+  const handleSortAlphabetically = () => {
+    const next = [...sortingTabs].sort((a, b) => a.name.localeCompare(b.name));
+    setSortingTabs(next);
+  };
+
+  const handleConfirmSortDialog = () => {
+    const builtin = tabs.filter((t) => t.isBuiltin || t.id === "clipboard");
+    if (onReorderTabs) {
+      onReorderTabs([...builtin, ...sortingTabs]);
+    }
+    setIsSortDialogOpen(false);
+  };
+
+  const handleQuickMove = (tabId: string, direction: 'left' | 'right') => {
+    setContextMenu(null);
+    const custom = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard");
+    const idx = custom.findIndex((t) => t.id === tabId);
+    if (idx < 0) return;
+    const targetIdx = direction === 'left' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= custom.length) return;
+    const next = [...custom];
+    const temp = next[idx];
+    next[idx] = next[targetIdx];
+    next[targetIdx] = temp;
+    const builtin = tabs.filter((t) => t.isBuiltin || t.id === "clipboard");
+    if (onReorderTabs) {
+      onReorderTabs([...builtin, ...next]);
+    }
   };
 
   // Measure scrollability
@@ -422,8 +484,8 @@ export const FluentTabBar = ({
         <div
           className="fluent-tab-context-menu"
           style={{
-            left: `${Math.min(contextMenu.x, window.innerWidth - 150)}px`,
-            top: `${Math.min(contextMenu.y, window.innerHeight - 80)}px`
+            left: `${Math.min(contextMenu.x, window.innerWidth - 160)}px`,
+            top: `${Math.min(contextMenu.y, window.innerHeight - 150)}px`
           }}
           onMouseDown={(e) => e.stopPropagation()}
         >
@@ -433,8 +495,49 @@ export const FluentTabBar = ({
             onClick={handleOpenCreateDialog}
           >
             <Plus size={13} />
-            <span>{t ? t("new_tab") : "新建标签页..."}</span>
+            <span>{t ? t("new_tab") || "新建标签页..." : "新建标签页..."}</span>
           </button>
+
+          {/* Move tab left/right if clicking a specific custom tab */}
+          {contextMenu.tabId && !contextMenu.isBuiltin && (() => {
+            const customTabs = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard");
+            const idx = customTabs.findIndex((t) => t.id === contextMenu.tabId);
+            return (
+              <>
+                {idx > 0 && (
+                  <button
+                    type="button"
+                    className="fluent-tab-context-item"
+                    onClick={() => handleQuickMove(contextMenu.tabId!, 'left')}
+                  >
+                    <ArrowLeft size={13} />
+                    <span>{t ? t("move_tab_left") || "向左移动" : "向左移动"}</span>
+                  </button>
+                )}
+                {idx >= 0 && idx < customTabs.length - 1 && (
+                  <button
+                    type="button"
+                    className="fluent-tab-context-item"
+                    onClick={() => handleQuickMove(contextMenu.tabId!, 'right')}
+                  >
+                    <ArrowRight size={13} />
+                    <span>{t ? t("move_tab_right") || "向右移动" : "向右移动"}</span>
+                  </button>
+                )}
+              </>
+            );
+          })()}
+
+          {/* Sort tabs option */}
+          <button
+            type="button"
+            className="fluent-tab-context-item"
+            onClick={handleOpenSortDialog}
+          >
+            <ArrowUpDown size={13} />
+            <span>{t ? t("sort_tabs") || "标签页排序..." : "标签页排序..."}</span>
+          </button>
+
           {contextMenu.tabId && !contextMenu.isBuiltin && onDeleteTab && (
             <button
               type="button"
@@ -446,7 +549,7 @@ export const FluentTabBar = ({
               }}
             >
               <Trash2 size={13} />
-              <span>{t ? t("delete_tab") : "删除此标签页"}</span>
+              <span>{t ? t("delete_tab") || "删除此标签页" : "删除此标签页"}</span>
             </button>
           )}
         </div>,
@@ -495,6 +598,86 @@ export const FluentTabBar = ({
                 onClick={handleConfirmCreateDialog}
               >
                 {t ? t("confirm") : "确定"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Tab Sort Dialog */}
+      {isSortDialogOpen && createPortal(
+        <div
+          className="fluent-tab-dialog-overlay"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setIsSortDialogOpen(false);
+          }}
+        >
+          <div className="fluent-tab-dialog fluent-tab-sort-dialog" onMouseDown={(e) => e.stopPropagation()}>
+            <div className="fluent-tab-dialog-title">{t ? t("sort_tabs") || "标签页排序" : "标签页排序"}</div>
+            <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4, marginTop: "-4px" }}>
+              {t ? t("sort_tabs_hint") || "调整标签页顺序（前10个标签页将依次对应快捷键 1~9, 0）" : "调整标签页顺序（前10个标签页将依次对应快捷键 1~9, 0）"}
+            </div>
+
+            <div className="fluent-tab-sort-toolbar">
+              <button
+                type="button"
+                className="fluent-tab-sort-quick-btn"
+                onClick={handleSortAlphabetically}
+              >
+                {t ? t("sort_az") || "A-Z 升序" : "A-Z 升序"}
+              </button>
+            </div>
+
+            <div className="fluent-tab-sort-list">
+              {sortingTabs.length === 0 ? (
+                <div style={{ padding: "16px", textAlign: "center", color: "var(--text-secondary)", fontSize: "12px" }}>
+                  {t ? t("no_custom_tabs") || "暂无自定义标签页" : "暂无自定义标签页"}
+                </div>
+              ) : (
+                sortingTabs.map((tab, idx) => (
+                  <div key={tab.id} className="fluent-tab-sort-item">
+                    <span className="fluent-tab-sort-badge">#{idx + 1}</span>
+                    <span className="fluent-tab-sort-name" title={tab.name}>{tab.name}</span>
+                    <div className="fluent-tab-sort-actions">
+                      <button
+                        type="button"
+                        className="fluent-tab-sort-btn"
+                        disabled={idx === 0}
+                        onClick={() => handleMoveSortingTab(idx, 'up')}
+                        title={t ? t("move_up") || "上移" : "上移"}
+                      >
+                        <ChevronUp size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        className="fluent-tab-sort-btn"
+                        disabled={idx === sortingTabs.length - 1}
+                        onClick={() => handleMoveSortingTab(idx, 'down')}
+                        title={t ? t("move_down") || "下移" : "下移"}
+                      >
+                        <ChevronDown size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="fluent-tab-dialog-actions" style={{ marginTop: "8px" }}>
+              <button
+                type="button"
+                className="fluent-tab-dialog-btn"
+                onClick={() => setIsSortDialogOpen(false)}
+              >
+                {t ? t("cancel") || "取消" : "取消"}
+              </button>
+              <button
+                type="button"
+                className="fluent-tab-dialog-btn primary"
+                onClick={handleConfirmSortDialog}
+              >
+                {t ? t("confirm") || "确定" : "确定"}
               </button>
             </div>
           </div>
