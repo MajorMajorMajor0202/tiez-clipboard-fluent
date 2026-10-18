@@ -32,6 +32,7 @@ import {
     Check,
     Trash2,
     Edit3,
+    Layers,
     Lock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -731,6 +732,7 @@ const ClipboardItem = ({
     isMultiSelectActive = false,
     onMultiSelect,
     onItemContentUpdated,
+    onPinToDesktop,
     doubleClickToPaste = true,
     isEditingContent: propIsEditingContent,
     onSaveContentEdit,
@@ -2764,6 +2766,21 @@ const ClipboardItem = ({
                         <ExternalLink size={13} />
                         <span>{t('open') || '外部打开'}</span>
                     </button>
+
+                    {onPinToDesktop && (
+                        <button
+                            type="button"
+                            className="secondary-menu-item"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMoreMenuOpen(false);
+                                onPinToDesktop();
+                            }}
+                        >
+                            <Layers size={13} />
+                            <span>{t('pin_to_desktop') || '固定到桌面浮窗'}</span>
+                        </button>
+                    )}
 
                     {item.tags?.some(tag => {
                         const l = tag.toLowerCase();

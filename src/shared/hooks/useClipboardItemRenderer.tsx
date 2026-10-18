@@ -66,6 +66,8 @@ interface UseClipboardItemRendererOptions {
   setTagInput: Dispatch<SetStateAction<string>>;
   handleUpdateTags: (id: number, tags: string[]) => void;
   handleAIAction: (id: number, content: string, actionType: string) => void;
+  pastedPulseId?: number | null;
+  onPinToDesktop?: (item: ClipboardEntry) => void;
 }
 
 type RenderItemContent = (
@@ -123,7 +125,9 @@ export const useClipboardItemRenderer = ({
   setEditingTagsId,
   setTagInput,
   handleUpdateTags,
-  handleAIAction
+  handleAIAction,
+  pastedPulseId,
+  onPinToDesktop
 }: UseClipboardItemRendererOptions): { renderItemContent: RenderItemContent } => {
   const renderItemContent = useCallback(
     (item: ClipboardEntry, index: number, dragControls?: DragControls, disableLayout?: boolean) => {
@@ -276,10 +280,12 @@ export const useClipboardItemRenderer = ({
             )
           }
           index={index}
+          className={pastedPulseId === item.id ? "pasted-pulse" : ""}
           isMultiSelected={selectedItemIds?.has(item.id)}
           isMultiSelectActive={Boolean(selectedItemIds && selectedItemIds.size > 0)}
           onMultiSelect={onMultiSelect}
           onItemContentUpdated={onItemContentUpdated}
+          onPinToDesktop={onPinToDesktop ? () => onPinToDesktop(item) : undefined}
           dragControls={dragControls}
           disableLayout={disableLayout}
         />
@@ -331,7 +337,9 @@ export const useClipboardItemRenderer = ({
       onItemContentUpdated,
       setTagInput,
       handleUpdateTags,
-      handleAIAction
+      handleAIAction,
+      pastedPulseId,
+      onPinToDesktop
     ]
   );
 

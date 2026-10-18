@@ -359,6 +359,26 @@ pub fn get_clipboard_content(
 }
 
 #[tauri::command]
+pub fn get_clipboard_entry_by_id(
+    state: State<'_, DbState>,
+    session: State<'_, SessionHistory>,
+    id: i64,
+) -> AppResult<ClipboardEntry> {
+    if id < 0 {
+        let session_items = session.inner().0.lock().unwrap();
+        if let Some(item) = session_items.iter().find(|i| i.id == id) {
+            return Ok(item.clone());
+        }
+    }
+
+    if let Some(entry) = state.repo.get_entry_by_id(id).map_err(AppError::from)? {
+        return Ok(entry);
+    }
+
+    Err(AppError::Validation("Entry not found".to_string()))
+}
+
+#[tauri::command]
 pub fn update_pinned_order(
     app_handle: AppHandle,
     state: State<'_, DbState>,

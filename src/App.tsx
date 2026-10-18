@@ -44,6 +44,7 @@ import { useListSelectionReset } from "./shared/hooks/useListSelectionReset";
 import { useSearchFetchTrigger } from "./shared/hooks/useSearchFetchTrigger";
 import { useScrollToSelection } from "./shared/hooks/useScrollToSelection";
 import { useClipboardItemRenderer } from "./shared/hooks/useClipboardItemRenderer";
+import { openDesktopSticker } from "./features/sticker/lib/openSticker";
 import { useAnnouncements } from "./shared/hooks/useAnnouncements";
 import { useOverlays } from "./shared/hooks/useOverlays";
 import { useAutoUpdate } from "./shared/hooks/useAutoUpdate";
@@ -396,6 +397,7 @@ const App = () => {
   // Manual Item Add Modal
   const [isAddEntryModalOpen, setIsAddEntryModalOpen] = useState(false);
   const [addEntryContent, setAddEntryContent] = useState("");
+  const [pastedPulseId, setPastedPulseId] = useState<number | null>(null);
 
   useEffect(() => {
     (window as any).__tiezSelectedItemIds = selectedItemIds;
@@ -1063,7 +1065,12 @@ const App = () => {
       moveToTopAfterPaste,
       setSearch,
       setHistory,
-      virtualListRef
+      virtualListRef,
+      activeTabId,
+      onPastedItem: (id: number) => {
+        setPastedPulseId(id);
+        setTimeout(() => setPastedPulseId(null), 700);
+      }
     });
 
   const { handleAIAction } = useAiActions({
@@ -1800,6 +1807,8 @@ const App = () => {
       setEditingContentId(null);
     },
     onCancelContentEdit: () => setEditingContentId(null),
+    pastedPulseId,
+    onPinToDesktop: openDesktopSticker,
     richTextSnapshotPreview,
     sensitiveMaskPrefixVisible,
     sensitiveMaskSuffixVisible,
@@ -2181,6 +2190,13 @@ const App = () => {
             hasTags={Boolean(selectedItem?.tags && selectedItem.tags.length > 0)}
             onTogglePin={handleRailTogglePin}
             isPinned={!!selectedItem?.is_pinned}
+            onPinToDesktop={() => {
+              if (selectedItem) {
+                openDesktopSticker(selectedItem);
+              } else {
+                pushToast(t("select_item_first") || "请先在列表中选中一个条目");
+              }
+            }}
             onToggleLock={handleRailToggleLock}
             isLocked={isSelectedItemLocked}
             onMoveUp={handleRailMoveUp}

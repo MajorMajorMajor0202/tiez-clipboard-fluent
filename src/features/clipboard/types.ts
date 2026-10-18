@@ -58,6 +58,7 @@ export interface ClipboardItemProps {
   onAIAction?: (type: string) => void;
   onAIOptionsToggle?: () => void;
   onInputSubmit?: (val: string) => void;
+  onPinToDesktop?: () => void;
   index?: number;
   isMultiSelected?: boolean;
   isMultiSelectActive?: boolean;

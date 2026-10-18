@@ -75,6 +75,29 @@ export const useFilteredHistory = ({
       );
     });
 
+    // In Custom Staging Tab: strictly preserve tab assignment order (immune to pasting jumps)
+    if (activeTabId && activeTabId !== "clipboard") {
+      const allowedIds = tabAssignments?.[activeTabId] || [];
+      const idOrderMap = new Map(allowedIds.map((id, index) => [id, index]));
+      return filtered.sort((a, b) => {
+        if (a.is_pinned !== b.is_pinned) {
+          return a.is_pinned ? -1 : 1;
+        }
+        if (a.is_pinned) {
+          if ((a.pinned_order || 0) !== (b.pinned_order || 0)) {
+            return (b.pinned_order || 0) - (a.pinned_order || 0);
+          }
+        }
+        const orderA = idOrderMap.has(a.id) ? idOrderMap.get(a.id)! : 999999;
+        const orderB = idOrderMap.has(b.id) ? idOrderMap.get(b.id)! : 999999;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        return b.timestamp - a.timestamp;
+      });
+    }
+
+    // Main Clipboard Stream: sort by pinned, pinned_order, and chronological timestamp
     return filtered.sort((a, b) => {
       if (a.is_pinned !== b.is_pinned) {
         return a.is_pinned ? -1 : 1;

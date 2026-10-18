@@ -1021,5 +1021,21 @@ body.dark-mode .secondary-menu-item:hover,
   cursor: text !important;
 }
 
+/* Fluent pulse animation on item paste in staging tabs */
+@keyframes item-paste-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 120, 212, 0.45);
+    border-color: var(--accent-color, #0078d4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.2);
+    border-color: var(--accent-color, #0078d4);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 120, 212, 0);
+  }
+}
 
-
+.history-item.pasted-pulse {
+  animation: item-paste-pulse 0.65s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+}

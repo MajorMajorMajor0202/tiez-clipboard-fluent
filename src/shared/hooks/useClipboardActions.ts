@@ -13,6 +13,8 @@ interface UseClipboardActionsOptions {
   setSearch: (val: string) => void;
   setHistory: Dispatch<SetStateAction<ClipboardEntry[]>>;
   virtualListRef: RefObject<VirtualClipboardListHandle | null>;
+  activeTabId?: string;
+  onPastedItem?: (id: number) => void;
 }
 
 export const useClipboardActions = ({
@@ -22,7 +24,9 @@ export const useClipboardActions = ({
   moveToTopAfterPaste,
   setSearch,
   setHistory,
-  virtualListRef
+  virtualListRef,
+  activeTabId,
+  onPastedItem
 }: UseClipboardActionsOptions) => {
   const copyToClipboard = useCallback(
     async (id: number, content: string, contentType: string, pasteWithFormat = false) => {
@@ -31,6 +35,9 @@ export const useClipboardActions = ({
           document.activeElement.blur();
         }
 
+        const isCustomTab = activeTabId && activeTabId !== "clipboard";
+        const effectiveMoveToTop = isCustomTab ? false : moveToTopAfterPaste;
+
         await invoke("copy_to_clipboard", {
           content,
           contentType,
@@ -38,14 +45,29 @@ export const useClipboardActions = ({
           id: id,
           deleteAfterUse: deleteAfterPaste,
           pasteWithFormat,
-          moveToTop: moveToTopAfterPaste
+          moveToTop: effectiveMoveToTop
         });
 
-        if (moveToTopAfterPaste && !deleteAfterPaste) {
+        if (isCustomTab) {
+          // In staging tab: strictly preserve spatial and timeline order, trigger feedback pulse
+          onPastedItem?.(id);
+          setHistory((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, use_count: (item.use_count || 0) + 1 } : item
+            )
+          );
+        } else if (effectiveMoveToTop && !deleteAfterPaste) {
+          // In main clipboard: move to top in history
           const now = Date.now();
           setHistory((prev) =>
             prev.map((item) =>
-              item.id === id ? { ...item, timestamp: now } : item
+              item.id === id ? { ...item, timestamp: now, use_count: (item.use_count || 0) + 1 } : item
+            )
+          );
+        } else {
+          setHistory((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, use_count: (item.use_count || 0) + 1 } : item
             )
           );
         }
@@ -56,7 +78,7 @@ export const useClipboardActions = ({
         pushToast(errorMsg, 3000);
       }
     },
-    [deleteAfterPaste, moveToTopAfterPaste, pushToast, setHistory, setSearch, t]
+    [activeTabId, deleteAfterPaste, moveToTopAfterPaste, onPastedItem, pushToast, setHistory, setSearch, t]
   );
 
   const openContent = useCallback(

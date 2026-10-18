@@ -46,12 +46,18 @@ function onDpiChange() {
 dpiMediaQuery.addEventListener("change", onDpiChange);
 // ─────────────────────────────────────────────────────────────────────
 
+import DesktopStickerWindow from "./features/sticker/components/DesktopStickerWindow";
+
 const isCompactPreview = params.get("window") === "compact-preview";
 const isAdvancedSettingsWindow = params.get("window") === "advanced-settings";
 const isSettingsWindow = params.get("window") === "settings";
+const isStickerWindow = params.get("window") === "sticker";
 
 if (isSettingsWindow || isAdvancedSettingsWindow) {
   document.body.classList.add("is-settings-window");
+}
+if (isStickerWindow) {
+  document.body.classList.add("is-sticker-window");
 }
 
 // ── Canvas 边框叠加层 ─────────────────────────────────────────────────
@@ -68,7 +74,7 @@ if (isSettingsWindow || isAdvancedSettingsWindow) {
 //      - 宽度设为 w - 3, 高度设为 h - 3 (右/下边界落在 index w-2 / h-2)
 //    这样，边框线处于 100% 不会被系统裁剪的内部安全区，且在四边表现出完美的物理对称。
 // ─────────────────────────────────────────────────────────────────────
-if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
+if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isStickerWindow) {
   const canvas = document.createElement("canvas");
   canvas.id = "window-border-overlay";
   Object.assign(canvas.style, {
@@ -202,12 +208,14 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview) {
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    {isCompactPreview
-      ? <CompactPreviewWindow />
-      : isAdvancedSettingsWindow
-        ? <AdvancedSettingsWindow />
-        : isSettingsWindow
-          ? <SettingsWindow />
-          : <App />}
+    {isStickerWindow
+      ? <DesktopStickerWindow />
+      : isCompactPreview
+        ? <CompactPreviewWindow />
+        : isAdvancedSettingsWindow
+          ? <AdvancedSettingsWindow />
+          : isSettingsWindow
+            ? <SettingsWindow />
+            : <App />}
   </React.StrictMode>,
 );

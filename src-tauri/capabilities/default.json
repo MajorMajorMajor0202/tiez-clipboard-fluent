@@ -3,9 +3,7 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": [
-    "main",
-    "compact-preview",
-    "settings"
+    "*"
   ],
   "permissions": [
     "core:default",

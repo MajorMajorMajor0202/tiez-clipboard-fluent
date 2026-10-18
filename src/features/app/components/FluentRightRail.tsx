@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   FolderPlus,
+  Layers,
   Loader2,
   Lock,
   MessageSquare,
@@ -44,6 +45,7 @@ export interface FluentRightRailProps {
   hasTags?: boolean;
   onTogglePin?: (e: ReactMouseEvent) => void;
   isPinned: boolean;
+  onPinToDesktop?: () => void;
   onToggleLock?: (e: ReactMouseEvent) => void;
   isLocked: boolean;
   onMoveUp?: () => void;
@@ -87,6 +89,7 @@ export const FluentRightRail = ({
   hasTags,
   onTogglePin,
   isPinned,
+  onPinToDesktop,
   onToggleLock,
   isLocked,
   onMoveUp,
@@ -223,6 +226,21 @@ export const FluentRightRail = ({
               aria-label="Pin to top"
             >
               {isPinned ? <PinOff size={15} strokeWidth={2} /> : <Pin size={15} strokeWidth={2} />}
+            </button>
+          </FluentTooltip>
+        )}
+
+        {/* Pin to Desktop Floating Sticker */}
+        {onPinToDesktop && (
+          <FluentTooltip text={t("pin_to_desktop") || "固定到桌面浮窗 (贴图便签)"}>
+            <button
+              type="button"
+              className="rail-btn"
+              onClick={onPinToDesktop}
+              disabled={!hasSelectedItem}
+              aria-label="Pin to desktop"
+            >
+              <Layers size={15} strokeWidth={2} />
             </button>
           </FluentTooltip>
         )}
