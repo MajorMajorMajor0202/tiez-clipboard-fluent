@@ -15,7 +15,8 @@ use windows_core::Ref as WRef;
 use windows::{
     core::{implement, BOOL, GUID},
     Win32::{
-        Foundation::{DRAGDROP_E_INVALIDHWND, FILETIME, HWND, LPARAM, POINTL, SIZE},
+        Foundation::{DRAGDROP_E_INVALIDHWND, FILETIME, HWND, LPARAM, POINT, POINTL, SIZE},
+        Graphics::Gdi::ScreenToClient,
         System::{
             Com::{
                 IDataObject, IStream, DVASPECT_CONTENT, FORMATETC, TYMED_HGLOBAL, TYMED_ISTREAM,
@@ -41,8 +42,23 @@ use windows::{
 use crate::app::commands::file_cmd::image_ext_from_bytes;
 
 #[derive(Clone, Serialize)]
+pub struct DropPosition {
+    pub x: i32,
+    pub y: i32,
+}
+
+#[derive(Clone, Serialize)]
 struct DropPayload {
     paths: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    position: Option<DropPosition>,
+}
+
+#[derive(Clone, Serialize)]
+struct DropTextPayload {
+    text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    position: Option<DropPosition>,
 }
 
 #[repr(C)]
@@ -74,11 +90,11 @@ pub struct DragDropController {
 }
 
 impl DragDropController {
-    pub fn new(hwnd: HWND, app_handle: AppHandle) -> Self {
+    pub fn new(top_hwnd: HWND, app_handle: AppHandle) -> Self {
         let mut controller = DragDropController::default();
 
         let app_handle = Rc::new(app_handle);
-        let mut callback = |child| controller.inject_in_hwnd(child, app_handle.clone());
+        let mut callback = |child| controller.inject_in_hwnd(child, top_hwnd, app_handle.clone());
         let mut trait_obj: &mut dyn FnMut(HWND) -> bool = &mut callback;
         let closure_pointer_pointer: *mut c_void = unsafe { std::mem::transmute(&mut trait_obj) };
         let lparam = LPARAM(closure_pointer_pointer as _);
@@ -86,15 +102,15 @@ impl DragDropController {
             let closure = &mut *(lparam.0 as *mut c_void as *mut &mut dyn FnMut(HWND) -> bool);
             closure(hwnd).into()
         }
-        let _ = unsafe { EnumChildWindows(Some(hwnd), Some(enumerate_callback), lparam) };
+        let _ = unsafe { EnumChildWindows(Some(top_hwnd), Some(enumerate_callback), lparam) };
 
         controller
     }
 
-    fn inject_in_hwnd(&mut self, hwnd: HWND, app_handle: Rc<AppHandle>) -> bool {
-        let drop_target: IDropTarget = EmojiDropTarget::new(app_handle).into();
-        if unsafe { RevokeDragDrop(hwnd) } != Err(DRAGDROP_E_INVALIDHWND.into())
-            && unsafe { RegisterDragDrop(hwnd, &drop_target) }.is_ok()
+    fn inject_in_hwnd(&mut self, child_hwnd: HWND, top_hwnd: HWND, app_handle: Rc<AppHandle>) -> bool {
+        let drop_target: IDropTarget = EmojiDropTarget::new(top_hwnd, app_handle).into();
+        if unsafe { RevokeDragDrop(child_hwnd) } != Err(DRAGDROP_E_INVALIDHWND.into())
+            && unsafe { RegisterDragDrop(child_hwnd, &drop_target) }.is_ok()
         {
             self.drop_targets.push(drop_target);
         }
@@ -104,14 +120,16 @@ impl DragDropController {
 
 #[implement(IDropTarget)]
 pub struct EmojiDropTarget {
+    top_hwnd: HWND,
     app_handle: Rc<AppHandle>,
     cursor_effect: UnsafeCell<DROPEFFECT>,
     enter_is_valid: UnsafeCell<bool>,
 }
 
 impl EmojiDropTarget {
-    pub fn new(app_handle: Rc<AppHandle>) -> Self {
+    pub fn new(top_hwnd: HWND, app_handle: Rc<AppHandle>) -> Self {
         Self {
+            top_hwnd,
             app_handle,
             cursor_effect: UnsafeCell::new(DROPEFFECT_NONE),
             enter_is_valid: UnsafeCell::new(false),
@@ -329,20 +347,52 @@ impl EmojiDropTarget {
         None
     }
 
-    fn emit_file_drop(app_handle: &AppHandle, paths: Vec<String>) {
-        let payload = DropPayload { paths };
+    unsafe fn read_text(data_obj: &IDataObject) -> Option<String> {
+        let format_unicode = Self::format_etc(13, -1, TYMED_HGLOBAL.0 as u32);
+        if let Ok(mut medium) = data_obj.GetData(&format_unicode) {
+            let text = Self::read_hglobal_wide_string(medium.u.hGlobal);
+            ReleaseStgMedium(&mut medium);
+            if let Some(t) = text {
+                if !t.trim().is_empty() {
+                    return Some(t);
+                }
+            }
+        }
+
+        let format_text = Self::format_etc(1, -1, TYMED_HGLOBAL.0 as u32);
+        if let Ok(mut medium) = data_obj.GetData(&format_text) {
+            let text = Self::read_hglobal_string(medium.u.hGlobal);
+            ReleaseStgMedium(&mut medium);
+            if let Some(t) = text {
+                if !t.trim().is_empty() {
+                    return Some(t);
+                }
+            }
+        }
+
+        None
+    }
+
+    fn emit_file_drop(app_handle: &AppHandle, paths: Vec<String>, position: Option<DropPosition>) {
+        let payload = DropPayload { paths, position };
         let _ = app_handle.emit("tauri://file-drop", payload.clone());
         let _ = app_handle.emit("tauri://drag-drop", payload);
     }
 
+    fn emit_text_drop(app_handle: &AppHandle, text: String, position: Option<DropPosition>) {
+        let payload = DropTextPayload { text, position };
+        let _ = app_handle.emit("tauri://text-drop", payload.clone());
+        let _ = app_handle.emit("tauri://drag-drop-text", payload);
+    }
+
     fn emit_drag_enter(app_handle: &AppHandle) {
-        let payload = DropPayload { paths: Vec::new() };
+        let payload = DropPayload { paths: Vec::new(), position: None };
         let _ = app_handle.emit("tauri://file-drop-hover", payload.clone());
         let _ = app_handle.emit("tauri://drag-enter", payload);
     }
 
     fn emit_drag_leave(app_handle: &AppHandle) {
-        let payload = DropPayload { paths: Vec::new() };
+        let payload = DropPayload { paths: Vec::new(), position: None };
         let _ = app_handle.emit("tauri://file-drop-cancelled", payload.clone());
         let _ = app_handle.emit("tauri://drag-leave", payload);
     }
@@ -442,6 +492,8 @@ impl IDropTarget_Impl for EmojiDropTarget_Impl {
         let cf_inet_url_a = unsafe { RegisterClipboardFormatW(CFSTR_INETURLA) };
         let valid = unsafe {
             EmojiDropTarget::has_format(data_obj, CF_HDROP.0, TYMED_HGLOBAL.0 as u32, -1)
+                || EmojiDropTarget::has_format(data_obj, 13, TYMED_HGLOBAL.0 as u32, -1)
+                || EmojiDropTarget::has_format(data_obj, 1, TYMED_HGLOBAL.0 as u32, -1)
                 || (cf_file_descriptor != 0
                     && EmojiDropTarget::has_format(
                         data_obj,
@@ -510,7 +562,7 @@ impl IDropTarget_Impl for EmojiDropTarget_Impl {
         &self,
         pDataObj: WRef<'_, IDataObject>,
         _grfKeyState: MODIFIERKEYS_FLAGS,
-        _pt: &POINTL,
+        pt: &POINTL,
         _pdwEffect: *mut DROPEFFECT,
     ) -> windows::core::Result<()> {
         if !unsafe { *self.enter_is_valid.get() } {
@@ -519,19 +571,35 @@ impl IDropTarget_Impl for EmojiDropTarget_Impl {
 
         let data_obj = pDataObj.as_ref().expect("Received null IDataObject");
 
+        let mut win_pt = POINT {
+            x: pt.x,
+            y: pt.y,
+        };
+        let pos = if unsafe { ScreenToClient(self.top_hwnd, &mut win_pt) }.as_bool() {
+            Some(DropPosition {
+                x: win_pt.x,
+                y: win_pt.y,
+            })
+        } else {
+            None
+        };
+
         if let Some((paths, hdrop)) = unsafe { EmojiDropTarget::iterate_file_paths(data_obj) } {
             let paths: Vec<String> = paths
                 .into_iter()
                 .map(|p| p.to_string_lossy().to_string())
                 .collect();
             if !paths.is_empty() {
-                EmojiDropTarget::emit_file_drop(self.app_handle.as_ref(), paths);
+                EmojiDropTarget::emit_file_drop(self.app_handle.as_ref(), paths, pos);
             }
             unsafe { DragFinish(hdrop) };
+        } else if let Some(text) = unsafe { EmojiDropTarget::read_text(data_obj) } {
+            EmojiDropTarget::emit_text_drop(self.app_handle.as_ref(), text, pos);
         } else {
             let virtual_files = unsafe { EmojiDropTarget::read_virtual_files(data_obj) };
             if !virtual_files.is_empty() {
                 let app_handle = self.app_handle.as_ref().clone();
+                let pos_clone = pos.clone();
                 std::thread::spawn(move || {
                     let mut saved = Vec::new();
                     for (name, bytes) in virtual_files {
@@ -542,14 +610,15 @@ impl IDropTarget_Impl for EmojiDropTarget_Impl {
                         }
                     }
                     if !saved.is_empty() {
-                        EmojiDropTarget::emit_file_drop(&app_handle, saved);
+                        EmojiDropTarget::emit_file_drop(&app_handle, saved, pos_clone);
                     }
                 });
             } else if let Some(url) = unsafe { EmojiDropTarget::read_inet_url(data_obj) } {
                 let app_handle = self.app_handle.as_ref().clone();
+                let pos_clone = pos;
                 tauri::async_runtime::spawn(async move {
                     if let Some(path) = EmojiDropTarget::save_url_to_temp(url).await {
-                        EmojiDropTarget::emit_file_drop(&app_handle, vec![path]);
+                        EmojiDropTarget::emit_file_drop(&app_handle, vec![path], pos_clone);
                     }
                 });
             }

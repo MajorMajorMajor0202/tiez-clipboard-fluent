@@ -1,27 +1,56 @@
-/* Clipboard Item Selection */
-.history-item.selected {
+/* Clipboard Item Selection - Windows 11 Fluent Design Persistent Selection */
+.history-item.selected,
+.theme-mica .history-item.selected,
+.theme-acrylic .history-item.selected {
   outline: none !important;
   outline-offset: 0 !important;
-  border-color: var(--card-border-color, rgba(128, 128, 128, 0.2)) !important;
-  box-shadow: none !important;
+  border-color: var(--accent-color, #2f6fed) !important;
+  box-shadow: 0 0 0 1px var(--accent-color, #2f6fed), var(--card-hover-shadow) !important;
+  background: rgba(var(--accent-color-rgb, 47, 111, 237), 0.1) !important;
   z-index: 10;
   position: relative;
+  color: inherit;
+  transform: none !important;
 }
 
+.history-item.selected:hover,
+.theme-mica .history-item.selected:hover,
+.theme-acrylic .history-item.selected:hover {
+  background: rgba(var(--accent-color-rgb, 47, 111, 237), 0.15) !important;
+  border-color: var(--accent-color, #2f6fed) !important;
+  box-shadow: 0 0 0 1.5px var(--accent-color, #2f6fed), var(--card-hover-shadow) !important;
+}
+
+:root.dark-mode .history-item.selected,
+body.dark-mode .history-item.selected,
+.dark-mode.theme-mica .history-item.selected,
+.dark-mode.theme-acrylic .history-item.selected {
+  background: rgba(var(--accent-color-rgb, 79, 125, 255), 0.18) !important;
+  border-color: var(--accent-color, #4f7dff) !important;
+  box-shadow: 0 0 0 1px var(--accent-color, #4f7dff), var(--card-hover-shadow) !important;
+}
+
+:root.dark-mode .history-item.selected:hover,
+body.dark-mode .history-item.selected:hover,
+.dark-mode.theme-mica .history-item.selected:hover,
+.dark-mode.theme-acrylic .history-item.selected:hover {
+  background: rgba(var(--accent-color-rgb, 79, 125, 255), 0.25) !important;
+  border-color: var(--accent-color, #4f7dff) !important;
+  box-shadow: 0 0 0 1.5px var(--accent-color, #4f7dff), var(--card-hover-shadow) !important;
+}
+
+/* Fluent selection indicator bar on left edge */
 .history-item.selected::before {
   content: "";
   position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  border: 2px solid var(--text-primary) !important;
-  z-index: 2;
-  border-radius: inherit;
+  left: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--accent-color, #2f6fed) !important;
+  z-index: 12;
   pointer-events: none;
-}
-
-.history-item.selected {
-  color: inherit;
-  transform: none !important;
+  border: none !important;
 }

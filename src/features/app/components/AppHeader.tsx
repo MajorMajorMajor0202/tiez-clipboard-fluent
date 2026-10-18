@@ -46,6 +46,7 @@ interface AppHeaderProps {
   onDropItemOnTab?: (itemId: number, tabName: string) => void;
   onDropExternalFilesOnTab?: (paths: string[], tabIdOrName: string) => void;
   onDropExternalTextOnTab?: (text: string, tabIdOrName: string) => void;
+  chatMode?: boolean;
 }
 
 const AppHeader = ({
@@ -80,14 +81,16 @@ const AppHeader = ({
   onDeleteTab,
   onDropItemOnTab,
   onDropExternalFilesOnTab,
-  onDropExternalTextOnTab
+  onDropExternalTextOnTab,
+  chatMode
 }: AppHeaderProps) => {
+  const isSubpage = Boolean(showSettings || showTagManager || showEmojiPanel || chatMode);
 
   return (
-  <header className={(showSettings || showTagManager || showEmojiPanel) ? 'subpage-header' : ''}>
+  <header className={isSubpage ? 'subpage-header' : ''}>
     <div className="header-top window-drag-region" data-tauri-drag-region>
       <div className="header-leading">
-        {(showSettings || showTagManager || showEmojiPanel) && (
+        {isSubpage && (
           <FluentTooltip text={t('back') || '返回'}>
             <button className="btn-icon-ghost window-no-drag" onClick={onBack}>
               <ChevronLeft size={18} />
@@ -100,9 +103,11 @@ const AppHeader = ({
               ? (t('emoji_panel') || '表情包')
               : showTagManager && tagManagerEnabled
                 ? (t('tag_manager') || '标签管理')
-                : showSettings
-                  ? settingsTitle
-                  : t('app_name')}
+                : chatMode
+                  ? '局域网文件传输'
+                  : showSettings
+                    ? settingsTitle
+                    : t('app_name')}
           </span>
         </div>
       </div>
@@ -131,21 +136,21 @@ const AppHeader = ({
       </div>
     </div>
 
-    {!showSettings && !showTagManager && !showEmojiPanel && (
-      <AnimatePresence>
-        {(showSearchBox || search.trim().length > 0) && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
-            animate={{
-              height: "auto",
-              opacity: 1,
-              transitionEnd: { overflow: "visible" }
-            }}
-            exit={{ height: 0, opacity: 0, overflow: 'hidden' }}
-            transition={{ duration: 0.2, ease: "circOut" }}
-            style={{ flexShrink: 0 }}
-          >
-            <div className="search-container window-no-drag">
+    {!isSubpage && (
+      <div className="search-container window-no-drag">
+        <AnimatePresence>
+          {(showSearchBox || search.trim().length > 0) && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+              animate={{
+                height: "auto",
+                opacity: 1,
+                transitionEnd: { overflow: "visible" }
+              }}
+              exit={{ height: 0, opacity: 0, overflow: 'hidden' }}
+              transition={{ duration: 0.2, ease: "circOut" }}
+              style={{ flexShrink: 0 }}
+            >
               <div className="fluent-search-box home-search-wrapper">
                 <Search size={14} className="fluent-search-icon search-icon" />
                 <input
@@ -219,21 +224,21 @@ const AppHeader = ({
                   )}
                 </AnimatePresence>
               </div>
-              <FluentTabBar
-                tabs={tabs || []}
-                activeTabId={activeTabId || "clipboard"}
-                onSelectTab={onSelectTab || (() => {})}
-                onAddTab={onAddTab}
-                onDeleteTab={onDeleteTab}
-                onDropItemOnTab={onDropItemOnTab}
-                onDropExternalFilesOnTab={onDropExternalFilesOnTab}
-                onDropExternalTextOnTab={onDropExternalTextOnTab}
-                t={t}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <FluentTabBar
+          tabs={tabs || []}
+          activeTabId={activeTabId || "clipboard"}
+          onSelectTab={onSelectTab || (() => {})}
+          onAddTab={onAddTab}
+          onDeleteTab={onDeleteTab}
+          onDropItemOnTab={onDropItemOnTab}
+          onDropExternalFilesOnTab={onDropExternalFilesOnTab}
+          onDropExternalTextOnTab={onDropExternalTextOnTab}
+          t={t}
+        />
+      </div>
     )}
   </header>
 );

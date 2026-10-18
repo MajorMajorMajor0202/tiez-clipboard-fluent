@@ -1510,6 +1510,23 @@ const App = () => {
     const appWindow = getCurrentWindow();
     const lastHandledRef = { sig: "", time: 0 };
 
+    const resolveTargetTab = (pos: { x: number; y: number } | null): TabItem | null => {
+      if (pos) {
+        let el = document.elementFromPoint(pos.x, pos.y);
+        let btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
+        if (!btn && window.devicePixelRatio && window.devicePixelRatio !== 1) {
+          el = document.elementFromPoint(pos.x / window.devicePixelRatio, pos.y / window.devicePixelRatio);
+          btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
+        }
+        if (btn) {
+          const tabId = btn.getAttribute("data-tab-id");
+          const found = tabs.find((t) => t.id === tabId);
+          if (found) return found;
+        }
+      }
+      return tabs.find((t) => t.id === activeTabId) || tabs[0] || null;
+    };
+
     const handleDropPayload = (payload: unknown) => {
       const paths = resolveDropPaths(payload);
       if (!paths || paths.length === 0) return;
@@ -1522,31 +1539,7 @@ const App = () => {
         }
       }
 
-      let targetTab: TabItem | null = null;
-      if (pos) {
-        let el = document.elementFromPoint(pos.x, pos.y);
-        let btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
-        if (!btn && window.devicePixelRatio && window.devicePixelRatio !== 1) {
-          el = document.elementFromPoint(pos.x / window.devicePixelRatio, pos.y / window.devicePixelRatio);
-          btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
-        }
-        if (btn) {
-          const tabId = btn.getAttribute("data-tab-id");
-          targetTab = tabs.find((t) => t.id === tabId) || null;
-        }
-
-        if (!targetTab) {
-          let bar = el?.closest(".fluent-tab-bar-container") as HTMLElement | null;
-          if (!bar && window.devicePixelRatio && window.devicePixelRatio !== 1) {
-            const el2 = document.elementFromPoint(pos.x / window.devicePixelRatio, pos.y / window.devicePixelRatio);
-            bar = el2?.closest(".fluent-tab-bar-container") as HTMLElement | null;
-          }
-          if (bar) {
-            targetTab = tabs.find((t) => t.id === activeTabId) || tabs[0] || null;
-          }
-        }
-      }
-
+      const targetTab = resolveTargetTab(pos);
       if (!targetTab) return;
 
       const sig = `${paths.join("|")}@${targetTab.id}`;
@@ -1560,18 +1553,59 @@ const App = () => {
       handleDropExternalFilesOnTab(paths, targetTab.id);
     };
 
+    const handleTextDropPayload = (payload: unknown) => {
+      let text = "";
+      let pos: { x: number; y: number } | null = null;
+      if (typeof payload === "string") {
+        text = payload;
+      } else if (payload && typeof payload === "object") {
+        if ("text" in payload && typeof (payload as any).text === "string") {
+          text = (payload as any).text;
+        }
+        if ("position" in payload) {
+          const rawPos = (payload as any).position;
+          if (rawPos && typeof rawPos.x === "number" && typeof rawPos.y === "number") {
+            pos = rawPos;
+          }
+        }
+      }
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      const targetTab = resolveTargetTab(pos);
+      if (!targetTab) return;
+
+      const sig = `text:${trimmed.slice(0, 50)}@${targetTab.id}`;
+      const now = Date.now();
+      if (sig === lastHandledRef.sig && now - lastHandledRef.time < 1500) {
+        return;
+      }
+      lastHandledRef.sig = sig;
+      lastHandledRef.time = now;
+
+      handleDropExternalTextOnTab(trimmed, targetTab.id);
+    };
+
     const unlistenDrop = appWindow.listen("tauri://drag-drop", (e) => {
       handleDropPayload(e.payload);
     });
     const unlistenFileDrop = appWindow.listen("tauri://file-drop", (e) => {
       handleDropPayload(e.payload);
     });
+    const unlistenTextDrop = appWindow.listen("tauri://text-drop", (e) => {
+      handleTextDropPayload(e.payload);
+    });
+    const unlistenDragDropText = appWindow.listen("tauri://drag-drop-text", (e) => {
+      handleTextDropPayload(e.payload);
+    });
 
     return () => {
       unlistenDrop.then((f) => f());
       unlistenFileDrop.then((f) => f());
+      unlistenTextDrop.then((f) => f());
+      unlistenDragDropText.then((f) => f());
     };
-  }, [tabs, activeTabId, handleDropExternalFilesOnTab]);
+  }, [tabs, activeTabId, handleDropExternalFilesOnTab, handleDropExternalTextOnTab]);
 
   const handleQuickAssignToTab = useCallback((tabIndex: number, specificItemId?: number) => {
     if (!quickTabAssignEnabled) return;
@@ -1953,9 +1987,51 @@ const App = () => {
     deleteEntry(e || ({ stopPropagation: () => {} } as any), selectedItem.id);
   }, [selectedItem, isSelectedItemLocked, pushToast, deleteEntry]);
 
+  const handleWindowHtml5Drop = useCallback((e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes("application/x-tiez-item") || (window as any).__tiezDraggedItemId) {
+      return;
+    }
+    if ((e.target as HTMLElement)?.closest(".fluent-tab-item")) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const targetTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+    if (!targetTab) return;
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const paths = Array.from(e.dataTransfer.files)
+        .map((f: any) => f.path)
+        .filter((p): p is string => typeof p === "string" && p.length > 0);
+      if (paths.length > 0) {
+        handleDropExternalFilesOnTab(paths, targetTab.id);
+        return;
+      }
+    }
+
+    let text = "";
+    try {
+      text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData("text/uri-list");
+    } catch {}
+    if (text && text.trim()) {
+      handleDropExternalTextOnTab(text.trim(), targetTab.id);
+    }
+  }, [tabs, activeTabId, handleDropExternalFilesOnTab, handleDropExternalTextOnTab]);
+
+  const shouldShowRightRail = !effectiveShowTagManager && !effectiveShowEmojiPanel && !chatMode && !showSettings;
+
   return (
     <div
       className={`app-container ${entranceActive ? "window-entrance" : ""}`}
+      onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes("application/x-tiez-item")) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+        }
+      }}
+      onDrop={handleWindowHtml5Drop}
     >
       <AppHeader
         t={t}
@@ -1963,6 +2039,7 @@ const App = () => {
         showTagManager={effectiveShowTagManager}
         tagManagerEnabled={tagManagerEnabled}
         showEmojiPanel={effectiveShowEmojiPanel}
+        chatMode={chatMode}
         isWindowPinned={isWindowPinned}
         setIsWindowPinned={setIsWindowPinned}
         showSearchBox={showSearchBox}
@@ -2034,49 +2111,51 @@ const App = () => {
           />
         </main>
 
-        <FluentRightRail
-          onOpenAddEntry={() => {
-            setIsAddEntryModalOpen(true);
-            setAddEntryContent("");
-          }}
-          clearHistory={clearHistory}
-          hasSelectedItem={!!selectedItem}
-          onCopySelectedItem={handleRailCopy}
-          onEditContent={handleRailEditContent}
-          isEditingContent={selectedItem ? editingContentId === selectedItem.id : false}
-          onOpenContent={handleRailOpenContent}
-          onAssignTab={handleRailAssignTab}
-          isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id : false}
-          isTabAssigned={isSelectedItemTabAssigned}
-          onAssignTag={handleRailAssignTag}
-          isEditingTags={selectedItem ? editingTagsId === selectedItem.id : false}
-          hasTags={Boolean(selectedItem?.tags && selectedItem.tags.length > 0)}
-          onTogglePin={handleRailTogglePin}
-          isPinned={!!selectedItem?.is_pinned}
-          onToggleLock={handleRailToggleLock}
-          isLocked={isSelectedItemLocked}
-          onMoveUp={handleRailMoveUp}
-          onMoveDown={handleRailMoveDown}
-          onToggleReveal={handleRailToggleReveal}
-          isRevealed={selectedItem ? revealedIds.has(selectedItem.id) : false}
-          hasSensitiveTag={isSelectedItemSensitive}
-          onAIAction={handleRailAIAction}
-          isAIOpen={selectedItem ? aiOptionsOpenId === selectedItem.id : false}
-          isAIProcessing={selectedItem ? processingAiId === selectedItem.id : false}
-          canAI={aiEnabled && !!selectedItem && selectedItem.content_type === "text"}
-          onDeleteSelectedItem={handleRailDeleteSelectedItem}
-          showTagManager={effectiveShowTagManager}
-          setShowTagManager={setShowTagManager}
-          tagManagerEnabled={tagManagerEnabled}
-          showEmojiPanel={effectiveShowEmojiPanel}
-          setShowEmojiPanel={setShowEmojiPanel}
-          emojiPanelEnabled={emojiPanelEnabled}
-          chatMode={chatMode}
-          fileServerEnabled={fileServerEnabled}
-          onToggleChat={handleToggleHeaderChat}
-          onOpenSettings={handleOpenSettings}
-          t={t}
-        />
+        {shouldShowRightRail && (
+          <FluentRightRail
+            onOpenAddEntry={() => {
+              setIsAddEntryModalOpen(true);
+              setAddEntryContent("");
+            }}
+            clearHistory={clearHistory}
+            hasSelectedItem={!!selectedItem}
+            onCopySelectedItem={handleRailCopy}
+            onEditContent={handleRailEditContent}
+            isEditingContent={selectedItem ? editingContentId === selectedItem.id : false}
+            onOpenContent={handleRailOpenContent}
+            onAssignTab={handleRailAssignTab}
+            isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id : false}
+            isTabAssigned={isSelectedItemTabAssigned}
+            onAssignTag={handleRailAssignTag}
+            isEditingTags={selectedItem ? editingTagsId === selectedItem.id : false}
+            hasTags={Boolean(selectedItem?.tags && selectedItem.tags.length > 0)}
+            onTogglePin={handleRailTogglePin}
+            isPinned={!!selectedItem?.is_pinned}
+            onToggleLock={handleRailToggleLock}
+            isLocked={isSelectedItemLocked}
+            onMoveUp={handleRailMoveUp}
+            onMoveDown={handleRailMoveDown}
+            onToggleReveal={handleRailToggleReveal}
+            isRevealed={selectedItem ? revealedIds.has(selectedItem.id) : false}
+            hasSensitiveTag={isSelectedItemSensitive}
+            onAIAction={handleRailAIAction}
+            isAIOpen={selectedItem ? aiOptionsOpenId === selectedItem.id : false}
+            isAIProcessing={selectedItem ? processingAiId === selectedItem.id : false}
+            canAI={aiEnabled && !!selectedItem && selectedItem.content_type === "text"}
+            onDeleteSelectedItem={handleRailDeleteSelectedItem}
+            showTagManager={effectiveShowTagManager}
+            setShowTagManager={setShowTagManager}
+            tagManagerEnabled={tagManagerEnabled}
+            showEmojiPanel={effectiveShowEmojiPanel}
+            setShowEmojiPanel={setShowEmojiPanel}
+            emojiPanelEnabled={emojiPanelEnabled}
+            chatMode={chatMode}
+            fileServerEnabled={fileServerEnabled}
+            onToggleChat={handleToggleHeaderChat}
+            onOpenSettings={handleOpenSettings}
+            t={t}
+          />
+        )}
       </div>
 
       {/* Floating Batch Action Bar (Pure icons, strictly no button boxes/text, no copy option) */}
