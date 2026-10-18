@@ -86,6 +86,8 @@ export interface AppState {
   setSearchHotkey: StateSetter<string>;
   stripNewlineHotkey: string;
   setStripNewlineHotkey: StateSetter<string>;
+  pinWindowHotkey: string;
+  setPinWindowHotkey: StateSetter<string>;
   quickPasteModifier: QuickPasteModifier;
   setQuickPasteModifier: StateSetter<QuickPasteModifier>;
   quickTabAssignEnabled: boolean;
@@ -106,6 +108,8 @@ export interface AppState {
   setIsRecordingSearch: StateSetter<boolean>;
   isRecordingStripNewline: boolean;
   setIsRecordingStripNewline: StateSetter<boolean>;
+  isRecordingPinWindow: boolean;
+  setIsRecordingPinWindow: StateSetter<boolean>;
   deleteAfterPaste: boolean;
   setDeleteAfterPaste: StateSetter<boolean>;
   moveToTopAfterPaste: boolean;

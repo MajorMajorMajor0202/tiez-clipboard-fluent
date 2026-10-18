@@ -108,6 +108,25 @@ pub fn set_strip_newline_hotkey(
 }
 
 #[tauri::command]
+pub fn set_pin_window_hotkey(
+    app_handle: AppHandle,
+    state: State<'_, SettingsState>,
+    hotkey: String,
+) -> AppResult<()> {
+    if let Ok(mut guard) = state.pin_window_hotkey.lock() {
+        *guard = hotkey.clone();
+    }
+
+    let db_state = app_handle.state::<DbState>();
+    db_state
+        .settings_repo
+        .set("app.pin_window_hotkey", &hotkey)
+        .map_err(AppError::from)?;
+    let _ = app_handle.emit("settings-changed", ());
+    crate::app::commands::hotkey_cmd::sync_registered_hotkeys(&app_handle)
+}
+
+#[tauri::command]
 pub fn set_deduplication(
     app_handle: AppHandle,
     state: State<'_, crate::app_state::SettingsState>,
@@ -290,6 +309,7 @@ pub fn set_window_pinned(app_handle: AppHandle, state: State<'_, DbState>, pinne
     let _ = state
         .settings_repo
         .set("app.window_pinned", &pinned.to_string());
+    let _ = app_handle.emit("window-pinned-changed", pinned);
 }
 
 #[tauri::command]

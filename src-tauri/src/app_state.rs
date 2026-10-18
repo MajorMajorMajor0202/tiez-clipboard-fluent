@@ -24,6 +24,7 @@ pub struct SettingsState {
     pub rich_paste_hotkey: Mutex<String>,
     pub search_hotkey: Mutex<String>,
     pub strip_newline_hotkey: Mutex<String>,
+    pub pin_window_hotkey: Mutex<String>,
     pub quick_paste_modifier: Mutex<String>,
     pub quick_tab_assign_enabled: AtomicBool,
     pub quick_tab_assign_seconds: AtomicU32,

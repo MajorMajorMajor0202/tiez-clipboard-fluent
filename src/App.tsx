@@ -196,6 +196,8 @@ const App = () => {
     setRichPasteHotkey,
     setSearchHotkey,
     setStripNewlineHotkey,
+    pinWindowHotkey,
+    setPinWindowHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
     quickTabAssignEnabled,
@@ -209,6 +211,7 @@ const App = () => {
     isRecordingSequential,
     isRecordingRich,
     isRecordingSearch,
+    isRecordingPinWindow,
     deleteAfterPaste,
     setDeleteAfterPaste,
     moveToTopAfterPaste,
@@ -617,7 +620,16 @@ const App = () => {
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch) return;
+      if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch || isRecordingPinWindow) return;
+
+      if (pinWindowHotkey && matchesHotkey(event, pinWindowHotkey)) {
+        event.preventDefault();
+        const nextVal = !isWindowPinned;
+        setIsWindowPinned(nextVal);
+        invoke("set_window_pinned", { pinned: nextVal }).catch(console.error);
+        return;
+      }
+
       if (!hotkey || hotkey === t('not_set')) return;
 
       const activeEl = document.activeElement as HTMLElement | null;
@@ -641,7 +653,7 @@ const App = () => {
 
     window.addEventListener('keydown', handleKeydown, true);
     return () => window.removeEventListener('keydown', handleKeydown, true);
-  }, [hotkey, isRecording, isRecordingSequential, isRecordingRich, isRecordingSearch, t]);
+  }, [hotkey, pinWindowHotkey, isRecording, isRecordingSequential, isRecordingRich, isRecordingSearch, isRecordingPinWindow, isWindowPinned, setIsWindowPinned, t]);
 
 
   const { toasts, pushToast, confirmDialog, openConfirm, closeConfirm } = useOverlays();
@@ -740,6 +752,7 @@ const App = () => {
     setRichPasteHotkey,
     setSearchHotkey,
     setStripNewlineHotkey,
+    setPinWindowHotkey,
     setQuickPasteModifier,
     setQuickTabAssignEnabled,
     setQuickTabAssignSeconds,

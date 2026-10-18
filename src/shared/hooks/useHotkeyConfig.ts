@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
-type HotkeyMode = "main" | "sequential" | "rich" | "search" | "strip_newline";
+type HotkeyMode = "main" | "sequential" | "rich" | "search" | "strip_newline" | "pin_window";
 
 interface UseHotkeyConfigOptions {
   hotkey: string;
@@ -15,6 +15,8 @@ interface UseHotkeyConfigOptions {
   setSearchHotkey: (val: string) => void;
   stripNewlineHotkey: string;
   setStripNewlineHotkey: (val: string) => void;
+  pinWindowHotkey: string;
+  setPinWindowHotkey: (val: string) => void;
   sequentialMode: boolean;
   isRecording: boolean;
   setIsRecording: (val: boolean) => void;
@@ -26,6 +28,8 @@ interface UseHotkeyConfigOptions {
   setIsRecordingSearch: (val: boolean) => void;
   isRecordingStripNewline: boolean;
   setIsRecordingStripNewline: (val: boolean) => void;
+  isRecordingPinWindow: boolean;
+  setIsRecordingPinWindow: (val: boolean) => void;
   saveAppSetting: (type: string, value: string) => void;
   t: (key: string) => string;
   pushToast: (msg: string, duration?: number) => number;
@@ -42,6 +46,8 @@ export const useHotkeyConfig = ({
   setSearchHotkey,
   stripNewlineHotkey,
   setStripNewlineHotkey,
+  pinWindowHotkey,
+  setPinWindowHotkey,
   sequentialMode,
   isRecording,
   setIsRecording,
@@ -53,6 +59,8 @@ export const useHotkeyConfig = ({
   setIsRecordingSearch,
   isRecordingStripNewline,
   setIsRecordingStripNewline,
+  isRecordingPinWindow,
+  setIsRecordingPinWindow,
   saveAppSetting,
   t,
   pushToast
@@ -75,6 +83,9 @@ export const useHotkeyConfig = ({
       if (mode !== "strip_newline" && newHotkey === stripNewlineHotkey) {
         conflicts.push(t("strip_newline_hotkey_label"));
       }
+      if (mode !== "pin_window" && newHotkey === pinWindowHotkey) {
+        conflicts.push(t("pin_window_hotkey_label") || "固定窗口快捷键");
+      }
 
       if (conflicts.length > 0) {
         const msg = t("hotkey_conflict_toast").replace("{name}", conflicts[0]);
@@ -83,7 +94,7 @@ export const useHotkeyConfig = ({
       }
       return false;
     },
-    [hotkey, sequentialMode, sequentialHotkey, richPasteHotkey, searchHotkey, stripNewlineHotkey, t, pushToast]
+    [hotkey, sequentialMode, sequentialHotkey, richPasteHotkey, searchHotkey, stripNewlineHotkey, pinWindowHotkey, t, pushToast]
   );
 
   const updateHotkey = useCallback(
@@ -250,19 +261,53 @@ export const useHotkeyConfig = ({
     ]
   );
 
+  const updatePinWindowHotkey = useCallback(
+    async (newHotkey: string) => {
+      const hasConflict = checkHotkeyConflict(newHotkey, "pin_window");
+      if (hasConflict) {
+        setIsRecordingPinWindow(false);
+        return;
+      }
+
+      if (newHotkey) {
+        try {
+          await invoke<boolean>("test_hotkey_available", { hotkey: newHotkey });
+        } catch (err) {
+          const errorMsg = `❌ ${newHotkey}: ${err || "快捷键被占用"}`;
+          pushToast(errorMsg, 5000);
+          setIsRecordingPinWindow(false);
+          return;
+        }
+      }
+
+      setPinWindowHotkey(newHotkey);
+      saveAppSetting("app.pin_window_hotkey", newHotkey);
+      await invoke("set_pin_window_hotkey", { hotkey: newHotkey }).catch(console.error);
+      setIsRecordingPinWindow(false);
+    },
+    [
+      checkHotkeyConflict,
+      pushToast,
+      saveAppSetting,
+      setPinWindowHotkey,
+      setIsRecordingPinWindow
+    ]
+  );
+
   useEffect(() => {
     invoke("set_recording_mode", {
       enabled: isRecording || isRecordingSequential || isRecordingRich
-        || isRecordingSearch || isRecordingStripNewline
+        || isRecordingSearch || isRecordingStripNewline || isRecordingPinWindow
     }).catch(console.error);
 
-    if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch || isRecordingStripNewline) {
+    if (isRecording || isRecordingSequential || isRecordingRich || isRecordingSearch || isRecordingStripNewline || isRecordingPinWindow) {
       const unlisten = listen<string>("hotkey-recorded", (event) => {
         if (isRecording) updateHotkey(event.payload);
         if (isRecordingSequential) updateSequentialHotkey(event.payload);
         if (isRecordingRich) updateRichPasteHotkey(event.payload);
         if (isRecordingSearch) updateSearchHotkey(event.payload);
         if (isRecordingStripNewline) updateStripNewlineHotkey(event.payload);
+        if (isRecordingPinWindow) updatePinWindowHotkey(event.payload);
       });
 
       const unlistenCancel = listen("recording-cancelled", () => {
@@ -271,6 +316,7 @@ export const useHotkeyConfig = ({
         setIsRecordingRich(false);
         setIsRecordingSearch(false);
         setIsRecordingStripNewline(false);
+        setIsRecordingPinWindow(false);
       });
 
       return () => {
@@ -284,16 +330,19 @@ export const useHotkeyConfig = ({
     isRecordingRich,
     isRecordingSearch,
     isRecordingStripNewline,
+    isRecordingPinWindow,
     setIsRecording,
     setIsRecordingSequential,
     setIsRecordingRich,
     setIsRecordingSearch,
     setIsRecordingStripNewline,
+    setIsRecordingPinWindow,
     updateHotkey,
     updateSequentialHotkey,
     updateRichPasteHotkey,
     updateSearchHotkey,
-    updateStripNewlineHotkey
+    updateStripNewlineHotkey,
+    updatePinWindowHotkey
   ]);
 
   return {
@@ -302,6 +351,7 @@ export const useHotkeyConfig = ({
     updateSequentialHotkey,
     updateRichPasteHotkey,
     updateSearchHotkey,
-    updateStripNewlineHotkey
+    updateStripNewlineHotkey,
+    updatePinWindowHotkey
   };
 };

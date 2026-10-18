@@ -98,6 +98,7 @@ interface UseSettingsPostInitOptions {
   setRichPasteHotkey: (val: string) => void;
   setSearchHotkey: (val: string) => void;
   setStripNewlineHotkey: (val: string) => void;
+  setPinWindowHotkey?: (val: string) => void;
   setQuickPasteModifier: (val: QuickPasteModifier) => void;
   setDoubleClickToPaste?: (val: boolean) => void;
   setQuickTabAssignEnabled?: (val: boolean) => void;
@@ -189,6 +190,7 @@ export const useSettingsPostInit = ({
   setRichPasteHotkey,
   setSearchHotkey,
   setStripNewlineHotkey,
+  setPinWindowHotkey,
   setQuickPasteModifier,
   setDoubleClickToPaste,
   setQuickTabAssignEnabled,
@@ -394,6 +396,7 @@ export const useSettingsPostInit = ({
     if (settings["app.rich_paste_hotkey"]) setRichPasteHotkey(settings["app.rich_paste_hotkey"]);
     if (settings["app.search_hotkey"] !== undefined) setSearchHotkey(settings["app.search_hotkey"]);
     if (settings["app.strip_newline_hotkey"] !== undefined) setStripNewlineHotkey(settings["app.strip_newline_hotkey"]);
+    if (settings["app.pin_window_hotkey"] !== undefined && setPinWindowHotkey) setPinWindowHotkey(settings["app.pin_window_hotkey"]);
     setQuickPasteModifier(normalizeQuickPasteModifier(settings["app.quick_paste_modifier"]));
     if (settings["app.quick_tab_assign_enabled"] !== undefined && setQuickTabAssignEnabled) {
       setQuickTabAssignEnabled(settings["app.quick_tab_assign_enabled"] === "true");
@@ -551,6 +554,7 @@ export const useSettingsPostInit = ({
     setRichPasteHotkey,
     setSearchHotkey,
     setStripNewlineHotkey,
+    setPinWindowHotkey,
     setQuickPasteModifier,
     setQuickTabAssignEnabled,
     setQuickTabAssignSeconds,

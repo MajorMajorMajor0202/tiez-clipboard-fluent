@@ -198,6 +198,8 @@ const SettingsWindow = () => {
     setSearchHotkey,
     stripNewlineHotkey,
     setStripNewlineHotkey,
+    pinWindowHotkey,
+    setPinWindowHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
     tabs,
@@ -219,6 +221,8 @@ const SettingsWindow = () => {
     setIsRecordingSearch,
     isRecordingStripNewline,
     setIsRecordingStripNewline,
+    isRecordingPinWindow,
+    setIsRecordingPinWindow,
     emojiPanelEnabled,
     setEmojiPanelEnabled,
     tagManagerEnabled,
@@ -265,7 +269,7 @@ const SettingsWindow = () => {
   const [editingProfile, setEditingProfile] = useState<EditableAiProfile | null>(null);
   const [profileStatuses, setProfileStatuses] = useState<AiProfileStatusMap>({});
   const [showAppSelector, setShowAppSelector] = useState<string | null>(null);
-  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | null>(null);
+  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | 'pin_window' | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
 
   const tagManagerSizeRef = useRef<{ width: number; height: number } | null>(null);
@@ -604,7 +608,8 @@ const SettingsWindow = () => {
     updateSequentialHotkey,
     updateRichPasteHotkey,
     updateSearchHotkey,
-    updateStripNewlineHotkey
+    updateStripNewlineHotkey,
+    updatePinWindowHotkey
   } = useHotkeyConfig({
     hotkey,
     setHotkey,
@@ -616,6 +621,8 @@ const SettingsWindow = () => {
     setSearchHotkey,
     stripNewlineHotkey,
     setStripNewlineHotkey,
+    pinWindowHotkey,
+    setPinWindowHotkey,
     sequentialMode,
     isRecording,
     setIsRecording,
@@ -627,6 +634,8 @@ const SettingsWindow = () => {
     setIsRecordingSearch,
     isRecordingStripNewline,
     setIsRecordingStripNewline,
+    isRecordingPinWindow,
+    setIsRecordingPinWindow,
     saveAppSetting,
     t,
     pushToast
@@ -1240,6 +1249,24 @@ const SettingsWindow = () => {
                       style={{ cursor: 'pointer' }}
                     >
                       {renderHotkeyCaps(stripNewlineHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+
+                  {/* Pin window hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('pin_window_hotkey_label') || '固定剪贴板窗口'}</span>
+                      <span className="fluent-setting-description">
+                        {t('pin_window_hotkey_desc') || '切换主窗口的固定置顶状态，防止失去焦点时自动隐藏'}
+                      </span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('pin_window')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(pinWindowHotkey)}
                       <Edit3 size={14} className="fluent-hotkey-edit-icon" />
                     </div>
                   </div>
@@ -2854,14 +2881,16 @@ const SettingsWindow = () => {
           showHotkeyModal === 'search' ? searchHotkey :
           showHotkeyModal === 'rich' ? richPasteHotkey :
           showHotkeyModal === 'sequential' ? sequentialHotkey :
-          showHotkeyModal === 'strip_newline' ? stripNewlineHotkey : ""
+          showHotkeyModal === 'strip_newline' ? stripNewlineHotkey :
+          showHotkeyModal === 'pin_window' ? pinWindowHotkey : ""
         }
         defaultValue={
           showHotkeyModal === 'main' ? "Alt+C" :
           showHotkeyModal === 'search' ? "Alt+F" :
           showHotkeyModal === 'rich' ? "Ctrl+Shift+Z" :
           showHotkeyModal === 'sequential' ? "Alt+V" :
-          showHotkeyModal === 'strip_newline' ? "Alt+Shift+C" : ""
+          showHotkeyModal === 'strip_newline' ? "Alt+Shift+C" :
+          showHotkeyModal === 'pin_window' ? "Alt+P" : ""
         }
         t={t}
         onClose={() => setShowHotkeyModal(null)}
@@ -2871,6 +2900,7 @@ const SettingsWindow = () => {
           if (showHotkeyModal === 'rich') updateRichPasteHotkey(val);
           if (showHotkeyModal === 'sequential') updateSequentialHotkey(val);
           if (showHotkeyModal === 'strip_newline') updateStripNewlineHotkey(val);
+          if (showHotkeyModal === 'pin_window') updatePinWindowHotkey(val);
         }}
       />
 

@@ -47,6 +47,7 @@ export const useAppState = (): AppState => {
   const [richPasteHotkey, setRichPasteHotkey] = useState<string>("Alt+Shift+V");
   const [searchHotkey, setSearchHotkey] = useState<string>("Alt+F");
   const [stripNewlineHotkey, setStripNewlineHotkey] = useState<string>("Alt+Shift+C");
+  const [pinWindowHotkey, setPinWindowHotkey] = useState<string>("Alt+P");
   const [quickPasteModifier, setQuickPasteModifier] =
     useState<QuickPasteModifier>("disabled");
   const [quickTabAssignEnabled, setQuickTabAssignEnabled] = useState<boolean>(true);
@@ -58,6 +59,7 @@ export const useAppState = (): AppState => {
   const [isRecordingRich, setIsRecordingRich] = useState(false);
   const [isRecordingSearch, setIsRecordingSearch] = useState(false);
   const [isRecordingStripNewline, setIsRecordingStripNewline] = useState(false);
+  const [isRecordingPinWindow, setIsRecordingPinWindow] = useState(false);
   const [deleteAfterPaste, setDeleteAfterPaste] = useState(false);
   const [moveToTopAfterPaste, setMoveToTopAfterPaste] = useState(true);
   const [privacyProtection, setPrivacyProtection] = useState(true);
@@ -265,6 +267,8 @@ export const useAppState = (): AppState => {
     setSearchHotkey,
     stripNewlineHotkey,
     setStripNewlineHotkey,
+    pinWindowHotkey,
+    setPinWindowHotkey,
     quickPasteModifier,
     setQuickPasteModifier,
     sequentialMode,
@@ -279,6 +283,8 @@ export const useAppState = (): AppState => {
     setIsRecordingSearch,
     isRecordingStripNewline,
     setIsRecordingStripNewline,
+    isRecordingPinWindow,
+    setIsRecordingPinWindow,
     deleteAfterPaste,
     setDeleteAfterPaste,
     moveToTopAfterPaste,

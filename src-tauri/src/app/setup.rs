@@ -194,6 +194,7 @@ pub struct StartupSettings {
     pub rich_paste_hotkey: String,
     pub search_hotkey: String,
     pub strip_newline_hotkey: String,
+    pub pin_window_hotkey: String,
     pub quick_paste_modifier: String,
     pub quick_tab_assign_enabled: bool,
     pub quick_tab_assign_seconds: u32,
@@ -293,6 +294,10 @@ fn load_settings(repo: &impl SettingsRepository) -> StartupSettings {
             .get("app.strip_newline_hotkey")
             .unwrap_or(Some("Alt+Shift+C".to_string()))
             .unwrap_or("Alt+Shift+C".to_string()),
+        pin_window_hotkey: repo
+            .get("app.pin_window_hotkey")
+            .unwrap_or(Some("Alt+P".to_string()))
+            .unwrap_or("Alt+P".to_string()),
         quick_paste_modifier: repo
             .get("app.quick_paste_modifier")
             .unwrap_or(Some("disabled".to_string()))
@@ -409,6 +414,7 @@ fn setup_state(
         rich_paste_hotkey: std::sync::Mutex::new(s.rich_paste_hotkey.clone()),
         search_hotkey: std::sync::Mutex::new(s.search_hotkey.clone()),
         strip_newline_hotkey: std::sync::Mutex::new(s.strip_newline_hotkey.clone()),
+        pin_window_hotkey: std::sync::Mutex::new(s.pin_window_hotkey.clone()),
         quick_paste_modifier: std::sync::Mutex::new(s.quick_paste_modifier.clone()),
         quick_tab_assign_enabled: AtomicBool::new(s.quick_tab_assign_enabled),
         quick_tab_assign_seconds: AtomicU32::new(s.quick_tab_assign_seconds),
@@ -1306,6 +1312,18 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
                     crate::services::clipboard_ops::copy_and_strip_newlines(app).await;
                 }
             });
+        }
+    }
+
+    if let Ok(pin_s) = {
+        let val = settings.pin_window_hotkey.lock().unwrap().clone();
+        val.replace("Win", "Super").replace("Command", "Super").replace("Cmd", "Super").parse::<Shortcut>()
+    } {
+        if shortcut == &pin_s {
+            let db_state = app.state::<DbState>();
+            let current = crate::WINDOW_PINNED.load(Ordering::Relaxed);
+            let next = !current;
+            crate::app::commands::set_window_pinned(app.clone(), db_state, next);
         }
     }
 }
