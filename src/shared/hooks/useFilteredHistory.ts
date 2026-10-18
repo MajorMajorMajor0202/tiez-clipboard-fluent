@@ -20,6 +20,11 @@ export const useFilteredHistory = ({
     const lowerSearch = search.toLowerCase();
 
     const filtered = history.filter((item) => {
+      // Notes only appear in tabs, never in the main clipboard history list
+      if ((!activeTabId || activeTabId === "clipboard") && item.content_type === "note") {
+        return false;
+      }
+
       // Filter by active Tab if selected (completely independent from tags)
       if (activeTabId && activeTabId !== "clipboard") {
         const allowedIds = tabAssignments?.[activeTabId];

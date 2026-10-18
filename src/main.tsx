@@ -73,18 +73,24 @@ dpiMediaQuery.addEventListener("change", onDpiChange);
 // ─────────────────────────────────────────────────────────────────────
 
 import DesktopStickerWindow from "./features/sticker/components/DesktopStickerWindow";
+import StickyNoteWindow from "./features/note/components/StickyNoteWindow";
 
 const isCompactPreview = params.get("window") === "compact-preview";
 const isAdvancedSettingsWindow = params.get("window") === "advanced-settings";
 const isSettingsWindow = params.get("window") === "settings";
 const isStickerWindow = params.get("window") === "sticker";
+const isNoteWindow = params.get("window") === "note";
 
 if (isSettingsWindow || isAdvancedSettingsWindow) {
   document.body.classList.add("is-settings-window");
 }
-if (isStickerWindow) {
+if (isStickerWindow || isNoteWindow) {
   document.documentElement.classList.add("is-sticker-window");
   document.body.classList.add("is-sticker-window");
+  if (isNoteWindow) {
+    document.documentElement.classList.add("is-note-window");
+    document.body.classList.add("is-note-window");
+  }
 }
 
 // ── Canvas 边框叠加层 ─────────────────────────────────────────────────
@@ -235,14 +241,16 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isSt
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    {isStickerWindow
-      ? <DesktopStickerWindow />
-      : isCompactPreview
-        ? <CompactPreviewWindow />
-        : isAdvancedSettingsWindow
-          ? <AdvancedSettingsWindow />
-          : isSettingsWindow
-            ? <SettingsWindow />
-            : <App />}
+    {isNoteWindow
+      ? <StickyNoteWindow />
+      : isStickerWindow
+        ? <DesktopStickerWindow />
+        : isCompactPreview
+          ? <CompactPreviewWindow />
+          : isAdvancedSettingsWindow
+            ? <AdvancedSettingsWindow />
+            : isSettingsWindow
+              ? <SettingsWindow />
+              : <App />}
   </React.StrictMode>,
 );

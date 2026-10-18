@@ -45,6 +45,7 @@ import { useSearchFetchTrigger } from "./shared/hooks/useSearchFetchTrigger";
 import { useScrollToSelection } from "./shared/hooks/useScrollToSelection";
 import { useClipboardItemRenderer } from "./shared/hooks/useClipboardItemRenderer";
 import { openDesktopSticker } from "./features/sticker/lib/openSticker";
+import { openStickyNote } from "./features/note/lib/openStickyNote";
 import { useAnnouncements } from "./shared/hooks/useAnnouncements";
 import { useOverlays } from "./shared/hooks/useOverlays";
 import { useAutoUpdate } from "./shared/hooks/useAutoUpdate";
@@ -1811,6 +1812,64 @@ const App = () => {
     }
   }, [editingItem, editEntryContent, handleItemContentUpdated]);
 
+  const handleCreateNote = useCallback(async () => {
+    try {
+      const currentTabId = activeTabId || activeTab?.id || "clipboard";
+      let targetTabId = currentTabId;
+
+      if (targetTabId === "clipboard") {
+        let noteTab = tabs.find((t) => t.id === "tab-notes" || t.name === "便笺" || t.name === "Notes");
+        if (!noteTab) {
+          const newTab = { id: `tab-notes-${Date.now()}`, name: t("notes") || "便笺" };
+          setTabs((prev) => [...prev, newTab]);
+          targetTabId = newTab.id;
+          setActiveTabId(newTab.id);
+        } else {
+          targetTabId = noteTab.id;
+          setActiveTabId(noteTab.id);
+        }
+      }
+
+      const newId = await invoke<number>("add_manual_item", {
+        content: "# 新便笺\n\n- [ ] 事项 1\n",
+        contentType: "note",
+        tags: []
+      });
+
+      if (typeof newId === "number") {
+        setTabAssignments((prev) => {
+          const list = prev[targetTabId] || [];
+          const nextList = [newId, ...list.filter((id) => id !== newId)];
+          const next = { ...prev, [targetTabId]: nextList };
+          saveTabAssignments(next);
+          return next;
+        });
+
+        const optimisticEntry: ClipboardEntry = {
+          id: newId,
+          content_type: "note",
+          content: "# 新便笺\n\n- [ ] 事项 1\n",
+          source_app: "Manual",
+          source_app_path: undefined,
+          timestamp: Date.now(),
+          preview: "新便笺",
+          is_pinned: false,
+          tags: [],
+          use_count: 0,
+          is_external: false,
+          pinned_order: 0,
+          file_preview_exists: true
+        };
+        setHistory((prev) => [optimisticEntry, ...prev.filter((item) => item.id !== newId)]);
+
+        openStickyNote(optimisticEntry, targetTabId);
+        pushToast(t("note_created") || "已新建便笺");
+      }
+    } catch (err) {
+      console.error("Failed to create note:", err);
+    }
+  }, [activeTabId, activeTab, tabs, setTabs, setActiveTabId, saveTabAssignments, setHistory, pushToast, t]);
+
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
     revealedIds,
@@ -2214,6 +2273,7 @@ const App = () => {
               setIsAddEntryModalOpen(true);
               setAddEntryContent("");
             }}
+            onOpenAddNote={handleCreateNote}
             clearHistory={clearHistory}
             hasSelectedItem={!!selectedItem}
             canEditContent={selectedItem ? selectedItem.content_type !== "image" && selectedItem.content_type !== "files" : false}

@@ -33,8 +33,10 @@ import {
     Trash2,
     Edit3,
     Layers,
-    Lock
+    Lock,
+    StickyNote
 } from "lucide-react";
+import { openStickyNote } from "../../note/lib/openStickyNote";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ClipboardItemProps } from "../types";
 import {
@@ -619,6 +621,7 @@ const getIcon = (type: string) => {
         case "code": return <Code size={14} />;
         case "file": return <File size={14} />;
         case "video": return <Video size={14} />;
+        case "note": return <StickyNote size={14} />;
         default: return <FileText size={14} />;
     }
 };
@@ -1828,9 +1831,71 @@ const ClipboardItem = ({
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
             className={`history-item ${isSelected ? "selected" : ""} ${isMultiSelected ? "multi-selected" : ""} ${isEditingTags ? "tag-editing" : ""} ${isTabFlyoutOpen ? "tab-editing" : ""} ${isMoreMenuOpen ? "has-open-menu" : ""} ${isAnyFlyoutOpen ? "active-menu-card actions-visible" : ""} ${compactMode ? "compact" : ""} ${item.is_pinned ? "pinned" : ""} ${className || ''}`}
-            draggable={false}
+            draggable={!isEditingTags && !isEditingContent}
             onDragStart={(e: any) => {
-                e.preventDefault();
+                const target = e.target as HTMLElement;
+                if (target.closest('button, input, textarea, [role="button"], a, .item-inline-editor, .secondary-actions-menu, .tag-edit-flyout, .tab-assign-flyout')) {
+                    e.preventDefault();
+                    return;
+                }
+                isDraggingRef.current = true;
+                setIgnoreBlurSafe(true);
+                void hideCompactPreview();
+                invoke("set_ignore_blur", { ignore: true }).catch(() => {});
+
+                // Store in window for reliable internal drop transfer in Tauri WebView2
+                (window as any).__tiezDraggedItemId = item.id;
+                const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
+                if (selectedSet && selectedSet.has(item.id) && selectedSet.size > 1) {
+                    (window as any).__tiezDraggedItemIds = Array.from(selectedSet);
+                } else if (isMultiSelected) {
+                    const fallbackList = (window as any).__tiezDraggedItemIds;
+                    if (!Array.isArray(fallbackList) || !fallbackList.includes(item.id)) {
+                        (window as any).__tiezDraggedItemIds = [item.id];
+                    }
+                } else {
+                    (window as any).__tiezDraggedItemIds = [item.id];
+                }
+
+                const dt = e.dataTransfer;
+                if (dt) {
+                    try {
+                        dt.setData("application/x-tiez-item", String(item.id));
+                        dt.setData("text/tiez-item-id", String(item.id));
+                    } catch {}
+
+                    if (item.content_type === "rich_text" && item.html_content) {
+                        dt.setData("text/plain", item.preview || item.content);
+                        dt.setData("text/html", item.html_content);
+                    } else if (item.content_type === "file" || item.content_type === "video") {
+                        dt.setData("text/plain", item.content);
+                        const paths = filePaths && filePaths.length > 0 ? filePaths : [item.content];
+                        const uriList = paths.map((p) => p.startsWith("file://") ? p : `file:///${p.replace(/\\/g, '/')}`).join('\r\n');
+                        if (uriList) {
+                            try { dt.setData("text/uri-list", uriList); } catch {}
+                        }
+                    } else if (item.content_type === "image") {
+                        dt.setData("text/plain", item.content);
+                        if (!item.content.startsWith("data:")) {
+                            const uri = item.content.startsWith("file://") ? item.content : `file:///${item.content.replace(/\\/g, '/')}`;
+                            try { dt.setData("text/uri-list", uri); } catch {}
+                        }
+                    } else {
+                        dt.setData("text/plain", item.content);
+                    }
+                    dt.effectAllowed = "copyMove";
+                }
+            }}
+            onDragEnd={() => {
+                setTimeout(() => {
+                    isDraggingRef.current = false;
+                    (window as any).__tiezDraggedItemId = null;
+                    (window as any).__tiezDraggedItemIds = null;
+                }, 150);
+                if (!isMultiSelectActive && !isEditingContent) {
+                    setIgnoreBlurSafe(false);
+                    invoke("set_ignore_blur", { ignore: false }).catch(() => {});
+                }
             }}
             onMouseDown={(e) => {
                 const target = e.target as HTMLElement;
@@ -1867,153 +1932,6 @@ const ClipboardItem = ({
                         return;
                     }
                 }
-
-                // Pointer drag tracking to tab (100% reliable, independent of OS OLE hooks)
-                const startX = e.clientX;
-                const startY = e.clientY;
-                let isCardDragging = false;
-                let avatarEl: HTMLDivElement | null = null;
-                let currentHoveredTabId: string | null = null;
-
-                const cleanup = () => {
-                    window.removeEventListener('mousemove', onMouseMove, true);
-                    window.removeEventListener('mouseup', onMouseUp, true);
-                    window.removeEventListener('blur', cleanup, true);
-                    if (avatarEl) {
-                        avatarEl.remove();
-                        avatarEl = null;
-                    }
-                    if (currentHoveredTabId) {
-                        document.querySelectorAll('.fluent-tab-item.drag-target-hover').forEach((el) => {
-                            el.classList.remove('drag-target-hover');
-                        });
-                        currentHoveredTabId = null;
-                    }
-                };
-
-                const onMouseMove = (moveE: MouseEvent) => {
-                    const dist = Math.hypot(moveE.clientX - startX, moveE.clientY - startY);
-                    if (!isCardDragging && dist > 5) {
-                        isCardDragging = true;
-                        isDraggingRef.current = true;
-                        setIgnoreBlurSafe(true);
-                        void hideCompactPreview();
-
-                        avatarEl = document.createElement('div');
-                        avatarEl.className = 'tiez-drag-avatar';
-                        const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
-                        const isMulti = isMultiSelected && selectedSet && selectedSet.size > 1;
-                        const count = isMulti ? selectedSet.size : 1;
-                        const rawSnippet = (item.preview || item.content || '剪贴板条目').trim().replace(/\s+/g, ' ');
-                        const snippet = rawSnippet.length > 14 ? rawSnippet.slice(0, 14) + '...' : rawSnippet;
-                        const label = isMulti ? `${count} 项` : snippet;
-                        avatarEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg><span>${label}</span>`;
-                        avatarEl.style.left = `${moveE.clientX}px`;
-                        avatarEl.style.top = `${moveE.clientY}px`;
-                        document.body.appendChild(avatarEl);
-                    }
-
-                    if (isCardDragging && avatarEl) {
-                        avatarEl.style.left = `${moveE.clientX}px`;
-                        avatarEl.style.top = `${moveE.clientY}px`;
-
-                        const elUnder = document.elementFromPoint(moveE.clientX, moveE.clientY);
-                        let tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
-                        if (!tabBtn) {
-                            const bar = elUnder?.closest('.fluent-tab-bar-container') || elUnder?.closest('.fluent-tab-track');
-                            if (bar) {
-                                const allBtns = Array.from(document.querySelectorAll<HTMLElement>('.fluent-tab-item'));
-                                for (const b of allBtns) {
-                                    const r = b.getBoundingClientRect();
-                                    if (moveE.clientX >= r.left && moveE.clientX <= r.right) {
-                                        tabBtn = b;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        const tabId = tabBtn?.getAttribute('data-tab-id') || null;
-
-                        if (tabId !== currentHoveredTabId) {
-                            if (currentHoveredTabId) {
-                                document.querySelectorAll('.fluent-tab-item.drag-target-hover').forEach((el) => {
-                                    el.classList.remove('drag-target-hover');
-                                });
-                            }
-                            if (tabId) {
-                                const targetTab = tabs?.find(t => t.id === tabId);
-                                const isFirst = targetTab?.id === 'clipboard';
-                                const droppable = (!isFirst && !targetTab?.isBuiltin) || (isFirst && activeTabId !== 'clipboard');
-                                if (droppable) {
-                                    tabBtn?.classList.add('drag-target-hover');
-                                    currentHoveredTabId = tabId;
-                                } else {
-                                    currentHoveredTabId = null;
-                                }
-                            } else {
-                                currentHoveredTabId = null;
-                            }
-                        }
-                    }
-                };
-
-                const onMouseUp = (upE: MouseEvent) => {
-                    cleanup();
-
-                    if (isCardDragging) {
-                        upE.preventDefault();
-                        upE.stopPropagation();
-
-                        const elUnder = document.elementFromPoint(upE.clientX, upE.clientY);
-                        let tabBtn = elUnder?.closest('.fluent-tab-item') as HTMLElement | null;
-                        if (!tabBtn) {
-                            const bar = elUnder?.closest('.fluent-tab-bar-container') || elUnder?.closest('.fluent-tab-track');
-                            if (bar) {
-                                const allBtns = Array.from(document.querySelectorAll<HTMLElement>('.fluent-tab-item'));
-                                for (const b of allBtns) {
-                                    const r = b.getBoundingClientRect();
-                                    if (upE.clientX >= r.left && upE.clientX <= r.right) {
-                                        tabBtn = b;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        const finalTabId = tabBtn?.getAttribute('data-tab-id') || currentHoveredTabId;
-
-                        if (finalTabId) {
-                            const targetTab = tabs?.find(t => t.id === finalTabId);
-                            if (targetTab) {
-                                const isFirst = targetTab.id === 'clipboard';
-                                const droppable = (!isFirst && !targetTab.isBuiltin) || (isFirst && activeTabId !== 'clipboard');
-                                if (droppable) {
-                                    const selectedSet: Set<number> | undefined = (window as any).__tiezSelectedItemIds;
-                                    if (selectedSet && selectedSet.has(item.id) && selectedSet.size > 1) {
-                                        (window as any).__tiezDraggedItemIds = Array.from(selectedSet);
-                                    } else {
-                                        (window as any).__tiezDraggedItemIds = [item.id];
-                                    }
-                                    window.dispatchEvent(new CustomEvent('tiez-card-dropped-on-tab', {
-                                        detail: { itemId: item.id, tabId: targetTab.id, tabName: targetTab.name }
-                                    }));
-                                }
-                            }
-                        }
-
-                        setTimeout(() => {
-                            isDraggingRef.current = false;
-                            (window as any).__tiezDraggedItemId = null;
-                            (window as any).__tiezDraggedItemIds = null;
-                            if (!isMultiSelectActive && !isEditingContent) {
-                                setIgnoreBlurSafe(false);
-                            }
-                        }, 100);
-                    }
-                };
-
-                window.addEventListener('mousemove', onMouseMove, true);
-                window.addEventListener('mouseup', onMouseUp, true);
-                window.addEventListener('blur', cleanup, true);
             }}
             onClick={(e) => {
                 if (isEditingTags || isEditingContent) return;
@@ -2043,13 +1961,17 @@ const ClipboardItem = ({
                 }
             }}
             onDoubleClick={(e) => {
-                if (!doubleClickToPaste) return;
                 if (isEditingTags || isEditingContent) return;
                 const target = e.target as HTMLElement;
                 if (target.closest('button, input, textarea, [role="button"], .item-inline-editor, .secondary-actions-menu')) {
                     return;
                 }
                 if (isDraggingRef.current) return;
+                if (item.content_type === 'note') {
+                    openStickyNote(item, activeTabId);
+                    return;
+                }
+                if (!doubleClickToPaste) return;
                 void hideCompactPreview();
                 onCopy(false);
             }}
@@ -2771,6 +2693,24 @@ const ClipboardItem = ({
                         <ExternalLink size={13} />
                         <span>{t('open') || '外部打开'}</span>
                     </button>
+
+                    {item.content_type === 'note' && (
+                        <button
+                            type="button"
+                            className="secondary-menu-item"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsMoreMenuOpen(false);
+                                if (!isMultiSelectActive && !isEditingContent) {
+                                    setIgnoreBlurSafe(false);
+                                }
+                                openStickyNote(item, activeTabId);
+                            }}
+                        >
+                            <StickyNote size={13} />
+                            <span>{t('open_sticky_note') || '打开便笺窗口'}</span>
+                        </button>
+                    )}
 
                     {onPinToDesktop && (
                         <button

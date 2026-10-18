@@ -258,9 +258,9 @@ body.dark-mode.compact-preview.theme-mica #root {
 }
 
 .theme-mica .history-item:hover {
-  background: rgba(255, 255, 255, 0.65) !important;
-  border-color: var(--card-hover-border-color) !important;
-  box-shadow: var(--card-hover-shadow) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.24) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
 }
 
 body.theme-mica:not(.light-mode) .history-item:hover,

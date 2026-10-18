@@ -30,6 +30,7 @@
     "framer-motion": "^12.25.0",
     "franc-min": "^6.2.0",
     "lucide-react": "^0.562.0",
+    "marked": "^18.1.1",
     "prismjs": "^1.30.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
