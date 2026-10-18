@@ -387,6 +387,22 @@ body:not(.is-settings-window):not(.compact-preview) {
   position: relative; /* Position context for ::after border line */
 }
 
+body.is-sticker-window,
+html.is-sticker-window,
+body.is-sticker-window #root,
+html.is-sticker-window #root {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
 /*
  * ─── Canvas 窗口边框叠加层 ─────────────────────────────────────────────
  * 这是一个 <canvas> 元素，由 main.tsx 注入为 body 的直接子节点。

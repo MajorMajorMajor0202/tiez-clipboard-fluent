@@ -8,6 +8,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import "./index.css";
 import "./styles/components/index.css";
 import "./styles/themes/load";
+import { applyThemeClasses, normalizeThemeId } from "./shared/config/themes";
 
 const params = new URLSearchParams(window.location.search);
 const accent = params.get("accent");
@@ -22,6 +23,31 @@ if (accent) {
     document.documentElement.style.setProperty("--accent-color-rgb", `${r}, ${g}, ${b}`);
   }
 }
+
+// Global instant theme & dark/light mode initialization
+const themeParam = params.get("theme") || localStorage.getItem("tiez_theme") || "retro";
+const colorModeParam = params.get("color_mode") || localStorage.getItem("tiez_color_mode") || "system";
+
+const isDarkMode =
+  colorModeParam === "dark"
+    ? true
+    : colorModeParam === "light"
+      ? false
+      : window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+if (isDarkMode) {
+  document.documentElement.classList.add("dark-mode");
+  document.body.classList.add("dark-mode");
+  document.documentElement.classList.remove("light-mode");
+  document.body.classList.remove("light-mode");
+} else {
+  document.documentElement.classList.add("light-mode");
+  document.body.classList.add("light-mode");
+  document.documentElement.classList.remove("dark-mode");
+  document.body.classList.remove("dark-mode");
+}
+
+applyThemeClasses(normalizeThemeId(themeParam), document.documentElement, document.body);
 
 // ── 精确物理像素边框：注入 devicePixelRatio 并持续监听变化 ────────────
 // 当窗口移动到不同 DPI 的显示器时，matchMedia 会触发回调，动态更新 CSS 变量，
@@ -57,6 +83,7 @@ if (isSettingsWindow || isAdvancedSettingsWindow) {
   document.body.classList.add("is-settings-window");
 }
 if (isStickerWindow) {
+  document.documentElement.classList.add("is-sticker-window");
   document.body.classList.add("is-sticker-window");
 }
 

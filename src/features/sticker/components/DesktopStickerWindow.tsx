@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import {
   Copy,
@@ -62,6 +63,35 @@ export const DesktopStickerWindow: React.FC = () => {
       .catch((err) => {
         console.error("Failed to load sticker entry:", err);
       });
+  }, []);
+
+  useEffect(() => {
+    const handleThemeEvent = (event: { payload: string }) => {
+      const isDark = event.payload === "dark";
+      document.documentElement.classList.toggle("dark-mode", isDark);
+      document.body.classList.toggle("dark-mode", isDark);
+      document.documentElement.classList.toggle("light-mode", !isDark);
+      document.body.classList.toggle("light-mode", !isDark);
+    };
+
+    const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent);
+
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      const mode = localStorage.getItem("tiez_color_mode") || "system";
+      if (mode === "system") {
+        document.documentElement.classList.toggle("dark-mode", e.matches);
+        document.body.classList.toggle("dark-mode", e.matches);
+        document.documentElement.classList.toggle("light-mode", !e.matches);
+        document.body.classList.toggle("light-mode", !e.matches);
+      }
+    };
+    mql.addEventListener("change", handleMediaChange);
+
+    return () => {
+      unlistenPromise.then((off) => off());
+      mql.removeEventListener("change", handleMediaChange);
+    };
   }, []);
 
   useEffect(() => {

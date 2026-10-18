@@ -40,8 +40,17 @@ export async function openDesktopSticker(item: ClipboardEntry) {
     localStorage.setItem(`sticker_entry_${item.id}`, JSON.stringify(item));
   } catch {}
 
+  const isDark =
+    document.documentElement.classList.contains("dark-mode") ||
+    document.body.classList.contains("dark-mode");
+  const colorModeParam = isDark ? "&color_mode=dark" : "&color_mode=light";
+  const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
+  const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
+  const savedTheme = localStorage.getItem("tiez_theme") || "retro";
+  const themeParam = `&theme=${encodeURIComponent(savedTheme)}`;
+
   const sticker = new WebviewWindow(label, {
-    url: `index.html?window=sticker&id=${item.id}`,
+    url: `index.html?window=sticker&id=${item.id}${accentParam}${themeParam}${colorModeParam}`,
     title: item.preview?.slice(0, 30) || "桌面便签",
     width,
     height,

@@ -1,11 +1,30 @@
 /* Desktop Floating Sticker Window Styles */
+
+/* Ensure the entire outer host, window, body and #root are 100% transparent with NO border or box-shadow */
+html.is-sticker-window,
+body.is-sticker-window,
+body.is-sticker-window #root,
+html.is-sticker-window #root {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 .sticker-window-root {
   width: 100vw;
   height: 100vh;
-  margin: 0;
-  padding: 8px;
+  margin: 0 !important;
+  padding: 0 !important;
   box-sizing: border-box;
   background: transparent !important;
+  background-color: transparent !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -13,6 +32,7 @@
   -webkit-user-select: none;
 }
 
+/* The floating card fills the window edge-to-edge with clean rounded corners and 1px border */
 .sticker-card {
   position: relative;
   width: 100%;
@@ -21,20 +41,23 @@
   display: flex;
   flex-direction: column;
   border-radius: 8px;
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--line-soft, rgba(0, 0, 0, 0.12));
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
+/* Dark Mode card styling */
 .dark-mode .sticker-card,
-body.dark-mode .sticker-card {
-  background: var(--bg-card, #272727);
-  border: 1px solid var(--line-soft, rgba(255, 255, 255, 0.1));
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.25);
+body.dark-mode .sticker-card,
+html.dark-mode .sticker-card {
+  background: #202020;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
+/* Header & Drag Region */
 .sticker-header {
   height: 34px;
   min-height: 34px;
@@ -42,8 +65,8 @@ body.dark-mode .sticker-card {
   align-items: center;
   justify-content: space-between;
   padding: 0 8px 0 10px;
-  background: var(--bg-header, rgba(0, 0, 0, 0.03));
-  border-bottom: 1px solid var(--line-soft, rgba(0, 0, 0, 0.08));
+  background: #f8f8f8;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   cursor: grab;
   user-select: none;
   -webkit-app-region: drag;
@@ -51,9 +74,10 @@ body.dark-mode .sticker-card {
 }
 
 .dark-mode .sticker-header,
-body.dark-mode .sticker-header {
-  background: var(--bg-header, rgba(255, 255, 255, 0.03));
-  border-bottom: 1px solid var(--line-soft, rgba(255, 255, 255, 0.08));
+body.dark-mode .sticker-header,
+html.dark-mode .sticker-header {
+  background: #262626;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sticker-header:active {
@@ -89,15 +113,16 @@ body.dark-mode .sticker-header {
 .sticker-title {
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-secondary, #666666);
+  color: #555555;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .dark-mode .sticker-title,
-body.dark-mode .sticker-title {
-  color: var(--text-secondary, #aaaaaa);
+body.dark-mode .sticker-title,
+html.dark-mode .sticker-title {
+  color: #b0b0b0;
 }
 
 .sticker-actions {
@@ -116,31 +141,33 @@ body.dark-mode .sticker-title {
   border-radius: 4px;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #666666);
+  color: #555555;
   cursor: pointer;
   transition: all 0.15s ease;
   padding: 0;
 }
 
 .dark-mode .sticker-btn,
-body.dark-mode .sticker-btn {
-  color: var(--text-secondary, #bbbbbb);
+body.dark-mode .sticker-btn,
+html.dark-mode .sticker-btn {
+  color: #bbbbbb;
 }
 
 .sticker-btn:hover {
   background: rgba(0, 0, 0, 0.06);
-  color: var(--text-primary, #111111);
+  color: #111111;
 }
 
 .dark-mode .sticker-btn:hover,
-body.dark-mode .sticker-btn:hover {
+body.dark-mode .sticker-btn:hover,
+html.dark-mode .sticker-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
 .sticker-btn.active {
   color: var(--accent-color, #0078d4);
-  background: rgba(0, 120, 212, 0.1);
+  background: rgba(0, 120, 212, 0.12);
 }
 
 .sticker-btn.btn-close:hover {
@@ -153,8 +180,8 @@ body.dark-mode .sticker-btn:hover {
   position: absolute;
   top: 36px;
   right: 50px;
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--line-soft, rgba(0, 0, 0, 0.12));
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   padding: 4px;
@@ -165,9 +192,11 @@ body.dark-mode .sticker-btn:hover {
   gap: 2px;
 }
 
-.dark-mode .sticker-openwith-popover {
-  background: var(--bg-card, #2b2b2b);
-  border: 1px solid var(--line-soft, rgba(255, 255, 255, 0.12));
+.dark-mode .sticker-openwith-popover,
+body.dark-mode .sticker-openwith-popover,
+html.dark-mode .sticker-openwith-popover {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -180,7 +209,7 @@ body.dark-mode .sticker-btn:hover {
   border-radius: 4px;
   background: transparent;
   border: none;
-  color: var(--text-primary, #222);
+  color: #222222;
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -188,15 +217,19 @@ body.dark-mode .sticker-btn:hover {
   transition: background 0.15s ease;
 }
 
-.dark-mode .sticker-openwith-item {
-  color: var(--text-primary, #eee);
+.dark-mode .sticker-openwith-item,
+body.dark-mode .sticker-openwith-item,
+html.dark-mode .sticker-openwith-item {
+  color: #eeeeee;
 }
 
 .sticker-openwith-item:hover {
   background: rgba(0, 0, 0, 0.06);
 }
 
-.dark-mode .sticker-openwith-item:hover {
+.dark-mode .sticker-openwith-item:hover,
+body.dark-mode .sticker-openwith-item:hover,
+html.dark-mode .sticker-openwith-item:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -208,11 +241,16 @@ body.dark-mode .sticker-btn:hover {
   padding: 8px 10px;
   font-size: 13px;
   line-height: 1.5;
-  color: var(--text-primary, #1a1a1a);
+  color: #1a1a1a;
   user-select: text;
   -webkit-user-select: text;
   word-break: break-word;
-  cursor: grab;
+}
+
+.dark-mode .sticker-body,
+body.dark-mode .sticker-body,
+html.dark-mode .sticker-body {
+  color: #f0f0f0;
 }
 
 .sticker-body.fluent-scrollbar-host {
@@ -227,11 +265,6 @@ body.dark-mode .sticker-btn:hover {
   height: 0;
 }
 
-.dark-mode .sticker-body,
-body.dark-mode .sticker-body {
-  color: var(--text-primary, #f0f0f0);
-}
-
 .sticker-text-content {
   white-space: pre-wrap;
   font-family: inherit;
@@ -240,16 +273,19 @@ body.dark-mode .sticker-body {
 .sticker-code-content {
   font-family: "Cascadia Code", Consolas, "Courier New", monospace;
   font-size: 12px;
-  background: rgba(0, 0, 0, 0.03);
+  background: #f4f4f4;
+  color: #1a1a1a;
   padding: 6px 8px;
   border-radius: 4px;
-  border: 1px solid var(--line-soft, rgba(0, 0, 0, 0.06));
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .dark-mode .sticker-code-content,
-body.dark-mode .sticker-code-content {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.06);
+body.dark-mode .sticker-code-content,
+html.dark-mode .sticker-code-content {
+  background: #181818;
+  color: #e6e6e6;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Edit Mode */
@@ -266,21 +302,23 @@ body.dark-mode .sticker-code-content {
   width: 100%;
   min-height: 70px;
   resize: none;
-  background: rgba(0, 0, 0, 0.02);
+  background: #ffffff;
   border: 1px solid var(--accent-color, #0078d4);
   border-radius: 4px;
   padding: 6px 8px;
   font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
-  color: var(--text-primary, #1a1a1a);
+  color: #1a1a1a;
   outline: none;
   box-sizing: border-box;
 }
 
-.dark-mode .sticker-edit-textarea {
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #f0f0f0);
+.dark-mode .sticker-edit-textarea,
+body.dark-mode .sticker-edit-textarea,
+html.dark-mode .sticker-edit-textarea {
+  background: #1a1a1a;
+  color: #f0f0f0;
 }
 
 .sticker-edit-footer {
@@ -314,23 +352,28 @@ body.dark-mode .sticker-code-content {
 }
 
 .sticker-cancel-btn {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--text-primary, #333);
+  background: rgba(0, 0, 0, 0.06);
+  color: #333333;
 }
 
 .sticker-cancel-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.09);
 }
 
-.dark-mode .sticker-cancel-btn {
+.dark-mode .sticker-cancel-btn,
+body.dark-mode .sticker-cancel-btn,
+html.dark-mode .sticker-cancel-btn {
   background: rgba(255, 255, 255, 0.08);
-  color: #eee;
+  color: #eeeeee;
 }
 
-.dark-mode .sticker-cancel-btn:hover {
+.dark-mode .sticker-cancel-btn:hover,
+body.dark-mode .sticker-cancel-btn:hover,
+html.dark-mode .sticker-cancel-btn:hover {
   background: rgba(255, 255, 255, 0.12);
 }
 
+/* Image */
 .sticker-image-container {
   width: 100%;
   height: 100%;
@@ -339,6 +382,12 @@ body.dark-mode .sticker-code-content {
   justify-content: center;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.02);
+}
+
+.dark-mode .sticker-image-container,
+body.dark-mode .sticker-image-container,
+html.dark-mode .sticker-image-container {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .sticker-image {
@@ -350,20 +399,22 @@ body.dark-mode .sticker-code-content {
   cursor: grab;
 }
 
+/* File / Video */
 .sticker-file-card {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.03);
-  border: 1px solid var(--line-soft, rgba(0, 0, 0, 0.06));
+  background: #f4f4f4;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .dark-mode .sticker-file-card,
-body.dark-mode .sticker-file-card {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.06);
+body.dark-mode .sticker-file-card,
+html.dark-mode .sticker-file-card {
+  background: #2a2a2a;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .sticker-file-info {
@@ -374,26 +425,46 @@ body.dark-mode .sticker-file-card {
 .sticker-file-name {
   font-size: 12px;
   font-weight: 500;
+  color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dark-mode .sticker-file-name,
+body.dark-mode .sticker-file-name,
+html.dark-mode .sticker-file-name {
+  color: #ffffff;
 }
 
 .sticker-file-path {
   font-size: 10px;
-  color: var(--text-muted, #888888);
+  color: #777777;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.dark-mode .sticker-file-path,
+body.dark-mode .sticker-file-path,
+html.dark-mode .sticker-file-path {
+  color: #888888;
+}
+
+/* Drag Hint */
 .sticker-drag-hint {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
   font-size: 10px;
-  color: var(--text-muted, #999999);
+  color: #888888;
   padding: 4px 8px 6px;
   user-select: none;
+}
+
+.dark-mode .sticker-drag-hint,
+body.dark-mode .sticker-drag-hint,
+html.dark-mode .sticker-drag-hint {
+  color: #777777;
 }
