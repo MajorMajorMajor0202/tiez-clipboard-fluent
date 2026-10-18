@@ -53,7 +53,12 @@ export function useInputFocus<T extends HTMLElement = HTMLInputElement>(
 
     clearTimer(blurTimer);
     blurTimer.current = window.setTimeout(async () => {
-      if (isEditableElement(document.activeElement)) {
+      if (
+        isEditableElement(document.activeElement) ||
+        document.querySelector(".fluent-modal-overlay") !== null ||
+        document.querySelector(".fluent-modal-dialog") !== null ||
+        document.querySelector("[role='dialog']") !== null
+      ) {
         return;
       }
 

@@ -1718,7 +1718,6 @@ const App = () => {
   const handleConfirmAddEntry = useCallback(async () => {
     const trimmed = addEntryContent.trim();
     if (!trimmed) {
-      setIsAddEntryModalOpen(false);
       return;
     }
     try {
@@ -1727,22 +1726,46 @@ const App = () => {
         contentType: "text",
         tags: []
       });
-      if (activeTab && activeTab.id !== "clipboard" && typeof newId === "number") {
+
+      const currentTabId = activeTabId || activeTab?.id || "clipboard";
+      if (currentTabId !== "clipboard" && typeof newId === "number") {
         setTabAssignments((prev) => {
-          const list = prev[activeTab.id] || [];
-          const next = { ...prev, [activeTab.id]: [newId, ...list] };
+          const list = prev[currentTabId] || [];
+          const nextList = [newId, ...list.filter((id) => id !== newId)];
+          const next = { ...prev, [currentTabId]: nextList };
           saveTabAssignments(next);
           return next;
         });
       }
-      pushToast(t("entry_added"));
+
+      if (typeof newId === "number") {
+        const optimisticEntry: ClipboardEntry = {
+          id: newId,
+          content_type: "text",
+          content: trimmed,
+          source_app: "Manual",
+          source_app_path: undefined,
+          timestamp: Date.now(),
+          preview: trimmed.length > 200 ? trimmed.slice(0, 200) + "..." : trimmed,
+          is_pinned: false,
+          tags: [],
+          use_count: 0,
+          is_external: false,
+          pinned_order: 0,
+          file_preview_exists: true
+        };
+        setHistory((prev) => [optimisticEntry, ...prev.filter((item) => item.id !== newId)]);
+      }
+
+      pushToast(t("entry_added") || "已添加条目");
       setIsAddEntryModalOpen(false);
       setAddEntryContent("");
+      setSearch("");
       fetchHistory(true);
     } catch (err) {
       console.error("Failed to add entry:", err);
     }
-  }, [addEntryContent, activeTab, saveTabAssignments, pushToast, t, fetchHistory]);
+  }, [addEntryContent, activeTabId, activeTab, saveTabAssignments, pushToast, t, fetchHistory, setHistory, setSearch]);
 
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
@@ -2140,6 +2163,7 @@ const App = () => {
         {shouldShowRightRail && (
           <FluentRightRail
             onOpenAddEntry={() => {
+              invoke("activate_window_focus").catch(() => {});
               setIsAddEntryModalOpen(true);
               setAddEntryContent("");
             }}
@@ -2252,7 +2276,10 @@ const App = () => {
       {/* Manual Entry Creation Modal */}
       <FluentModal
         open={isAddEntryModalOpen}
-        onClose={() => setIsAddEntryModalOpen(false)}
+        onClose={() => {
+          setIsAddEntryModalOpen(false);
+          setAddEntryContent("");
+        }}
         title={t("add_item") || "添加条目"}
         width={420}
         theme={theme}
@@ -2260,12 +2287,16 @@ const App = () => {
           <>
             <FluentButton
               variant="secondary"
-              onClick={() => setIsAddEntryModalOpen(false)}
+              onClick={() => {
+                setIsAddEntryModalOpen(false);
+                setAddEntryContent("");
+              }}
             >
               {t("cancel") || "取消"}
             </FluentButton>
             <FluentButton
               variant="primary"
+              disabled={!addEntryContent.trim()}
               onClick={handleConfirmAddEntry}
             >
               {t("confirm") || "确定"}
@@ -2277,8 +2308,10 @@ const App = () => {
           className="fluent-modal-textarea"
           value={addEntryContent}
           onChange={(e) => setAddEntryContent(e.target.value)}
-          placeholder={t("input_content_placeholder") || t("add_entry_placeholder") || "输入要添加的内容..."}
+          placeholder={t("input_content_placeholder") || "在此处输入条目内容... (Ctrl+Enter 保存)"}
           autoFocus
+          onFocus={() => invoke("activate_window_focus").catch(() => {})}
+          onMouseDown={() => invoke("activate_window_focus").catch(() => {})}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();

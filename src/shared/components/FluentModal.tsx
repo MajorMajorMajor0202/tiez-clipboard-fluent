@@ -38,10 +38,24 @@ const FluentModal: React.FC<FluentModalProps> = ({
   useEffect(() => {
     if (!open) return;
 
-    // Prevent Tauri from closing on blur while modal is open
+    // Prevent Tauri from closing on blur while modal is open and ensure window receives OS keyboard focus
     invoke("set_ignore_blur", { ignore: true }).catch(() => {});
+    invoke("activate_window_focus").catch(() => {});
+    invoke("focus_clipboard_window").catch(() => {});
+
+    const timer = setTimeout(() => {
+      invoke("activate_window_focus").catch(() => {});
+      const dialog = document.querySelector(".fluent-modal-dialog");
+      if (dialog) {
+        const editable = dialog.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          "[autofocus], textarea, input:not([type=hidden])"
+        );
+        editable?.focus();
+      }
+    }, 50);
 
     return () => {
+      clearTimeout(timer);
       invoke("set_ignore_blur", { ignore: false }).catch(() => {});
     };
   }, [open]);
@@ -51,6 +65,7 @@ const FluentModal: React.FC<FluentModalProps> = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         e.stopPropagation();
         onClose();
       }
@@ -83,7 +98,10 @@ const FluentModal: React.FC<FluentModalProps> = ({
           width: typeof width === "number" ? `${width}px` : width,
           maxWidth: typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth,
         }}
-        onMouseDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          invoke("activate_window_focus").catch(() => {});
+        }}
         role="dialog"
         aria-modal="true"
       >

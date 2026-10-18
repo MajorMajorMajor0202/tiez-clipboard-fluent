@@ -81,16 +81,31 @@ export const useKeyboardNavigation = ({
         showSettingsRef.current ||
         showTagManagerRef.current ||
         chatModeRef.current ||
-        editingTagsIdRef.current !== null
+        editingTagsIdRef.current !== null ||
+        document.querySelector(".fluent-modal-overlay") !== null ||
+        document.querySelector("[role='dialog']") !== null
       ) {
         return;
       }
 
       const target = e.target as HTMLElement;
-      const tagName = target.tagName;
-      const isSearchInput = target.classList.contains("search-input");
+      if (
+        target?.closest?.(".fluent-modal-dialog") ||
+        target?.closest?.(".fluent-modal-overlay") ||
+        target?.closest?.("[role='dialog']")
+      ) {
+        return;
+      }
+
+      const tagName = target?.tagName;
+      const isSearchInput = target?.classList?.contains("search-input");
       const isAnyInput = tagName === "INPUT" || tagName === "TEXTAREA";
-      const isEditable = isAnyInput || target.isContentEditable === true;
+      const isEditable = isAnyInput || target?.isContentEditable === true;
+
+      // Never intercept keystrokes when editing any non-search input or textarea
+      if (isEditable && !isSearchInput) {
+        return;
+      }
 
       if (e.key === "Escape") {
           e.preventDefault();
