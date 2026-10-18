@@ -56,6 +56,69 @@ pub fn open_file_location(file_path: String) -> AppResult<()> {
 }
 
 #[tauri::command]
+pub fn close_window_by_label(app: AppHandle, label: String) -> AppResult<()> {
+    if let Some(win) = app.get_webview_window(&label) {
+        let _ = win.close();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn open_file_with_picker(file_path: String) -> AppResult<()> {
+    #[cfg(target_os = "windows")]
+    {
+        use windows::core::{HSTRING, PCWSTR};
+        use windows::Win32::UI::Shell::ShellExecuteW;
+        use windows::Win32::UI::WindowsAndMessaging::SW_SHOW;
+
+        let operation = HSTRING::from("openas");
+        let file = HSTRING::from(&file_path);
+
+        unsafe {
+            let ret = ShellExecuteW(
+                None,
+                PCWSTR::from_raw(operation.as_ptr()),
+                PCWSTR::from_raw(file.as_ptr()),
+                None,
+                None,
+                SW_SHOW,
+            );
+            if (ret.0 as isize) <= 32 {
+                let _ = std::process::Command::new("rundll32.exe")
+                    .arg("shell32.dll,OpenAs_RunDLL")
+                    .arg(&file_path)
+                    .spawn();
+            }
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = std::process::Command::new("open").arg(&file_path).spawn();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn open_content_with_picker(content: String, content_type: String) -> AppResult<()> {
+    let mut temp_path = std::env::temp_dir();
+    let filename = format!("TieZ_Clip_{}", chrono::Utc::now().format("%Y%m%d-%H%M%S"));
+
+    let ext = match content_type.as_str() {
+        "image" => "png",
+        "code" => "txt",
+        "markdown" => "md",
+        "json" => "json",
+        "html" => "html",
+        _ => "txt",
+    };
+    temp_path.push(format!("{}.{}", filename, ext));
+    std::fs::write(&temp_path, content.as_bytes()).map_err(AppError::from)?;
+
+    let path_str = temp_path.to_string_lossy().to_string();
+    open_file_with_picker(path_str)
+}
+
+#[tauri::command]
 pub fn toggle_autostart(enabled: bool) -> AppResult<()> {
     use winreg::enums::*;
     use winreg::RegKey;

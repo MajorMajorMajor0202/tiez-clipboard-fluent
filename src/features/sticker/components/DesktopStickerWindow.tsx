@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import {
   Copy,
   Check,
-  Pin,
   X,
   FileText,
   Image as ImageIcon,
@@ -12,17 +11,28 @@ import {
   Code,
   File,
   Video,
-  Move
+  Move,
+  Edit3,
+  ExternalLink,
+  FolderOpen,
+  AppWindow
 } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types";
+import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import "../../../styles/components/sticker-window.css";
 
 export const DesktopStickerWindow: React.FC = () => {
   const [item, setItem] = useState<ClipboardEntry | null>(null);
   const [copied, setCopied] = useState(false);
-  const [isPinned, setIsPinned] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
+  const [isOpenMenuVisible, setIsOpenMenuVisible] = useState(false);
+
   const previousHeightRef = useRef<number>(180);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [bodyEl, setBodyEl] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -36,6 +46,7 @@ export const DesktopStickerWindow: React.FC = () => {
       if (cached) {
         const parsed = JSON.parse(cached) as ClipboardEntry;
         setItem(parsed);
+        setEditContent(parsed.content);
       }
     } catch {}
 
@@ -43,6 +54,7 @@ export const DesktopStickerWindow: React.FC = () => {
     invoke<ClipboardEntry>("get_clipboard_entry_by_id", { id })
       .then((entry) => {
         setItem(entry);
+        setEditContent(entry.content);
         try {
           localStorage.setItem(`sticker_entry_${id}`, JSON.stringify(entry));
         } catch {}
@@ -51,6 +63,12 @@ export const DesktopStickerWindow: React.FC = () => {
         console.error("Failed to load sticker entry:", err);
       });
   }, []);
+
+  useEffect(() => {
+    if (bodyRef.current) {
+      setBodyEl(bodyRef.current);
+    }
+  }, [item, isEditing, isCollapsed]);
 
   // Adaptive window sizing on load
   useEffect(() => {
@@ -82,7 +100,31 @@ export const DesktopStickerWindow: React.FC = () => {
     adjustSize();
   }, [item]);
 
-  const handleCopy = async () => {
+  // Close open-with menu when clicking outside
+  useEffect(() => {
+    if (!isOpenMenuVisible) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".sticker-openwith-popover, .btn-openwith")) {
+        setIsOpenMenuVisible(false);
+      }
+    };
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => window.removeEventListener("mousedown", handleOutsideClick);
+  }, [isOpenMenuVisible]);
+
+  // Header window drag handler
+  const handleMouseDown = useCallback(async (e: React.MouseEvent) => {
+    if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, .sticker-btn, input, textarea, button")) {
+      try {
+        await getCurrentWindow().startDragging();
+      } catch (err) {
+        console.error("Failed to start dragging window", err);
+      }
+    }
+  }, []);
+
+  const handleCopy = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (!item) return;
     try {
       await invoke("copy_to_clipboard", {
@@ -100,21 +142,17 @@ export const DesktopStickerWindow: React.FC = () => {
     }
   };
 
-  const handleTogglePin = async () => {
-    const next = !isPinned;
-    setIsPinned(next);
+  const handleClose = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
-      await getCurrentWindow().setAlwaysOnTop(next);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleClose = async () => {
-    try {
-      await getCurrentWindow().close();
-    } catch (e) {
-      console.error(e);
+      const win = getCurrentWindow();
+      await invoke("close_window_by_label", { label: win.label });
+    } catch {
+      try {
+        await getCurrentWindow().close();
+      } catch (err) {
+        console.error("Failed to close window", err);
+      }
     }
   };
 
@@ -127,6 +165,81 @@ export const DesktopStickerWindow: React.FC = () => {
       setIsCollapsed(false);
       await win.setSize(new LogicalSize(280, previousHeightRef.current || 180));
     }
+  };
+
+  // Open button: single-click opens menu, double-click directly opens
+  const handleOpenButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      setIsOpenMenuVisible(false);
+      handleDefaultOpen();
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickTimerRef.current = null;
+        setIsOpenMenuVisible((prev) => !prev);
+      }, 230);
+    }
+  };
+
+  const handleDefaultOpen = async () => {
+    if (!item) return;
+    try {
+      await invoke("open_content", {
+        id: item.id,
+        content: item.content,
+        contentType: item.content_type
+      });
+    } catch (err) {
+      console.error("Failed to open content", err);
+    }
+  };
+
+  const handleOpenWithSystemDialog = async () => {
+    if (!item) return;
+    setIsOpenMenuVisible(false);
+    try {
+      if (item.content_type === "file" || item.content_type === "video" || item.content_type === "image") {
+        const firstLine = item.content.split("\n")[0].trim();
+        if (!firstLine.startsWith("data:")) {
+          await invoke("open_file_with_picker", { filePath: firstLine });
+          return;
+        }
+      }
+      await invoke("open_content_with_picker", { content: item.content, contentType: item.content_type });
+    } catch (err) {
+      console.error("Failed to open with system dialog", err);
+    }
+  };
+
+  const handleStartEditing = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!item) return;
+    setEditContent(item.content);
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!item) return;
+    try {
+      await invoke("update_item_content", { id: item.id, newContent: editContent });
+      const updated = { ...item, content: editContent, preview: editContent.slice(0, 500) };
+      setItem(updated);
+      try {
+        localStorage.setItem(`sticker_entry_${item.id}`, JSON.stringify(updated));
+      } catch {}
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to save edit", err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    if (item) {
+      setEditContent(item.content);
+    }
+    setIsEditing(false);
   };
 
   // Drag-out handler to drag content directly to external applications
@@ -157,6 +270,8 @@ export const DesktopStickerWindow: React.FC = () => {
     );
   }
 
+  const isEditable = item.content_type === "text" || item.content_type === "code" || item.content_type === "markdown" || item.content_type === "url";
+
   const renderIcon = () => {
     switch (item.content_type) {
       case "image":
@@ -175,6 +290,36 @@ export const DesktopStickerWindow: React.FC = () => {
   };
 
   const renderBody = () => {
+    if (isEditing) {
+      return (
+        <div className="sticker-edit-container">
+          <textarea
+            className="sticker-edit-textarea window-no-drag"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                handleSaveEdit();
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                handleCancelEdit();
+              }
+            }}
+            autoFocus
+          />
+          <div className="sticker-edit-footer window-no-drag">
+            <button type="button" className="sticker-cancel-btn" onClick={handleCancelEdit}>
+              取消 (Esc)
+            </button>
+            <button type="button" className="sticker-save-btn" onClick={handleSaveEdit}>
+              保存 (Ctrl+↵)
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     if (item.content_type === "image") {
       const src = item.content.startsWith("data:") ? item.content : convertFileSrc(item.content);
       return (
@@ -197,7 +342,7 @@ export const DesktopStickerWindow: React.FC = () => {
           className="sticker-file-card"
           draggable
           onDragStart={handleDragStart}
-          title="按住可直接拖出至外部应用"
+          title="按住内容拖出至外部应用"
         >
           <File size={24} color="var(--accent-color, #0078d4)" />
           <div className="sticker-file-info">
@@ -214,7 +359,7 @@ export const DesktopStickerWindow: React.FC = () => {
           className="sticker-code-content"
           draggable
           onDragStart={handleDragStart}
-          title="双击复制，按住可直接拖出"
+          title="双击复制，按住内容拖出"
           onDoubleClick={handleCopy}
         >
           {item.content}
@@ -227,7 +372,7 @@ export const DesktopStickerWindow: React.FC = () => {
         className="sticker-text-content"
         draggable
         onDragStart={handleDragStart}
-        title="双击复制，按住可直接拖出"
+        title="双击复制，按住内容拖出"
         onDoubleClick={handleCopy}
       >
         {item.content}
@@ -240,37 +385,55 @@ export const DesktopStickerWindow: React.FC = () => {
       <div className="sticker-card">
         {/* Header with drag region */}
         <div
-          className="sticker-header"
+          className="sticker-header window-drag-region"
           data-tauri-drag-region
+          onMouseDown={handleMouseDown}
           onDoubleClick={handleDoubleClickHeader}
         >
-          <div className="sticker-meta" data-tauri-drag-region>
+          <div className="sticker-meta window-drag-region" data-tauri-drag-region>
             <div className="sticker-type-icon">{renderIcon()}</div>
-            <div className="sticker-title" data-tauri-drag-region>
+            <div className="sticker-title window-drag-region" data-tauri-drag-region>
               {item.source_app || "便签"}
             </div>
           </div>
 
-          <div className="sticker-actions">
+          <div className="sticker-actions window-no-drag">
+            {/* Edit Button for Text */}
+            {isEditable && (
+              <button
+                type="button"
+                className={`sticker-btn window-no-drag ${isEditing ? "active" : ""}`}
+                onClick={isEditing ? handleSaveEdit : handleStartEditing}
+                title={isEditing ? "保存修改 (Ctrl+Enter)" : "编辑文本"}
+              >
+                {isEditing ? <Check size={13} color="#107c41" /> : <Edit3 size={13} />}
+              </button>
+            )}
+
+            {/* Open With App Button: single-click popover, double-click direct open */}
             <button
               type="button"
-              className="sticker-btn"
+              className="sticker-btn btn-openwith window-no-drag"
+              onClick={handleOpenButtonClick}
+              title="双击直接打开 / 单击选择打开方式"
+            >
+              <ExternalLink size={13} />
+            </button>
+
+            {/* Copy Button */}
+            <button
+              type="button"
+              className="sticker-btn window-no-drag"
               onClick={handleCopy}
               title={copied ? "已复制" : "复制"}
             >
               {copied ? <Check size={13} color="#107c41" /> : <Copy size={13} />}
             </button>
+
+            {/* Close Button */}
             <button
               type="button"
-              className={`sticker-btn ${isPinned ? "pinned" : ""}`}
-              onClick={handleTogglePin}
-              title={isPinned ? "取消置顶" : "置顶显示"}
-            >
-              <Pin size={13} fill={isPinned ? "currentColor" : "none"} />
-            </button>
-            <button
-              type="button"
-              className="sticker-btn btn-close"
+              className="sticker-btn btn-close window-no-drag"
               onClick={handleClose}
               title="关闭浮窗"
             >
@@ -279,14 +442,47 @@ export const DesktopStickerWindow: React.FC = () => {
           </div>
         </div>
 
-        {/* Body content */}
-        {!isCollapsed && <div className="sticker-body">{renderBody()}</div>}
+        {/* Open With Popover Menu */}
+        {isOpenMenuVisible && (
+          <div className="sticker-openwith-popover window-no-drag">
+            <button
+              type="button"
+              className="sticker-openwith-item"
+              onClick={() => {
+                setIsOpenMenuVisible(false);
+                handleDefaultOpen();
+              }}
+            >
+              <AppWindow size={13} />
+              <span>默认应用打开</span>
+            </button>
+            <button
+              type="button"
+              className="sticker-openwith-item"
+              onClick={handleOpenWithSystemDialog}
+            >
+              <FolderOpen size={13} />
+              <span>系统打开方式...</span>
+            </button>
+          </div>
+        )}
+
+        {/* Body content with FluentScrollbar */}
+        {!isCollapsed && (
+          <div
+            ref={bodyRef}
+            className="sticker-body fluent-scrollbar-host"
+          >
+            {renderBody()}
+            <FluentScrollbar scrollContainer={bodyEl} />
+          </div>
+        )}
 
         {/* Drag Hint Footer */}
-        {!isCollapsed && (
+        {!isCollapsed && !isEditing && (
           <div className="sticker-drag-hint">
             <Move size={10} />
-            <span>支持按住内容拖出</span>
+            <span>按住内容拖出</span>
           </div>
         )}
       </div>
