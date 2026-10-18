@@ -4,6 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TieZ</title>
+    <script>
+      window.addEventListener('error', function(e) {
+        var msg = '[JS_ERROR] ' + (e.error ? (e.error.stack || e.error.message) : e.message) + ' (' + e.filename + ':' + e.lineno + ')';
+        try { localStorage.setItem('__tiez_last_error', msg); } catch(x) {}
+        console.error(msg);
+        var el = document.getElementById('tiez-fatal-error-overlay');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'tiez-fatal-error-overlay';
+          el.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(180,0,0,0.95);color:#fff;z-index:2147483647;padding:20px;font-family:Consolas,monospace;font-size:12px;overflow:auto;user-select:text;white-space:pre-wrap;line-height:1.5;';
+          (document.body || document.documentElement).appendChild(el);
+        }
+        el.innerText += '\n' + msg + '\n';
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        var msg = '[PROMISE_REJECTION] ' + (e.reason ? (e.reason.stack || e.reason) : e);
+        try { localStorage.setItem('__tiez_last_rejection', msg); } catch(x) {}
+        console.error(msg);
+        var el = document.getElementById('tiez-fatal-error-overlay');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'tiez-fatal-error-overlay';
+          el.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(180,0,0,0.95);color:#fff;z-index:2147483647;padding:20px;font-family:Consolas,monospace;font-size:12px;overflow:auto;user-select:text;white-space:pre-wrap;line-height:1.5;';
+          (document.body || document.documentElement).appendChild(el);
+        }
+        el.innerText += '\n' + msg + '\n';
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

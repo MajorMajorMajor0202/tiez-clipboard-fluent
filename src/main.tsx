@@ -4,6 +4,8 @@ import App from "./App";
 import CompactPreviewWindow from "./features/clipboard/components/CompactPreviewWindow";
 import AdvancedSettingsWindow from "./features/settings/components/AdvancedSettingsWindow";
 import SettingsWindow from "./features/settings/components/SettingsWindow";
+import DesktopStickerWindow from "./features/sticker/components/DesktopStickerWindow";
+import StickyNoteWindow from "./features/note/components/StickyNoteWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import "./index.css";
 import "./styles/components/index.css";
@@ -71,10 +73,6 @@ function onDpiChange() {
 }
 dpiMediaQuery.addEventListener("change", onDpiChange);
 // ─────────────────────────────────────────────────────────────────────
-
-import DesktopStickerWindow from "./features/sticker/components/DesktopStickerWindow";
-import StickyNoteWindow from "./features/note/components/StickyNoteWindow";
-
 const isCompactPreview = params.get("window") === "compact-preview";
 const isAdvancedSettingsWindow = params.get("window") === "advanced-settings";
 const isSettingsWindow = params.get("window") === "settings";
@@ -107,7 +105,7 @@ if (isStickerWindow || isNoteWindow) {
 //      - 宽度设为 w - 3, 高度设为 h - 3 (右/下边界落在 index w-2 / h-2)
 //    这样，边框线处于 100% 不会被系统裁剪的内部安全区，且在四边表现出完美的物理对称。
 // ─────────────────────────────────────────────────────────────────────
-if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isStickerWindow) {
+if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isStickerWindow && !isNoteWindow) {
   const canvas = document.createElement("canvas");
   canvas.id = "window-border-overlay";
   Object.assign(canvas.style, {
@@ -239,18 +237,74 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isSt
 }
 // ─────────────────────────────────────────────────────────────────────
 
+class GlobalErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("GlobalErrorBoundary caught error:", error, errorInfo);
+    try {
+      localStorage.setItem(
+        "__tiez_render_error",
+        `${error.name}: ${error.message}\n${error.stack}\n${errorInfo.componentStack}`
+      );
+    } catch {}
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "#8b0000",
+            color: "#ffffff",
+            padding: 20,
+            fontFamily: "Consolas, monospace",
+            fontSize: 12,
+            overflow: "auto",
+            zIndex: 2147483647,
+            whiteSpace: "pre-wrap",
+            userSelect: "text"
+          }}
+        >
+          <h3 style={{ margin: "0 0 10px 0" }}>界面渲染异常 (React Render Error)</h3>
+          <p style={{ fontWeight: "bold" }}>{this.state.error?.name}: {this.state.error?.message}</p>
+          <pre style={{ opacity: 0.9 }}>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    {isNoteWindow
-      ? <StickyNoteWindow />
-      : isStickerWindow
-        ? <DesktopStickerWindow />
-        : isCompactPreview
-          ? <CompactPreviewWindow />
-          : isAdvancedSettingsWindow
-            ? <AdvancedSettingsWindow />
-            : isSettingsWindow
-              ? <SettingsWindow />
-              : <App />}
+    <GlobalErrorBoundary>
+      {isNoteWindow
+        ? <StickyNoteWindow />
+        : isStickerWindow
+          ? <DesktopStickerWindow />
+          : isCompactPreview
+            ? <CompactPreviewWindow />
+            : isAdvancedSettingsWindow
+              ? <AdvancedSettingsWindow />
+              : isSettingsWindow
+                ? <SettingsWindow />
+                : <App />}
+    </GlobalErrorBoundary>
   </React.StrictMode>,
 );
