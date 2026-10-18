@@ -597,7 +597,7 @@ const CompactPreviewWindow = () => {
                     <div className="meta-dot">•</div>
                     <div className="meta-row">
                         <Clock size={14} />
-                        <span>
+                        <span title={payload?.timestamp ? new Date(payload.timestamp).toLocaleString() : undefined}>
                             {payload?.timestamp && payload?.language
                                 ? getConciseTime(payload.timestamp, payload.language)
                                 : "-"}

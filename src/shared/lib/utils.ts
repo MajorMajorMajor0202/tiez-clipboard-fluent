@@ -63,21 +63,47 @@ export const getTagTextColor = (backgroundColor: string) => {
   return "#ffffff";
 };
 
-export const getConciseTime = (timestamp: number, language: Locale) => {
-  const diff = Date.now() - timestamp;
-  const seconds = Math.floor(diff / 1000);
+export const getConciseTime = (timestamp: number, language: Locale = "zh") => {
+  if (!timestamp || isNaN(timestamp)) return "";
+  const d = new Date(timestamp);
+  const now = new Date();
 
-  if (language === "zh") {
-    if (seconds < 60) return "< 1分钟";
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}分钟前`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}小时前`;
-    return `${Math.floor(seconds / 86400)}天前`;
-  } else {
-    if (seconds < 60) return "< 1m";
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    return `${Math.floor(seconds / 86400)}d ago`;
+  const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  const timeStr = `${hours}:${minutes}`;
+
+  const isToday =
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+
+  if (isToday) {
+    return timeStr;
   }
+
+  // Check if yesterday
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday =
+    d.getFullYear() === yesterday.getFullYear() &&
+    d.getMonth() === yesterday.getMonth() &&
+    d.getDate() === yesterday.getDate();
+
+  if (isYesterday) {
+    if (language === "en") return `Yesterday ${timeStr}`;
+    return `昨天 ${timeStr}`;
+  }
+
+  const isThisYear = d.getFullYear() === now.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+
+  if (isThisYear) {
+    return `${month}-${day} ${timeStr}`;
+  }
+
+  return `${d.getFullYear()}-${month}-${day} ${timeStr}`;
 };
 
 export const formatSensitivePreview = (

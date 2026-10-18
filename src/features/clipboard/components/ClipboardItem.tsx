@@ -2137,7 +2137,9 @@ const ClipboardItem = ({
                                 {quickPasteHint.combo}
                             </span>
                         )}
-                        <span>{getConciseTime(item.timestamp, language)}</span>
+                        <span title={item.timestamp ? new Date(item.timestamp).toLocaleString() : undefined}>
+                            {getConciseTime(item.timestamp, language)}
+                        </span>
                     </div>
                 </div>
             </div>
