@@ -59,7 +59,7 @@ html.dark-mode .note-card {
 
 /* 1. Mica (Default) */
 .note-theme-mica {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(32px) saturate(140%);
   -webkit-backdrop-filter: blur(32px) saturate(140%);
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -68,7 +68,7 @@ html.dark-mode .note-card {
 .dark-mode .note-theme-mica,
 body.dark-mode .note-theme-mica,
 html.dark-mode .note-theme-mica {
-  background: rgba(32, 32, 32, 0.84);
+  background: rgba(32, 32, 32, 0.85);
   backdrop-filter: blur(32px) saturate(140%);
   -webkit-backdrop-filter: blur(32px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -179,25 +179,69 @@ html.dark-mode .note-theme-charcoal {
 
 /* ───────────────────────────────────────────────────────────
    TitleBar: Windows 11 Fluent Stickies 32px Square Button Bar
+   Auto-hides when unfocused & unhovered, smoothly slides down on focus/hover
    ─────────────────────────────────────────────────────────── */
 .note-titlebar {
   height: 32px;
-  min-height: 32px;
+  min-height: 0;
   max-height: 32px;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  background: transparent;
+  width: 100%;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   user-select: none;
   -webkit-user-select: none;
   box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
   z-index: 20;
+  transition: height 0.22s cubic-bezier(0.1, 0.9, 0.2, 1),
+              opacity 0.18s cubic-bezier(0.1, 0.9, 0.2, 1),
+              border-bottom-color 0.18s ease;
+}
+
+.dark-mode .note-titlebar {
+  background: rgba(28, 28, 28, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Auto-hide: smoothly collapse height and fade out when not focused/hovered */
+.note-window-root:not(.is-controls-visible) .note-titlebar {
+  height: 0 !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  border-bottom-color: transparent !important;
+  pointer-events: none !important;
+}
+
+.note-window-root.is-controls-visible .note-titlebar {
+  height: 32px !important;
+  max-height: 32px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Left Pin Button Group */
+.note-titlebar-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 32px;
+  flex-shrink: 0;
 }
 
 /* Center Native Drag Region */
 .note-titlebar-drag {
   flex: 1;
-  height: 100%;
+  height: 32px;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
@@ -207,58 +251,76 @@ html.dark-mode .note-theme-charcoal {
   cursor: grabbing;
 }
 
-.note-titlebar-actions {
+/* Right Control Buttons Group */
+.note-titlebar-right {
   display: flex;
-  align-items: stretch;
+  flex-direction: row;
+  align-items: center;
   height: 32px;
+  flex-shrink: 0;
+  gap: 0;
 }
 
 /* TitleBar Square Button Style (TitleBarSquareButtonStyle) */
 .note-titlebar-btn {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 0;
-  margin: 0;
-  border: none;
-  border-radius: 0;
-  background: transparent;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: inherit;
   opacity: 0.75;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  outline: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  outline: none !important;
+  box-sizing: border-box !important;
   transition: background 0.1s ease, opacity 0.1s ease, color 0.1s ease;
-  box-sizing: border-box;
+}
+
+.note-titlebar-btn svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .note-titlebar-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.08) !important;
   opacity: 1;
 }
 
 .dark-mode .note-titlebar-btn:hover,
 body.dark-mode .note-titlebar-btn:hover,
 html.dark-mode .note-titlebar-btn:hover {
-  background: rgba(255, 255, 255, 0.095);
+  background: rgba(255, 255, 255, 0.095) !important;
   opacity: 1;
 }
 
 .note-titlebar-btn:active {
-  background: rgba(0, 0, 0, 0.17);
+  background: rgba(0, 0, 0, 0.17) !important;
 }
 
 .dark-mode .note-titlebar-btn:active,
 body.dark-mode .note-titlebar-btn:active,
 html.dark-mode .note-titlebar-btn:active {
-  background: rgba(255, 255, 255, 0.19);
+  background: rgba(255, 255, 255, 0.19) !important;
 }
 
-/* Pin Button */
+/* Pin Button Active / Pinned */
 .note-titlebar-btn.is-pinned {
+  color: var(--accent-color, #0078d4) !important;
+  opacity: 1 !important;
+}
+
+/* Edit / Preview Active */
+.note-titlebar-btn.active {
   color: var(--accent-color, #0078d4) !important;
   opacity: 1 !important;
 }
@@ -285,9 +347,15 @@ html.dark-mode .note-titlebar-btn:active {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 6px 16px 16px 16px;
+  padding: 8px 16px 14px 16px;
   overflow: hidden;
   box-sizing: border-box;
+  transition: padding 0.22s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+/* When titlebar is hidden, give a little more top breathing room */
+.note-window-root:not(.is-controls-visible) .note-body {
+  padding-top: 14px;
 }
 
 /* Markdown Textarea (transparent, natural text placement) */

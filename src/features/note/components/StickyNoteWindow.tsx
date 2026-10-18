@@ -55,6 +55,8 @@ export const StickyNoteWindow: React.FC = () => {
   const [item, setItem] = useState<ClipboardEntry | null>(null);
   const [content, setContent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [isFocused, setIsFocused] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
   const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
   const [backdrop, setBackdrop] = useState<NoteBackdrop>("mica");
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -96,7 +98,6 @@ export const StickyNoteWindow: React.FC = () => {
     if (savedBackdrop && NOTE_THEMES.some((t) => t.id === savedBackdrop)) {
       setBackdrop(savedBackdrop);
     } else {
-      // Default to mica or app theme
       const appTheme = localStorage.getItem("tiez_theme");
       if (appTheme === "acrylic") {
         setBackdrop("acrylic");
@@ -135,7 +136,31 @@ export const StickyNoteWindow: React.FC = () => {
       });
   }, []);
 
-  // 2. System Theme & Dark Mode Sync
+  // 2. Track Window Focus State for Auto-Hiding Controls
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let unlistenFocus: (() => void) | undefined;
+
+    appWindow.onFocusChanged(({ payload: focused }) => {
+      setIsFocused(focused);
+    }).then((unlisten) => {
+      unlistenFocus = unlisten;
+    }).catch(() => {});
+
+    const handleFocus = () => setIsFocused(true);
+    const handleBlur = () => setIsFocused(false);
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      unlistenFocus?.();
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, []);
+
+  // 3. System Theme & Dark Mode Sync
   useEffect(() => {
     const handleThemeEvent = (event: { payload: string }) => {
       const isDark = event.payload === "dark";
@@ -167,7 +192,7 @@ export const StickyNoteWindow: React.FC = () => {
     };
   }, []);
 
-  // 3. Auto-save content to database (debounced 350ms)
+  // 4. Auto-save content to database (debounced 350ms)
   const saveContent = useCallback((newText: string) => {
     if (!item) return;
     if (saveTimeoutRef.current) {
@@ -191,7 +216,7 @@ export const StickyNoteWindow: React.FC = () => {
     saveContent(val);
   };
 
-  // 4. Window Dragging Handler (fluent-stickies native drag style)
+  // 5. Window Dragging Handler
   const handleMouseDownDrag = useCallback(async (e: React.MouseEvent) => {
     if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, button, input, textarea")) {
       try {
@@ -202,7 +227,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   }, []);
 
-  // 5. Toggle Always On Top (Pin)
+  // 6. Toggle Always On Top (Pin)
   const handleTogglePin = async () => {
     try {
       const next = !isAlwaysOnTop;
@@ -214,7 +239,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   };
 
-  // 6. Close Window
+  // 7. Close Window
   const handleClose = async () => {
     try {
       const win = getCurrentWindow();
@@ -228,7 +253,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   };
 
-  // 7. Delete Note
+  // 8. Delete Note
   const handleDelete = async () => {
     if (!item) return;
     try {
@@ -241,7 +266,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   };
 
-  // 8. Create Another Note
+  // 9. Create Another Note
   const handleCreateAnother = async () => {
     try {
       if (contextMenu) setContextMenu(null);
@@ -287,7 +312,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   };
 
-  // 9. Backdrop Theme Selection
+  // 10. Backdrop Theme Selection
   const handleSelectBackdrop = (themeId: NoteBackdrop) => {
     setBackdrop(themeId);
     if (item) {
@@ -296,7 +321,7 @@ export const StickyNoteWindow: React.FC = () => {
     setContextMenu(null);
   };
 
-  // 10. Context Menu Handler
+  // 11. Context Menu Handler
   const handleContextMenu = (e: React.MouseEvent) => {
     // If inside textarea and editing, allow default OS text context menu
     if (isEditing && (e.target as HTMLElement).tagName === "TEXTAREA") {
@@ -332,7 +357,7 @@ export const StickyNoteWindow: React.FC = () => {
     };
   }, [contextMenu]);
 
-  // 11. Rendered Markdown HTML
+  // 12. Rendered Markdown HTML
   const parsedMarkdownHtml = useMemo(() => {
     if (!content || !content.trim()) return "";
     try {
@@ -343,7 +368,7 @@ export const StickyNoteWindow: React.FC = () => {
     }
   }, [content]);
 
-  // 12. Interactive Checkbox Click in Preview Mode
+  // 13. Interactive Checkbox Click in Preview Mode
   const handlePreviewClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.tagName === "INPUT" && (target as HTMLInputElement).type === "checkbox") {
@@ -383,29 +408,36 @@ export const StickyNoteWindow: React.FC = () => {
     }
   }, [isEditing]);
 
+  // Controls are visible when window is focused, hovered, or context menu is active
+  const isControlsVisible = isFocused || isHovered || Boolean(contextMenu);
+
   return (
     <div
-      className="note-window-root"
+      className={`note-window-root ${isControlsVisible ? "is-controls-visible" : ""}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
       <div className={`note-card note-theme-${backdrop}`} onMouseDown={handleMouseDownDrag}>
-        {/* Windows 11 Fluent Stickies 32px Square Button TitleBar */}
-        <header className="note-titlebar" onMouseDown={handleMouseDownDrag}>
-          {/* Left: Pin / Always On Top (TitleBarSquareButtonStyle) */}
-          <button
-            type="button"
-            className={`note-titlebar-btn window-no-drag ${isAlwaysOnTop ? "is-pinned" : ""}`}
-            title={isAlwaysOnTop ? "取消置顶" : "置顶便笺"}
-            onClick={handleTogglePin}
-          >
-            {isAlwaysOnTop ? <PinOff size={14} /> : <Pin size={14} />}
-          </button>
+        {/* Windows 11 Fluent 32px Square-Button TitleBar (Auto-hiding) */}
+        <div className="note-titlebar" onMouseDown={handleMouseDownDrag}>
+          {/* Left: Pin / Always On Top (32x32) */}
+          <div className="note-titlebar-left window-no-drag">
+            <button
+              type="button"
+              className={`note-titlebar-btn ${isAlwaysOnTop ? "is-pinned" : ""}`}
+              title={isAlwaysOnTop ? "取消置顶" : "置顶便笺"}
+              onClick={handleTogglePin}
+            >
+              {isAlwaysOnTop ? <PinOff size={13} strokeWidth={2} /> : <Pin size={13} strokeWidth={2} />}
+            </button>
+          </div>
 
           {/* Center: Blank Drag Region */}
           <div className="note-titlebar-drag" onMouseDown={handleMouseDownDrag} />
 
-          {/* Right: Actions */}
-          <div className="note-titlebar-actions window-no-drag">
+          {/* Right: Action Buttons (32x32 each) */}
+          <div className="note-titlebar-right window-no-drag">
             {/* Toggle Preview / Edit */}
             <button
               type="button"
@@ -413,27 +445,27 @@ export const StickyNoteWindow: React.FC = () => {
               title={isEditing ? "预览 Markdown" : "编辑内容"}
               onClick={() => setIsEditing(!isEditing)}
             >
-              {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
+              {isEditing ? <Eye size={13} strokeWidth={2} /> : <Edit3 size={13} strokeWidth={2} />}
             </button>
 
-            {/* New Note Button */}
+            {/* New Note */}
             <button
               type="button"
               className="note-titlebar-btn"
               title="新建便笺"
               onClick={handleCreateAnother}
             >
-              <Plus size={15} strokeWidth={2.2} />
+              <Plus size={14} strokeWidth={2.2} />
             </button>
 
-            {/* Delete Note Button */}
+            {/* Delete Note */}
             <button
               type="button"
               className="note-titlebar-btn"
               title="删除便笺"
               onClick={handleDelete}
             >
-              <Trash2 size={14} />
+              <Trash2 size={13} strokeWidth={2} />
             </button>
 
             {/* Close Window Button (Red Hover) */}
@@ -443,10 +475,10 @@ export const StickyNoteWindow: React.FC = () => {
               title="关闭 (保存)"
               onClick={handleClose}
             >
-              <X size={15} />
+              <X size={14} strokeWidth={2} />
             </button>
           </div>
-        </header>
+        </div>
 
         {/* Content Body */}
         <div className="note-body">
@@ -516,19 +548,19 @@ export const StickyNoteWindow: React.FC = () => {
 
           {/* New note */}
           <div className="note-menu-item" onClick={handleCreateAnother}>
-            <Plus size={14} />
+            <Plus size={14} strokeWidth={2} />
             <span>新建便笺</span>
           </div>
 
           {/* Delete note */}
           <div className="note-menu-item text-danger" onClick={handleDelete}>
-            <Trash2 size={14} />
+            <Trash2 size={14} strokeWidth={2} />
             <span>删除便笺</span>
           </div>
 
           {/* Close note */}
           <div className="note-menu-item" onClick={handleClose}>
-            <X size={14} />
+            <X size={14} strokeWidth={2} />
             <span>关闭便笺</span>
           </div>
         </div>

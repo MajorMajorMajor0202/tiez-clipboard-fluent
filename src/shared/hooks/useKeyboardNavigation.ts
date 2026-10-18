@@ -186,7 +186,10 @@ export const useKeyboardNavigation = ({
   }, [searchInputRef, setIsKeyboardMode, setSelectedIndex]);
 
   useEffect(() => {
-    const unlisten = listen<string>("navigation-action", async (event) => {
+    let unlistenFn: (() => void) | null = null;
+    let isCleanedUp = false;
+
+    listen<string>("navigation-action", async (event) => {
       try {
         const isVisible = await getCurrentWindow().isVisible();
         if (!isVisible) return;
@@ -194,14 +197,21 @@ export const useKeyboardNavigation = ({
         console.warn("Failed to check window visibility:", err);
       }
 
-      if (showSettings || showTagManager || chatMode || editingTagsId !== null) return;
+      if (
+        showSettingsRef.current ||
+        showTagManagerRef.current ||
+        chatModeRef.current ||
+        editingTagsIdRef.current !== null
+      ) {
+        return;
+      }
 
       const action = event.payload;
       const history = filteredHistoryRef.current;
       const currentIndex = selectedIndexRef.current;
       const isNavMode = isKeyboardModeRef.current;
 
-      if ((action === "up" || action === "down") && !arrowKeySelection) {
+      if ((action === "up" || action === "down") && !arrowKeySelectionRef.current) {
         return;
       }
 
@@ -223,26 +233,39 @@ export const useKeyboardNavigation = ({
         if (!isNavMode) return;
         if (currentIndex >= 0 && currentIndex < history.length) {
           const item = history[currentIndex];
-          copyToClipboard(item.id, item.content, item.content_type, false);
+          copyToClipboardRef.current(item.id, item.content, item.content_type, false);
         }
       } else if (action === "escape") {
         setSearch("");
         setIsKeyboardMode(false);
       }
+    }).then((fn) => {
+      if (isCleanedUp) {
+        try {
+          const res: unknown = fn();
+          if (res && typeof (res as Promise<unknown>).catch === "function") {
+            (res as Promise<unknown>).catch(() => {});
+          }
+        } catch {}
+      } else {
+        unlistenFn = fn;
+      }
+    }).catch((err) => {
+      console.warn("Failed to register navigation-action listener:", err);
     });
 
-    return () => { unlisten.then(f => f()); };
-  }, [
-    arrowKeySelection,
-    chatMode,
-    copyToClipboard,
-    editingTagsId,
-    setIsKeyboardMode,
-    setSearch,
-    setSelectedIndex,
-    showSettings,
-    showTagManager
-  ]);
+    return () => {
+      isCleanedUp = true;
+      if (unlistenFn) {
+        try {
+          const res: unknown = unlistenFn();
+          if (res && typeof (res as Promise<unknown>).catch === "function") {
+            (res as Promise<unknown>).catch(() => {});
+          }
+        } catch {}
+      }
+    };
+  }, [setIsKeyboardMode, setSearch, setSelectedIndex]);
 };
 
 
