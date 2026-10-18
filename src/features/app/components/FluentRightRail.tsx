@@ -33,6 +33,7 @@ export interface FluentRightRailProps {
 
   // Selected Item Actions (Unpacked from Card & More Menu)
   hasSelectedItem: boolean;
+  canEditContent?: boolean;
   onCopySelectedItem?: () => void;
   onEditContent?: () => void;
   isEditingContent?: boolean;
@@ -77,6 +78,7 @@ export const FluentRightRail = ({
   onOpenAddEntry,
   clearHistory,
   hasSelectedItem,
+  canEditContent,
   onCopySelectedItem,
   onEditContent,
   isEditingContent,
@@ -156,7 +158,7 @@ export const FluentRightRail = ({
               type="button"
               className={`rail-btn ${isEditingContent ? "active" : ""}`}
               onClick={onEditContent}
-              disabled={!hasSelectedItem}
+              disabled={!hasSelectedItem || canEditContent === false}
               aria-label="Edit content"
             >
               <Edit3 size={15} strokeWidth={2} />

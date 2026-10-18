@@ -38,6 +38,7 @@ interface UseClipboardItemRendererOptions {
   compactMode: boolean;
   doubleClickToPaste?: boolean;
   editingContentId?: number | null;
+  onStartContentEdit?: (item: ClipboardEntry) => void;
   onSaveContentEdit?: (id: number, newContent: string) => void;
   onCancelContentEdit?: () => void;
   richTextSnapshotPreview: boolean;
@@ -105,6 +106,7 @@ export const useClipboardItemRenderer = ({
   compactMode,
   doubleClickToPaste,
   editingContentId,
+  onStartContentEdit,
   onSaveContentEdit,
   onCancelContentEdit,
   richTextSnapshotPreview,
@@ -167,6 +169,7 @@ export const useClipboardItemRenderer = ({
           compactMode={compactMode}
           doubleClickToPaste={doubleClickToPaste}
           isEditingContent={editingContentId === item.id}
+          onStartContentEdit={onStartContentEdit ? () => onStartContentEdit(item) : undefined}
           onSaveContentEdit={(newContent) => onSaveContentEdit?.(item.id, newContent)}
           onCancelContentEdit={onCancelContentEdit}
           richTextSnapshotPreview={richTextSnapshotPreview}
@@ -312,6 +315,7 @@ export const useClipboardItemRenderer = ({
       compactMode,
       doubleClickToPaste,
       editingContentId,
+      onStartContentEdit,
       richTextSnapshotPreview,
       sensitiveMaskPrefixVisible,
       sensitiveMaskSuffixVisible,

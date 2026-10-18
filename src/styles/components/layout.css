@@ -381,7 +381,7 @@ select.search-input option {
   border: var(--card-border);
   border-radius: var(--card-radius);
   color: var(--text-primary);
-  cursor: grab;
+  cursor: default;
   box-shadow: var(--card-shadow);
   user-select: none;
   -webkit-user-select: none;
@@ -413,7 +413,6 @@ select.search-input option {
 }
 
 .history-item:active {
-  cursor: grabbing;
   transform: var(--card-active-transform);
   box-shadow: var(--card-active-shadow);
 }
@@ -427,6 +426,7 @@ select.search-input option {
 .pinned-reorder.dragging .history-item,
 .pinned-reorder.dragging .history-item:hover,
 .pinned-reorder.dragging .history-item:active {
+  cursor: grabbing !important;
   transform: none;
   box-shadow: none;
 }
@@ -442,6 +442,7 @@ select.search-input option {
   border-radius: 4px;
   transition: all 0.2s;
   color: var(--text-secondary);
+  cursor: grab;
 }
 
 .drag-handle:hover {
@@ -455,6 +456,7 @@ select.search-input option {
 }
 
 .history-item[data-reordering="true"] {
+  cursor: grabbing !important;
   z-index: 9999;
   box-shadow: var(--card-selected-shadow);
   background: var(--card-selected-background);

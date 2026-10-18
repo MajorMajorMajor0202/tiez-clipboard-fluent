@@ -103,8 +103,13 @@
 }
 
 .rail-btn.active {
-  color: var(--accent-color, #0078d4);
-  background: rgba(var(--accent-rgb, 0, 120, 212), 0.12);
+  color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.1);
+}
+
+.rail-btn.active:hover {
+  color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.16);
 }
 
 .rail-btn-danger:hover {

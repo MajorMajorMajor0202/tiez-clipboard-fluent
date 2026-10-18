@@ -303,7 +303,7 @@ html.dark-mode .sticker-code-content {
   min-height: 70px;
   resize: none;
   background: #ffffff;
-  border: 1px solid var(--accent-color, #0078d4);
+  border: 1px solid rgba(0, 0, 0, 0.16);
   border-radius: 4px;
   padding: 6px 8px;
   font-family: inherit;
@@ -319,6 +319,7 @@ body.dark-mode .sticker-edit-textarea,
 html.dark-mode .sticker-edit-textarea {
   background: #1a1a1a;
   color: #f0f0f0;
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .sticker-edit-footer {

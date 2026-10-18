@@ -735,6 +735,7 @@ const ClipboardItem = ({
     onPinToDesktop,
     doubleClickToPaste = true,
     isEditingContent: propIsEditingContent,
+    onStartContentEdit,
     onSaveContentEdit,
     onCancelContentEdit,
     dragControls: _dragControls,
@@ -1734,9 +1735,9 @@ const ClipboardItem = ({
             className={`item-tags-container${overlay ? ' overlay' : ''}${isEditingTags ? ' tag-edit-active' : ''}`}
             style={overlay ? {
                 position: 'absolute',
-                right: '4px',
-                bottom: '0px',
-                height: '16px',
+                right: '6px',
+                bottom: '2px',
+                height: '20px',
                 zIndex: 5,
                 margin: 0,
                 display: 'flex',
@@ -2154,7 +2155,7 @@ const ClipboardItem = ({
                 )
             }
             <div className={`content-preview-shell${overlayTagsInPreview ? ' has-overlay-tags' : ''}`}>
-                {isEditingContent ? (
+                {isEditingContent && !onStartContentEdit ? (
                     <div className="item-inline-editor" onClick={(e) => e.stopPropagation()}>
                         <textarea
                             ref={editInputRef}
@@ -2743,8 +2744,12 @@ const ClipboardItem = ({
                         onClick={(e) => {
                             e.stopPropagation();
                             setIsMoreMenuOpen(false);
-                            setIsEditingContent(true);
-                            setEditContentVal(item.content);
+                            if (onStartContentEdit) {
+                                onStartContentEdit();
+                            } else {
+                                setIsEditingContent(true);
+                                setEditContentVal(item.content);
+                            }
                         }}
                     >
                         <Edit3 size={13} />

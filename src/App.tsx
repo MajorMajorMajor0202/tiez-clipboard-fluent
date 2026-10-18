@@ -399,17 +399,22 @@ const App = () => {
   const [addEntryContent, setAddEntryContent] = useState("");
   const [pastedPulseId, setPastedPulseId] = useState<number | null>(null);
 
+  // Edit Item Modal
+  const [isEditEntryModalOpen, setIsEditEntryModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<ClipboardEntry | null>(null);
+  const [editEntryContent, setEditEntryContent] = useState("");
+
   useEffect(() => {
     (window as any).__tiezSelectedItemIds = selectedItemIds;
   }, [selectedItemIds]);
 
   useEffect(() => {
-    if (selectedItemIds.size > 0 || isAddEntryModalOpen) {
+    if (selectedItemIds.size > 0 || isAddEntryModalOpen || isEditEntryModalOpen) {
       invoke("set_ignore_blur", { ignore: true }).catch(() => {});
     } else {
       invoke("set_ignore_blur", { ignore: false }).catch(() => {});
     }
-  }, [selectedItemIds.size, isAddEntryModalOpen]);
+  }, [selectedItemIds.size, isAddEntryModalOpen, isEditEntryModalOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -421,6 +426,11 @@ const App = () => {
         }
         if (isAddEntryModalOpen) {
           setIsAddEntryModalOpen(false);
+        }
+        if (isEditEntryModalOpen) {
+          setIsEditEntryModalOpen(false);
+          setEditingItem(null);
+          setEditEntryContent("");
         }
       }
     };
@@ -1774,6 +1784,33 @@ const App = () => {
     }
   }, [addEntryContent, activeTabId, activeTab, saveTabAssignments, pushToast, t, fetchHistory, setHistory, setSearch]);
 
+  const handleStartEditEntry = useCallback((item: ClipboardEntry) => {
+    if (item.content_type === "image" || item.content_type === "files") return;
+    setEditingItem(item);
+    setEditEntryContent(item.content);
+    setIsEditEntryModalOpen(true);
+  }, []);
+
+  const handleConfirmEditEntry = useCallback(async () => {
+    if (!editingItem) return;
+    const trimmed = editEntryContent;
+    if (trimmed === editingItem.content) {
+      setIsEditEntryModalOpen(false);
+      setEditingItem(null);
+      setEditEntryContent("");
+      return;
+    }
+    try {
+      await invoke("update_item_content", { id: editingItem.id, newContent: trimmed });
+      handleItemContentUpdated(editingItem.id, trimmed);
+      setIsEditEntryModalOpen(false);
+      setEditingItem(null);
+      setEditEntryContent("");
+    } catch (err) {
+      console.error("Failed to update item content:", err);
+    }
+  }, [editingItem, editEntryContent, handleItemContentUpdated]);
+
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
     revealedIds,
@@ -1802,6 +1839,7 @@ const App = () => {
     compactMode,
     doubleClickToPaste,
     editingContentId,
+    onStartContentEdit: handleStartEditEntry,
     onSaveContentEdit: (id, newContent) => {
       handleItemContentUpdated(id, newContent);
       setEditingContentId(null);
@@ -1994,8 +2032,8 @@ const App = () => {
 
   const handleRailEditContent = useCallback(() => {
     if (!selectedItem) return;
-    setEditingContentId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
-  }, [selectedItem, setEditingContentId]);
+    handleStartEditEntry(selectedItem);
+  }, [selectedItem, handleStartEditEntry]);
 
   const handleRailOpenContent = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -2178,9 +2216,10 @@ const App = () => {
             }}
             clearHistory={clearHistory}
             hasSelectedItem={!!selectedItem}
+            canEditContent={selectedItem ? selectedItem.content_type !== "image" && selectedItem.content_type !== "files" : false}
             onCopySelectedItem={handleRailCopy}
             onEditContent={handleRailEditContent}
-            isEditingContent={selectedItem ? editingContentId === selectedItem.id : false}
+            isEditingContent={isEditEntryModalOpen}
             onOpenContent={handleRailOpenContent}
             onAssignTab={handleRailAssignTab}
             isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id : false}
@@ -2332,6 +2371,56 @@ const App = () => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();
               handleConfirmAddEntry();
+            }
+          }}
+        />
+      </FluentModal>
+
+      {/* Edit Entry Modal */}
+      <FluentModal
+        open={isEditEntryModalOpen}
+        onClose={() => {
+          setIsEditEntryModalOpen(false);
+          setEditingItem(null);
+          setEditEntryContent("");
+        }}
+        title={t("edit_content") || "编辑条目"}
+        width={420}
+        theme={theme}
+        footer={
+          <>
+            <FluentButton
+              variant="secondary"
+              onClick={() => {
+                setIsEditEntryModalOpen(false);
+                setEditingItem(null);
+                setEditEntryContent("");
+              }}
+            >
+              {t("cancel") || "取消"}
+            </FluentButton>
+            <FluentButton
+              variant="primary"
+              disabled={!editEntryContent.trim()}
+              onClick={handleConfirmEditEntry}
+            >
+              {t("save") || "保存"}
+            </FluentButton>
+          </>
+        }
+      >
+        <textarea
+          className="fluent-modal-textarea"
+          value={editEntryContent}
+          onChange={(e) => setEditEntryContent(e.target.value)}
+          placeholder={t("input_content_placeholder") || "在此处输入条目内容... (Ctrl+Enter 保存)"}
+          autoFocus
+          onFocus={() => invoke("activate_window_focus").catch(() => {})}
+          onMouseDown={() => invoke("activate_window_focus").catch(() => {})}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+              e.preventDefault();
+              handleConfirmEditEntry();
             }
           }}
         />
