@@ -164,7 +164,7 @@
 }
 
 .tag-suggest-item:focus-visible {
-    outline: 2px solid var(--accent-color, #3b82f6);
+    outline: 2px solid var(--line-strong);
     outline-offset: -1px;
 }
 

@@ -2,9 +2,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0 !important;
-  background: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(2px) !important;
-  -webkit-backdrop-filter: blur(2px) !important;
+  background: rgba(0, 0, 0, 0.32) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,8 +13,9 @@
   -webkit-clip-path: inset(0 round var(--shell-radius));
 }
 
-.dark-mode .modal-overlay {
-  background: rgba(0, 0, 0, 0.4) !important;
+.dark-mode .modal-overlay,
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.55) !important;
 }
 
 body:has(.modal-overlay) #root,
@@ -222,4 +221,261 @@ body:has(.modal-overlay) #root,
  
 .dark-mode .confirm-dialog-button.primary.danger:active {
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), #c42b1c !important;
+}
+
+/* Windows 11 WinUI 3 ContentDialog - Universal Fluent Modal */
+.fluent-modal-overlay {
+  position: fixed;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.32) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  animation: fluent-overlay-fade 0.15s cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
+.dark-mode .fluent-modal-overlay,
+body.dark-mode .fluent-modal-overlay {
+  background: rgba(0, 0, 0, 0.55) !important;
+}
+
+@keyframes fluent-overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fluent-modal-dialog {
+  background: #ffffff !important;
+  border: 1px solid var(--line-soft) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+  color: var(--text-primary) !important;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  animation: fluent-modal-pop 0.18s cubic-bezier(0.1, 0.9, 0.2, 1) !important;
+}
+
+.dark-mode .fluent-modal-dialog,
+body.dark-mode .fluent-modal-dialog {
+  background: #2c2c2c !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+@keyframes fluent-modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fluent-modal-upper {
+  padding: 24px 24px 20px !important;
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  overflow-y: auto !important;
+  flex: 1 1 auto !important;
+}
+
+.dark-mode .fluent-modal-upper,
+body.dark-mode .fluent-modal-upper {
+  background: #2c2c2c !important;
+}
+
+.fluent-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fluent-modal-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--accent-color, #0078d4);
+  margin-top: 2px;
+}
+
+.fluent-modal-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.fluent-modal-title {
+  margin: 0 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  line-height: 1.35 !important;
+}
+
+.fluent-modal-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.fluent-modal-body {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.fluent-modal-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.fluent-modal-lower {
+  padding: 14px 24px !important;
+  background: #f7f7f7 !important;
+  border-top: 1px solid var(--line-soft) !important;
+  flex-shrink: 0 !important;
+}
+
+.dark-mode .fluent-modal-lower,
+body.dark-mode .fluent-modal-lower {
+  background: #242424 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.fluent-modal-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+/* Neutral text inputs / textareas inside Fluent Modals - NO ACCENT BORDER ON FOCUS */
+.fluent-modal-input,
+.fluent-modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-input, #ffffff);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.fluent-modal-input:hover,
+.fluent-modal-textarea:hover {
+  border-color: var(--line-strong);
+}
+
+.fluent-modal-input:focus,
+.fluent-modal-textarea:focus {
+  border-color: var(--line-strong) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.fluent-modal-textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Tab Sort Dialog Styles inside FluentModal */
+.fluent-tab-sort-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.fluent-tab-sort-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 2px 0;
+}
+
+.fluent-tab-sort-empty {
+  padding: 20px 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.fluent-tab-sort-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #f7f7f7;
+  border: 1px solid var(--line-soft);
+  transition: background 0.15s ease;
+}
+
+.dark-mode .fluent-tab-sort-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.fluent-tab-sort-item:hover {
+  background: #eeeeee;
+}
+
+.dark-mode .fluent-tab-sort-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.fluent-tab-sort-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--accent-color, #0078d4);
+  color: #ffffff;
+  min-width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fluent-tab-sort-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fluent-tab-sort-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.fluent-tab-sort-icon-btn {
+  padding: 0 !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
 }

@@ -71,3 +71,170 @@
 .btn-icon-ghost.active:hover {
   background: rgba(var(--accent-color-rgb), 0.16);
 }
+
+/* Windows 11 Fluent Design Shared Button Components */
+.fluent-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  white-space: nowrap;
+  border-radius: 4px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+}
+
+.fluent-btn:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.fluent-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Button Sizes */
+.fluent-btn-sm {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+  min-width: 60px;
+}
+
+.fluent-btn-md {
+  height: 32px;
+  padding: 0 16px;
+  font-size: 13px;
+  min-width: 76px;
+}
+
+.fluent-btn-lg {
+  height: 38px;
+  padding: 0 20px;
+  font-size: 14px;
+  min-width: 90px;
+}
+
+/* Secondary Button (Default) */
+.fluent-btn-secondary {
+  background: #ffffff;
+  border: 1px solid var(--line-soft);
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fluent-btn-secondary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--line-strong);
+}
+
+.fluent-btn-secondary:active:not(:disabled) {
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: none;
+}
+
+.dark-mode .fluent-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.dark-mode .fluent-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .fluent-btn-secondary:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Primary Button */
+.fluent-btn-primary {
+  background: var(--accent-color, #0078d4);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.fluent-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+}
+
+.fluent-btn-primary:active:not(:disabled) {
+  filter: brightness(0.92);
+  box-shadow: none;
+}
+
+/* Danger Button */
+.fluent-btn-danger {
+  background: #c42b1c;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.fluent-btn-danger:hover:not(:disabled) {
+  background: #d83b01;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+}
+
+.fluent-btn-danger:active:not(:disabled) {
+  background: #a80000;
+  box-shadow: none;
+}
+
+/* Subtle Button */
+.fluent-btn-subtle {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  box-shadow: none;
+  min-width: auto;
+}
+
+.fluent-btn-subtle:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.fluent-btn-subtle:active:not(:disabled) {
+  background: rgba(0, 0, 0, 0.09);
+}
+
+.dark-mode .fluent-btn-subtle:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark-mode .fluent-btn-subtle:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+/* Button Icon & Spinner */
+.fluent-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+}
+
+.fluent-btn-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: fluent-btn-spin 0.6s linear infinite;
+}
+
+@keyframes fluent-btn-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

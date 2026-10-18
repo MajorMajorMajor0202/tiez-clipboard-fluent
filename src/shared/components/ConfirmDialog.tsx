@@ -1,15 +1,20 @@
+import React from "react";
+import FluentModal from "./FluentModal";
+import FluentButton from "./FluentButton";
+
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
   message: string;
-  theme: string;
+  theme?: string;
   confirmLabel: string;
   cancelLabel: string;
   onConfirm: () => void;
   onClose: () => void;
+  isDanger?: boolean;
 }
 
-const ConfirmDialog = ({
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   title,
   message,
@@ -17,31 +22,41 @@ const ConfirmDialog = ({
   confirmLabel,
   cancelLabel,
   onConfirm,
-  onClose
-}: ConfirmDialogProps) => {
-  if (!open) return null;
-
-  const isDanger = confirmLabel === '删除' || confirmLabel === 'Delete' || confirmLabel === '確定' || confirmLabel === '确定' || confirmLabel === '確定刪除' || confirmLabel === '确定删除';
+  onClose,
+  isDanger: explicitDanger,
+}) => {
+  const isDanger =
+    explicitDanger ??
+    (confirmLabel === "删除" ||
+      confirmLabel === "Delete" ||
+      confirmLabel === "確定" ||
+      confirmLabel === "确定" ||
+      confirmLabel === "確定刪除" ||
+      confirmLabel === "确定删除");
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className={`confirm-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
-        <div className="confirm-dialog-upper">
-          <div className="confirm-dialog-title">{title}</div>
-          <div className="confirm-dialog-message">{message}</div>
-        </div>
-        <div className="confirm-dialog-lower">
-          <div className="confirm-dialog-buttons">
-            <button className="confirm-dialog-button" onClick={onClose}>
-              {cancelLabel}
-            </button>
-            <button className={`confirm-dialog-button primary ${isDanger ? 'danger' : ''}`} onClick={onConfirm}>
-              {confirmLabel}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <FluentModal
+      open={open}
+      onClose={onClose}
+      title={title}
+      theme={theme}
+      width={340}
+      footer={
+        <>
+          <FluentButton variant="secondary" onClick={onClose}>
+            {cancelLabel}
+          </FluentButton>
+          <FluentButton
+            variant={isDanger ? "danger" : "primary"}
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </FluentButton>
+        </>
+      }
+    >
+      <div className="fluent-modal-text">{message}</div>
+    </FluentModal>
   );
 };
 

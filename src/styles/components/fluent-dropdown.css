@@ -188,32 +188,25 @@
 
 .app-selector-input:focus {
     background: #ffffff;
-    border-color: var(--line-strong);
+    border-color: var(--line-strong) !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .dark-mode .app-selector-input:focus {
     background: #323232;
-    border-color: var(--line-strong);
+    border-color: var(--line-strong) !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 /* Focused underline */
 .app-selector-input-wrapper::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--accent-color);
-    transform: scaleX(0);
-    transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-    border-radius: 0 0 2px 2px;
-    z-index: 10;
-    pointer-events: none;
+    display: none !important;
 }
 
 .app-selector-input-wrapper:focus-within::after {
-    transform: scaleX(1);
+    display: none !important;
 }
 
 /* Seamless connection, no top border, same width */

@@ -41,7 +41,7 @@ body.theme-acrylic {
   --input-border: 1px solid rgba(255, 255, 255, 0.28);
   --input-radius: 12px;
   --input-shadow: none;
-  --input-focus-shadow: 0 0 0 3px rgba(79, 125, 255, 0.14);
+  --input-focus-shadow: none;
 
   --button-border: 1px solid rgba(255, 255, 255, 0.28);
   --button-radius: 10px;

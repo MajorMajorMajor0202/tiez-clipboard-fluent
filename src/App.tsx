@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
-import { createPortal } from "react-dom";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -7,6 +6,8 @@ import { Trash2, FolderPlus, X, Folder } from "lucide-react";
 import ToastContainer from "./shared/components/ToastContainer";
 import ConfirmDialog from "./shared/components/ConfirmDialog";
 import FluentTooltip from "./shared/components/FluentTooltip";
+import FluentModal from "./shared/components/FluentModal";
+import FluentButton from "./shared/components/FluentButton";
 
 import { translations } from "./locales";
 import AppHeader from "./features/app/components/AppHeader";
@@ -2249,58 +2250,43 @@ const App = () => {
       )}
 
       {/* Manual Entry Creation Modal */}
-      {isAddEntryModalOpen && createPortal(
-        <div
-          className="modal-overlay"
-          onClick={() => setIsAddEntryModalOpen(false)}
-        >
-          <div
-            className={`confirm-dialog tag-manager-dialog theme-${theme}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="confirm-dialog-upper">
-              <h3 className="confirm-dialog-title">{t("add_item") || "添加条目"}</h3>
-              <div className="modal-input-field" style={{ marginTop: "12px" }}>
-                <textarea
-                  className="tag-manager-textarea"
-                  value={addEntryContent}
-                  onChange={(e) => setAddEntryContent(e.target.value)}
-                  placeholder={t("input_content_placeholder") || t("add_entry_placeholder") || "输入要添加的内容..."}
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                      e.preventDefault();
-                      handleConfirmAddEntry();
-                    } else if (e.key === "Escape") {
-                      e.preventDefault();
-                      setIsAddEntryModalOpen(false);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-            <div className="confirm-dialog-lower">
-              <div className="confirm-dialog-buttons">
-                <button
-                  type="button"
-                  className="confirm-dialog-button"
-                  onClick={() => setIsAddEntryModalOpen(false)}
-                >
-                  {t("cancel") || "取消"}
-                </button>
-                <button
-                  type="button"
-                  className="confirm-dialog-button primary"
-                  onClick={handleConfirmAddEntry}
-                >
-                  {t("confirm") || "确定"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+      <FluentModal
+        open={isAddEntryModalOpen}
+        onClose={() => setIsAddEntryModalOpen(false)}
+        title={t("add_item") || "添加条目"}
+        width={420}
+        theme={theme}
+        footer={
+          <>
+            <FluentButton
+              variant="secondary"
+              onClick={() => setIsAddEntryModalOpen(false)}
+            >
+              {t("cancel") || "取消"}
+            </FluentButton>
+            <FluentButton
+              variant="primary"
+              onClick={handleConfirmAddEntry}
+            >
+              {t("confirm") || "确定"}
+            </FluentButton>
+          </>
+        }
+      >
+        <textarea
+          className="fluent-modal-textarea"
+          value={addEntryContent}
+          onChange={(e) => setAddEntryContent(e.target.value)}
+          placeholder={t("input_content_placeholder") || t("add_entry_placeholder") || "输入要添加的内容..."}
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+              e.preventDefault();
+              handleConfirmAddEntry();
+            }
+          }}
+        />
+      </FluentModal>
 
       <ToastContainer toasts={toasts} />
 

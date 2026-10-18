@@ -314,7 +314,7 @@
 }
 
 .wt-input-wrap:focus-within {
-  border-color: rgba(var(--accent-color-rgb), 0.3);
+  border-color: var(--line-strong);
   background: var(--bg-element);
 }
 

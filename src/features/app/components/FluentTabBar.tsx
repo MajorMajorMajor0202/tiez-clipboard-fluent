@@ -14,6 +14,7 @@ import {
   Trash2
 } from "lucide-react";
 import type { TabItem } from "../types";
+import { FluentModal, FluentButton } from "../../../shared/components";
 
 interface FluentTabBarProps {
   tabs: TabItem[];
@@ -557,133 +558,123 @@ export const FluentTabBar = ({
       )}
 
       {/* Tab Creation Dialog */}
-      {isCreateDialogOpen && createPortal(
-        <div
-          className="fluent-tab-dialog-overlay"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setIsCreateDialogOpen(false);
+      <FluentModal
+        open={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        title={t ? t("create_new_tab") : "新建标签页"}
+        width={340}
+        footer={
+          <>
+            <FluentButton
+              variant="secondary"
+              onClick={() => setIsCreateDialogOpen(false)}
+            >
+              {t ? t("cancel") : "取消"}
+            </FluentButton>
+            <FluentButton
+              variant="primary"
+              onClick={handleConfirmCreateDialog}
+            >
+              {t ? t("confirm") : "确定"}
+            </FluentButton>
+          </>
+        }
+      >
+        <input
+          ref={dialogInputRef}
+          type="text"
+          className="fluent-modal-input"
+          placeholder={t ? t("tab_name_placeholder") : "输入标签页名称..."}
+          value={dialogTabName}
+          onChange={(e) => setDialogTabName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleConfirmCreateDialog();
+            }
           }}
-        >
-          <div className="fluent-tab-dialog" onMouseDown={(e) => e.stopPropagation()}>
-            <div className="fluent-tab-dialog-title">{t ? t("create_new_tab") : "新建标签页"}</div>
-            <input
-              ref={dialogInputRef}
-              type="text"
-              className="fluent-tab-dialog-input"
-              placeholder={t ? t("tab_name_placeholder") : "输入标签页名称..."}
-              value={dialogTabName}
-              onChange={(e) => setDialogTabName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleConfirmCreateDialog();
-                } else if (e.key === "Escape") {
-                  e.preventDefault();
-                  setIsCreateDialogOpen(false);
-                }
-              }}
-              autoFocus
-            />
-            <div className="fluent-tab-dialog-actions">
-              <button
-                type="button"
-                className="fluent-tab-dialog-btn"
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                {t ? t("cancel") : "取消"}
-              </button>
-              <button
-                type="button"
-                className="fluent-tab-dialog-btn primary"
-                onClick={handleConfirmCreateDialog}
-              >
-                {t ? t("confirm") : "确定"}
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          autoFocus
+        />
+      </FluentModal>
 
       {/* Tab Sort Dialog */}
-      {isSortDialogOpen && createPortal(
-        <div
-          className="fluent-tab-dialog-overlay"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setIsSortDialogOpen(false);
-          }}
-        >
-          <div className="fluent-tab-dialog fluent-tab-sort-dialog" onMouseDown={(e) => e.stopPropagation()}>
-            <div className="fluent-tab-dialog-title">{t ? t("sort_tabs") || "标签页排序" : "标签页排序"}</div>
-            <div style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4, marginTop: "-4px" }}>
-              {t ? t("sort_tabs_hint") || "调整标签页顺序（前10个标签页将依次对应快捷键 1~9, 0）" : "调整标签页顺序（前10个标签页将依次对应快捷键 1~9, 0）"}
-            </div>
+      <FluentModal
+        open={isSortDialogOpen}
+        onClose={() => setIsSortDialogOpen(false)}
+        title={t ? t("sort_tabs") || "标签页排序" : "标签页排序"}
+        subtitle={
+          t
+            ? t("sort_tabs_hint") ||
+              "调整标签页顺序（前10个标签页将依次对应快捷键 1~9, 0）"
+            : "调整标签页顺序（前10个标签页将依次对应快捷键 1~9, 0）"
+        }
+        width={380}
+        footer={
+          <>
+            <FluentButton
+              variant="secondary"
+              onClick={() => setIsSortDialogOpen(false)}
+            >
+              {t ? t("cancel") || "取消" : "取消"}
+            </FluentButton>
+            <FluentButton
+              variant="primary"
+              onClick={handleConfirmSortDialog}
+            >
+              {t ? t("confirm") || "确定" : "确定"}
+            </FluentButton>
+          </>
+        }
+      >
+        <div className="fluent-tab-sort-toolbar">
+          <FluentButton
+            variant="subtle"
+            size="small"
+            onClick={handleSortAlphabetically}
+          >
+            {t ? t("sort_az") || "A-Z 升序" : "A-Z 升序"}
+          </FluentButton>
+        </div>
 
-            <div className="fluent-tab-sort-toolbar">
-              <button
-                type="button"
-                className="fluent-tab-sort-quick-btn"
-                onClick={handleSortAlphabetically}
-              >
-                {t ? t("sort_az") || "A-Z 升序" : "A-Z 升序"}
-              </button>
+        <div className="fluent-tab-sort-list">
+          {sortingTabs.length === 0 ? (
+            <div className="fluent-tab-sort-empty">
+              {t ? t("no_custom_tabs") || "暂无自定义标签页" : "暂无自定义标签页"}
             </div>
-
-            <div className="fluent-tab-sort-list">
-              {sortingTabs.length === 0 ? (
-                <div style={{ padding: "16px", textAlign: "center", color: "var(--text-secondary)", fontSize: "12px" }}>
-                  {t ? t("no_custom_tabs") || "暂无自定义标签页" : "暂无自定义标签页"}
+          ) : (
+            sortingTabs.map((tab, idx) => (
+              <div key={tab.id} className="fluent-tab-sort-item">
+                <span className="fluent-tab-sort-badge">#{idx + 1}</span>
+                <span className="fluent-tab-sort-name" title={tab.name}>
+                  {tab.name}
+                </span>
+                <div className="fluent-tab-sort-actions">
+                  <FluentButton
+                    variant="subtle"
+                    size="small"
+                    className="fluent-tab-sort-icon-btn"
+                    disabled={idx === 0}
+                    onClick={() => handleMoveSortingTab(idx, "up")}
+                    title={t ? t("move_up") || "上移" : "上移"}
+                  >
+                    <ChevronUp size={13} />
+                  </FluentButton>
+                  <FluentButton
+                    variant="subtle"
+                    size="small"
+                    className="fluent-tab-sort-icon-btn"
+                    disabled={idx === sortingTabs.length - 1}
+                    onClick={() => handleMoveSortingTab(idx, "down")}
+                    title={t ? t("move_down") || "下移" : "下移"}
+                  >
+                    <ChevronDown size={13} />
+                  </FluentButton>
                 </div>
-              ) : (
-                sortingTabs.map((tab, idx) => (
-                  <div key={tab.id} className="fluent-tab-sort-item">
-                    <span className="fluent-tab-sort-badge">#{idx + 1}</span>
-                    <span className="fluent-tab-sort-name" title={tab.name}>{tab.name}</span>
-                    <div className="fluent-tab-sort-actions">
-                      <button
-                        type="button"
-                        className="fluent-tab-sort-btn"
-                        disabled={idx === 0}
-                        onClick={() => handleMoveSortingTab(idx, 'up')}
-                        title={t ? t("move_up") || "上移" : "上移"}
-                      >
-                        <ChevronUp size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        className="fluent-tab-sort-btn"
-                        disabled={idx === sortingTabs.length - 1}
-                        onClick={() => handleMoveSortingTab(idx, 'down')}
-                        title={t ? t("move_down") || "下移" : "下移"}
-                      >
-                        <ChevronDown size={13} />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="fluent-tab-dialog-actions" style={{ marginTop: "8px" }}>
-              <button
-                type="button"
-                className="fluent-tab-dialog-btn"
-                onClick={() => setIsSortDialogOpen(false)}
-              >
-                {t ? t("cancel") || "取消" : "取消"}
-              </button>
-              <button
-                type="button"
-                className="fluent-tab-dialog-btn primary"
-                onClick={handleConfirmSortDialog}
-              >
-                {t ? t("confirm") || "确定" : "确定"}
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+              </div>
+            ))
+          )}
+        </div>
+      </FluentModal>
     </div>
   );
 };

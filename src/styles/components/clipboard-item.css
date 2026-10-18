@@ -466,20 +466,11 @@ body.dark-mode .tab-assign-flyout,
 }
 
 .tag-flyout-search-wrapper::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--accent-color);
-  transform: scaleX(0);
-  transition: transform 0.2s ease;
-  transform-origin: center;
+  display: none !important;
 }
 
 .tag-flyout-search-wrapper:focus-within::after {
-  transform: scaleX(1);
+  display: none !important;
 }
 
 .tag-flyout-search-icon {
@@ -1009,7 +1000,9 @@ body.dark-mode .secondary-menu-item:hover,
 }
 
 .fluent-modal-textarea:focus {
-  border-color: var(--accent-color);
+  border-color: var(--line-strong) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .fluent-modal-footer {

@@ -367,7 +367,9 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 }
 
 .fluent-select:focus {
-  border-color: var(--accent-color);
+  border-color: var(--line-strong) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .fluent-input {
@@ -439,7 +441,9 @@ body:has(.advanced-settings-window-shell):not(.theme-mica):not(.theme-acrylic) {
 }
 
 .fluent-textarea:focus {
-  border-color: var(--accent-color);
+  border-color: var(--line-strong) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 /* Custom Switch styling following Fluent standard */

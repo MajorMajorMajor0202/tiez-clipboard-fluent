@@ -207,22 +207,11 @@ header.subpage-header {
 }
 
 .fluent-search-box::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent-color);
-  transform: scaleX(0);
-  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-  border-radius: 0 0 2px 2px;
-  z-index: 10;
-  pointer-events: none;
+  display: none !important;
 }
 
 .fluent-search-box:focus-within::after {
-  transform: scaleX(1);
+  display: none !important;
 }
 
 .fluent-search-icon {
@@ -252,7 +241,9 @@ header.subpage-header {
 
 .fluent-search-input:focus {
   background: var(--bg-input);
-  border-color: var(--line-strong);
+  border-color: var(--line-strong) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 /* Universal input focus underline wrapper */
@@ -263,22 +254,11 @@ header.subpage-header {
 }
 
 .fluent-input-wrapper::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent-color);
-  transform: scaleX(0);
-  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-  border-radius: 0 0 2px 2px;
-  z-index: 10;
-  pointer-events: none;
+  display: none !important;
 }
 
 .fluent-input-wrapper:focus-within::after {
-  transform: scaleX(1);
+  display: none !important;
 }
 
 .fluent-input-wrapper input {
@@ -322,26 +302,11 @@ select.search-input option {
 }
 
 .home-search-wrapper::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--accent-color);
-  transform: scaleX(0);
-  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-  border-radius: 0 0 2px 2px;
-  z-index: 100005;
-  pointer-events: none;
+  display: none !important;
 }
 
 .home-search-wrapper:focus-within::after {
-  transform: scaleX(1);
-}
-
-.home-search-wrapper:has(.dropdown-open)::after {
-  border-radius: 0;
+  display: none !important;
 }
 
 .search-icon {

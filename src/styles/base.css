@@ -98,8 +98,8 @@
   --input-border: 1px solid var(--line-soft);
   --input-radius: var(--radius-control);
   --input-shadow: var(--shadow-inset);
-  --input-focus-border-color: var(--accent-color);
-  --input-focus-shadow: 0 0 0 3px var(--accent-soft);
+  --input-focus-border-color: var(--line-strong);
+  --input-focus-shadow: none;
   --input-font-weight: 500;
 
   --button-border: 1px solid var(--line-soft);

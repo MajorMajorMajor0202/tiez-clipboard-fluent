@@ -42,7 +42,7 @@ body.theme-mica {
   --input-border: 1px solid rgba(128, 128, 128, 0.18);
   --input-radius: 4px;
   --input-shadow: none;
-  --input-focus-shadow: 0 0 0 3px rgba(79, 125, 255, 0.14);
+  --input-focus-shadow: none;
 
   --button-border: 1px solid rgba(128, 128, 128, 0.18);
   --button-radius: 6px;

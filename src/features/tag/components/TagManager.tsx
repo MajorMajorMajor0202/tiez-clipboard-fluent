@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { listen, emit } from '@tauri-apps/api/event';
 import {
@@ -10,6 +9,8 @@ import {
 import { getTagColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
+import FluentModal from "../../../shared/components/FluentModal";
+import FluentButton from "../../../shared/components/FluentButton";
 import type { ClipboardEntry } from "../../../shared/types";
 
 interface TagManagerProps {
@@ -871,140 +872,152 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {/* Kept minimal if needed for future extensions, but currently inline handles rename */}
 
             {/* Tag Delete Confirmation Modal */}
-            {deleteConfirmation.show && createPortal(
-                <div className="modal-overlay" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
-                    <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={(e) => e.stopPropagation()}>
-                        <div className="confirm-dialog-upper">
-                            <h3 className="confirm-dialog-title">要删除标签吗？</h3>
-                            <p className="confirm-dialog-message">
-                                此操作将永久删除该标签及其下的所有条目。
-                                <br />
-                                <span className="tag-highlight" style={{ marginTop: '8px', display: 'inline-block' }}>
-                                    {deleteConfirmation.tagName}
-                                </span>
-                            </p>
-                        </div>
-                        <div className="confirm-dialog-lower">
-                            <div className="confirm-dialog-buttons">
-                                <button className="confirm-dialog-button" onClick={() => setDeleteConfirmation({ show: false, tagName: null })}>
-                                    {t('cancel')}
-                                </button>
-                                <button className="confirm-dialog-button primary danger" onClick={() => {
-                                    if (deleteConfirmation.tagName) {
-                                        handleDeleteTag(deleteConfirmation.tagName);
-                                    }
-                                    setDeleteConfirmation({ show: false, tagName: null });
-                                }}>
-                                    {t('delete')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+            <FluentModal
+                open={deleteConfirmation.show}
+                onClose={() => setDeleteConfirmation({ show: false, tagName: null })}
+                title="要删除标签吗？"
+                theme={theme}
+                width={360}
+                footer={
+                    <>
+                        <FluentButton
+                            variant="secondary"
+                            onClick={() => setDeleteConfirmation({ show: false, tagName: null })}
+                        >
+                            {t('cancel')}
+                        </FluentButton>
+                        <FluentButton
+                            variant="danger"
+                            onClick={() => {
+                                if (deleteConfirmation.tagName) {
+                                    handleDeleteTag(deleteConfirmation.tagName);
+                                }
+                                setDeleteConfirmation({ show: false, tagName: null });
+                            }}
+                        >
+                            {t('delete')}
+                        </FluentButton>
+                    </>
+                }
+            >
+                <div className="fluent-modal-text">
+                    此操作将永久删除该标签及其下的所有条目。
+                    <br />
+                    <span className="tag-highlight" style={{ marginTop: '8px', display: 'inline-block' }}>
+                        {deleteConfirmation.tagName}
+                    </span>
+                </div>
+            </FluentModal>
 
             {/* Item Delete Confirmation Modal */}
-            {itemDeleteConfirmation.show && createPortal(
-                <div className="modal-overlay" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
-                    <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
-                        <div className="confirm-dialog-upper">
-                            <h3 className="confirm-dialog-title">要删除记录吗？</h3>
-                            <p className="confirm-dialog-message">此操作无法撤回。</p>
-                        </div>
-                        <div className="confirm-dialog-lower">
-                            <div className="confirm-dialog-buttons">
-                                <button className="confirm-dialog-button" onClick={() => setItemDeleteConfirmation({ show: false, id: null })}>
-                                    {t('cancel')}
-                                </button>
-                                <button className="confirm-dialog-button primary" onClick={async () => {
-                                    if (itemDeleteConfirmation.id === -1) {
-                                        // Bulk delete
-                                        try {
-                                            for (const id of Array.from(selectedItemIds)) {
-                                                await invoke('delete_clipboard_entry', { id });
-                                            }
-                                            setIsManageMode(false);
-                                            setSelectedItemIds(new Set());
-                                            if (selectedTag) await loadTagItems(selectedTag);
-                                            emit('clipboard-changed');
-                                        } catch (err) { console.error(err); }
-                                    } else if (itemDeleteConfirmation.id) {
-                                        await invoke('delete_clipboard_entry', { id: itemDeleteConfirmation.id });
-                                        loadTagItems(selectedTag!);
+            <FluentModal
+                open={itemDeleteConfirmation.show}
+                onClose={() => setItemDeleteConfirmation({ show: false, id: null })}
+                title="要删除记录吗？"
+                theme={theme}
+                width={340}
+                footer={
+                    <>
+                        <FluentButton
+                            variant="secondary"
+                            onClick={() => setItemDeleteConfirmation({ show: false, id: null })}
+                        >
+                            {t('cancel')}
+                        </FluentButton>
+                        <FluentButton
+                            variant="danger"
+                            onClick={async () => {
+                                if (itemDeleteConfirmation.id === -1) {
+                                    // Bulk delete
+                                    try {
+                                        for (const id of Array.from(selectedItemIds)) {
+                                            await invoke('delete_clipboard_entry', { id });
+                                        }
+                                        setIsManageMode(false);
+                                        setSelectedItemIds(new Set());
+                                        if (selectedTag) await loadTagItems(selectedTag);
                                         emit('clipboard-changed');
-                                    }
-                                    setItemDeleteConfirmation({ show: false, id: null });
-                                }}>
-                                    {t('delete')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+                                    } catch (err) { console.error(err); }
+                                } else if (itemDeleteConfirmation.id) {
+                                    await invoke('delete_clipboard_entry', { id: itemDeleteConfirmation.id });
+                                    loadTagItems(selectedTag!);
+                                    emit('clipboard-changed');
+                                }
+                                setItemDeleteConfirmation({ show: false, id: null });
+                            }}
+                        >
+                            {t('delete')}
+                        </FluentButton>
+                    </>
+                }
+            >
+                <div className="fluent-modal-text">此操作无法撤回。</div>
+            </FluentModal>
 
             {/* Create Item Modal */}
-            {isCreatingItem && createPortal(
-                <div className="modal-overlay" onClick={() => setIsCreatingItem(false)}>
-                    <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
-                        <div className="confirm-dialog-upper">
-                            <h3 className="confirm-dialog-title">{t('add_item')}</h3>
-                            <div className="modal-input-field" style={{ marginTop: '12px' }}>
-                                <textarea
-                                    className="tag-manager-textarea"
-                                    value={newItemContent}
-                                    onChange={e => setNewItemContent(e.target.value)}
-                                    placeholder={t('input_content_placeholder')}
-                                    autoFocus
-                                />
-                            </div>
-                        </div>
-                        <div className="confirm-dialog-lower">
-                            <div className="confirm-dialog-buttons">
-                                <button className="confirm-dialog-button" onClick={() => setIsCreatingItem(false)}>
-                                    {t('cancel')}
-                                </button>
-                                <button className="confirm-dialog-button primary" onClick={handleAddManualItem}>
-                                    {t('confirm')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+            <FluentModal
+                open={isCreatingItem}
+                onClose={() => setIsCreatingItem(false)}
+                title={t('add_item')}
+                theme={theme}
+                width={420}
+                footer={
+                    <>
+                        <FluentButton
+                            variant="secondary"
+                            onClick={() => setIsCreatingItem(false)}
+                        >
+                            {t('cancel')}
+                        </FluentButton>
+                        <FluentButton
+                            variant="primary"
+                            onClick={handleAddManualItem}
+                        >
+                            {t('confirm')}
+                        </FluentButton>
+                    </>
+                }
+            >
+                <textarea
+                    className="fluent-modal-textarea"
+                    value={newItemContent}
+                    onChange={e => setNewItemContent(e.target.value)}
+                    placeholder={t('input_content_placeholder')}
+                    autoFocus
+                />
+            </FluentModal>
 
             {/* Edit Item Modal */}
-            {editingItem && createPortal(
-                <div className="modal-overlay" onClick={() => setEditingItem(null)}>
-                    <div className={`confirm-dialog tag-manager-dialog theme-${theme}`} onClick={e => e.stopPropagation()}>
-                        <div className="confirm-dialog-upper">
-                            <h3 className="confirm-dialog-title">{t('edit_item')}</h3>
-                            <div className="modal-input-field" style={{ marginTop: '12px' }}>
-                                <textarea
-                                    className="tag-manager-textarea"
-                                    value={editingItem.content}
-                                    onChange={e => setEditingItem({ ...editingItem, content: e.target.value })}
-                                    autoFocus
-                                />
-                            </div>
-                        </div>
-                        <div className="confirm-dialog-lower">
-                            <div className="confirm-dialog-buttons">
-                                <button className="confirm-dialog-button" onClick={() => setEditingItem(null)}>
-                                    {t('cancel')}
-                                </button>
-                                <button className="confirm-dialog-button primary" onClick={handleUpdateItemContent}>
-                                    {t('save')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+            <FluentModal
+                open={!!editingItem}
+                onClose={() => setEditingItem(null)}
+                title={t('edit_item')}
+                theme={theme}
+                width={420}
+                footer={
+                    <>
+                        <FluentButton
+                            variant="secondary"
+                            onClick={() => setEditingItem(null)}
+                        >
+                            {t('cancel')}
+                        </FluentButton>
+                        <FluentButton
+                            variant="primary"
+                            onClick={handleUpdateItemContent}
+                        >
+                            {t('save')}
+                        </FluentButton>
+                    </>
+                }
+            >
+                <textarea
+                    className="fluent-modal-textarea"
+                    value={editingItem?.content || ""}
+                    onChange={e => setEditingItem(prev => prev ? { ...prev, content: e.target.value } : null)}
+                    autoFocus
+                />
+            </FluentModal>
             <style>{`
                 .themed-tag-manager {
                     display: grid;
@@ -1073,20 +1086,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                 }
                 .tag-search-box::after {
-                    content: "";
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    height: 2px;
-                    background: var(--accent-color);
-                    transform: scaleX(0);
-                    transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
-                    border-radius: 0 0 2px 2px;
-                    z-index: 2;
+                    display: none !important;
                 }
                 .tag-search-box:focus-within::after {
-                    transform: scaleX(1);
+                    display: none !important;
                 }
                 .tag-search-box .search-input-wrapper {
                     flex: 1;
@@ -1120,6 +1123,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
                 .tag-search-box input:focus {
                     background: var(--bg-panel);
+                    border-color: var(--line-strong) !important;
+                    box-shadow: none !important;
+                    outline: none !important;
                 }
                 .tag-search-box input::placeholder { color: var(--text-muted); opacity: 0.7; font-style: normal; font-size: 13px; }
 
@@ -1959,8 +1965,9 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     transition: all 0.2s;
                 }
                 .modal-input-field input:focus {
-                    border-color: var(--accent-color);
-                    box-shadow: 0 0 0 3px var(--accent-light);
+                    border-color: var(--line-strong) !important;
+                    box-shadow: none !important;
+                    outline: none !important;
                 }
                 .modal-buttons { display: flex; gap: 8px; justify-content: flex-end; }
                 .modal-buttons button {
@@ -2622,10 +2629,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 }
 
                 .tag-manager-textarea:focus {
-                    border-color: var(--line-soft) !important;
-                    border-bottom: 2px solid var(--accent-color) !important;
-                    padding-bottom: 8px !important;
-                    box-shadow: 0 0 0 1px var(--accent-color) !important;
+                    border-color: var(--line-strong) !important;
+                    border-bottom: 1px solid var(--line-strong) !important;
+                    box-shadow: none !important;
+                    outline: none !important;
                 }
 
                 .tag-search-box {
