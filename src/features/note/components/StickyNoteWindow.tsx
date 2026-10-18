@@ -82,7 +82,7 @@ export const StickyNoteWindow: React.FC = () => {
       setIsFocused(focused);
     }).then((unlisten) => {
       unlistenFocus = unlisten;
-    });
+    }).catch(() => {});
 
     const handleFocus = () => setIsFocused(true);
     const handleBlur = () => setIsFocused(false);
@@ -107,7 +107,7 @@ export const StickyNoteWindow: React.FC = () => {
       document.body.classList.toggle("light-mode", !isDark);
     };
 
-    const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent);
+    const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent).catch(() => () => {});
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const handleMediaChange = (e: MediaQueryListEvent) => {
@@ -122,7 +122,7 @@ export const StickyNoteWindow: React.FC = () => {
     mql.addEventListener("change", handleMediaChange);
 
     return () => {
-      unlistenPromise.then((off) => off());
+      unlistenPromise.then((off) => { if (typeof off === "function") off(); }).catch(() => {});
       mql.removeEventListener("change", handleMediaChange);
     };
   }, []);

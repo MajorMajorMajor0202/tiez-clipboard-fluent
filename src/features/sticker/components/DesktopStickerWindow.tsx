@@ -74,7 +74,7 @@ export const DesktopStickerWindow: React.FC = () => {
       document.body.classList.toggle("light-mode", !isDark);
     };
 
-    const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent);
+    const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent).catch(() => () => {});
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const handleMediaChange = (e: MediaQueryListEvent) => {
@@ -89,7 +89,7 @@ export const DesktopStickerWindow: React.FC = () => {
     mql.addEventListener("change", handleMediaChange);
 
     return () => {
-      unlistenPromise.then((off) => off());
+      unlistenPromise.then((off) => { if (typeof off === "function") off(); }).catch(() => {});
       mql.removeEventListener("change", handleMediaChange);
     };
   }, []);
