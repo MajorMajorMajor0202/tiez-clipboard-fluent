@@ -39,18 +39,3 @@ body.dark-mode .history-item.selected:hover,
   box-shadow: 0 0 0 1.5px var(--accent-color, #4f7dff), var(--card-hover-shadow) !important;
 }
 
-/* Fluent selection indicator bar on left edge */
-.history-item.selected::before {
-  content: "";
-  position: absolute;
-  left: 0px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3.5px;
-  height: 20px;
-  border-radius: 2px;
-  background: var(--accent-color, #2f6fed) !important;
-  z-index: 12;
-  pointer-events: none;
-  border: none !important;
-}
