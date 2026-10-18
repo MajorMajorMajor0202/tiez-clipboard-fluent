@@ -18,6 +18,13 @@
     "release:all": "npm run release:arm && npm run release:intel"
   },
   "dependencies": {
+    "@milkdown/core": "^7.22.3",
+    "@milkdown/ctx": "^7.22.3",
+    "@milkdown/plugin-listener": "^7.22.3",
+    "@milkdown/preset-commonmark": "^7.22.3",
+    "@milkdown/preset-gfm": "^7.22.3",
+    "@milkdown/react": "^7.22.3",
+    "@milkdown/theme-nord": "^7.22.3",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2",

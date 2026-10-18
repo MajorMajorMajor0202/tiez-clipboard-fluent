@@ -1,27 +1,21 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   Plus,
-  Eye,
-  Edit3,
+  Code,
+  FileText,
   Pin,
   PinOff,
   Trash2,
   X
 } from "lucide-react";
-import { marked } from "marked";
 import type { ClipboardEntry } from "../../../shared/types/clipboard";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import { openStickyNote } from "../lib/openStickyNote";
+import MilkdownEditor from "./MilkdownEditor";
 import "../../../styles/components/note-window.css";
-
-// Configure marked with GFM (GitHub Flavored Markdown) and breaks
-marked.setOptions({
-  gfm: true,
-  breaks: true,
-});
 
 export type NoteBackdrop =
   | "mica"
@@ -54,7 +48,7 @@ export const NOTE_THEMES: NoteThemeOption[] = [
 export const StickyNoteWindow: React.FC = () => {
   const [item, setItem] = useState<ClipboardEntry | null>(null);
   const [content, setContent] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isSourceMode, setIsSourceMode] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
@@ -63,7 +57,6 @@ export const StickyNoteWindow: React.FC = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -113,9 +106,6 @@ export const StickyNoteWindow: React.FC = () => {
         const parsed = JSON.parse(cached) as ClipboardEntry;
         setItem(parsed);
         setContent(parsed.content);
-        if (!parsed.content || parsed.content.trim() === "" || parsed.content.trim() === "# 新便笺") {
-          setIsEditing(true);
-        }
       }
     } catch {}
 
@@ -124,9 +114,6 @@ export const StickyNoteWindow: React.FC = () => {
       .then((entry) => {
         setItem(entry);
         setContent(entry.content);
-        if (!entry.content || entry.content.trim() === "" || entry.content.trim() === "# 新便笺") {
-          setIsEditing(true);
-        }
         try {
           localStorage.setItem(`note_entry_${id}`, JSON.stringify(entry));
         } catch {}
@@ -210,7 +197,14 @@ export const StickyNoteWindow: React.FC = () => {
     }, 350);
   }, [item]);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  // Handle Milkdown WYSIWYG text update
+  const handleMilkdownChange = useCallback((newText: string) => {
+    setContent(newText);
+    saveContent(newText);
+  }, [saveContent]);
+
+  // Handle Source Mode textarea update
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setContent(val);
     saveContent(val);
@@ -218,7 +212,7 @@ export const StickyNoteWindow: React.FC = () => {
 
   // 5. Window Dragging Handler
   const handleMouseDownDrag = useCallback(async (e: React.MouseEvent) => {
-    if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, button, input, textarea")) {
+    if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, button, input, textarea, .ProseMirror")) {
       try {
         await getCurrentWindow().startDragging();
       } catch (err) {
@@ -323,15 +317,15 @@ export const StickyNoteWindow: React.FC = () => {
 
   // 11. Context Menu Handler
   const handleContextMenu = (e: React.MouseEvent) => {
-    // If inside textarea and editing, allow default OS text context menu
-    if (isEditing && (e.target as HTMLElement).tagName === "TEXTAREA") {
+    // If inside text editing area, allow default OS text context menu
+    if ((e.target as HTMLElement).tagName === "TEXTAREA" || (e.target as HTMLElement).closest(".ProseMirror")) {
       return;
     }
     e.preventDefault();
     e.stopPropagation();
 
     const menuWidth = 205;
-    const menuHeight = 250;
+    const menuHeight = 280;
     const x = Math.min(e.clientX, window.innerWidth - menuWidth - 8);
     const y = Math.min(e.clientY, window.innerHeight - menuHeight - 8);
     setContextMenu({ x: Math.max(8, x), y: Math.max(8, y) });
@@ -357,56 +351,12 @@ export const StickyNoteWindow: React.FC = () => {
     };
   }, [contextMenu]);
 
-  // 12. Rendered Markdown HTML
-  const parsedMarkdownHtml = useMemo(() => {
-    if (!content || !content.trim()) return "";
-    try {
-      return marked.parse(content) as string;
-    } catch (e) {
-      console.error("Markdown parse error:", e);
-      return `<p>${content}</p>`;
-    }
-  }, [content]);
-
-  // 13. Interactive Checkbox Click in Preview Mode
-  const handlePreviewClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.tagName === "INPUT" && (target as HTMLInputElement).type === "checkbox") {
-      e.stopPropagation();
-      const checkboxes = previewRef.current?.querySelectorAll('input[type="checkbox"]');
-      if (checkboxes) {
-        let index = -1;
-        for (let i = 0; i < checkboxes.length; i++) {
-          if (checkboxes[i] === target) {
-            index = i;
-            break;
-          }
-        }
-        if (index >= 0) {
-          let count = 0;
-          const updatedContent = content.replace(/- \[( |x|X)\]/g, (match, p1) => {
-            if (count === index) {
-              count++;
-              return p1.trim() ? "- [ ]" : "- [x]";
-            }
-            count++;
-            return match;
-          });
-          setContent(updatedContent);
-          saveContent(updatedContent);
-        }
-      }
-    }
-  };
-
   // Sync scroll host element for FluentScrollbar
   useEffect(() => {
-    if (isEditing && textareaRef.current) {
+    if (isSourceMode && textareaRef.current) {
       setScrollHostEl(textareaRef.current);
-    } else if (!isEditing && previewRef.current) {
-      setScrollHostEl(previewRef.current);
     }
-  }, [isEditing]);
+  }, [isSourceMode]);
 
   // Controls are visible when window is focused, hovered, or context menu is active
   const isControlsVisible = isFocused || isHovered || Boolean(contextMenu);
@@ -438,14 +388,14 @@ export const StickyNoteWindow: React.FC = () => {
 
           {/* Right: Action Buttons (32x32 each) */}
           <div className="note-titlebar-right window-no-drag">
-            {/* Toggle Preview / Edit */}
+            {/* Toggle Typora Live WYSIWYG / Raw Source Mode */}
             <button
               type="button"
-              className={`note-titlebar-btn ${isEditing ? "active" : ""}`}
-              title={isEditing ? "预览 Markdown" : "编辑内容"}
-              onClick={() => setIsEditing(!isEditing)}
+              className={`note-titlebar-btn ${isSourceMode ? "active" : ""}`}
+              title={isSourceMode ? "切换为即时渲染模式 (Typora)" : "切换为 Markdown 源码模式"}
+              onClick={() => setIsSourceMode(!isSourceMode)}
             >
-              {isEditing ? <Eye size={13} strokeWidth={2} /> : <Edit3 size={13} strokeWidth={2} />}
+              {isSourceMode ? <FileText size={13} strokeWidth={2} /> : <Code size={13} strokeWidth={2} />}
             </button>
 
             {/* New Note */}
@@ -482,24 +432,22 @@ export const StickyNoteWindow: React.FC = () => {
 
         {/* Content Body */}
         <div className="note-body">
-          {isEditing ? (
+          {isSourceMode ? (
             <textarea
               ref={textareaRef}
               className="note-editor-textarea window-no-drag"
               value={content}
-              onChange={handleTextChange}
-              placeholder="在此输入 Markdown 便笺内容..."
+              onChange={handleTextareaChange}
+              placeholder="在此输入 Markdown 源码..."
               autoFocus
             />
           ) : (
-            <div
-              ref={previewRef}
-              className="note-markdown-view window-no-drag"
-              onClick={handlePreviewClick}
-              onDoubleClick={() => setIsEditing(true)}
-              dangerouslySetInnerHTML={{
-                __html: parsedMarkdownHtml || '<div class="note-empty-hint">双击此处或点击右上角编辑图标输入内容</div>',
-              }}
+            <MilkdownEditor
+              key={`milkdown-${item?.id}`}
+              initialContent={content}
+              onChange={handleMilkdownChange}
+              onFocus={() => setIsFocused(true)}
+              onScrollHostReady={setScrollHostEl}
             />
           )}
 
@@ -519,6 +467,12 @@ export const StickyNoteWindow: React.FC = () => {
           <div className="note-menu-item" onClick={handleTogglePin}>
             <span className="note-menu-check">{isAlwaysOnTop ? "✓" : ""}</span>
             <span>始终置顶</span>
+          </div>
+
+          {/* Source mode toggle */}
+          <div className="note-menu-item" onClick={() => { setIsSourceMode(!isSourceMode); setContextMenu(null); }}>
+            <span className="note-menu-check">{isSourceMode ? "✓" : ""}</span>
+            <span>源码编辑模式</span>
           </div>
 
           <div className="note-menu-separator" />
