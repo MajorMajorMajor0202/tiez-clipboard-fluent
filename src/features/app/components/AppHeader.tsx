@@ -4,12 +4,12 @@ import {
   ChevronLeft,
   Pin,
   PinOff,
-  Search,
   X
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { getTagColor, getTagTextColor } from "../../../shared/lib/utils";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
+import FluentSearchInput from "../../../shared/components/FluentSearchInput";
 import FluentTabBar from "./FluentTabBar";
 import type { TabItem } from "../types";
 
@@ -160,11 +160,10 @@ const AppHeader = ({
               style={{ flexShrink: 0 }}
             >
               <div className="fluent-search-box home-search-wrapper">
-                <Search size={14} className="fluent-search-icon search-icon" />
-                <input
+                <FluentSearchInput
                   ref={searchInputRef}
                   type="text"
-                  className={`fluent-search-input search-input ${showTagFilter && allTags.length > 0 ? 'dropdown-open' : ''}`}
+                  className={showTagFilter && allTags.length > 0 ? 'dropdown-open' : ''}
                   placeholder={t('search_placeholder')}
                   value={search}
                   onCompositionStart={() => setIsComposing(true)}

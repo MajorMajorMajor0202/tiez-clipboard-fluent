@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import TieZFluentProvider from "./shared/components/TieZFluentProvider";
 import CompactPreviewWindow from "./features/clipboard/components/CompactPreviewWindow";
 import AdvancedSettingsWindow from "./features/settings/components/AdvancedSettingsWindow";
 import SettingsWindow from "./features/settings/components/SettingsWindow";
@@ -294,17 +295,19 @@ class GlobalErrorBoundary extends React.Component<
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <GlobalErrorBoundary>
-      {isNoteWindow
-        ? <StickyNoteWindow />
-        : isStickerWindow
-          ? <DesktopStickerWindow />
-          : isCompactPreview
-            ? <CompactPreviewWindow />
-            : isAdvancedSettingsWindow
-              ? <AdvancedSettingsWindow />
-              : isSettingsWindow
-                ? <SettingsWindow />
-                : <App />}
+      <TieZFluentProvider>
+        {isNoteWindow
+          ? <StickyNoteWindow />
+          : isStickerWindow
+            ? <DesktopStickerWindow />
+            : isCompactPreview
+              ? <CompactPreviewWindow />
+              : isAdvancedSettingsWindow
+                ? <AdvancedSettingsWindow />
+                : isSettingsWindow
+                  ? <SettingsWindow />
+                  : <App />}
+      </TieZFluentProvider>
     </GlobalErrorBoundary>
   </React.StrictMode>,
 );

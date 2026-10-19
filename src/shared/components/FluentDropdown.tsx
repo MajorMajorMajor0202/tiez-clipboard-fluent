@@ -1,117 +1,60 @@
-import React, { useState, useRef, useEffect } from "react";
-import { ChevronRight } from "lucide-react";
+import type { CSSProperties, ReactNode } from "react";
+import { Dropdown, Option } from "@fluentui/react-components";
+import { ChevronDown } from "lucide-react";
 
 export interface FluentDropdownOption {
   id: string;
   label: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
-
 interface FluentDropdownProps {
   options: FluentDropdownOption[];
   value: string;
   onChange: (id: string) => void;
   triggerClassName?: string;
   menuClassName?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
+  "aria-label"?: string;
 }
 
-export const FluentDropdown: React.FC<FluentDropdownProps> = ({
-  options,
-  value,
-  onChange,
-  triggerClassName = "",
-  menuClassName = "",
-  style,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const selectedIndex = options.findIndex((opt) => opt.id === value);
-  const selectedOption = options[selectedIndex] || options[0];
-
-  // Dynamic positioning for Fluent overlay effect
-  const itemHeight = 32;
-  const padding = 4;
-  const gap = 4;
-  const triggerHeight = 32;
-
-  const topOffset = selectedIndex !== -1
-    ? -(padding + selectedIndex * (itemHeight + gap)) + (triggerHeight - itemHeight) / 2
-    : -4;
-
-  const transformOrigin = selectedIndex !== -1
-    ? `center ${padding + selectedIndex * (itemHeight + gap) + itemHeight / 2}px`
-    : "top center";
-
-  // Close when clicking outside
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        triggerRef.current?.contains(e.target as Node) ||
-        menuRef.current?.contains(e.target as Node)
-      ) {
-        return;
-      }
-      setIsOpen(false);
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [isOpen]);
-
-  const handleOptionClick = (id: string) => {
-    onChange(id);
-    setIsOpen(false);
-  };
-
+/** Keep the app API; Fluent owns keyboard selection, focus and positioning. */
+export const FluentDropdown = ({
+  options, value, onChange, triggerClassName = "", menuClassName = "", style,
+  "aria-label": ariaLabel,
+}: FluentDropdownProps) => {
+  const selected = options.find((option) => option.id === value) || options[0];
   return (
-    <div
-      className="fluent-dropdown-container"
-      style={{
-        ...style,
-        zIndex: isOpen ? 1000 : undefined
+    <Dropdown
+      className="fluent-dropdown-container tiez-official-dropdown"
+      style={style}
+      size="small"
+      aria-label={ariaLabel || selected?.label}
+      value={selected?.label || ""}
+      selectedOptions={selected ? [selected.id] : []}
+      disabled={!options.length}
+      button={{
+        className: `fluent-dropdown-trigger-btn ${triggerClassName}`.trim(),
+        children: <>{selected?.icon}<span>{selected?.label}</span></>,
+      }}
+      expandIcon={<ChevronDown size={12} />}
+      listbox={{ className: `tiez-official-listbox ${menuClassName}`.trim() }}
+      onOptionSelect={(_event, data) => {
+        if (data.optionValue !== undefined) onChange(data.optionValue);
       }}
     >
-      <button
-        ref={triggerRef}
-        className={`fluent-dropdown-trigger-btn ${triggerClassName}`}
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        {selectedOption?.icon}
-        <span>{selectedOption?.label}</span>
-        <ChevronRight size={12} className="chevron-icon" />
-      </button>
-
-      {isOpen && (
-        <div
-          ref={menuRef}
-          className={`fluent-dropdown-menu ${menuClassName}`}
-          style={{
-            top: `${topOffset}px`,
-            transformOrigin,
-          }}
+      {options.map((option) => (
+        <Option
+          key={option.id}
+          value={option.id}
+          text={option.label}
+          checkIcon={null}
+          className={`fluent-dropdown-item ${option.id === selected?.id ? "active" : ""}`}
         >
-          {options.map((option) => {
-            const isActive = option.id === value;
-            return (
-              <button
-                key={option.id}
-                className={`fluent-dropdown-item ${isActive ? "active" : ""}`}
-                onClick={() => handleOptionClick(option.id)}
-              >
-                {option.icon}
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
+          {option.icon}
+          {option.label}
+        </Option>
+      ))}
+    </Dropdown>
   );
 };
-
 export default FluentDropdown;

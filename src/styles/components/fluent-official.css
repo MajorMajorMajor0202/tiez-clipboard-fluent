@@ -1,0 +1,82 @@
+/* Adapt official primitives without depending on generated Griffel classes. */
+/* The desktop shell clips body overflow; give portals a viewport-sized layer. */
+.tiez-fluent-provider[data-portal-node] {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.tiez-fluent-provider[data-portal-node] > * {
+  pointer-events: auto;
+}
+.tiez-official-dropdown.fluent-dropdown-container {
+  min-width: 0;
+  border: none;
+  background: transparent;
+}
+.tiez-official-dropdown::after { display: none; }
+.tiez-official-dropdown .fluent-dropdown-trigger-btn { font-family: inherit; }
+.tiez-official-listbox {
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: var(--flyout-border);
+  border-radius: 4px;
+  box-shadow: var(--flyout-shadow);
+  z-index: 1000004;
+  animation: fluentDropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top center;
+}
+.tiez-official-listbox .fluent-dropdown-item { flex-shrink: 0; font-family: inherit; }
+.tiez-official-listbox .fluent-dropdown-item:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
+}
+.tiez-official-tooltip {
+  padding: 4px 8px;
+  max-width: min(240px, calc(100vw - 16px));
+  font-family: var(--font-main, "Segoe UI", sans-serif);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  box-shadow: var(--flyout-shadow);
+  z-index: 1000005;
+}
+.tiez-official-search {
+  display: flex;
+  width: 100%;
+  min-height: 32px;
+  box-sizing: border-box;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 0 10px;
+  gap: 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.tiez-official-search:focus-within { border-color: var(--line-strong); }
+/* The outer home-search-wrapper already draws TieZ's animated underline. */
+.tiez-official-search::after { display: none; }
+.tiez-official-search input {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+.home-search-wrapper::after { transform-origin: center; }
+@media (prefers-reduced-motion: reduce) {
+  .tiez-official-listbox { animation: none; }
+  .home-search-wrapper::after { transition-duration: 0.01ms; }
+}

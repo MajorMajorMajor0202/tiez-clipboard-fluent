@@ -135,7 +135,8 @@ body.theme-mica #root {
 
 
 
-body.theme-mica #root > * {
+body.theme-mica #root > *,
+body.theme-mica #root > .tiez-fluent-provider > * {
   position: relative;
   z-index: 1;
 }

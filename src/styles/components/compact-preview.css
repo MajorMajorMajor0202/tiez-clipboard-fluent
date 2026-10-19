@@ -26,7 +26,8 @@ body.compact-preview #root::before {
     background: none !important;
 }
 
-body.compact-preview #root>* {
+body.compact-preview #root>*,
+body.compact-preview #root > .tiez-fluent-provider > * {
     position: static !important;
     z-index: auto !important;
 }

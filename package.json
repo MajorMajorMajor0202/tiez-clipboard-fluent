@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test:components": "node tests/fluent-components.browser.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev --features devtools",
     "tauri:build": "tauri build",
@@ -18,6 +19,7 @@
     "release:all": "npm run release:arm && npm run release:intel"
   },
   "dependencies": {
+    "@fluentui/react-components": "^9.74.9",
     "@milkdown/core": "^7.22.3",
     "@milkdown/ctx": "^7.22.3",
     "@milkdown/plugin-listener": "^7.22.3",

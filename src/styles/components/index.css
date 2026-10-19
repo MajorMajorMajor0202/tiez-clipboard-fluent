@@ -8,7 +8,6 @@
 @import "./empty-state.css";
 @import "./emoji.css";
 @import "./file-transfer.css";
-@import "./fluent-tooltip.css";
 @import "./layout.css";
 @import "./fluent-scrollbar.css";
 @import "./fluent-dropdown.css";
@@ -24,3 +23,4 @@
 @import "./toast.css";
 @import "./tab-bar.css";
 @import "./utilities.css";
+@import "./fluent-official.css";
