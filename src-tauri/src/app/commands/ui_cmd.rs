@@ -188,10 +188,19 @@ pub fn apply_theme_to_window_internal(
         let is_win11 = build >= 22000;
         let is_win10_1803 = build >= 17134;
         let is_win10 = build >= 10240 && build < 22000;
+        if window.label() == "settings"
+            && ((theme == "mica" && !is_win11)
+                || (theme == "acrylic" && (!is_win10_1803 || is_win10)))
+        {
+            return Err(AppError::Internal("Settings material unavailable on this Windows version".into()));
+        }
 
         match theme {
             "mica" if is_win11 => {
-                let _ = window_vibrancy::apply_mica(window, Some(is_dark));
+                let result = window_vibrancy::apply_mica(window, Some(is_dark));
+                if window.label() == "settings" {
+                    result.map_err(|e| AppError::Internal(format!("Settings Mica failed: {e}")))?;
+                }
                 let _ = window.set_shadow(false);
                 unsafe {
                     let m = MARGINS { cxLeftWidth: 0, cxRightWidth: 0, cyTopHeight: 0, cyBottomHeight: 0 };
@@ -199,10 +208,13 @@ pub fn apply_theme_to_window_internal(
                 }
             }
             "acrylic" if is_win10_1803 && !is_win10 => {
-                let _ = window_vibrancy::apply_acrylic(
+                let result = window_vibrancy::apply_acrylic(
                     window,
                     Some(if is_dark { (30, 30, 30, 40) } else { (240, 240, 240, 40) }),
                 );
+                if window.label() == "settings" {
+                    result.map_err(|e| AppError::Internal(format!("Settings Acrylic failed: {e}")))?;
+                }
                 let _ = window.set_shadow(false);
                 unsafe {
                     let m = MARGINS { cxLeftWidth: 0, cxRightWidth: 0, cyTopHeight: 0, cyBottomHeight: 0 };

@@ -14,7 +14,7 @@ body.theme-mica {
   --text-secondary: #607188;
   --text-muted: #8c97ab;
 
-  --accent-hover: #3f6ce9;
+  --accent-hover: color-mix(in srgb, var(--accent-color) 88%, black);
 
   --line-soft: rgba(40, 56, 84, 0.12);
   --line-strong: rgba(40, 56, 84, 0.2);
@@ -49,13 +49,13 @@ body.theme-mica {
   --button-shadow: var(--shadow-xs);
   --button-hover-shadow: var(--shadow-sm);
   --button-active-shadow: var(--shadow-xs);
-  --button-active-filled-shadow: 0 12px 24px rgba(79, 125, 255, 0.26);
+  --button-active-filled-shadow: 0 12px 24px rgba(var(--accent-color-rgb), 0.26);
 
   --card-border: 1px solid rgba(128, 128, 128, 0.16);
   --card-radius: 4px;
   --card-hover-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-  --card-selected-background: rgba(79, 125, 255, 0.1);
-  --card-selected-border-color: rgba(79, 125, 255, 0.34);
+  --card-selected-background: rgba(var(--accent-color-rgb), 0.1);
+  --card-selected-border-color: rgba(var(--accent-color-rgb), 0.34);
   --card-selected-shadow: none;
 
   --panel-border: 1px solid rgba(255, 255, 255, 0.3);
@@ -270,4 +270,8 @@ body.dark-mode.theme-mica .history-item:hover {
   background: rgba(100, 100, 100, 0.45) !important;
   border-color: var(--card-hover-border-color) !important;
   box-shadow: var(--card-hover-shadow) !important;
+}
+
+:root.theme-mica.dark-mode, body.theme-mica.dark-mode {
+  --accent-hover: color-mix(in srgb, var(--accent-color) 88%, white);
 }

@@ -1,6 +1,11 @@
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect, useId } from "react";
+import { Dialog, DialogSurface, DialogTitle } from "@fluentui/react-components";
+import { isTauriRuntime } from "../lib/tauriRuntime";
+
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+
+let openNativeModals = 0;
 
 export interface FluentModalProps {
   open: boolean;
@@ -35,83 +40,46 @@ const FluentModal: React.FC<FluentModalProps> = ({
   closeOnEscape = true,
   theme,
 }) => {
+  const titleId = useId();
+  const subtitleId = useId();
   useEffect(() => {
-    if (!open) return;
-
-    // Prevent Tauri from closing on blur while modal is open and ensure window receives OS keyboard focus
-    invoke("set_ignore_blur", { ignore: true }).catch(() => {});
-    invoke("activate_window_focus").catch(() => {});
-    invoke("focus_clipboard_window").catch(() => {});
-
-    const timer = setTimeout(() => {
-      invoke("activate_window_focus").catch(() => {});
-      const dialog = document.querySelector(".fluent-modal-dialog");
-      if (dialog) {
-        const editable = dialog.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-          "[autofocus], textarea, input:not([type=hidden])"
-        );
-        editable?.focus();
-      }
-    }, 50);
-
+    if (!open || !isTauriRuntime()) return;
+    if (++openNativeModals === 1) invoke("set_ignore_blur", { ignore: true }).catch(console.error);
+    const win = getCurrentWindow();
+    if (win.label === "main") invoke("activate_window_focus").catch(console.error);
+    else win.setFocus().catch(console.error);
     return () => {
-      clearTimeout(timer);
-      invoke("set_ignore_blur", { ignore: false }).catch(() => {});
+      if (--openNativeModals === 0) invoke("set_ignore_blur", { ignore: false }).catch(console.error);
     };
   }, [open]);
 
-  useEffect(() => {
-    if (!open || !closeOnEscape) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown, true);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown, true);
-    };
-  }, [open, closeOnEscape, onClose]);
-
-  if (!open) return null;
-
-  const handleOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (closeOnOverlayClick && e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const themeClass = theme ? `theme-${theme}` : "";
 
-  return createPortal(
-    <div
-      className={`fluent-modal-overlay ${themeClass} ${overlayClassName}`.trim()}
-      onMouseDown={handleOverlayMouseDown}
-    >
-      <div
-        className={`fluent-modal-dialog ${className}`.trim()}
+  return (
+    <Dialog open={open} onOpenChange={(_event, data) => {
+      if (data.open) return;
+      if (data.type === "escapeKeyDown" && !closeOnEscape) return;
+      if (data.type === "backdropClick" && !closeOnOverlayClick) return;
+      onClose();
+    }}>
+      <DialogSurface
+        className={`fluent-modal-dialog tiez-official-dialog ${themeClass} ${className}`.trim()}
+        backdrop={{ className: `fluent-modal-overlay ${themeClass} ${overlayClassName}`.trim() }}
+        aria-labelledby={title ? titleId : undefined}
+        aria-label={title ? undefined : "对话框"}
+        aria-describedby={subtitle ? subtitleId : undefined}
         style={{
           width: typeof width === "number" ? `${width}px` : width,
           maxWidth: typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth,
         }}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          invoke("activate_window_focus").catch(() => {});
-        }}
-        role="dialog"
-        aria-modal="true"
       >
         <div className="fluent-modal-upper">
           {(title || subtitle || icon) && (
             <div className="fluent-modal-header">
               {icon && <div className="fluent-modal-icon">{icon}</div>}
               <div className="fluent-modal-titles">
-                {title && <h3 className="fluent-modal-title">{title}</h3>}
-                {subtitle && <div className="fluent-modal-subtitle">{subtitle}</div>}
+                {title && <DialogTitle id={titleId} className="fluent-modal-title">{title}</DialogTitle>}
+                {subtitle && <div id={subtitleId} className="fluent-modal-subtitle">{subtitle}</div>}
               </div>
             </div>
           )}
@@ -122,9 +90,8 @@ const FluentModal: React.FC<FluentModalProps> = ({
             <div className="fluent-modal-actions">{footer}</div>
           </div>
         )}
-      </div>
-    </div>,
-    document.body
+      </DialogSurface>
+    </Dialog>
   );
 };
 

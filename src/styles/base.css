@@ -33,7 +33,7 @@
 
   --accent-color: #2f6fed;
   --accent-color-rgb: 47, 111, 237;
-  --accent-hover: #245dce;
+  --accent-hover: color-mix(in srgb, var(--accent-color) 88%, black);
   --border-dark: #24364d;
   --border-light: rgba(255, 255, 255, 0.78);
   --shadow-color: rgba(24, 34, 53, 0.18);

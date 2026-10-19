@@ -1,4 +1,5 @@
 import React from "react";
+import { Button, useRestoreFocusTarget } from "@fluentui/react-components";
 
 export interface FluentButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "subtle" | "danger";
@@ -22,9 +23,14 @@ const FluentButton: React.FC<FluentButtonProps> = ({
 }) => {
   const sizeClass = size === "small" ? "fluent-btn-sm" : size === "large" ? "fluent-btn-lg" : "fluent-btn-md";
   const variantClass = `fluent-btn-${variant}`;
+  const restoreFocusTarget = useRestoreFocusTarget();
 
   return (
-    <button
+    <Button
+      {...restoreFocusTarget}
+      appearance={variant === "primary" ? "primary" : variant === "subtle" ? "subtle" : "secondary"}
+      size={size}
+      aria-busy={loading || undefined}
       type={type}
       className={`fluent-btn ${variantClass} ${sizeClass} ${className}`.trim()}
       disabled={disabled || loading}
@@ -40,7 +46,7 @@ const FluentButton: React.FC<FluentButtonProps> = ({
       {!loading && icon && iconPosition === "right" && (
         <span className="fluent-btn-icon fluent-btn-icon-right">{icon}</span>
       )}
-    </button>
+    </Button>
   );
 };
 

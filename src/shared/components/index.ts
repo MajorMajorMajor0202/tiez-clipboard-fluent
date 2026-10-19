@@ -11,3 +11,8 @@ export { default as FluentScrollbar } from "./FluentScrollbar";
 export { default as FluentTooltip } from "./FluentTooltip";
 export { default as ToastContainer } from "./ToastContainer";
 export { default as UpdateDialog } from "./UpdateDialog";
+
+export { default as FluentSwitch } from "./FluentSwitch";
+export { default as FluentSlider } from "./FluentSlider";
+export { default as FluentCheckbox } from "./FluentCheckbox";
+export { default as FluentSettingsExpander } from "./FluentSettingsExpander";

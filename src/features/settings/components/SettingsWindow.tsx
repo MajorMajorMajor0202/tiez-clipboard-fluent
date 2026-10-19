@@ -1,9 +1,13 @@
+import FluentSettingsExpander from "../../../shared/components/FluentSettingsExpander";
+import FluentCheckbox from "../../../shared/components/FluentCheckbox";
+import FluentButton from "../../../shared/components/FluentButton";
+import FluentSlider from "../../../shared/components/FluentSlider";
+import FluentSwitch from "../../../shared/components/FluentSwitch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getVersion } from "@tauri-apps/api/app";
 import {
-  ChevronDown,
   Sliders,
   Shield,
   Wifi,
@@ -801,18 +805,11 @@ const SettingsWindow = () => {
                   )}
                 </span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={autoStart}
-                  onChange={(e) => {
+              <FluentSwitch checked={autoStart} onChange={(e) => {
                     const enabled = e.target.checked;
                     setAutoStart(enabled);
                     invoke("toggle_autostart", { enabled }).catch(console.error);
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -820,18 +817,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">静默启动</span>
                 <span className="fluent-setting-description">启动时隐藏主窗口，保持在后台托盘静默运行</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={silentStart}
-                  onChange={(e) => {
+              <FluentSwitch checked={silentStart} onChange={(e) => {
                     const enabled = e.target.checked;
                     setSilentStart(enabled);
                     invoke("set_silent_start", { enabled }).catch(console.error);
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -839,18 +829,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">隐藏系统托盘图标</span>
                 <span className="fluent-setting-description">不在任务栏通知区域显示图标，仅可通过快捷键呼出</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={hideTrayIcon}
-                  onChange={(e) => {
+              <FluentSwitch checked={hideTrayIcon} onChange={(e) => {
                     const val = e.target.checked;
                     setHideTrayIcon(val);
                     invoke("set_tray_visible", { visible: !val }).catch(console.error);
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             {isMacPlatform() && (
@@ -859,18 +842,11 @@ const SettingsWindow = () => {
                   <span className="fluent-setting-title">隐藏程序坞 Dock 图标</span>
                   <span className="fluent-setting-description">在 macOS 程序坞中隐去应用图标，保持桌面整洁</span>
                 </div>
-                <label className="fluent-switch">
-                  <input
-                    type="checkbox"
-                    checked={hideDockIcon}
-                    onChange={(e) => {
+                <FluentSwitch checked={hideDockIcon} onChange={(e) => {
                       const val = e.target.checked;
                       setHideDockIcon(val);
                       invoke("set_dock_visible", { visible: !val }).catch(console.error);
-                    }}
-                  />
-                  <span className="fluent-slider" />
-                </label>
+                    }}   />
               </div>
             )}
 
@@ -879,18 +855,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">贴边自动收纳</span>
                 <span className="fluent-setting-description">当窗口贴近屏幕边缘时自动缩进隐藏，鼠标悬停时平滑划出</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={edgeDocking}
-                  onChange={(e) => {
+              <FluentSwitch checked={edgeDocking} onChange={(e) => {
                     const val = e.target.checked;
                     setEdgeDocking(val);
                     invoke("set_edge_docking", { enabled: val }).catch(console.error);
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -898,18 +867,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">常驻主页搜索栏</span>
                 <span className="fluent-setting-description">在主窗口固定显示搜索框，关闭后可通过向上滚动列表唤出</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={showSearchBox}
-                  onChange={(e) => {
+              <FluentSwitch checked={showSearchBox} onChange={(e) => {
                     const enabled = e.target.checked;
                     setShowSearchBox(enabled);
                     saveAppSetting('show_search_box', String(enabled));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -917,18 +879,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">回到顶部悬浮钮</span>
                 <span className="fluent-setting-description">列表滚动超过一屏时，在右下角显示一键直达首位的便捷按钮</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={scrollTopButtonEnabled}
-                  onChange={(e) => {
+              <FluentSwitch checked={scrollTopButtonEnabled} onChange={(e) => {
                     const enabled = e.target.checked;
                     setScrollTopButtonEnabled(enabled);
                     saveAppSetting('show_scroll_top_button', String(enabled));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -936,18 +891,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">启用标签分类</span>
                 <span className="fluent-setting-description">激活后可在主界面对历史记录进行多色标签归类与筛选</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={tagManagerEnabled}
-                  onChange={(e) => {
+              <FluentSwitch checked={tagManagerEnabled} onChange={(e) => {
                     const enabled = e.target.checked;
                     setTagManagerEnabled(enabled);
                     saveAppSetting('tag_manager_enabled', String(enabled));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -955,18 +903,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">启用表情收藏面板</span>
                 <span className="fluent-setting-description">在主窗口顶栏展示常用表情包，支持图片和 GIF 快捷拖拽粘贴</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={emojiPanelEnabled}
-                  onChange={(e) => {
+              <FluentSwitch checked={emojiPanelEnabled} onChange={(e) => {
                     const enabled = e.target.checked;
                     setEmojiPanelEnabled(enabled);
                     saveAppSetting('emoji_panel_enabled', String(enabled));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -974,18 +915,11 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">启用便笺统一管理</span>
                 <span className="fluent-setting-description">在侧边栏提供便笺管理中心入口，集中查看、筛选和整理所有便笺卡片</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={noteManagerEnabled}
-                  onChange={(e) => {
+              <FluentSwitch checked={noteManagerEnabled} onChange={(e) => {
                     const enabled = e.target.checked;
                     setNoteManagerEnabled?.(enabled);
                     saveAppSetting('note_manager_enabled', String(enabled));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -993,48 +927,25 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">键盘方向键导航</span>
                 <span className="fluent-setting-description">允许使用键盘上下键 (↑/↓) 直接高亮选中历史条目，按回车粘贴</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={arrowKeySelection}
-                  onChange={(e) => {
+              <FluentSwitch checked={arrowKeySelection} onChange={(e) => {
                     const enabled = e.target.checked;
                     setArrowKeySelection(enabled);
                     saveAppSetting('arrow_key_selection', String(enabled));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             {/* Audio Feedback Expander */}
-            <div className={`fluent-setting-expander ${!soundEnabled ? 'disabled' : ''}`}>
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['audio'] && soundEnabled ? 'expanded' : ''} ${!soundEnabled ? 'disabled' : ''}`}
-                onClick={() => {
+            <FluentSettingsExpander className={`fluent-setting-expander ${!soundEnabled ? 'disabled' : ''}`} expanded={!!(expandedCards['audio'] && soundEnabled)} onToggle={() => {
                   if (soundEnabled) toggleExpander('audio');
-                }}
-              >
-                <div className="fluent-setting-info">
+                }} disabled={!soundEnabled} header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">音效反馈</span>
                   <span className="fluent-setting-description">管理软件内按键交互及粘贴动作的提示音效</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <label className="fluent-switch" onClick={e => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={soundEnabled}
-                      onChange={(e) => {
+                </div>} actions={<><div style={{ display: "flex", alignItems: "center", gap: "12px" }}><FluentSwitch checked={soundEnabled} onChange={(e) => {
                         const enabled = e.target.checked;
                         setSoundEnabled(enabled);
                         invoke("set_sound_enabled", { enabled }).catch(console.error);
-                      }}
-                    />
-                    <span className="fluent-slider" />
-                  </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['audio'] && soundEnabled ? 'expanded' : ''}`} />
-                </div>
-              </div>
+                      }} onClick={e => e.stopPropagation()}  /></div></>}>
+
               {expandedCards['audio'] && soundEnabled && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
@@ -1042,18 +953,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">粘贴成功提示音</span>
                       <span className="fluent-setting-description">当系统模拟粘贴指令完成后播放反馈音效</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={pasteSoundEnabled}
-                        onChange={(e) => {
+                    <FluentSwitch checked={pasteSoundEnabled} onChange={(e) => {
                           const enabled = e.target.checked;
                           setPasteSoundEnabled(enabled);
                           invoke("save_setting", { key: 'app.sound_paste_enabled', value: String(enabled) }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "8px" }}>
@@ -1061,35 +965,20 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">音量大小</span>
                       <span style={{ fontSize: "11px" }}>{Math.round(soundVolume * 100)}%</span>
                     </div>
-                    <input
-                      type="range"
-                      className="fluent-range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={soundVolume}
-                      onChange={(e) => setSoundVolume(parseFloat(e.target.value))}
-                      style={{
+                    <FluentSlider min="0" max="1" step="0.01" value={soundVolume} onChange={(e) => setSoundVolume(parseFloat(e.target.value))} style={{
                         ['--range-progress' as any]: `${soundVolume * 100}%`
-                      }}
-                    />
+                      }} />
                   </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Default Apps Expander */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['apps'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('apps')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['apps'])} onToggle={() => toggleExpander('apps')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">配置格式关联程序</span>
                   <span className="fluent-setting-description">自定义双击不同格式历史条目时的默认打开应用</span>
-                </div>
-                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['apps'] ? 'expanded' : ''}`} />
-              </div>
+                </div>} >
+
               {expandedCards['apps'] && (
                 <div className="fluent-setting-expander-content">
                   {['text', 'rich_text', 'image', 'video', 'code', 'url'].map(type => (
@@ -1108,25 +997,19 @@ const SettingsWindow = () => {
                             : (defaultApps[type] ? `${t('system_default')} (${defaultApps[type].replace(/\.exe$/i, '')})` : t('not_configured'))}
                         </span>
                       </div>
-                      <button className="fluent-button" onClick={() => setShowAppSelector(type)}>更改程序</button>
+                      <FluentButton className="fluent-button" onClick={() => setShowAppSelector(type)}>更改程序</FluentButton>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Data storage Card (Collapsible Expander) */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['dbPath'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('dbPath')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['dbPath'])} onToggle={() => toggleExpander('dbPath')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">本地数据库路径</span>
                   <span className="fluent-setting-description">查看或修改本地剪贴板历史数据的物理存放位置</span>
-                </div>
-                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['dbPath'] ? 'expanded' : ''}`} />
-              </div>
+                </div>} >
+
               {expandedCards['dbPath'] && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card" style={{ padding: "8px 12px", gap: "12px", alignItems: "center" }}>
@@ -1140,7 +1023,7 @@ const SettingsWindow = () => {
                         style={{ flex: 1, minWidth: 0, textOverflow: "ellipsis" }}
                       />
                     </div>
-                    <button
+                    <FluentButton
                       className="fluent-button"
                       onClick={async () => {
                         const { open, ask, message } = await import("@tauri-apps/plugin-dialog");
@@ -1171,18 +1054,18 @@ const SettingsWindow = () => {
                       }}
                     >
                       搬迁数据库
-                    </button>
+                    </FluentButton>
                   </div>
                 </div>
               )}
-            </div>
-            
+            </FluentSettingsExpander>
+
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
                 <span className="fluent-setting-title">重置应用配置</span>
                 <span className="fluent-setting-description">清除所有自定义设置，恢复初始状态；这不会清空您的历史记录数据库</span>
               </div>
-              <button className="fluent-button" onClick={handleResetSettings} style={{ color: "#f44336", borderColor: "rgba(244,67,54,0.3)" }}>重置设置</button>
+              <FluentButton className="fluent-button" onClick={handleResetSettings} style={{ color: "#f44336", borderColor: "rgba(244,67,54,0.3)" }}>重置设置</FluentButton>
             </div>
           </div>
         )}
@@ -1193,17 +1076,11 @@ const SettingsWindow = () => {
             <h2 className="fluent-page-header">{t("clipboard_settings") || "剪贴板与热键"}</h2>
 
             {/* Hotkey Recorders expander */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['hotkeys'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('hotkeys')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['hotkeys'])} onToggle={() => toggleExpander('hotkeys')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">快捷键分配</span>
                   <span className="fluent-setting-description">配置用于快速唤起窗口、启动搜索或特殊粘贴的全局热键</span>
-                </div>
-                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['hotkeys'] ? 'expanded' : ''}`} />
-              </div>
+                </div>} >
+
               {expandedCards['hotkeys'] && (
                 <div className="fluent-setting-expander-content">
                   {/* Global hotkey */}
@@ -1291,20 +1168,14 @@ const SettingsWindow = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Storage controls expander */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['storage'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('storage')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['storage'])} onToggle={() => toggleExpander('storage')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">数据捕获与本地存储限制</span>
                   <span className="fluent-setting-description">配置历史数据的存盘规则、最大保留数量与去重合并策略</span>
-                </div>
-                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['storage'] ? 'expanded' : ''}`} />
-              </div>
+                </div>} >
+
               {expandedCards['storage'] && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
@@ -1312,18 +1183,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">持久化历史记录</span>
                       <span className="fluent-setting-description">若关闭，剪贴板历史只会在当前运行期间生效，重启后清空</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={persistent}
-                        onChange={(e) => {
+                    <FluentSwitch checked={persistent} onChange={(e) => {
                           const val = e.target.checked;
                           setPersistent(val);
                           invoke('set_persistence', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   {persistent && (
@@ -1333,17 +1197,10 @@ const SettingsWindow = () => {
                           <span className="fluent-setting-title">启用最大存储上限</span>
                           <span className="fluent-setting-description">限制本地数据库中允许保留的历史记录总条数</span>
                         </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={persistentLimitEnabled}
-                            onChange={(e) => {
+                        <FluentSwitch checked={persistentLimitEnabled} onChange={(e) => {
                               setPersistentLimitEnabled(e.target.checked);
                               saveAppSetting('persistent_limit_enabled', e.target.checked.toString());
-                            }}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
+                            }}   />
                       </div>
 
                       {persistentLimitEnabled && (
@@ -1371,18 +1228,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">合并重复记录</span>
                       <span className="fluent-setting-description">再次复制已存在的内容时，将其移至列表首位并删除旧副本，防止列表重复</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={deduplicate}
-                        onChange={(e) => {
+                    <FluentSwitch checked={deduplicate} onChange={(e) => {
                           const val = e.target.checked;
                           setDeduplicate(val);
                           invoke('set_deduplication', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1390,18 +1240,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">捕获文件路径</span>
                       <span className="fluent-setting-description">允许将复制的文件、文件夹及视频文件路径录入剪贴板历史列表</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={captureFiles}
-                        onChange={(e) => {
+                    <FluentSwitch checked={captureFiles} onChange={(e) => {
                           const val = e.target.checked;
                           setCaptureFiles(val);
                           invoke('set_capture_files', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1409,18 +1252,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">收集富文本排版</span>
                       <span className="fluent-setting-description">捕获文本的加粗、颜色等样式；双击可通过右键菜单粘回带格式文本</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={captureRichText}
-                        onChange={(e) => {
+                    <FluentSwitch checked={captureRichText} onChange={(e) => {
                           const val = e.target.checked;
                           setCaptureRichText(val);
                           invoke('set_capture_rich_text', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   {captureRichText && (
@@ -1429,35 +1265,22 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">富文本快照预览</span>
                         <span className="fluent-setting-description">将捕获的 HTML 渲染为临时内存图像以加快主列表显示速度，稍微增加内存占用</span>
                       </div>
-                      <label className="fluent-switch">
-                        <input
-                          type="checkbox"
-                          checked={richTextSnapshotPreview}
-                          onChange={(e) => {
+                      <FluentSwitch checked={richTextSnapshotPreview} onChange={(e) => {
                             setRichTextSnapshotPreview(e.target.checked);
                             saveAppSetting('rich_text_snapshot_preview', e.target.checked.toString());
-                          }}
-                        />
-                        <span className="fluent-slider" />
-                      </label>
+                          }}   />
                     </div>
                   )}
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Paste behavior expander */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['paste'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('paste')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['paste'])} onToggle={() => toggleExpander('paste')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">智能粘贴行为</span>
                   <span className="fluent-setting-description">配置双击历史条目后，应用与系统输入焦点之间的交互策略</span>
-                </div>
-                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['paste'] ? 'expanded' : ''}`} />
-              </div>
+                </div>} >
+
               {expandedCards['paste'] && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
@@ -1465,18 +1288,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">双击执行粘贴（单击仅选中）</span>
                       <span className="fluent-setting-description">开启后，单击条目仅高亮选中并激活右侧工具栏操作，双击直接执行粘贴；关闭则恢复单击直接粘贴</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={doubleClickToPaste}
-                        onChange={(e) => {
+                    <FluentSwitch checked={doubleClickToPaste} onChange={(e) => {
                           const val = e.target.checked;
                           setDoubleClickToPaste(val);
                           saveAppSetting('double_click_to_paste', val.toString());
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1506,17 +1322,10 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">单次粘贴立即销毁</span>
                       <span className="fluent-setting-description">历史内容粘贴一次后自动在数据库中删除；“已置顶”或“带标签”的内容除外</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={deleteAfterPaste}
-                        onChange={(e) => {
+                    <FluentSwitch checked={deleteAfterPaste} onChange={(e) => {
                           setDeleteAfterPaste(e.target.checked);
                           saveAppSetting('delete_after_paste', e.target.checked.toString());
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1524,17 +1333,10 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">最近粘贴历史重排序</span>
                       <span className="fluent-setting-description">粘贴历史项后，自动将其移动到主列表首位，方便后续连续多次使用</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={moveToTopAfterPaste}
-                        onChange={(e) => {
+                    <FluentSwitch checked={moveToTopAfterPaste} onChange={(e) => {
                           setMoveToTopAfterPaste(e.target.checked);
                           saveAppSetting('move_to_top_after_paste', e.target.checked.toString());
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1542,17 +1344,10 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">顺次粘贴队列</span>
                       <span className="fluent-setting-description">开启后，使用顺次粘贴快捷键可以按复制时间先后顺序依次进行粘贴</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={sequentialMode}
-                        onChange={(e) => {
+                    <FluentSwitch checked={sequentialMode} onChange={(e) => {
                           setSequentialModeState(e.target.checked);
                           invoke('set_sequential_mode', { enabled: e.target.checked }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   {sequentialMode && (
@@ -1573,36 +1368,20 @@ const SettingsWindow = () => {
                   )}
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Quick Tab Assign Expander */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['quickTabAssign'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('quickTabAssign')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['quickTabAssign'])} onToggle={() => toggleExpander('quickTabAssign')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">{t('quick_tab_assign_title') || '复制后快速归类到标签页'}</span>
                   <span className="fluent-setting-description">
                     {t('quick_tab_assign_desc') || '每次复制内容后的几秒内，可按下快捷键组合（修饰键 + 数字 1~9/0）将刚复制的条目直接归入对应顺序的标签页（完全按照标签页当前的排列顺序，可通过右键菜单调整标签页排序）'}
                   </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <label className="fluent-switch" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={quickTabAssignEnabled}
-                      onChange={(e) => {
+                </div>} actions={<><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><FluentSwitch checked={quickTabAssignEnabled} onChange={(e) => {
                         const val = e.target.checked;
                         setQuickTabAssignEnabled(val);
                         saveAppSetting('quick_tab_assign_enabled', String(val));
-                      }}
-                    />
-                    <span className="fluent-slider" />
-                  </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['quickTabAssign'] ? 'expanded' : ''}`} />
-                </div>
-              </div>
+                      }} onClick={(e) => e.stopPropagation()}  /></div></>}>
+
               {expandedCards['quickTabAssign'] && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
@@ -1648,7 +1427,7 @@ const SettingsWindow = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
           </div>
         )}
 
@@ -1662,33 +1441,20 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">敏感信息自动脱敏</span>
                 <span className="fluent-setting-description">自动在主窗口列表中模糊遮蔽密码、手机号、验证码、链接等敏感文本</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={privacyProtection}
-                  onChange={(e) => {
+              <FluentSwitch checked={privacyProtection} onChange={(e) => {
                     setPrivacyProtection(e.target.checked);
                     invoke('set_privacy_protection', { enabled: e.target.checked }).catch(console.error);
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             {privacyProtection && (
               <>
                 {/* Privacy types expander */}
-                <div className="fluent-setting-expander">
-                  <div
-                    className={`fluent-setting-expander-header ${expandedCards['privKinds'] ? 'expanded' : ''}`}
-                    onClick={() => toggleExpander('privKinds')}
-                  >
-                    <div className="fluent-setting-info">
+                <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['privKinds'])} onToggle={() => toggleExpander('privKinds')}  header={<div className="fluent-setting-info">
                       <span className="fluent-setting-title">脱敏信息识别类型</span>
                       <span className="fluent-setting-description">勾选触发自动脱敏过滤的内置字段；未勾选的种类将维持明文显示</span>
-                    </div>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['privKinds'] ? 'expanded' : ''}`} />
-                  </div>
+                    </div>} >
+
                   {expandedCards['privKinds'] && (
                     <div className="fluent-setting-expander-content" style={{ padding: "16px 24px" }}>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
@@ -1703,17 +1469,13 @@ const SettingsWindow = () => {
                           const checked = privacyProtectionKinds.includes(opt.id);
                           return (
                             <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: "pointer", fontSize: "13px" }}>
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={(e) => {
+                              <FluentCheckbox checked={checked} onChange={(e) => {
                                   const next = e.target.checked
                                     ? [...privacyProtectionKinds, opt.id]
                                     : privacyProtectionKinds.filter(t => t !== opt.id);
                                   setPrivacyProtectionKinds(next);
                                   invoke('set_privacy_protection_kinds', { kinds: next }).catch(console.error);
-                                }}
-                              />
+                                }} />
                               <span>{opt.label}</span>
                             </label>
                           );
@@ -1721,20 +1483,14 @@ const SettingsWindow = () => {
                       </div>
                     </div>
                   )}
-                </div>
+                </FluentSettingsExpander>
 
                 {/* Mask offsets expander */}
-                <div className="fluent-setting-expander">
-                  <div
-                    className={`fluent-setting-expander-header ${expandedCards['maskSettings'] ? 'expanded' : ''}`}
-                    onClick={() => toggleExpander('maskSettings')}
-                  >
-                    <div className="fluent-setting-info">
+                <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['maskSettings'])} onToggle={() => toggleExpander('maskSettings')}  header={<div className="fluent-setting-info">
                       <span className="fluent-setting-title">脱敏遮罩显示控制</span>
                       <span className="fluent-setting-description">配置敏感文本前后的明文保留位数，以及邮箱域名的脱敏策略</span>
-                    </div>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['maskSettings'] ? 'expanded' : ''}`} />
-                  </div>
+                    </div>} >
+
                   {expandedCards['maskSettings'] && (
                     <div className="fluent-setting-expander-content">
                       <div className="fluent-setting-card">
@@ -1774,34 +1530,21 @@ const SettingsWindow = () => {
                           <span className="fluent-setting-title">电子邮箱后缀脱敏</span>
                           <span className="fluent-setting-description">开启后将同步模糊电子邮箱中 @ 符号后的域名部分，进一步保障隐私</span>
                         </div>
-                        <label className="fluent-switch">
-                          <input
-                            type="checkbox"
-                            checked={sensitiveMaskEmailDomain}
-                            onChange={(e) => {
+                        <FluentSwitch checked={sensitiveMaskEmailDomain} onChange={(e) => {
                               setSensitiveMaskEmailDomain(e.target.checked);
                               invoke('save_setting', { key: 'app.sensitive_mask_email_domain', value: e.target.checked.toString() }).catch(console.error);
-                            }}
-                          />
-                          <span className="fluent-slider" />
-                        </label>
+                            }}   />
                       </div>
                     </div>
                   )}
-                </div>
+                </FluentSettingsExpander>
 
                 {/* Custom Rules */}
-                <div className="fluent-setting-expander">
-                  <div
-                    className={`fluent-setting-expander-header ${expandedCards['customPriv'] ? 'expanded' : ''}`}
-                    onClick={() => toggleExpander('customPriv')}
-                  >
-                    <div className="fluent-setting-info">
+                <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['customPriv'])} onToggle={() => toggleExpander('customPriv')}  header={<div className="fluent-setting-info">
                       <span className="fluent-setting-title">自定义正则屏蔽规则</span>
                       <span className="fluent-setting-description">使用正则表达式定义需保护的私有内容格式；凡命中规则的字符都将被自动遮罩</span>
-                    </div>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['customPriv'] ? 'expanded' : ''}`} />
-                  </div>
+                    </div>} >
+
                   {expandedCards['customPriv'] && (
                     <div className="fluent-setting-expander-content" style={{ padding: "12px" }}>
                       <textarea
@@ -1817,7 +1560,7 @@ const SettingsWindow = () => {
                       />
                     </div>
                   )}
-                </div>
+                </FluentSettingsExpander>
               </>
             )}
           </div>
@@ -1830,34 +1573,18 @@ const SettingsWindow = () => {
 
             {/* LAN File Server Expander */}
             {/* LAN File Server Expander */}
-            <div className={`fluent-setting-expander ${!fileServerEnabled ? 'disabled' : ''}`}>
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['lan'] && fileServerEnabled ? 'expanded' : ''} ${!fileServerEnabled ? 'disabled' : ''}`}
-                onClick={() => {
+            <FluentSettingsExpander className={`fluent-setting-expander ${!fileServerEnabled ? 'disabled' : ''}`} expanded={!!(expandedCards['lan'] && fileServerEnabled)} onToggle={() => {
                   if (fileServerEnabled) toggleExpander('lan');
-                }}
-              >
-                <div className="fluent-setting-info">
+                }} disabled={!fileServerEnabled} header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">局域网极速文件传输</span>
                   <span className="fluent-setting-description">开启本地文件传输网页，允许处于同一局域网的设备通过浏览器上传文件或聊天</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <label className="fluent-switch" onClick={e => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={fileServerEnabled}
-                      onChange={(e) => {
+                </div>} actions={<><div style={{ display: "flex", alignItems: "center", gap: "12px" }}><FluentSwitch checked={fileServerEnabled} onChange={(e) => {
                         const val = e.target.checked;
                         setFileServerEnabled(val);
                         const port = Number(fileServerPort);
                         invoke("toggle_file_server", { enabled: val, port: Number.isInteger(port) ? port : undefined });
-                      }}
-                    />
-                    <span className="fluent-slider" />
-                  </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['lan'] && fileServerEnabled ? 'expanded' : ''}`} />
-                </div>
-              </div>
+                      }} onClick={e => e.stopPropagation()}  /></div></>}>
+
               {expandedCards['lan'] && fileServerEnabled && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
@@ -1901,18 +1628,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">接收文件后展示列表</span>
                       <span className="fluent-setting-description">当本机接收到传输文件时，主界面自动弹窗展现局域网传输列表</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={fileTransferAutoOpen}
-                        onChange={(e) => {
+                    <FluentSwitch checked={fileTransferAutoOpen} onChange={(e) => {
                           const val = e.target.checked;
                           setFileTransferAutoOpen(val);
                           invoke('set_file_transfer_auto_open', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1920,18 +1640,11 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">空闲自动关闭机制</span>
                       <span className="fluent-setting-description">若连续 5 分钟没有任何文件接收活动且传输网页关闭，将自动关闭服务以节省资源</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={fileServerAutoClose}
-                        onChange={(e) => {
+                    <FluentSwitch checked={fileServerAutoClose} onChange={(e) => {
                           const val = e.target.checked;
                           setFileServerAutoClose(val);
                           invoke('set_file_server_auto_close', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card">
@@ -1939,24 +1652,17 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">文件接收完毕自动复制</span>
                       <span className="fluent-setting-description">局域网文件传输完成后，自动将该文件存入剪贴板首位以备随时粘贴</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={fileTransferAutoCopy}
-                        onChange={(e) => {
+                    <FluentSwitch checked={fileTransferAutoCopy} onChange={(e) => {
                           const val = e.target.checked;
                           setFileTransferAutoCopy(val);
                           invoke('set_auto_copy_file', { enabled: val }).catch(console.error);
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
 
                   <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                       <span className="fluent-setting-title">传输文件存储目录</span>
-                      <button
+                      <FluentButton
                         className="fluent-button"
                         onClick={async () => {
                           const { open } = await import("@tauri-apps/plugin-dialog");
@@ -1970,7 +1676,7 @@ const SettingsWindow = () => {
                         }}
                       >
                         更改路径
-                      </button>
+                      </FluentButton>
                     </div>
                     <div
                       className="fluent-value-display"
@@ -1984,18 +1690,13 @@ const SettingsWindow = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* MQTT Sync Expander */}
             {/* MQTT Sync Expander */}
-            <div className={`fluent-setting-expander ${!mqttEnabled ? 'disabled' : ''}`}>
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['mqtt'] && mqttEnabled ? 'expanded' : ''} ${!mqttEnabled ? 'disabled' : ''}`}
-                onClick={() => {
+            <FluentSettingsExpander className={`fluent-setting-expander ${!mqttEnabled ? 'disabled' : ''}`} expanded={!!(expandedCards['mqtt'] && mqttEnabled)} onToggle={() => {
                   if (mqttEnabled) toggleExpander('mqtt');
-                }}
-              >
-                <div className="fluent-setting-info">
+                }} disabled={!mqttEnabled} header={<div className="fluent-setting-info">
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span className="fluent-setting-title">MQTT 跨端同步服务</span>
                     {mqttEnabled && (
@@ -2008,23 +1709,12 @@ const SettingsWindow = () => {
                     )}
                   </div>
                   <span className="fluent-setting-description">基于 MQTT 代理服务器，在多端设备间进行剪贴板历史及短信验证码的低延迟同步</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <label className="fluent-switch" onClick={e => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={mqttEnabled}
-                      onChange={(e) => {
+                </div>} actions={<><div style={{ display: "flex", alignItems: "center", gap: "12px" }}><FluentSwitch checked={mqttEnabled} onChange={(e) => {
                         const val = e.target.checked;
                         setMqttEnabled(val);
                         saveMqtt('mqtt_enabled', String(val));
-                      }}
-                    />
-                    <span className="fluent-slider" />
-                  </label>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['mqtt'] && mqttEnabled ? 'expanded' : ''}`} />
-                </div>
-              </div>
+                      }} onClick={e => e.stopPropagation()}  /></div></>}>
+
               {expandedCards['mqtt'] && mqttEnabled && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card">
@@ -2154,32 +1844,20 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">同步成功系统通知</span>
                       <span className="fluent-setting-description">当其他设备成功同步了新短信验证码或文本时，在系统右下角弹出气泡提醒</span>
                     </div>
-                    <label className="fluent-switch">
-                      <input
-                        type="checkbox"
-                        checked={mqttNotificationEnabled}
-                        onChange={(e) => {
+                    <FluentSwitch checked={mqttNotificationEnabled} onChange={(e) => {
                           setMqttNotificationEnabled(e.target.checked);
                           saveMqtt('mqtt_notification_enabled', String(e.target.checked));
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
+                        }}   />
                   </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Cloud sync WebDAV expander */}
             {CLOUD_SYNC_ENABLED && (
-              <div className={`fluent-setting-expander ${!cloudSyncEnabled ? 'disabled' : ''}`}>
-                <div
-                  className={`fluent-setting-expander-header ${expandedCards['cloud'] && cloudSyncEnabled ? 'expanded' : ''} ${!cloudSyncEnabled ? 'disabled' : ''}`}
-                  onClick={() => {
+              <FluentSettingsExpander className={`fluent-setting-expander ${!cloudSyncEnabled ? 'disabled' : ''}`} expanded={!!(expandedCards['cloud'] && cloudSyncEnabled)} onToggle={() => {
                     if (cloudSyncEnabled) toggleExpander('cloud');
-                  }}
-                >
-                  <div className="fluent-setting-info">
+                  }} disabled={!cloudSyncEnabled} header={<div className="fluent-setting-info">
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span className="fluent-setting-title">WebDAV 跨端数据云同步</span>
                       {cloudSyncEnabled && (
@@ -2192,23 +1870,12 @@ const SettingsWindow = () => {
                       )}
                     </div>
                     <span className="fluent-setting-description">支持将本地剪贴板数据加密上传备份至坚果云、Nextcloud 等 WebDAV 云盘，并在多端同步</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <label className="fluent-switch" onClick={e => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={cloudSyncEnabled}
-                        onChange={(e) => {
+                  </div>} actions={<><div style={{ display: "flex", alignItems: "center", gap: "12px" }}><FluentSwitch checked={cloudSyncEnabled} onChange={(e) => {
                           const val = e.target.checked;
                           setCloudSyncEnabled(val);
                           saveCloudSync('cloud_sync_enabled', String(val));
-                        }}
-                      />
-                      <span className="fluent-slider" />
-                    </label>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['cloud'] && cloudSyncEnabled ? 'expanded' : ''}`} />
-                  </div>
-                </div>
+                        }} onClick={e => e.stopPropagation()}  /></div></>}>
+
                 {expandedCards['cloud'] && cloudSyncEnabled && (
                   <div className="fluent-setting-expander-content">
                     <div className="fluent-setting-card">
@@ -2216,17 +1883,10 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">后台定时静默同步</span>
                         <span className="fluent-setting-description">在后台周期性自动执行本地历史记录与云端备份数据库的合并校准</span>
                       </div>
-                      <label className="fluent-switch">
-                        <input
-                          type="checkbox"
-                          checked={cloudSyncAuto}
-                          onChange={(e) => {
+                      <FluentSwitch checked={cloudSyncAuto} onChange={(e) => {
                             setCloudSyncAuto(e.target.checked);
                             saveCloudSync('cloud_sync_auto', String(e.target.checked));
-                          }}
-                        />
-                        <span className="fluent-slider" />
-                      </label>
+                          }}   />
                     </div>
 
                     {cloudSyncAuto && (
@@ -2354,17 +2014,17 @@ const SettingsWindow = () => {
                         <span className="fluent-setting-title">强制全量数据同步</span>
                         <span className="fluent-setting-description">立即手动触发一次本地数据与云端备份文件的强力合并与比对</span>
                       </div>
-                      <button
+                      <FluentButton
                         className="fluent-button"
                         disabled={cloudSyncNowRunning || cloudSyncStatus.state === "syncing"}
                         onClick={handleCloudSyncNow}
                       >
                         {cloudSyncNowRunning ? "同步中..." : "立即同步"}
-                      </button>
+                      </FluentButton>
                     </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
           )}
           </div>
         )}
@@ -2379,33 +2039,20 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">启用内置 AI 助手功能</span>
                 <span className="fluent-setting-description">在条目右键菜单中加入大模型处理入口，支持对剪贴板内容进行快速翻译、解释或润色</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={aiEnabled}
-                  onChange={(e) => {
+              <FluentSwitch checked={aiEnabled} onChange={(e) => {
                     setAiEnabled(e.target.checked);
                     saveSetting('ai_enabled', String(e.target.checked));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             {aiEnabled && (
               <>
                 {/* Model Profiles Management */}
-                <div className="fluent-setting-expander">
-                  <div
-                    className={`fluent-setting-expander-header ${expandedCards['aiModels'] ? 'expanded' : ''}`}
-                    onClick={() => toggleExpander('aiModels')}
-                  >
-                    <div className="fluent-setting-info">
+                <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['aiModels'])} onToggle={() => toggleExpander('aiModels')}  header={<div className="fluent-setting-info">
                       <span className="fluent-setting-title">模型库配置管理</span>
                       <span className="fluent-setting-description">添加、修改并测试第三方兼容 OpenAI/Claude 的大模型连接端点和 API 密钥</span>
-                    </div>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['aiModels'] ? 'expanded' : ''}`} />
-                  </div>
+                    </div>} >
+
                   {expandedCards['aiModels'] && (
                     <div className="fluent-setting-expander-content">
                       <div className="fluent-model-list">
@@ -2463,20 +2110,14 @@ const SettingsWindow = () => {
                       </div>
                     </div>
                   )}
-                </div>
+                </FluentSettingsExpander>
 
                 {/* Strategy binding */}
-                <div className="fluent-setting-expander">
-                  <div
-                    className={`fluent-setting-expander-header ${expandedCards['aiStrategy'] ? 'expanded' : ''}`}
-                    onClick={() => toggleExpander('aiStrategy')}
-                  >
-                    <div className="fluent-setting-info">
+                <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['aiStrategy'])} onToggle={() => toggleExpander('aiStrategy')}  header={<div className="fluent-setting-info">
                       <span className="fluent-setting-title">功能场景模型绑定</span>
                       <span className="fluent-setting-description">分别为智能任务执行、对话多端嘴替、快速翻译三个场景分配专属的模型配置</span>
-                    </div>
-                    <ChevronDown size={16} className={`fluent-chevron ${expandedCards['aiStrategy'] ? 'expanded' : ''}`} />
-                  </div>
+                    </div>} >
+
                   {expandedCards['aiStrategy'] && (
                     <div className="fluent-setting-expander-content">
                       {[
@@ -2505,7 +2146,7 @@ const SettingsWindow = () => {
                       ))}
                     </div>
                   )}
-                </div>
+                </FluentSettingsExpander>
 
                 {/* Translations and budget */}
                 <div className="fluent-setting-card">
@@ -2664,17 +2305,10 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">显示条目来源图标</span>
                 <span className="fluent-setting-description">在剪贴板条目左侧展示其所属的原程序图标</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={showSourceAppIcon}
-                  onChange={(e) => {
+              <FluentSwitch checked={showSourceAppIcon} onChange={(e) => {
                     setShowSourceAppIcon(e.target.checked);
                     saveAppSetting('show_source_app_icon', String(e.target.checked));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             <div className="fluent-setting-card">
@@ -2682,31 +2316,18 @@ const SettingsWindow = () => {
                 <span className="fluent-setting-title">紧凑排列列表模式</span>
                 <span className="fluent-setting-description">缩减条目的边距，大幅增加单屏所能展示的记录条数</span>
               </div>
-              <label className="fluent-switch">
-                <input
-                  type="checkbox"
-                  checked={compactMode}
-                  onChange={(e) => {
+              <FluentSwitch checked={compactMode} onChange={(e) => {
                     setCompactMode(e.target.checked);
                     saveAppSetting('compact_mode', String(e.target.checked));
-                  }}
-                />
-                <span className="fluent-slider" />
-              </label>
+                  }}   />
             </div>
 
             {/* Font slider expander */}
-            <div className="fluent-setting-expander">
-              <div
-                className={`fluent-setting-expander-header ${expandedCards['fonts'] ? 'expanded' : ''}`}
-                onClick={() => toggleExpander('fonts')}
-              >
-                <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['fonts'])} onToggle={() => toggleExpander('fonts')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">字体字号偏好调整</span>
                   <span className="fluent-setting-description">微调主界面和标签中文字的可读性字号</span>
-                </div>
-                <ChevronDown size={16} className={`fluent-chevron ${expandedCards['fonts'] ? 'expanded' : ''}`} />
-              </div>
+                </div>} >
+
               {expandedCards['fonts'] && (
                 <div className="fluent-setting-expander-content">
                   <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "6px" }}>
@@ -2714,20 +2335,13 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">条目文字大小</span>
                       <span style={{ fontSize: "11px" }}>{clipboardItemFontSize}px</span>
                     </div>
-                    <input
-                      type="range"
-                      className="fluent-range"
-                      min="11" max="18" step="1"
-                      value={clipboardItemFontSize}
-                      onChange={(e) => {
+                    <FluentSlider min="11" max="18" step="1" value={clipboardItemFontSize} onChange={(e) => {
                         const val = parseInt(e.target.value);
                         setClipboardItemFontSize(val);
                         saveAppSetting('clipboard_item_font_size', String(val));
-                      }}
-                      style={{
+                      }} style={{
                         ['--range-progress' as any]: `${((clipboardItemFontSize - 11) / 7) * 100}%`
-                      }}
-                    />
+                      }} />
                   </div>
 
                   <div className="fluent-setting-card" style={{ flexDirection: "column", alignItems: "stretch", gap: "6px" }}>
@@ -2735,38 +2349,25 @@ const SettingsWindow = () => {
                       <span className="fluent-setting-title">标签字号大小</span>
                       <span style={{ fontSize: "11px" }}>{clipboardTagFontSize}px</span>
                     </div>
-                    <input
-                      type="range"
-                      className="fluent-range"
-                      min="8" max="14" step="1"
-                      value={clipboardTagFontSize}
-                      onChange={(e) => {
+                    <FluentSlider min="8" max="14" step="1" value={clipboardTagFontSize} onChange={(e) => {
                         const val = parseInt(e.target.value);
                         setClipboardTagFontSize(val);
                         saveAppSetting('clipboard_tag_font_size', String(val));
-                      }}
-                      style={{
+                      }} style={{
                         ['--range-progress' as any]: `${((clipboardTagFontSize - 8) / 6) * 100}%`
-                      }}
-                    />
+                      }} />
                   </div>
                 </div>
               )}
-            </div>
+            </FluentSettingsExpander>
 
             {/* Window background transparent expander */}
             {(supportsCustomBackground(theme) || supportsSurfaceOpacity(theme)) && (
-              <div className="fluent-setting-expander">
-                <div
-                  className={`fluent-setting-expander-header ${expandedCards['transparent'] ? 'expanded' : ''}`}
-                  onClick={() => toggleExpander('transparent')}
-                >
-                  <div className="fluent-setting-info">
+              <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['transparent'])} onToggle={() => toggleExpander('transparent')}  header={<div className="fluent-setting-info">
                     <span className="fluent-setting-title">亚克力玻璃与背景自定义</span>
                     <span className="fluent-setting-description">自定义半透明玻璃板的磨砂值或选定壁纸大图</span>
-                  </div>
-                  <ChevronDown size={16} className={`fluent-chevron ${expandedCards['transparent'] ? 'expanded' : ''}`} />
-                </div>
+                  </div>} >
+
                 {expandedCards['transparent'] && (
                   <div className="fluent-setting-expander-content">
                     {supportsCustomBackground(theme) && (
@@ -2774,7 +2375,7 @@ const SettingsWindow = () => {
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span className="fluent-setting-title">自定义背景壁纸图片</span>
                           <div style={{ display: "flex", gap: "4px" }}>
-                            <button
+                            <FluentButton
                               className="fluent-button"
                               onClick={async () => {
                                 const { open, message } = await import("@tauri-apps/plugin-dialog");
@@ -2798,9 +2399,9 @@ const SettingsWindow = () => {
                               }}
                             >
                               {customBackground ? "更换背景" : "选择背景"}
-                            </button>
+                            </FluentButton>
                             {customBackground && (
-                              <button
+                              <FluentButton
                                 className="fluent-button"
                                 style={{ color: "#f44336" }}
                                 onClick={() => {
@@ -2809,7 +2410,7 @@ const SettingsWindow = () => {
                                 }}
                               >
                                 清除
-                              </button>
+                              </FluentButton>
                             )}
                           </div>
                         </div>
@@ -2823,20 +2424,13 @@ const SettingsWindow = () => {
                                 <span className="fluent-setting-title">壁纸图片不透明度</span>
                                 <span style={{ fontSize: "11px" }}>{customBackgroundOpacity}%</span>
                               </div>
-                              <input
-                                type="range"
-                                className="fluent-range"
-                                min="0" max="100"
-                                value={customBackgroundOpacity}
-                                onChange={(e) => {
+                              <FluentSlider min="0" max="100" value={customBackgroundOpacity} onChange={(e) => {
                                   const val = parseInt(e.target.value);
                                   setCustomBackgroundOpacity(val);
                                   saveAppSetting('custom_background_opacity', String(val));
-                                }}
-                                style={{
+                                }} style={{
                                   ['--range-progress' as any]: `${customBackgroundOpacity}%`
-                                }}
-                              />
+                                }} />
                             </div>
                           </>
                         )}
@@ -2849,25 +2443,18 @@ const SettingsWindow = () => {
                           <span className="fluent-setting-title">主程序界面底板不透明度</span>
                           <span style={{ fontSize: "11px" }}>{surfaceOpacity}%</span>
                         </div>
-                        <input
-                          type="range"
-                          className="fluent-range"
-                          min="0" max="100"
-                          value={surfaceOpacity}
-                          onChange={(e) => {
+                        <FluentSlider min="0" max="100" value={surfaceOpacity} onChange={(e) => {
                             const val = parseInt(e.target.value);
                             setSurfaceOpacity(val);
                             saveAppSetting('surface_opacity', String(val));
-                          }}
-                          style={{
+                          }} style={{
                             ['--range-progress' as any]: `${surfaceOpacity}%`
-                          }}
-                        />
+                          }} />
                       </div>
                     )}
                   </div>
                 )}
-              </div>
+              </FluentSettingsExpander>
             )}
           </div>
         )}

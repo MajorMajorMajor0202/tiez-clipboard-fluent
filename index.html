@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TieZ</title>
+    <style>
+      html:root.settings-startup, html:root.settings-startup body, html:root.settings-startup #root,
+      html:root.settings-startup body.is-settings-window, html:root.settings-startup body.is-settings-window #root {
+        background-color: var(--settings-startup-background, #202020) !important;
+      }
+    </style>
+    <script>
+      // Run before the module/CSS bundle: even a delayed WebView first paint is opaque.
+      if (new URLSearchParams(location.search).get('window') === 'settings') {
+        var startupMode = new URLSearchParams(location.search).get('color_mode');
+        var startupDark = startupMode === 'dark' || (startupMode !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.style.setProperty('--settings-startup-background', startupDark ? '#202020' : '#f3f3f3');
+        document.documentElement.classList.add('settings-startup');
+      }
+    </script>
     <script>
       window.addEventListener('error', function(e) {
         var msg = '[JS_ERROR] ' + (e.error ? (e.error.stack || e.error.message) : e.message) + ' (' + e.filename + ':' + e.lineno + ')';

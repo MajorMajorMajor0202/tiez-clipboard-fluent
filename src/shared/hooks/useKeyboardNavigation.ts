@@ -6,6 +6,7 @@ import type { RefObject } from "react";
 import { matchesHotkey } from "./useHotkeyMatching";
 import { useWindowVisibility } from "./useWindowVisibility";
 import type { ClipboardEntry } from "../types";
+import { isControlKeyboardTarget } from "../lib/controlKeyboardScope";
 
 interface UseKeyboardNavigationOptions {
   filteredHistory: ClipboardEntry[];
@@ -75,6 +76,7 @@ export const useKeyboardNavigation = ({
 
     const handleKeyDown = async (e: KeyboardEvent) => {
       if (!isWindowVisibleRef.current) return;
+      if (e.defaultPrevented || isControlKeyboardTarget(e.target)) return;
       if (isPastingLocal) {
         e.preventDefault();
         e.stopPropagation();
@@ -180,13 +182,18 @@ export const useKeyboardNavigation = ({
     const handleInteraction = () => {
       setIsKeyboardMode(false);
     };
+    const handleControlFocus = (event: FocusEvent) => {
+      if (isControlKeyboardTarget(event.target)) setIsKeyboardMode(false);
+    };
 
     window.addEventListener("keydown", handleKeyDown, true);
     window.addEventListener("mousedown", handleInteraction);
+    window.addEventListener("focusin", handleControlFocus);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
       window.removeEventListener("mousedown", handleInteraction);
+      window.removeEventListener("focusin", handleControlFocus);
     };
   }, [searchInputRef, setIsKeyboardMode, setSelectedIndex]);
 
@@ -195,6 +202,7 @@ export const useKeyboardNavigation = ({
     let isCleanedUp = false;
 
     listen<string>("navigation-action", async (event) => {
+      if (isControlKeyboardTarget(document.activeElement) || document.querySelector("[role='dialog']")) return;
       try {
         const isVisible = await getCurrentWindow().isVisible();
         if (!isVisible) return;

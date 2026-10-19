@@ -1,7 +1,10 @@
+import FluentSettingsExpander from "../../../../shared/components/FluentSettingsExpander";
+import FluentSwitch from "../../../../shared/components/FluentSwitch";
+import FluentButton from "../../../../shared/components/FluentButton";
 import { useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ChevronDown, ChevronUp, Plus, Trash2, Search, X } from "lucide-react";
+import { Plus, Trash2, Search, X } from "lucide-react";
 import type { InstalledAppOption } from "../../../app/types";
 import type { AppCleanupPolicy } from "../../types";
 import { getTagColor } from "../../../../shared/lib/utils";
@@ -213,7 +216,7 @@ const AdvancedSettingsGroup = ({
         const nextPolicies = appCleanupPolicies.filter(p => (
             p.id !== target.policyId && (p.appPath !== target.appPath || !target.appPath)
         ));
-        
+
         persistAppPolicies(nextPolicies);
     };
 
@@ -269,7 +272,7 @@ const AdvancedSettingsGroup = ({
         const existingIndex = appCleanupPolicies.findIndex((policy) => (
             target.policyId ? policy.id === target.policyId : policy.appPath === (target.appPath ?? "")
         ));
-        
+
         if (existingIndex < 0) return;
 
         const nextPolicies = [...appCleanupPolicies];
@@ -331,15 +334,15 @@ const AdvancedSettingsGroup = ({
                             </span>
                         </div>
                         <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
-                            <button
+                            <FluentButton
                                 type="button"
                                 className="fluent-button"
                                 style={{ padding: "6px 12px", fontSize: "12px", border: "none", background: "transparent", cursor: "pointer" }}
                                 onClick={() => openEditModal(target, idx)}
                             >
                                 编辑
-                            </button>
-                            <button
+                            </FluentButton>
+                            <FluentButton
                                 type="button"
                                 className="fluent-button"
                                 style={{ padding: "6px", color: "#ef4444", border: "none", background: "transparent", cursor: "pointer" }}
@@ -347,7 +350,7 @@ const AdvancedSettingsGroup = ({
                                 title="删除规则"
                             >
                                 <Trash2 size={14} />
-                            </button>
+                            </FluentButton>
                         </div>
                     </div>
                 ))}
@@ -430,35 +433,19 @@ const AdvancedSettingsGroup = ({
             <div className="fluent-section-title" style={{ margin: "12px 0 6px 0" }}>全局策略</div>
 
             {/* 全局折叠卡片 */}
-            <div className="fluent-setting-expander">
-                <div
-                    className={`fluent-setting-expander-header ${isGlobalExpanded ? "expanded" : ""}`}
-                    onClick={() => toggleCard("global")}
-                >
-                    <div className="fluent-setting-info">
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(isGlobalExpanded)} onToggle={() => toggleCard("global")}  header={<div className="fluent-setting-info">
                         <span className="fluent-setting-title">全局清洗规则</span>
                         <span className="fluent-setting-description">对所有未配置专属策略的应用生效</span>
-                    </div>
-                    <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
-                        {globalTarget.ruleCount > 0 && (
+                    </div>} actions={<><div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>{globalTarget.ruleCount > 0 && (
                             <span className="fluent-setting-badge">{globalTarget.ruleCount} 条规则</span>
-                        )}
-                        <button
-                            type="button"
-                            className="fluent-hotkey-recorder"
-                            style={{ height: "32px", padding: "0 8px" }}
-                            onClick={() => toggleCard("global")}
-                        >
-                            {isGlobalExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </button>
-                    </div>
-                </div>
+                        )}</div></>}>
+
                 {isGlobalExpanded && (
                     <div className="fluent-setting-expander-content">
                         {renderRulesSection(globalTarget)}
                     </div>
                 )}
-            </div>
+            </FluentSettingsExpander>
 
             {appTargets.length > 0 && (
                 <>
@@ -469,12 +456,7 @@ const AdvancedSettingsGroup = ({
                         const isRecordEnabled = policy ? policy.action !== "ignore" : true;
 
                         return (
-                            <div key={target.id} className="fluent-setting-expander">
-                                <div
-                                    className={`fluent-setting-expander-header ${isExpanded ? "expanded" : ""}`}
-                                    onClick={() => toggleCard(target.id)}
-                                >
-                                    <div className="fluent-setting-info" style={{ flexDirection: "row", alignItems: "center", gap: "10px" }}>
+                            <FluentSettingsExpander className="fluent-setting-expander" key={target.id} expanded={!!(isExpanded)} onToggle={() => toggleCard(target.id)}  header={<div className="fluent-setting-info" style={{ flexDirection: "row", alignItems: "center", gap: "10px" }}>
                                         <div
                                             className="target-color-dot"
                                             style={{
@@ -489,31 +471,17 @@ const AdvancedSettingsGroup = ({
                                             <span className="fluent-setting-title">{target.label}</span>
                                             <span className="fluent-setting-description" style={{ wordBreak: "break-all" }}>{target.appPath}</span>
                                         </div>
-                                    </div>
-                                    <div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>
-                                        {!isRecordEnabled ? (
+                                    </div>} actions={<><div className="fluent-setting-control" onClick={(e) => e.stopPropagation()}>{!isRecordEnabled ? (
                                             <span className="fluent-setting-badge ignore">忽略记录</span>
                                         ) : target.ruleCount > 0 ? (
                                             <span className="fluent-setting-badge">{target.ruleCount} 条规则</span>
-                                        ) : null}
-                                        <button
-                                            type="button"
-                                            className="fluent-hotkey-recorder"
-                                            style={{ height: "32px", padding: "0 8px" }}
-                                            onClick={() => toggleCard(target.id)}
-                                        >
-                                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                        </button>
-                                        <button
+                                        ) : null}<FluentButton
                                             type="button"
                                             className="fluent-button"
                                             style={{ padding: "6px 8px", color: "#ef4444", height: "32px", border: "none", background: "transparent" }}
                                             onClick={(e) => handleDeleteTarget(e, target)}
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                </div>
+                                        ><Trash2 size={14} /></FluentButton></div></>}>
+
 
                                 {isExpanded && (
                                     <div className="fluent-setting-expander-content">
@@ -527,20 +495,13 @@ const AdvancedSettingsGroup = ({
                                                     }
                                                 </span>
                                             </div>
-                                            <label className="fluent-switch" style={{ flexShrink: 0 }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isRecordEnabled}
-                                                    onChange={() => toggleTargetAction(target)}
-                                                />
-                                                <span className="fluent-slider" />
-                                            </label>
+                                            <FluentSwitch checked={isRecordEnabled} onChange={() => toggleTargetAction(target)} style={{ flexShrink: 0 }}  />
                                         </div>
 
                                         {isRecordEnabled && renderRulesSection(target)}
                                     </div>
                                 )}
-                            </div>
+                            </FluentSettingsExpander>
                         );
                     })}
                 </>

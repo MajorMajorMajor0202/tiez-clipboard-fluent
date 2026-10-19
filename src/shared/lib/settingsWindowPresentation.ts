@@ -5,6 +5,8 @@ export interface SettingsWindowPresentation {
   focus: () => Promise<void>;
   hideMain: () => Promise<unknown>;
   cancelled?: () => boolean;
+  settle?: () => Promise<void>;
+  releaseFallback?: () => void;
 }
 
 export async function presentSettingsWindow(steps: SettingsWindowPresentation) {
@@ -14,6 +16,8 @@ export async function presentSettingsWindow(steps: SettingsWindowPresentation) {
   await steps.show();
   await steps.hideMain();
   await steps.focus();
+  await steps.settle?.();
+  if (!steps.cancelled?.()) steps.releaseFallback?.();
 }
 
 export function waitForSettingsPaint(): Promise<void> {

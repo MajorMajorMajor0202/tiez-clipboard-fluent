@@ -19,14 +19,37 @@ export function useSettingsWindowPresentation(ready: boolean, theme: string, col
       if (disposed || running || !current.current.ready) return;
       running = true;
       const win = getCurrentWindow();
+      const root = document.documentElement;
+      const dark = current.current.colorMode === "dark" || (current.current.colorMode === "system" && root.classList.contains("dark-mode"));
+      root.style.setProperty("--settings-startup-background", dark ? "#202020" : "#f3f3f3");
+      root.classList.add("settings-startup");
+      let materialReady = false;
+      const applyTheme = async () => {
+        try {
+          await invoke("set_theme", { theme: current.current.theme, colorMode: current.current.colorMode });
+          materialReady = true;
+        } catch (error) {
+          materialReady = false;
+          console.error("Settings material unavailable; keeping opaque fallback", error);
+        }
+      };
       try {
         await presentSettingsWindow({
-          applyTheme: () => invoke("set_theme", { theme: current.current.theme, colorMode: current.current.colorMode }),
+          applyTheme,
           paint: waitForSettingsPaint,
           show: () => win.show(),
           hideMain: () => invoke("hide_window_cmd", { restoreFocus: false }),
           focus: () => win.setFocus(),
           cancelled: () => disposed,
+          settle: async () => {
+            // DWM may discard material applied while hidden. Reapply after show
+            // messages have been composed; retain the solid first-frame surface.
+            await new Promise(resolve => setTimeout(resolve, 150));
+            if (disposed) return;
+            await applyTheme();
+            await waitForSettingsPaint();
+          },
+          releaseFallback: () => { if (materialReady) root.classList.remove("settings-startup"); },
         });
         if (!disposed) presented.current = true;
       } catch (error) {

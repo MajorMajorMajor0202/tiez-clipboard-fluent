@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { chromium } from "playwright";
 import { createServer } from "vite";
 
@@ -67,24 +67,18 @@ try {
   await page.getByRole("button", { name: "切换主题" }).click();
   await dropdown.click();
   await page.getByRole("listbox").waitFor({ state: "visible" });
-  // Normalize theme hex and computed RGB before comparing the portaled surface.
-  assert.equal(await page.getByRole("listbox").evaluate((el) => {
-      const probe = document.createElement("div");
-      probe.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue("--bg-input");
-      document.body.appendChild(probe);
-      const expected = getComputedStyle(probe).backgroundColor;
-      probe.remove();
-      return getComputedStyle(el).backgroundColor === expected;
-  }), true, "portaled options inherit the active theme");
+  assert.equal(await page.getByRole("listbox").evaluate(el => getComputedStyle(el).backgroundColor), "rgb(45, 45, 45)", "popup matches Tag Manager's dark Fluent surface");
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 320, height: 600 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "narrow window fits");
   await dropdown.click();
   await page.getByRole("listbox").waitFor({ state: "visible" });
   await page.waitForFunction(() => {
-    const popup = document.querySelector('[role="listbox"]');
+    const row = document.querySelector('[role="option"][aria-selected="true"]');
     const trigger = document.querySelector('[role="combobox"]');
-    return popup && trigger && popup.getBoundingClientRect().top >= trigger.getBoundingClientRect().bottom - 2;
+    if (!row || !trigger) return false;
+    const a = row.getBoundingClientRect(), b = trigger.getBoundingClientRect();
+    return Math.abs(a.top + a.height / 2 - b.top - b.height / 2) < 3;
   });
   // A pointer action waits for the scale-in animation to settle before capture.
   await page.getByRole("option", { name: "Alt", exact: true }).hover();
@@ -93,11 +87,129 @@ try {
   await mkdir("artifacts/fluent-components", { recursive: true });
   await page.screenshot({ path: "artifacts/fluent-components/dark-narrow.png" });
   await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 480, height: 700 });
+  await page.evaluate(() => document.documentElement.style.setProperty("--accent-color", "#d13a80"));
+  const keep = page.getByRole("switch", { name: "保留工作区材料" });
+  await keep.focus(); await page.keyboard.press("Space");
+  assert.equal(await keep.isChecked(), true, "Space toggles a labelled setting switch");
+  await keep.hover();
+  await page.waitForFunction(() => {
+    const input = document.querySelector('[role="switch"]');
+    const color = getComputedStyle(input.parentElement.querySelector('.fui-Switch__indicator')).backgroundColor;
+    return color !== "rgb(15, 108, 189)" && color !== "rgb(98, 171, 245)";
+  });
+  const assertAccent = async () => {
+    await page.waitForFunction(input => {
+      const probe = document.createElement("span");
+      const mix = document.documentElement.classList.contains("dark-mode") ? "white" : "black";
+      probe.style.color = `color-mix(in srgb, var(--accent-color) 88%, ${mix})`;
+      input.parentElement.appendChild(probe);
+      const expected = getComputedStyle(probe).color;
+      probe.remove();
+      return getComputedStyle(input.parentElement.querySelector('.fui-Switch__indicator')).backgroundColor === expected;
+    }, await keep.elementHandle());
+  };
+  await assertAccent();
+  await page.getByRole("button", { name: "切换主题" }).click();
+  await keep.hover(); await assertAccent();
+  await page.getByRole("button", { name: "切换主题" }).click();
+  await keep.focus(); await page.keyboard.press("Space");
+  assert.equal(await keep.isChecked(), false);
+  assert.equal(await page.getByRole("switch", { name: "禁用开关" }).isDisabled(), true);
+  const checkbox = page.getByRole("checkbox", { name: "包括标签" });
+  await checkbox.check(); assert.equal(await keep.isChecked(), true);
+  const slider = page.getByRole("slider", { name: "提示音量" });
+  await slider.focus(); await page.keyboard.press("Home");
+  assert.equal(await slider.inputValue(), "0");
+  await page.keyboard.press("ArrowRight");
+  assert.equal(await page.getByTestId("volume").textContent(), "0.01");
+  await page.keyboard.press("End");
+  assert.equal(await slider.inputValue(), "1");
+  const bounds = await slider.boundingBox();
+  await slider.click({ position: { x: bounds.width * 0.75, y: bounds.height / 2 } });
+  assert.ok(Number(await slider.inputValue()) > 0.6 && Number(await slider.inputValue()) < 0.9, "pointer adjusts slider");
+  const spin = page.getByRole("spinbutton", { name: "历史容量" });
+  await spin.fill("99"); await spin.press("Tab");
+  assert.equal(await spin.inputValue(), "10", "numeric commit clamps max");
+  await spin.fill(""); await spin.press("Tab");
+  assert.equal(await spin.inputValue(), "1", "blank numeric commit falls back to min");
+  await spin.focus(); await spin.press("ArrowUp");
+  assert.equal(await spin.inputValue(), "2");
+  await page.getByRole("button", { name: "增加", exact: true }).click();
+  assert.equal(await spin.inputValue(), "3", "official spin buttons adjust value");
+  const expander = page.getByRole("button", { name: "高级选项" });
+  await expander.focus(); await expander.press("Enter");
+  assert.equal(await expander.getAttribute("aria-expanded"), "true");
+  await page.getByRole("button", { name: "展开后的操作" }).waitFor({ state: "visible" });
+  await expander.press("Space");
+  assert.equal(await expander.getAttribute("aria-expanded"), "false");
+  const soundHeader = page.getByRole("button", { name: "提示音设置" });
+  assert.equal(await soundHeader.isDisabled(), true);
+  const soundSwitch = page.getByRole("switch", { name: "提示音设置" });
+  await soundSwitch.focus(); await soundSwitch.press("Space");
+  assert.equal(await soundHeader.isDisabled(), false);
+  assert.equal(await soundHeader.getAttribute("aria-expanded"), "false", "switch does not also expand its row");
+  assert.equal(await page.locator("button button, button input").count(), 0, "no nested interactive controls");
+  assert.equal(await page.getByRole("button", { name: "正在保存" }).isDisabled(), true);
+  assert.equal(await page.getByRole("button", { name: "正在保存" }).getAttribute("aria-busy"), "true");
+  const danger = page.getByRole("button", { name: "删除材料", exact: true });
+  assert.equal(await danger.evaluate(el => getComputedStyle(el).backgroundColor), "rgb(196, 43, 28)", "danger button remains red");
+  assert.equal(await danger.evaluate(el => getComputedStyle(el).color), "rgb(255, 255, 255)");
+  const opener = page.getByRole("button", { name: "打开对话框", exact: true });
+  await opener.click();
+  const dialog = page.getByRole("dialog", { name: "处理材料", exact: true });
+  await dialog.waitFor({ state: "visible" });
+  assert.equal(await dialog.evaluate(el => el.contains(document.activeElement)), true, "opening moves focus into dialog");
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press("Tab");
+    assert.equal(await dialog.evaluate(el => el.contains(document.activeElement)), true, "Tab stays inside modal");
+  }
+  await page.keyboard.press("Shift+Tab");
+  assert.equal(await dialog.evaluate(el => el.contains(document.activeElement)), true);
+  await page.getByRole("combobox", { name: "输出格式" }).click();
+  await page.keyboard.press("Escape");
+  assert.equal(await dialog.isVisible(), true, "first Escape closes only dropdown");
+  assert.equal(await page.getByRole("listbox").count(), 0);
+  await page.getByRole("button", { name: "打开子对话框" }).click();
+  await page.getByRole("dialog", { name: "子对话框", exact: true }).waitFor({ state: "visible" });
+  await page.keyboard.press("Escape");
+  await page.getByRole("dialog", { name: "子对话框", exact: true }).waitFor({ state: "hidden" });
+  assert.equal(await dialog.isVisible(), true, "nested Escape preserves parent dialog");
+  await page.waitForFunction(() => document.activeElement?.textContent === "打开子对话框");
+  await page.keyboard.press("Escape");
+  await dialog.waitFor({ state: "hidden" });
+  await page.waitForFunction(() => document.activeElement?.textContent === "打开对话框");
+  await page.getByRole("button", { name: "打开受限对话框" }).click();
+  await dialog.waitFor({ state: "visible" });
+  await page.keyboard.press("Escape");
+  assert.equal(await dialog.isVisible(), true, "closeOnEscape=false retained");
+  await page.locator(".fluent-modal-overlay").click({ position: { x: 2, y: 2 } });
+  assert.equal(await dialog.isVisible(), true, "closeOnOverlayClick=false retained");
+  await page.getByRole("button", { name: "取消处理" }).click();
+  await dialog.waitFor({ state: "hidden" });
+  await opener.click(); await dialog.waitFor({ state: "visible" });
+  await page.screenshot({ path: "artifacts/fluent-components/dialog-dark.png", animations: "disabled" });
+  await page.locator(".fluent-modal-overlay").click({ position: { x: 2, y: 2 } });
+  await dialog.waitFor({ state: "hidden" });
   await page.emulateMedia({ reducedMotion: "reduce" });
   const reducedDuration = await page.locator(".home-search-wrapper").evaluate((el) => getComputedStyle(el, "::after").transitionDuration);
   assert.ok(parseFloat(reducedDuration) < 0.001, "reduced motion respected");
+  const startup = await browser.newPage();
+  await startup.route("**/src/main.tsx", route => route.abort());
+  await startup.goto(`http://127.0.0.1:${address.port}/?window=settings&color_mode=dark`);
+  assert.equal(await startup.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), "rgb(32, 32, 32)", "settings is opaque before React loads");
+  await startup.addStyleTag({ content: await readFile("src/styles/components/fluent-settings.css", "utf8") });
+  await startup.addStyleTag({ content: await readFile("src/styles/themes/mica.css", "utf8") });
+  await startup.evaluate(() => {
+    document.documentElement.classList.add("theme-mica", "dark-mode");
+    document.body.className = "is-settings-window theme-mica dark-mode";
+  });
+  for (const selector of ["html", "body", "#root"]) {
+    assert.equal(await startup.locator(selector).evaluate(el => getComputedStyle(el).backgroundColor), "rgb(32, 32, 32)", "startup fallback wins over transparent settings layers");
+  }
+  await startup.close();
   assert.deepEqual(errors, []);
-  console.log("Fluent browser checks passed: controlled input, IME, ref, motion, dropdown mouse/keyboard, Tooltip focus/Escape, dark portals, narrow layout.");
+  console.log("Fluent browser checks passed: input/IME, dropdown, tooltip, labelled switches, slider pointer/keys, spin bounds, accordion, button states, modal focus/trap/restore, nested dismissal and dark portals.");
 } finally {
   await browser?.close();
   await server.close();

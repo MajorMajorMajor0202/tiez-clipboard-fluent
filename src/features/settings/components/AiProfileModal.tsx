@@ -1,3 +1,4 @@
+import FluentSwitch from "../../../shared/components/FluentSwitch";
 import { AnimatePresence, motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import type { EditableAiProfile } from "../types";
@@ -66,15 +67,7 @@ const AiProfileModal = ({ editingProfile, t, onClose, onSave, setEditingProfile 
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{t('ai_thinking_enabled')}</span>
-                        <label className="switch">
-                            <input
-                                className="cb"
-                                type="checkbox"
-                                checked={editingProfile.enableThinking}
-                                onChange={e => setEditingProfile({ ...editingProfile, enableThinking: e.target.checked })}
-                            />
-                            <div className="toggle"><div className="left" /><div className="right" /></div>
-                        </label>
+                        <FluentSwitch checked={editingProfile.enableThinking} onChange={e => setEditingProfile({ ...editingProfile, enableThinking: e.target.checked })}  aria-label={t("ai_thinking_enabled")} />
                     </div>
                     <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
                         <button className="btn-icon" style={{ flex: 1, padding: '10px', textTransform: 'uppercase', fontWeight: 'bold' }} onClick={onClose}>{t('cancel')}</button>
