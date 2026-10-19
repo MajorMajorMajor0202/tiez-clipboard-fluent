@@ -322,6 +322,36 @@ try {
   await quick.getByRole('button', { name: 'Enabled', exact: true }).click();
   await quick.keyboard.press('Alt+1');
   assert.equal((await pasteLog()).length, 5, 'non-list views disable paste');
+  await quick.getByRole('button', { name: 'Enabled', exact: true }).click();
+  for (const [id, label, keys] of [
+    ['ctrl', 'Ctrl', ['Control']], ['shift', 'Shift', ['Shift']],
+    ['ctrl+alt', 'Ctrl + Alt', ['Control', 'Alt']],
+    ['ctrl+shift', 'Ctrl + Shift', ['Control', 'Shift']],
+    ['alt+shift', 'Alt + Shift', ['Alt', 'Shift']],
+    ['ctrl+alt+shift', 'Ctrl + Alt + Shift', ['Control', 'Alt', 'Shift']],
+  ]) {
+    await quick.getByRole('combobox', { name: 'Quick paste modifier', exact: true }).click();
+    await quick.getByRole('option', { name: label, exact: true }).click();
+    await quick.getByRole('textbox', { name: 'Search', exact: true }).focus();
+    const count = (await pasteLog()).length;
+    const before = await geometry();
+    for (const key of keys) await quick.keyboard.down(key);
+    await tips.first().waitFor();
+    assert.deepEqual(await geometry(), before, `${id} KeyTips do not move content`);
+    await quick.keyboard.press('1');
+    for (const key of [...keys].reverse()) await quick.keyboard.up(key);
+    await tips.first().waitFor({ state: 'hidden' });
+    assert.equal((await pasteLog()).length, count + 1, `${id} pastes exactly once`);
+    assert.equal((await pasteLog()).at(-1), 3);
+    await quick.keyboard.press('Alt+1');
+    assert.equal((await pasteLog()).length, count + 1, 'old modifier no longer active');
+  }
+  await quick.getByRole('combobox', { name: 'Quick paste modifier', exact: true }).click();
+  await quick.getByRole('option', { name: '关闭', exact: true }).click();
+  await quick.getByRole('textbox', { name: 'Search', exact: true }).focus();
+  const disabledCount = (await pasteLog()).length;
+  await quick.keyboard.press('Alt+1'); await quick.keyboard.press('Control+Alt+Shift+1');
+  assert.equal((await pasteLog()).length, disabledCount, 'shortcut can be disabled');
   await quick.close();
   assert.deepEqual(errors, []);
   console.log("Fluent browser checks passed: input/IME, dropdown, tooltip, labelled switches, slider pointer/keys, spin bounds, accordion, button states, modal focus/trap/restore, nested dismissal and dark portals.");

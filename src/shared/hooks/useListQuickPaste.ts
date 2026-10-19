@@ -4,17 +4,21 @@ import type { QuickPasteHint } from "../../features/clipboard/types";
 import { listen } from "@tauri-apps/api/event";
 import { isTauriRuntime } from "../lib/tauriRuntime";
 
+import { normalizeListQuickPasteModifier, matchesListQuickPasteModifier, listQuickPasteModifierLabel } from "../lib/listQuickPasteModifier";
+
 export const QUICK_PASTE_KEYS = "1234567890";
 
-/** Alt is local to the list; global pinned-item shortcuts are handled separately. */
+/** List shortcuts use the displayed order; global pinned shortcuts are separate. */
 export function useListQuickPaste(
   items: ClipboardEntry[],
   enabled: boolean,
   paste: (id: number, content: string, contentType: string) => Promise<void>,
+  modifierValue = "alt",
 ) {
+  const modifier = normalizeListQuickPasteModifier(modifierValue);
   const [held, setHeld] = useState(false);
-  const current = useRef({ items, enabled, paste });
-  current.current = { items, enabled, paste };
+  const current = useRef({ items, enabled: enabled && modifier !== "disabled", paste, modifier });
+  current.current = { items, enabled: enabled && modifier !== "disabled", paste, modifier };
 
   useEffect(() => {
     let busy = false;
@@ -38,9 +42,9 @@ export function useListQuickPaste(
     };
     const down = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing || !allowed(event.target)) { setHeld(false); return; }
-      const altOnly = event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.getModifierState('AltGraph');
-      if (!altOnly) { setHeld(false); return; }
-      if (event.key === 'Alt') {
+      const matches = matchesListQuickPasteModifier(event, current.current.modifier);
+      if (!matches) { setHeld(false); return; }
+      if (['Alt', 'Control', 'Shift'].includes(event.key)) {
         event.preventDefault(); // Keep WebView's menu activation out of the list.
         if (!consumed) setHeld(true);
         return;
@@ -51,7 +55,7 @@ export function useListQuickPaste(
       event.stopPropagation();
       pasteDigit(digit, event.repeat);
     };
-    const up = (event: KeyboardEvent) => { if (event.key === 'Alt' || !event.altKey) reset(); };
+    const up = (event: KeyboardEvent) => { if (!matchesListQuickPasteModifier(event, current.current.modifier)) reset(); };
     const focus = (event: FocusEvent) => { if (!allowed(event.target)) reset(); };
     window.addEventListener('keydown', down, true);
     window.addEventListener('keyup', up, true);
@@ -80,12 +84,12 @@ export function useListQuickPaste(
     };
   }, []);
 
-  useEffect(() => { if (!enabled) setHeld(false); }, [enabled]);
+  useEffect(() => { setHeld(false); }, [enabled, modifier]);
   return useMemo(() => {
     const hints: Record<number, QuickPasteHint> = {};
-    if (held && enabled) items.slice(0, 10).forEach((item, index) => {
-      hints[item.id] = { slot: index + 1, combo: `Alt+${QUICK_PASTE_KEYS[index]}` };
+    if (held && enabled && modifier !== "disabled") items.slice(0, 10).forEach((item, index) => {
+      hints[item.id] = { slot: index + 1, combo: `${listQuickPasteModifierLabel(modifier)}+${QUICK_PASTE_KEYS[index]}` };
     });
     return hints;
-  }, [held, enabled, items]);
+  }, [held, enabled, items, modifier]);
 }

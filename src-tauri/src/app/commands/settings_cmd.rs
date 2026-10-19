@@ -239,6 +239,11 @@ pub fn save_setting(
                 .hide_tray_icon
                 .store(value == "true", Ordering::Relaxed);
         }
+        "app.list_quick_paste_modifier" => {
+            let mask = crate::app::hooks::list_quick_paste_mask(&value);
+            value = ["disabled", "ctrl", "alt", "ctrl+alt", "shift", "ctrl+shift", "alt+shift", "ctrl+alt+shift"][mask as usize].to_string();
+            settings_state.list_quick_paste_modifier.store(mask, Ordering::Relaxed);
+        }
         "app.quick_paste_modifier" => {
             value = normalize_quick_paste_modifier(&value).to_string();
             if let Ok(mut guard) = settings_state.quick_paste_modifier.lock() {
@@ -709,6 +714,11 @@ pub fn reset_settings(
         .get("app.strip_newline_hotkey")
         .unwrap_or(Some("Alt+Shift+C".to_string()))
         .unwrap_or("Alt+Shift+C".to_string());
+    settings_state.list_quick_paste_modifier.store(
+        crate::app::hooks::list_quick_paste_mask(&state.settings_repo
+            .get("app.list_quick_paste_modifier").ok().flatten().unwrap_or_else(|| "alt".into())),
+        Ordering::Relaxed,
+    );
     let quick_paste_modifier = state
         .settings_repo
         .get("app.quick_paste_modifier")

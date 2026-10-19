@@ -196,6 +196,7 @@ pub struct StartupSettings {
     pub strip_newline_hotkey: String,
     pub pin_window_hotkey: String,
     pub quick_paste_modifier: String,
+    pub list_quick_paste_modifier: String,
     pub quick_tab_assign_enabled: bool,
     pub quick_tab_assign_seconds: u32,
     pub quick_tab_assign_modifier: String,
@@ -302,6 +303,8 @@ fn load_settings(repo: &impl SettingsRepository) -> StartupSettings {
             .get("app.quick_paste_modifier")
             .unwrap_or(Some("disabled".to_string()))
             .unwrap_or("disabled".to_string()),
+        list_quick_paste_modifier: repo.get("app.list_quick_paste_modifier")
+            .ok().flatten().unwrap_or_else(|| "alt".to_string()),
         quick_tab_assign_enabled: repo
             .get("app.quick_tab_assign_enabled")
             .unwrap_or(Some("true".to_string()))
@@ -416,6 +419,8 @@ fn setup_state(
         strip_newline_hotkey: std::sync::Mutex::new(s.strip_newline_hotkey.clone()),
         pin_window_hotkey: std::sync::Mutex::new(s.pin_window_hotkey.clone()),
         quick_paste_modifier: std::sync::Mutex::new(s.quick_paste_modifier.clone()),
+        list_quick_paste_modifier: std::sync::atomic::AtomicU8::new(
+            crate::app::hooks::list_quick_paste_mask(&s.list_quick_paste_modifier)),
         quick_tab_assign_enabled: AtomicBool::new(s.quick_tab_assign_enabled),
         quick_tab_assign_seconds: AtomicU32::new(s.quick_tab_assign_seconds),
         quick_tab_assign_modifier: std::sync::Mutex::new(s.quick_tab_assign_modifier.clone()),

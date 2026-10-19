@@ -1,3 +1,6 @@
+import { listQuickPasteModifiers } from "../src/shared/lib/listQuickPasteModifier";
+import FluentDropdown from "../src/shared/components/FluentDropdown";
+import TieZFluentProvider from "../src/shared/components/TieZFluentProvider";
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useListQuickPaste } from "../src/shared/hooks/useListQuickPaste";
@@ -9,6 +12,7 @@ import "../src/styles/components/index.css";
 import "../src/styles/themes/mica.css";
 
 function Fixture() {
+  const [modifier, setModifier] = useState("alt");
   const [workspace, setWorkspace] = useState(false);
   const [search, setSearch] = useState("");
   const [compact, setCompact] = useState(false);
@@ -21,9 +25,10 @@ function Fixture() {
   } as ClipboardEntry)), []);
   const filtered = useFilteredHistory({ history: items, search, typeFilter: null,
     activeTabId: workspace ? "work" : "clipboard", tabAssignments: { work: [5, 8, 11] } });
-  const hints = useListQuickPaste(filtered, enabled, async id => { setPasted(prev => [...prev, id]); });
-  return <main style={{ padding: 20 }}>
+  const hints = useListQuickPaste(filtered, enabled, async id => { setPasted(prev => [...prev, id]); }, modifier);
+  return <TieZFluentProvider><main style={{ padding: 20 }}>
     <div className="home-search-wrapper"><input aria-label="Search" value={search} onChange={e => setSearch(e.target.value)} /></div>
+    <FluentDropdown aria-label="Quick paste modifier" options={[...listQuickPasteModifiers]} value={modifier} onChange={setModifier} />
     <textarea aria-label="Note" />
     <button onClick={() => setWorkspace(v => !v)}>Workspace</button>
     <button onClick={() => setCompact(v => !v)}>Compact</button>
@@ -37,6 +42,6 @@ function Fixture() {
       <div className="item-meta"><span>Source</span><span>10:00</span></div>
       <div className="content-preview">{item.content}</div>
     </div></div>)}
-  </main>;
+  </main></TieZFluentProvider>;
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

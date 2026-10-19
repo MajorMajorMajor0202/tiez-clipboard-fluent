@@ -31,7 +31,7 @@ export const translations = {
 
         // Settings - Headers
         general_settings: "常规设置",
-        clipboard_settings: "剪贴板",
+        clipboard_settings: "剪贴板与热键",
         sync_settings: "验证码同步（MQTT）",
         sync_and_transfer: "同步与传输",
         cloud_sync_settings: "云端同步",
@@ -592,7 +592,7 @@ export const translations = {
 
         // Settings - Headers
         general_settings: "General & System",
-        clipboard_settings: "Clipboard",
+        clipboard_settings: "Clipboard & Hotkeys",
         sync_settings: "Verification Code Sync (MQTT)",
         sync_and_transfer: "Sync & Transfer",
         cloud_sync_settings: "Cloud Sync",
@@ -1153,7 +1153,7 @@ export const translations = {
 
         // Settings - Headers
         general_settings: "常規設定",
-        clipboard_settings: "剪貼簿",
+        clipboard_settings: "剪貼簿與快速鍵",
         sync_settings: "驗證碼同步 (MQTT)",
         sync_and_transfer: "同步與傳輸",
         cloud_sync_settings: "雲端同步",

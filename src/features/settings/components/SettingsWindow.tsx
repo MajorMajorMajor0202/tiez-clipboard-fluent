@@ -1,3 +1,4 @@
+import { listQuickPasteModifiers, normalizeListQuickPasteModifier } from "../../../shared/lib/listQuickPasteModifier";
 import FluentSettingsExpander from "../../../shared/components/FluentSettingsExpander";
 import FluentCheckbox from "../../../shared/components/FluentCheckbox";
 import FluentButton from "../../../shared/components/FluentButton";
@@ -744,8 +745,6 @@ const SettingsWindow = () => {
   const menuItems = [
     { id: "general", label: t("general_settings") || "常规设置", icon: <Settings size={16} /> },
     { id: "clipboard", label: t("clipboard_settings") || "剪贴板与热键", icon: <Sliders size={16} /> },
-    { id: "shortcuts", label: "快捷键", icon: <Sliders size={16} /> },
-    { id: "workspace", label: "工作区与便笺", icon: <Settings size={16} /> },
     { id: "privacy", label: t("privacy_protection") || "隐私保护", icon: <Shield size={16} /> },
     { id: "sync", label: t("sync_and_transfer") || "同步与传输", icon: <Wifi size={16} /> },
     { id: "ai", label: t("ai_settings") || "AI 智能助手", icon: <Cpu size={16} /> },
@@ -859,6 +858,40 @@ const SettingsWindow = () => {
             </div>
 
             {/* Audio Feedback Expander */}
+            <h3 className="fluent-section-title">面板入口</h3>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">标签分类</span>
+                <span className="fluent-setting-description">使用标签归类和筛选条目</span>
+              </div>
+              <FluentSwitch checked={tagManagerEnabled} onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setTagManagerEnabled(enabled);
+                    saveAppSetting('tag_manager_enabled', String(enabled));
+                  }}   />
+            </div>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">表情收藏</span>
+                <span className="fluent-setting-description">收藏图片和 GIF，拖动即可使用</span>
+              </div>
+              <FluentSwitch checked={emojiPanelEnabled} onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setEmojiPanelEnabled(enabled);
+                    saveAppSetting('emoji_panel_enabled', String(enabled));
+                  }}   />
+            </div>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">便笺管理</span>
+                <span className="fluent-setting-description">在侧边栏显示便笺管理入口</span>
+              </div>
+              <FluentSwitch checked={noteManagerEnabled} onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setNoteManagerEnabled?.(enabled);
+                    saveAppSetting('note_manager_enabled', String(enabled));
+                  }}   />
+            </div>
             <h3 className="fluent-section-title">声音与打开方式</h3>
             <FluentSettingsExpander className={`fluent-setting-expander ${!soundEnabled ? 'disabled' : ''}`} expanded={!!(expandedCards['audio'] && soundEnabled)} onToggle={() => {
                   if (soundEnabled) toggleExpander('audio');
@@ -944,6 +977,206 @@ const SettingsWindow = () => {
         {activeTab === "clipboard" && (
           <div>
             <h2 className="fluent-page-header">{t("clipboard_settings") || "剪贴板"}</h2>
+            <h3 className="fluent-section-title">快捷键</h3>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">列表快速粘贴</span>
+                <span className="fluent-setting-description">按住修饰键显示编号，搭配 1–9、0 粘贴当前列表的前十项。</span>
+              </div>
+              <FluentDropdown
+                aria-label="快速粘贴修饰键"
+                options={[...listQuickPasteModifiers]}
+                value={normalizeListQuickPasteModifier(appSettings['app.list_quick_paste_modifier'])}
+                onChange={value => saveAppSetting('list_quick_paste_modifier', value)}
+              />
+            </div>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">键盘方向键导航</span>
+                <span className="fluent-setting-description">用 ↑ / ↓ 选择条目，按 Enter 粘贴</span>
+              </div>
+              <FluentSwitch checked={arrowKeySelection} onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setArrowKeySelection(enabled);
+                    saveAppSetting('arrow_key_selection', String(enabled));
+                  }}   />
+            </div>
+            <h3 className="fluent-section-title">全局快捷键</h3>
+            <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">置顶条目全局粘贴</span>
+                      <span className="fluent-setting-description">在任意窗口用修饰键 + 1–9、0 粘贴前十个置顶条目。</span>
+                    </div>
+                    <FluentDropdown
+                      options={[
+                        { id: "disabled", label: t("quick_paste_modifier_disabled") || "已禁用" },
+                        { id: "ctrl", label: "Ctrl" },
+                        { id: "alt", label: "Alt" },
+                        { id: "shift", label: "Shift" },
+                        { id: "win", label: "Win" }
+                      ]}
+                      value={quickPasteModifier}
+                      onChange={(val) => {
+                        const castVal = val as QuickPasteModifier;
+                        setQuickPasteModifier(castVal);
+                        invoke("set_quick_paste_modifier", { modifier: castVal }).catch(console.error);
+                      }}
+                    />
+                  </div>
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['hotkeys'])} onToggle={() => toggleExpander('hotkeys')}  header={<div className="fluent-setting-info">
+                  <span className="fluent-setting-title">快捷键分配</span>
+                  <span className="fluent-setting-description">配置用于快速唤起窗口、启动搜索或特殊粘贴的全局热键</span>
+                </div>} >
+
+              {expandedCards['hotkeys'] && (
+                <div className="fluent-setting-expander-content">
+                  {/* Global hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">唤起主窗口</span>
+                      <span className="fluent-setting-description">显示或隐藏主窗口</span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('main')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(hotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+
+                  {/* Search hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">唤起并直接搜索</span>
+                      <span className="fluent-setting-description">打开主窗口并聚焦搜索框</span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('search')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(searchHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+
+                  {/* Rich text paste hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">强制富文本粘贴</span>
+                      <span className="fluent-setting-description">保留原始排版粘贴</span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('rich')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(richPasteHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+
+                  {/* Strip newline copy hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('strip_newline_hotkey_label') || '无换行复制'}</span>
+                      <span className="fluent-setting-description">
+                        {t('strip_newline_hotkey_desc') || '选中文本后触发此快捷键，自动复制并清除内容中的全部换行符'}
+                      </span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('strip_newline')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(stripNewlineHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+
+                  {/* Pin window hotkey */}
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('pin_window_hotkey_label') || '固定剪贴板窗口'}</span>
+                      <span className="fluent-setting-description">
+                        {t('pin_window_hotkey_desc') || '切换主窗口的固定置顶状态，防止失去焦点时自动隐藏'}
+                      </span>
+                    </div>
+                    <div
+                      className="fluent-hotkey-recorder"
+                      onClick={() => setShowHotkeyModal('pin_window')}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {renderHotkeyCaps(pinWindowHotkey)}
+                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </FluentSettingsExpander>
+            <h3 className="fluent-section-title">快捷归类</h3>
+            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['quickTabAssign'])} onToggle={() => toggleExpander('quickTabAssign')}  header={<div className="fluent-setting-info">
+                  <span className="fluent-setting-title">{t('quick_tab_assign_title') || '复制后归类到工作区'}</span>
+                  <span className="fluent-setting-description">
+                    {t('quick_tab_assign_desc') || '复制后按修饰键 + 1–9、0，将条目加入对应位置的工作区。'}
+                  </span>
+                </div>} actions={<><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><FluentSwitch checked={quickTabAssignEnabled} onChange={(e) => {
+                        const val = e.target.checked;
+                        setQuickTabAssignEnabled(val);
+                        saveAppSetting('quick_tab_assign_enabled', String(val));
+                      }} onClick={(e) => e.stopPropagation()}  /></div></>}>
+
+              {expandedCards['quickTabAssign'] && (
+                <div className="fluent-setting-expander-content">
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('quick_tab_assign_seconds_label') || '快捷键有效时长（秒）'}</span>
+                      <span className="fluent-setting-description">
+                        {t('quick_tab_assign_seconds_desc') || '复制后可使用归类快捷键的时长（1–30 秒）'}
+                      </span>
+                    </div>
+                    <FluentNumberBox
+                      value={quickTabAssignSeconds}
+                      min={1}
+                      max={30}
+                      step={1}
+                      onChange={(v) => {
+                        const clamped = Math.min(30, Math.max(1, v));
+                        setQuickTabAssignSeconds(clamped);
+                        saveAppSetting('quick_tab_assign_seconds', String(clamped));
+                      }}
+                    />
+                  </div>
+
+                  <div className="fluent-setting-card">
+                    <div className="fluent-setting-info">
+                      <span className="fluent-setting-title">{t('quick_tab_assign_modifier_label') || '快捷键修饰键'}</span>
+                      <span className="fluent-setting-description">
+                        {t('quick_tab_assign_modifier_desc') || '搭配 1–9、0，按工作区的排列顺序归类'}
+                      </span>
+                    </div>
+                    <FluentDropdown
+                      options={[
+                        { id: "ctrl+alt", label: "Ctrl + Alt" },
+                        { id: "alt+shift", label: "Alt + Shift" },
+                        { id: "ctrl+shift", label: "Ctrl + Shift" },
+                        { id: "win+alt", label: "Win + Alt" }
+                      ]}
+                      value={quickTabAssignModifier}
+                      onChange={(val) => {
+                        setQuickTabAssignModifier(val);
+                        saveAppSetting('quick_tab_assign_modifier', val);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </FluentSettingsExpander>
+
+            <h3 className="fluent-section-title">采集、存储与粘贴</h3>
+
 
             {/* Storage controls expander */}
             <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['dbPath'])} onToggle={() => toggleExpander('dbPath')}  header={<div className="fluent-setting-info">
@@ -1180,290 +1413,8 @@ const SettingsWindow = () => {
           </div>
         )}
 
-        {activeTab === "shortcuts" && (
-          <div>
-            <h2 className="fluent-page-header">快捷键</h2>
-            <h3 className="fluent-section-title">列表操作</h3>
-            <div className="fluent-setting-card">
-              <div className="fluent-setting-info">
-                <span className="fluent-setting-title">Alt + 数字粘贴</span>
-                <span className="fluent-setting-description">在主窗口按住 Alt 显示编号，按 1–9、0 粘贴当前列表的前十项。</span>
-              </div>
-              <span aria-label="快捷键">Alt + 1–9 / 0</span>
-            </div>
-            <div className="fluent-setting-card">
-              <div className="fluent-setting-info">
-                <span className="fluent-setting-title">键盘方向键导航</span>
-                <span className="fluent-setting-description">用 ↑ / ↓ 选择条目，按 Enter 粘贴</span>
-              </div>
-              <FluentSwitch checked={arrowKeySelection} onChange={(e) => {
-                    const enabled = e.target.checked;
-                    setArrowKeySelection(enabled);
-                    saveAppSetting('arrow_key_selection', String(enabled));
-                  }}   />
-            </div>
-            <h3 className="fluent-section-title">全局快捷键</h3>
-            <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">置顶条目全局粘贴</span>
-                      <span className="fluent-setting-description">在任意窗口用所选修饰键 + 1–9、0 粘贴前十个置顶条目。主窗口内 Alt 用于当前列表。</span>
-                    </div>
-                    <FluentDropdown
-                      options={[
-                        { id: "disabled", label: t("quick_paste_modifier_disabled") || "已禁用" },
-                        { id: "ctrl", label: "Ctrl" },
-                        { id: "alt", label: "Alt" },
-                        { id: "shift", label: "Shift" },
-                        { id: "win", label: "Win" }
-                      ]}
-                      value={quickPasteModifier}
-                      onChange={(val) => {
-                        const castVal = val as QuickPasteModifier;
-                        setQuickPasteModifier(castVal);
-                        invoke("set_quick_paste_modifier", { modifier: castVal }).catch(console.error);
-                      }}
-                    />
-                  </div>
-            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['hotkeys'])} onToggle={() => toggleExpander('hotkeys')}  header={<div className="fluent-setting-info">
-                  <span className="fluent-setting-title">快捷键分配</span>
-                  <span className="fluent-setting-description">配置用于快速唤起窗口、启动搜索或特殊粘贴的全局热键</span>
-                </div>} >
 
-              {expandedCards['hotkeys'] && (
-                <div className="fluent-setting-expander-content">
-                  {/* Global hotkey */}
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">唤起主窗口</span>
-                      <span className="fluent-setting-description">显示或隐藏主窗口</span>
-                    </div>
-                    <div
-                      className="fluent-hotkey-recorder"
-                      onClick={() => setShowHotkeyModal('main')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {renderHotkeyCaps(hotkey)}
-                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                    </div>
-                  </div>
 
-                  {/* Search hotkey */}
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">唤起并直接搜索</span>
-                      <span className="fluent-setting-description">打开主窗口并聚焦搜索框</span>
-                    </div>
-                    <div
-                      className="fluent-hotkey-recorder"
-                      onClick={() => setShowHotkeyModal('search')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {renderHotkeyCaps(searchHotkey)}
-                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                    </div>
-                  </div>
-
-                  {/* Rich text paste hotkey */}
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">强制富文本粘贴</span>
-                      <span className="fluent-setting-description">保留原始排版粘贴</span>
-                    </div>
-                    <div
-                      className="fluent-hotkey-recorder"
-                      onClick={() => setShowHotkeyModal('rich')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {renderHotkeyCaps(richPasteHotkey)}
-                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                    </div>
-                  </div>
-
-                  {/* Strip newline copy hotkey */}
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">{t('strip_newline_hotkey_label') || '无换行复制'}</span>
-                      <span className="fluent-setting-description">
-                        {t('strip_newline_hotkey_desc') || '选中文本后触发此快捷键，自动复制并清除内容中的全部换行符'}
-                      </span>
-                    </div>
-                    <div
-                      className="fluent-hotkey-recorder"
-                      onClick={() => setShowHotkeyModal('strip_newline')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {renderHotkeyCaps(stripNewlineHotkey)}
-                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                    </div>
-                  </div>
-
-                  {/* Pin window hotkey */}
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">{t('pin_window_hotkey_label') || '固定剪贴板窗口'}</span>
-                      <span className="fluent-setting-description">
-                        {t('pin_window_hotkey_desc') || '切换主窗口的固定置顶状态，防止失去焦点时自动隐藏'}
-                      </span>
-                    </div>
-                    <div
-                      className="fluent-hotkey-recorder"
-                      onClick={() => setShowHotkeyModal('pin_window')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {renderHotkeyCaps(pinWindowHotkey)}
-                      <Edit3 size={14} className="fluent-hotkey-edit-icon" />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </FluentSettingsExpander>
-          </div>
-        )}
-        {activeTab === "workspace" && (
-          <div>
-            <h2 className="fluent-page-header">工作区与便笺</h2>
-            <h3 className="fluent-section-title">面板入口</h3>
-            <div className="fluent-setting-card">
-              <div className="fluent-setting-info">
-                <span className="fluent-setting-title">标签分类</span>
-                <span className="fluent-setting-description">使用标签归类和筛选条目</span>
-              </div>
-              <FluentSwitch checked={tagManagerEnabled} onChange={(e) => {
-                    const enabled = e.target.checked;
-                    setTagManagerEnabled(enabled);
-                    saveAppSetting('tag_manager_enabled', String(enabled));
-                  }}   />
-            </div>
-            <div className="fluent-setting-card">
-              <div className="fluent-setting-info">
-                <span className="fluent-setting-title">表情收藏</span>
-                <span className="fluent-setting-description">收藏图片和 GIF，拖动即可使用</span>
-              </div>
-              <FluentSwitch checked={emojiPanelEnabled} onChange={(e) => {
-                    const enabled = e.target.checked;
-                    setEmojiPanelEnabled(enabled);
-                    saveAppSetting('emoji_panel_enabled', String(enabled));
-                  }}   />
-            </div>
-            <div className="fluent-setting-card">
-              <div className="fluent-setting-info">
-                <span className="fluent-setting-title">便笺管理</span>
-                <span className="fluent-setting-description">在侧边栏显示便笺管理入口</span>
-              </div>
-              <FluentSwitch checked={noteManagerEnabled} onChange={(e) => {
-                    const enabled = e.target.checked;
-                    setNoteManagerEnabled?.(enabled);
-                    saveAppSetting('note_manager_enabled', String(enabled));
-                  }}   />
-            </div>
-            <h3 className="fluent-section-title">便笺外观</h3>
-            <div className="fluent-setting-card">
-              <div className="fluent-setting-info">
-                <span className="fluent-setting-title">便笺窗口背景材质</span>
-                <span className="fluent-setting-description">选择便笺窗口的背景效果</span>
-              </div>
-              <FluentDropdown
-                options={[
-                  { id: 'sync', label: '跟随主窗口' },
-                  { id: 'mica', label: '云母材质 (Mica)' },
-                  { id: 'acrylic', label: '亚克力材质 (Acrylic)' },
-                  { id: 'solid', label: '纯色便笺纸' }
-                ]}
-                value={noteBackdropMode}
-                onChange={(val) => {
-                  setNoteBackdropMode(val);
-                  saveAppSetting('note_backdrop_mode', val);
-                }}
-              />
-            </div>
-
-            {noteBackdropMode === 'solid' && (
-              <div className="fluent-setting-card">
-                <div className="fluent-setting-info">
-                  <span className="fluent-setting-title">便笺默认底色</span>
-                  <span className="fluent-setting-description">新建纯色便笺时使用的颜色</span>
-                </div>
-                <FluentDropdown
-                  options={[
-                    { id: 'random', label: '🎲 随机色彩分配' },
-                    { id: 'yellow', label: '🟨 便笺黄 (Yellow)' },
-                    { id: 'green', label: '🟩 薄荷绿 (Mint)' },
-                    { id: 'blue', label: '🟦 天空蓝 (Sky Blue)' },
-                    { id: 'purple', label: '🟪 薰衣草 (Lavender)' },
-                    { id: 'pink', label: '🌸 樱花粉 (Rose)' },
-                    { id: 'charcoal', label: '⬜ 石板灰 (Slate)' },
-                    { id: 'orange', label: '🟧 暖阳橙 (Orange)' },
-                    { id: 'cyan', label: '🟦 湖水青 (Cyan)' }
-                  ]}
-                  value={noteDefaultSolidColor}
-                  onChange={(val) => {
-                    setNoteDefaultSolidColor(val);
-                    saveAppSetting('note_default_solid_color', val);
-                  }}
-                />
-              </div>
-            )}
-
-            <h3 className="fluent-section-title">快捷归类</h3>
-            <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['quickTabAssign'])} onToggle={() => toggleExpander('quickTabAssign')}  header={<div className="fluent-setting-info">
-                  <span className="fluent-setting-title">{t('quick_tab_assign_title') || '复制后归类到工作区'}</span>
-                  <span className="fluent-setting-description">
-                    {t('quick_tab_assign_desc') || '复制后按修饰键 + 1–9、0，将条目加入对应位置的工作区。'}
-                  </span>
-                </div>} actions={<><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><FluentSwitch checked={quickTabAssignEnabled} onChange={(e) => {
-                        const val = e.target.checked;
-                        setQuickTabAssignEnabled(val);
-                        saveAppSetting('quick_tab_assign_enabled', String(val));
-                      }} onClick={(e) => e.stopPropagation()}  /></div></>}>
-
-              {expandedCards['quickTabAssign'] && (
-                <div className="fluent-setting-expander-content">
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">{t('quick_tab_assign_seconds_label') || '快捷键有效时长（秒）'}</span>
-                      <span className="fluent-setting-description">
-                        {t('quick_tab_assign_seconds_desc') || '复制后可使用归类快捷键的时长（1–30 秒）'}
-                      </span>
-                    </div>
-                    <FluentNumberBox
-                      value={quickTabAssignSeconds}
-                      min={1}
-                      max={30}
-                      step={1}
-                      onChange={(v) => {
-                        const clamped = Math.min(30, Math.max(1, v));
-                        setQuickTabAssignSeconds(clamped);
-                        saveAppSetting('quick_tab_assign_seconds', String(clamped));
-                      }}
-                    />
-                  </div>
-
-                  <div className="fluent-setting-card">
-                    <div className="fluent-setting-info">
-                      <span className="fluent-setting-title">{t('quick_tab_assign_modifier_label') || '快捷键修饰键'}</span>
-                      <span className="fluent-setting-description">
-                        {t('quick_tab_assign_modifier_desc') || '搭配 1–9、0，按工作区的排列顺序归类'}
-                      </span>
-                    </div>
-                    <FluentDropdown
-                      options={[
-                        { id: "ctrl+alt", label: "Ctrl + Alt" },
-                        { id: "alt+shift", label: "Alt + Shift" },
-                        { id: "ctrl+shift", label: "Ctrl + Shift" },
-                        { id: "win+alt", label: "Win + Alt" }
-                      ]}
-                      value={quickTabAssignModifier}
-                      onChange={(val) => {
-                        setQuickTabAssignModifier(val);
-                        saveAppSetting('quick_tab_assign_modifier', val);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </FluentSettingsExpander>
-          </div>
-        )}
         {/* Tab 3: Privacy & Masking */}
         {activeTab === "privacy" && (
           <div>
@@ -2466,6 +2417,54 @@ const SettingsWindow = () => {
                 )}
               </FluentSettingsExpander>
             )}
+            <h3 className="fluent-section-title">便笺外观</h3>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">便笺窗口背景材质</span>
+                <span className="fluent-setting-description">选择便笺窗口的背景效果</span>
+              </div>
+              <FluentDropdown
+                options={[
+                  { id: 'sync', label: '跟随主窗口' },
+                  { id: 'mica', label: '云母材质 (Mica)' },
+                  { id: 'acrylic', label: '亚克力材质 (Acrylic)' },
+                  { id: 'solid', label: '纯色便笺纸' }
+                ]}
+                value={noteBackdropMode}
+                onChange={(val) => {
+                  setNoteBackdropMode(val);
+                  saveAppSetting('note_backdrop_mode', val);
+                }}
+              />
+            </div>
+
+            {noteBackdropMode === 'solid' && (
+              <div className="fluent-setting-card">
+                <div className="fluent-setting-info">
+                  <span className="fluent-setting-title">便笺默认底色</span>
+                  <span className="fluent-setting-description">新建纯色便笺时使用的颜色</span>
+                </div>
+                <FluentDropdown
+                  options={[
+                    { id: 'random', label: '🎲 随机色彩分配' },
+                    { id: 'yellow', label: '🟨 便笺黄 (Yellow)' },
+                    { id: 'green', label: '🟩 薄荷绿 (Mint)' },
+                    { id: 'blue', label: '🟦 天空蓝 (Sky Blue)' },
+                    { id: 'purple', label: '🟪 薰衣草 (Lavender)' },
+                    { id: 'pink', label: '🌸 樱花粉 (Rose)' },
+                    { id: 'charcoal', label: '⬜ 石板灰 (Slate)' },
+                    { id: 'orange', label: '🟧 暖阳橙 (Orange)' },
+                    { id: 'cyan', label: '🟦 湖水青 (Cyan)' }
+                  ]}
+                  value={noteDefaultSolidColor}
+                  onChange={(val) => {
+                    setNoteDefaultSolidColor(val);
+                    saveAppSetting('note_default_solid_color', val);
+                  }}
+                />
+              </div>
+            )}
+
           </div>
         )}
 

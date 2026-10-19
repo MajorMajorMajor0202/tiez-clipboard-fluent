@@ -22,9 +22,23 @@ use crate::infrastructure::windows_ext::WindowExt;
 static BLOCKED_HOTKEY_IDS: std::sync::Mutex<Vec<i32>> = std::sync::Mutex::new(Vec::new());
 
 #[cfg(target_os = "windows")]
-static LIST_ALT_HELD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static LIST_MODIFIER_HELD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 #[cfg(target_os = "windows")]
 static LIST_DIGIT_MASK: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+// Ctrl=1, Alt=2, Shift=4. Keep this canonical set aligned with the UI options.
+pub fn list_quick_paste_mask(value: &str) -> u8 {
+    match value.trim().to_ascii_lowercase().as_str() {
+        "disabled" => 0,
+        "ctrl" => 1,
+        "shift" => 4,
+        "ctrl+alt" => 3,
+        "ctrl+shift" => 5,
+        "alt+shift" => 6,
+        "ctrl+alt+shift" => 7,
+        _ => 2,
+    }
+}
 
 #[cfg(target_os = "windows")]
 fn quick_paste_index_from_vk(vk: u32) -> Option<usize> {
@@ -278,6 +292,7 @@ pub unsafe extern "system" fn keyboard_proc(
             }
         }
 
+        let list_modifier_active;
         // The popup is normally shown without activation. Forward its Alt shortcuts
         // to the frontend, which owns the workspace/search order. Focused WebView
         // handles DOM events directly so each press has exactly one owner.
@@ -302,18 +317,22 @@ pub unsafe extern "system" fn keyboard_proc(
                 if keys.contains(&vk) { is_down }
                 else { (GetAsyncKeyState(generic) as u16 & 0x8000) != 0 }
             };
-            let alt_only = alt_down
-                && !other_modifier_down(VK_CONTROL.0 as i32, &[0x11, 0xA2, 0xA3])
-                && !other_modifier_down(VK_SHIFT.0 as i32, &[0x10, 0xA0, 0xA1])
-                && !other_modifier_down(VK_LWIN.0 as i32, &[0x5B])
-                && !other_modifier_down(VK_RWIN.0 as i32, &[0x5C]);
-            let show = active && alt_only;
-            if LIST_ALT_HELD.swap(show, Ordering::SeqCst) != show {
+            let ctrl_down = other_modifier_down(VK_CONTROL.0 as i32, &[0x11, 0xA2, 0xA3]);
+            let shift_down = other_modifier_down(VK_SHIFT.0 as i32, &[0x10, 0xA0, 0xA1]);
+            let win_down = other_modifier_down(VK_LWIN.0 as i32, &[0x5B])
+                || other_modifier_down(VK_RWIN.0 as i32, &[0x5C]);
+            let configured = GLOBAL_APP_HANDLE.get().map(|handle| {
+                handle.state::<SettingsState>().list_quick_paste_modifier.load(Ordering::Relaxed)
+            }).unwrap_or(2);
+            let pressed = ctrl_down as u8 | ((alt_down as u8) << 1) | ((shift_down as u8) << 2);
+            list_modifier_active = configured != 0 && configured == pressed && !win_down;
+            let show = active && list_modifier_active;
+            if LIST_MODIFIER_HELD.swap(show, Ordering::SeqCst) != show {
                 if let Some(handle) = GLOBAL_APP_HANDLE.get() {
                     let _ = handle.emit_to("main", "list-quick-paste", if show { "show" } else { "hide" });
                 }
             }
-            if active && alt_only && is_down {
+            if active && list_modifier_active && is_down {
                 if let Some(index) = digit {
                     let bit = 1 << index;
                     if LIST_DIGIT_MASK.fetch_or(bit, Ordering::SeqCst) & bit == 0 {
@@ -355,11 +374,10 @@ pub unsafe extern "system" fn keyboard_proc(
                     }
                 }
 
-                // The focused main list owns Alt+digits, using its filtered order.
+                // The focused main list owns its configured shortcut and filtered order.
                 // Let WebView receive these keys instead of the global pinned shortcut.
                 if is_down
-                    && !(IS_MAIN_WINDOW_FOCUSED.load(Ordering::Relaxed) && alt_down
-                        && !ctrl_down && !shift_down && !win_down)
+                    && !(IS_MAIN_WINDOW_FOCUSED.load(Ordering::Relaxed) && list_modifier_active)
                     && quick_paste_modifier_active(
                         &quick_paste_modifier,
                         ctrl_down,
@@ -425,7 +443,8 @@ pub unsafe extern "system" fn keyboard_proc(
                     }
                 }
 
-                if is_down {
+                if is_down && !(list_modifier_active && NAVIGATION_ENABLED.load(Ordering::Relaxed)
+                    && !IS_HIDDEN.load(Ordering::Relaxed)) {
                     if let Some(handle) = GLOBAL_APP_HANDLE.get() {
                         let settings = handle.state::<SettingsState>();
                         if settings.quick_tab_assign_enabled.load(Ordering::Relaxed) {

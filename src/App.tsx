@@ -1139,6 +1139,7 @@ const App = () => {
     !showSettings && !effectiveShowTagManager && !effectiveShowNoteManager && !showEmojiPanel && !chatMode &&
       editingTagsId === null && editingContentId === null,
     copyToClipboard,
+    appSettings["app.list_quick_paste_modifier"] || "alt",
   );
 
   useListSelectionReset({ filteredHistory, setSelectedIndex });
@@ -1645,6 +1646,7 @@ const App = () => {
   useEffect(() => {
     if (!quickTabAssignEnabled) return;
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return;
       const activeEl = document.activeElement as HTMLElement | null;
       if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA" || activeEl.isContentEditable)) {
         return;

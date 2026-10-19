@@ -158,6 +158,7 @@ pub fn init_db(path: &str) -> Result<Connection> {
     // Negative clipboard IDs are reused in each process. This alias map is valid only
     // during this session and must never resolve a new item to a previous session's item.
     conn.execute("DELETE FROM settings WHERE key = 'app.workspace_session_id_map'", [])?;
+    conn.execute("DELETE FROM settings WHERE key = 'app.workspace_session_id_map'", [])?;
     if let Err(error) = crate::infrastructure::repository::local_data::migrate_workspace_tags(&conn) {
         eprintln!("Workspace migration skipped without changing data: {error}");
     }
@@ -294,6 +295,10 @@ pub fn seed_defaults(conn: &Connection) -> Result<()> {
     );
     let _ = conn.execute(
         "INSERT OR IGNORE INTO settings (key, value) VALUES ('app.quick_paste_modifier', 'disabled')",
+        [],
+    );
+    let _ = conn.execute(
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('app.list_quick_paste_modifier', 'alt')",
         [],
     );
     let _ = conn.execute(
