@@ -22,6 +22,11 @@ use crate::infrastructure::windows_ext::WindowExt;
 static BLOCKED_HOTKEY_IDS: std::sync::Mutex<Vec<i32>> = std::sync::Mutex::new(Vec::new());
 
 #[cfg(target_os = "windows")]
+static LIST_ALT_HELD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+#[cfg(target_os = "windows")]
+static LIST_DIGIT_MASK: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+#[cfg(target_os = "windows")]
 fn quick_paste_index_from_vk(vk: u32) -> Option<usize> {
     match vk {
         0x31 | 0x61 => Some(0),
@@ -273,6 +278,55 @@ pub unsafe extern "system" fn keyboard_proc(
             }
         }
 
+        // The popup is normally shown without activation. Forward its Alt shortcuts
+        // to the frontend, which owns the workspace/search order. Focused WebView
+        // handles DOM events directly so each press has exactly one owner.
+        {
+            let digit = quick_paste_index_from_vk(vk);
+            if is_up {
+                if let Some(index) = digit {
+                    if LIST_DIGIT_MASK.fetch_and(!(1 << index), Ordering::SeqCst) & (1 << index) != 0 {
+                        return LRESULT(1);
+                    }
+                }
+            }
+            let active = NAVIGATION_ENABLED.load(Ordering::SeqCst)
+                && !IS_HIDDEN.load(Ordering::Relaxed)
+                && !IS_MAIN_WINDOW_FOCUSED.load(Ordering::Relaxed);
+            let alt_down = if matches!(vk, 0x12 | 0xA4 | 0xA5) {
+                is_down
+            } else {
+                (GetAsyncKeyState(VK_MENU.0 as i32) as u16 & 0x8000) != 0
+            };
+            let other_modifier_down = |generic: i32, keys: &[u32]| {
+                if keys.contains(&vk) { is_down }
+                else { (GetAsyncKeyState(generic) as u16 & 0x8000) != 0 }
+            };
+            let alt_only = alt_down
+                && !other_modifier_down(VK_CONTROL.0 as i32, &[0x11, 0xA2, 0xA3])
+                && !other_modifier_down(VK_SHIFT.0 as i32, &[0x10, 0xA0, 0xA1])
+                && !other_modifier_down(VK_LWIN.0 as i32, &[0x5B])
+                && !other_modifier_down(VK_RWIN.0 as i32, &[0x5C]);
+            let show = active && alt_only;
+            if LIST_ALT_HELD.swap(show, Ordering::SeqCst) != show {
+                if let Some(handle) = GLOBAL_APP_HANDLE.get() {
+                    let _ = handle.emit_to("main", "list-quick-paste", if show { "show" } else { "hide" });
+                }
+            }
+            if active && alt_only && is_down {
+                if let Some(index) = digit {
+                    let bit = 1 << index;
+                    if LIST_DIGIT_MASK.fetch_or(bit, Ordering::SeqCst) & bit == 0 {
+                        if let Some(handle) = GLOBAL_APP_HANDLE.get() {
+                            let key = if index == 9 { "0".to_string() } else { (index + 1).to_string() };
+                            let _ = handle.emit_to("main", "list-quick-paste", key);
+                        }
+                    }
+                    return LRESULT(1);
+                }
+            }
+        }
+
         // 4. Quick Paste by Modifier+Number
         {
             let ctrl_down = (GetAsyncKeyState(VK_CONTROL.0 as i32) as u16 & 0x8000) != 0;
@@ -301,7 +355,11 @@ pub unsafe extern "system" fn keyboard_proc(
                     }
                 }
 
+                // The focused main list owns Alt+digits, using its filtered order.
+                // Let WebView receive these keys instead of the global pinned shortcut.
                 if is_down
+                    && !(IS_MAIN_WINDOW_FOCUSED.load(Ordering::Relaxed) && alt_down
+                        && !ctrl_down && !shift_down && !win_down)
                     && quick_paste_modifier_active(
                         &quick_paste_modifier,
                         ctrl_down,

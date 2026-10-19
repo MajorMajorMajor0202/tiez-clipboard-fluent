@@ -1,3 +1,4 @@
+import ListKeyTip from "../../../shared/components/ListKeyTip";
 import { useRef, useEffect, useLayoutEffect, useState, useMemo, useCallback, memo } from "react";
 import { createPortal } from "react-dom";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
@@ -2021,6 +2022,7 @@ const ClipboardItem = ({
                 void hideCompactPreview();
             }}
         >
+            <ListKeyTip hint={quickPasteHint} />
             <div className="item-meta">
                 <div className="item-meta-left">
                     <div className="app-info">
@@ -2054,14 +2056,7 @@ const ClipboardItem = ({
 
                 <div className="item-meta-right">
                     <div className="item-meta-right-info">
-                        {quickPasteHint && item.is_pinned && (
-                            <span
-                                className="quick-paste-hint"
-                                title={`${t('quick_paste_modifier')}: ${quickPasteHint.combo}`}
-                            >
-                                {quickPasteHint.combo}
-                            </span>
-                        )}
+
                         <span title={item.timestamp ? new Date(item.timestamp).toLocaleString() : undefined}>
                             {getConciseTime(item.timestamp, language)}
                         </span>

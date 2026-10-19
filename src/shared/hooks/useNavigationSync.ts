@@ -33,5 +33,5 @@ export const useNavigationSync = ({
       .catch(() => {
         invoke("set_navigation_enabled", { enabled: false }).catch(console.error);
       });
-  }, [showSettings, showTagManager, chatMode, showEmojiPanel]);
+  }, [showSettings, showTagManager, showNoteManager, chatMode, showEmojiPanel]);
 };

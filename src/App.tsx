@@ -50,17 +50,17 @@ import { useOverlays } from "./shared/hooks/useOverlays";
 import { useAutoUpdate } from "./shared/hooks/useAutoUpdate";
 import UpdateDialog from "./shared/components/UpdateDialog";
 import type { ClipboardEntry } from "./shared/types";
-import type { QuickPasteHint, VirtualClipboardListHandle } from "./features/clipboard/types";
+import type { VirtualClipboardListHandle } from "./features/clipboard/types";
 
 
-import type { QuickPasteModifier, TabItem } from "./features/app/types";
+import type { TabItem } from "./features/app/types";
 import {
   forceHideCompactPreviewWindow,
   isCompactPreviewWindowSupported,
   isCompactPreviewWarmupSupported,
   warmupCompactPreviewWindow
 } from "./features/clipboard/lib/compactPreviewControls";
-import { isMacPlatform } from "./shared/lib/platform";
+import { useListQuickPaste } from "./shared/hooks/useListQuickPaste";
 import { isTauriRuntime } from "./shared/lib/tauriRuntime";
 
 const insertHistoryItem = (list: ClipboardEntry[], item: ClipboardEntry) => {
@@ -92,40 +92,6 @@ const insertHistoryItem = (list: ClipboardEntry[], item: ClipboardEntry) => {
 
   next.splice(insertIndex, 0, item);
   return next;
-};
-
-const QUICK_PASTE_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"] as const;
-
-const buildQuickPasteHintsById = (
-  items: ClipboardEntry[],
-  quickPasteModifier: QuickPasteModifier
-): Record<number, QuickPasteHint> => {
-  if (quickPasteModifier === "disabled") {
-    return {};
-  }
-
-  const modifierLabels: Record<Exclude<QuickPasteModifier, "disabled">, string> = isMacPlatform()
-    ? {
-        ctrl: "⌃",
-        alt: "⌥",
-        shift: "⇧",
-        win: "⌘"
-      }
-    : {
-        ctrl: "Ctrl+",
-        alt: "Alt+",
-        shift: "Shift+",
-        win: "Win+"
-      };
-  const pinnedItems = items.filter((item) => item.is_pinned).slice(0, QUICK_PASTE_KEYS.length);
-
-  return pinnedItems.reduce<Record<number, QuickPasteHint>>((acc, item, index) => {
-    acc[item.id] = {
-      slot: index + 1,
-      combo: `${modifierLabels[quickPasteModifier]}${QUICK_PASTE_KEYS[index]}`
-    };
-    return acc;
-  }, {});
 };
 
 const resolveDropPaths = (payload: unknown): string[] => {
@@ -205,7 +171,6 @@ const App = () => {
     setStripNewlineHotkey,
     pinWindowHotkey,
     setPinWindowHotkey,
-    quickPasteModifier,
     setQuickPasteModifier,
     quickTabAssignEnabled,
     setQuickTabAssignEnabled,
@@ -478,9 +443,7 @@ const App = () => {
     }
   }, [effectiveShowTagManager, showTagFilter, editingTagsId, history]);
   const virtualListRef = useRef<VirtualClipboardListHandle | null>(null);
-  const [quickPasteHintsById, setQuickPasteHintsById] = useState<Record<number, QuickPasteHint>>(
-    {}
-  );
+
   // Use a larger page size when filtering by type, since filtered results
   // are sparser and the user expects to browse more items at once.
   const PAGE_SIZE = typeFilter ? 200 : 80;
@@ -972,39 +935,6 @@ const App = () => {
     fetchHistory();
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    const seededHints = buildQuickPasteHintsById(history, quickPasteModifier);
-    setQuickPasteHintsById(seededHints);
-
-    if (quickPasteModifier === "disabled") {
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    invoke<ClipboardEntry[]>("get_clipboard_history", {
-      limit: 256,
-      offset: 0,
-      contentType: null
-    })
-      .then((items) => {
-        if (!cancelled) {
-          setQuickPasteHintsById(buildQuickPasteHintsById(items, quickPasteModifier));
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to refresh quick paste hints:", error);
-        if (!cancelled) {
-          setQuickPasteHintsById(seededHints);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [history, quickPasteModifier]);
-
   useToastListener({ pushToast });
 
   useTagManagerRefresh({
@@ -1199,6 +1129,17 @@ const App = () => {
     history,
     setHistory
   });
+
+  const quickPasteItems = useMemo(
+    () => pinnedItems.slice(0, 10).concat(unpinnedItems.slice(0, Math.max(0, 10 - pinnedItems.length))),
+    [pinnedItems, unpinnedItems],
+  );
+  const quickPasteHintsById = useListQuickPaste(
+    quickPasteItems,
+    !showSettings && !effectiveShowTagManager && !effectiveShowNoteManager && !showEmojiPanel && !chatMode &&
+      editingTagsId === null && editingContentId === null,
+    copyToClipboard,
+  );
 
   useListSelectionReset({ filteredHistory, setSelectedIndex });
 

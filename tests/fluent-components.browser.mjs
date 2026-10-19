@@ -265,6 +265,64 @@ try {
     assert.equal(await startup.locator(selector).evaluate(el => getComputedStyle(el).backgroundColor), "rgb(32, 32, 32)", "startup fallback wins over transparent settings layers");
   }
   await startup.close();
+  const quick = await browser.newPage({ viewport: { width: 480, height: 900 } });
+  quick.on("pageerror", error => errors.push(error.message));
+  await quick.goto(`http://127.0.0.1:${address.port}/tests/list-quick-paste.fixture.html`);
+  const tips = quick.locator('.quick-paste-hint');
+  const pasteLog = () => quick.getByTestId('pasted').textContent().then(JSON.parse);
+  const geometry = () => quick.locator('.history-item').evaluateAll(items => items.map(item => {
+    const r = item.getBoundingClientRect();
+    const c = item.querySelector('.content-preview').getBoundingClientRect();
+    return [r.x, r.y, r.width, r.height, c.x, c.y, c.width, c.height];
+  }));
+  for (const compact of [false, true]) {
+    if (compact) await quick.getByRole('button', { name: 'Compact', exact: true }).click();
+    const before = await geometry();
+    await quick.keyboard.down('Alt');
+    await tips.first().waitFor();
+    assert.equal(await tips.count(), 10);
+    assert.deepEqual(await tips.allTextContents(), ['1','2','3','4','5','6','7','8','9','0']);
+    assert.deepEqual(await geometry(), before, 'KeyTips leave item and content geometry unchanged');
+    await quick.screenshot({ path: `artifacts/fluent-components/list-keytips-${compact ? 'compact' : 'normal'}.png` });
+    await quick.keyboard.up('Alt');
+    await tips.first().waitFor({ state: 'hidden' });
+    assert.deepEqual(await geometry(), before);
+  }
+  await quick.keyboard.press('Alt+1');
+  assert.deepEqual(await pasteLog(), [3], 'pinned first matches displayed order');
+  await quick.keyboard.press('Alt+0');
+  assert.deepEqual(await pasteLog(), [3, 10], 'zero selects tenth entry');
+  await quick.keyboard.down('Alt'); await quick.keyboard.down('2'); await quick.keyboard.down('2');
+  await quick.keyboard.up('2'); await quick.keyboard.up('Alt');
+  assert.deepEqual(await pasteLog(), [3, 10, 1], 'auto repeat pastes once');
+  await quick.getByRole('button', { name: 'Workspace', exact: true }).click();
+  await quick.keyboard.down('Alt');
+  await tips.first().waitFor();
+  assert.equal(await tips.count(), 3, 'workspace only numbers its own entries');
+  await quick.keyboard.press('2'); await quick.keyboard.up('Alt');
+  assert.deepEqual(await pasteLog(), [3, 10, 1, 8]);
+  await quick.getByRole('button', { name: 'Workspace', exact: true }).click();
+  await quick.getByRole('textbox', { name: 'Search', exact: true }).fill('Entry 12');
+  await quick.keyboard.press('Alt+1');
+  assert.deepEqual(await pasteLog(), [3, 10, 1, 8, 12], 'search uses filtered order');
+  await quick.getByRole('textbox', { name: 'Search', exact: true }).fill('');
+  await quick.getByRole('textbox', { name: 'Note', exact: true }).focus();
+  await quick.keyboard.press('Alt+1');
+  assert.equal((await pasteLog()).length, 5, 'note editing owns its keys');
+  await quick.getByRole('button', { name: 'Dialog', exact: true }).click();
+  await quick.keyboard.press('Alt+1');
+  assert.equal((await pasteLog()).length, 5, 'dialogs block list paste');
+  await quick.getByRole('button', { name: 'Dialog', exact: true }).click();
+  await quick.keyboard.press('Control+Alt+1'); await quick.keyboard.press('Alt+Shift+1');
+  assert.equal((await pasteLog()).length, 5, 'other modifier combinations stay available');
+  await quick.keyboard.down('Alt'); await tips.first().waitFor();
+  await quick.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await tips.first().waitFor({ state: 'hidden' });
+  await quick.keyboard.up('Alt');
+  await quick.getByRole('button', { name: 'Enabled', exact: true }).click();
+  await quick.keyboard.press('Alt+1');
+  assert.equal((await pasteLog()).length, 5, 'non-list views disable paste');
+  await quick.close();
   assert.deepEqual(errors, []);
   console.log("Fluent browser checks passed: input/IME, dropdown, tooltip, labelled switches, slider pointer/keys, spin bounds, accordion, button states, modal focus/trap/restore, nested dismissal and dark portals.");
 } finally {
