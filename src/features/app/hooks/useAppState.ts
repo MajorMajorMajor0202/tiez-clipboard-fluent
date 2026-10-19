@@ -20,6 +20,8 @@ export const useAppState = (): AppState => {
   const [settingsSubpage, setSettingsSubpage] = useState<SettingsSubpage>("home");
   const [showTagManager, setShowTagManager] = useState(false);
   const [tagManagerEnabled, setTagManagerEnabled] = useState(true);
+  const [showNoteManager, setShowNoteManager] = useState(false);
+  const [noteManagerEnabled, setNoteManagerEnabled] = useState(true);
   const [history, setHistory] = useState<ClipboardEntry[]>([]);
   const [search, setSearch] = useState("");
   const [isComposing, setIsComposing] = useState(false);
@@ -213,6 +215,10 @@ export const useAppState = (): AppState => {
     setShowTagManager,
     tagManagerEnabled,
     setTagManagerEnabled,
+    showNoteManager,
+    setShowNoteManager,
+    noteManagerEnabled,
+    setNoteManagerEnabled,
     history,
     setHistory,
     search,

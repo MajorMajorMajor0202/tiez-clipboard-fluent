@@ -66,6 +66,9 @@ export interface FluentRightRailProps {
   showTagManager: boolean;
   setShowTagManager: (val: boolean) => void;
   tagManagerEnabled: boolean;
+  showNoteManager: boolean;
+  setShowNoteManager: (val: boolean) => void;
+  noteManagerEnabled: boolean;
   showEmojiPanel: boolean;
   setShowEmojiPanel: (val: boolean) => void;
   emojiPanelEnabled: boolean;
@@ -110,6 +113,9 @@ export const FluentRightRail = ({
   showTagManager,
   setShowTagManager,
   tagManagerEnabled,
+  showNoteManager,
+  setShowNoteManager,
+  noteManagerEnabled,
   showEmojiPanel,
   setShowEmojiPanel,
   emojiPanelEnabled,
@@ -397,6 +403,19 @@ export const FluentRightRail = ({
               aria-label="Tag manager"
             >
               <Tags size={16} strokeWidth={2} />
+            </button>
+          </FluentTooltip>
+        )}
+
+        {noteManagerEnabled && (
+          <FluentTooltip text={t("note_manager") || "便笺统一管理"}>
+            <button
+              type="button"
+              className={`rail-btn ${showNoteManager ? "active" : ""}`}
+              onClick={() => setShowNoteManager(!showNoteManager)}
+              aria-label="Note manager"
+            >
+              <StickyNote size={16} strokeWidth={2} />
             </button>
           </FluentTooltip>
         )}

@@ -32,7 +32,7 @@ html.is-sticker-window #root {
   -webkit-user-select: none;
 }
 
-/* The floating card fills the window edge-to-edge with clean rounded corners and 1px border */
+/* The floating card fills the window edge-to-edge with clean rounded corners and Mica/Acrylic backdrop */
 .sticker-card {
   position: relative;
   width: 100%;
@@ -41,23 +41,51 @@ html.is-sticker-window #root {
   display: flex;
   flex-direction: column;
   border-radius: 8px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.16);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s cubic-bezier(0.1, 0.9, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.1, 0.9, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(32px) saturate(140%);
+  -webkit-backdrop-filter: blur(32px) saturate(140%);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #1f1f1f;
 }
 
-/* Dark Mode card styling */
+/* Dark Mode Mica card styling */
 .dark-mode .sticker-card,
 body.dark-mode .sticker-card,
 html.dark-mode .sticker-card {
-  background: #202020;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  background: rgba(32, 32, 32, 0.85);
+  backdrop-filter: blur(32px) saturate(140%);
+  -webkit-backdrop-filter: blur(32px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f3f3f3;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Header & Drag Region */
+/* Acrylic theme overrides */
+.theme-acrylic .sticker-card,
+body.theme-acrylic .sticker-card,
+html.theme-acrylic .sticker-card {
+  background: rgba(248, 248, 248, 0.72);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.dark-mode.theme-acrylic .sticker-card,
+.dark-mode .theme-acrylic .sticker-card,
+body.dark-mode.theme-acrylic .sticker-card,
+html.dark-mode.theme-acrylic .sticker-card {
+  background: rgba(26, 26, 26, 0.75);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Header & Drag Region: completely seamless and unified with card background */
 .sticker-header {
   height: 34px;
   min-height: 34px;
@@ -65,8 +93,8 @@ html.dark-mode .sticker-card {
   align-items: center;
   justify-content: space-between;
   padding: 0 8px 0 10px;
-  background: #f8f8f8;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   cursor: grab;
   user-select: none;
   -webkit-app-region: drag;
@@ -76,7 +104,7 @@ html.dark-mode .sticker-card {
 .dark-mode .sticker-header,
 body.dark-mode .sticker-header,
 html.dark-mode .sticker-header {
-  background: #262626;
+  background: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -233,7 +261,16 @@ html.dark-mode .sticker-openwith-item:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Body & Scrollbar */
+/* Body Wrapper & Scrollbar */
+.sticker-body-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .sticker-body {
   flex: 1;
   min-height: 0;
@@ -241,7 +278,7 @@ html.dark-mode .sticker-openwith-item:hover {
   padding: 8px 10px;
   font-size: 13px;
   line-height: 1.5;
-  color: #1a1a1a;
+  color: inherit;
   user-select: text;
   -webkit-user-select: text;
   word-break: break-word;
@@ -250,7 +287,7 @@ html.dark-mode .sticker-openwith-item:hover {
 .dark-mode .sticker-body,
 body.dark-mode .sticker-body,
 html.dark-mode .sticker-body {
-  color: #f0f0f0;
+  color: inherit;
 }
 
 .sticker-body.fluent-scrollbar-host {

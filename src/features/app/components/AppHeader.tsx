@@ -18,6 +18,8 @@ interface AppHeaderProps {
   showSettings: boolean;
   showTagManager: boolean;
   tagManagerEnabled: boolean;
+  showNoteManager?: boolean;
+  noteManagerEnabled?: boolean;
   showEmojiPanel: boolean;
   isWindowPinned: boolean;
   setIsWindowPinned: (val: boolean) => void;
@@ -55,6 +57,8 @@ const AppHeader = ({
   showSettings,
   showTagManager,
   tagManagerEnabled,
+  showNoteManager,
+  noteManagerEnabled,
   showEmojiPanel,
   isWindowPinned,
   setIsWindowPinned,
@@ -86,7 +90,7 @@ const AppHeader = ({
   onDropExternalTextOnTab,
   chatMode
 }: AppHeaderProps) => {
-  const isSubpage = Boolean(showSettings || showTagManager || showEmojiPanel || chatMode);
+  const isSubpage = Boolean(showSettings || showTagManager || (showNoteManager && noteManagerEnabled) || showEmojiPanel || chatMode);
 
   return (
   <header className={isSubpage ? 'subpage-header' : ''}>
@@ -105,11 +109,13 @@ const AppHeader = ({
               ? (t('emoji_panel') || '表情包')
               : showTagManager && tagManagerEnabled
                 ? (t('tag_manager') || '标签管理')
-                : chatMode
-                  ? '局域网文件传输'
-                  : showSettings
-                    ? settingsTitle
-                    : t('app_name')}
+                : showNoteManager && noteManagerEnabled
+                  ? (t('note_manager') || '便笺管理')
+                  : chatMode
+                    ? '局域网文件传输'
+                    : showSettings
+                      ? settingsTitle
+                      : t('app_name')}
           </span>
         </div>
       </div>

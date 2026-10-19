@@ -154,13 +154,13 @@ export const useClipboardItemRenderer = ({
           windowPinned={isWindowPinned}
           isSensitiveHidden={!!isSensitiveHidden}
           isRevealed={revealedIds.has(item.id)}
-          isEditingTags={isEditingTags}
+          isEditingTags={item.content_type === "note" ? false : isEditingTags}
           tabs={tabs}
           activeTabId={activeTabId}
           assignedTabIds={assignedTabIds}
           isTabFlyoutOpen={isTabFlyoutOpen}
-          tagInput={isEditingTags ? tagInput : ""}
-          tagSuggestions={isEditingTags ? allTags : EMPTY_TAG_SUGGESTIONS}
+          tagInput={isEditingTags && item.content_type !== "note" ? tagInput : ""}
+          tagSuggestions={isEditingTags && item.content_type !== "note" ? allTags : EMPTY_TAG_SUGGESTIONS}
           tagColors={tagColors}
           theme={theme}
           language={language}
@@ -197,6 +197,7 @@ export const useClipboardItemRenderer = ({
           onTogglePin={(e) => togglePin(e, item.id, item.is_pinned)}
           onDelete={(e) => deleteEntry(e, item.id)}
           onToggleTagEditor={(e) => {
+            if (item.content_type === "note") return;
             e.stopPropagation();
             if (editingTagsId === item.id) {
               setEditingTagsId(null);
@@ -208,6 +209,7 @@ export const useClipboardItemRenderer = ({
           }}
           onTagInput={setTagInput}
           onTagAdd={() => {
+            if (item.content_type === "note") return;
             const rawTag = tagInput.trim();
             const lower = rawTag.toLowerCase();
             let newTag = rawTag;

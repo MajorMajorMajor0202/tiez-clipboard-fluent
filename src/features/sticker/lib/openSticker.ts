@@ -46,7 +46,7 @@ export async function openDesktopSticker(item: ClipboardEntry) {
   const colorModeParam = isDark ? "&color_mode=dark" : "&color_mode=light";
   const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
   const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
-  const savedTheme = localStorage.getItem("tiez_theme") || "retro";
+  const savedTheme = localStorage.getItem("tiez_theme") || "mica";
   const themeParam = `&theme=${encodeURIComponent(savedTheme)}`;
 
   const sticker = new WebviewWindow(label, {

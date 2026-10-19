@@ -5,6 +5,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 interface UseNavigationSyncOptions {
   showSettings: boolean;
   showTagManager: boolean;
+  showNoteManager?: boolean;
   chatMode: boolean;
   showEmojiPanel: boolean;
 }
@@ -12,11 +13,12 @@ interface UseNavigationSyncOptions {
 export const useNavigationSync = ({
   showSettings,
   showTagManager,
+  showNoteManager,
   chatMode,
   showEmojiPanel
 }: UseNavigationSyncOptions) => {
   useEffect(() => {
-    const shouldDisableNavigation = showSettings || showTagManager || chatMode || showEmojiPanel;
+    const shouldDisableNavigation = showSettings || showTagManager || showNoteManager || chatMode || showEmojiPanel;
     if (shouldDisableNavigation) {
       invoke("set_navigation_enabled", { enabled: false }).catch(console.error);
       return;

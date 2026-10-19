@@ -225,6 +225,8 @@ const SettingsWindow = () => {
     setEmojiPanelEnabled,
     tagManagerEnabled,
     setTagManagerEnabled,
+    noteManagerEnabled,
+    setNoteManagerEnabled,
     appSettings,
     defaultApps,
     autoStart,
@@ -269,6 +271,12 @@ const SettingsWindow = () => {
   const [showAppSelector, setShowAppSelector] = useState<string | null>(null);
   const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | 'pin_window' | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+  const [noteBackdropMode, setNoteBackdropMode] = useState<string>(() => {
+    return localStorage.getItem("tiez_note_backdrop_mode") || "sync";
+  });
+  const [noteDefaultSolidColor, setNoteDefaultSolidColor] = useState<string>(() => {
+    return localStorage.getItem("tiez_note_default_solid_color") || "random";
+  });
 
   const tagManagerSizeRef = useRef<{ width: number; height: number } | null>(null);
 
@@ -378,6 +386,7 @@ const SettingsWindow = () => {
     setClipboardTagFontSize,
     setEmojiPanelEnabled,
     setTagManagerEnabled,
+    setNoteManagerEnabled,
     setEmojiPanelTab,
     setEmojiFavorites,
     setHideDockIcon,
@@ -510,6 +519,9 @@ const SettingsWindow = () => {
       if (type === 'theme') localStorage.setItem('tiez_theme', path);
       if (type === 'color_mode') localStorage.setItem('tiez_color_mode', path);
       if (type === 'compact_mode') localStorage.setItem('tiez_compact_mode', path);
+      if (type === 'note_backdrop_mode') localStorage.setItem('tiez_note_backdrop_mode', path);
+      if (type === 'note_default_solid_color') localStorage.setItem('tiez_note_default_solid_color', path);
+      if (type === 'note_manager_enabled') localStorage.setItem('tiez_note_manager_enabled', path);
     } catch (e) {}
 
     try {
@@ -961,6 +973,25 @@ const SettingsWindow = () => {
                     const enabled = e.target.checked;
                     setEmojiPanelEnabled(enabled);
                     saveAppSetting('emoji_panel_enabled', String(enabled));
+                  }}
+                />
+                <span className="fluent-slider" />
+              </label>
+            </div>
+
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">启用便笺统一管理</span>
+                <span className="fluent-setting-description">在侧边栏提供便笺管理中心入口，集中查看、筛选和整理所有便笺卡片</span>
+              </div>
+              <label className="fluent-switch">
+                <input
+                  type="checkbox"
+                  checked={noteManagerEnabled}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setNoteManagerEnabled?.(enabled);
+                    saveAppSetting('note_manager_enabled', String(enabled));
                   }}
                 />
                 <span className="fluent-slider" />
@@ -2571,6 +2602,53 @@ const SettingsWindow = () => {
                 }}
               />
             </div>
+
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">便笺窗口背景材质</span>
+                <span className="fluent-setting-description">独立便笺窗口的材质主题，可跟随主窗口或固定为特定材质</span>
+              </div>
+              <FluentDropdown
+                options={[
+                  { id: 'sync', label: '跟随主窗口' },
+                  { id: 'mica', label: '云母材质 (Mica)' },
+                  { id: 'acrylic', label: '亚克力材质 (Acrylic)' },
+                  { id: 'solid', label: '纯色便笺纸' }
+                ]}
+                value={noteBackdropMode}
+                onChange={(val) => {
+                  setNoteBackdropMode(val);
+                  saveAppSetting('note_backdrop_mode', val);
+                }}
+              />
+            </div>
+
+            {noteBackdropMode === 'solid' && (
+              <div className="fluent-setting-card">
+                <div className="fluent-setting-info">
+                  <span className="fluent-setting-title">便笺纯色默认底色</span>
+                  <span className="fluent-setting-description">纯色效果下新建便笺的默认底色，支持随机分配或指定颜色</span>
+                </div>
+                <FluentDropdown
+                  options={[
+                    { id: 'random', label: '🎲 随机色彩分配' },
+                    { id: 'yellow', label: '🟨 便笺黄 (Yellow)' },
+                    { id: 'green', label: '🟩 薄荷绿 (Mint)' },
+                    { id: 'blue', label: '🟦 天空蓝 (Sky Blue)' },
+                    { id: 'purple', label: '🟪 薰衣草 (Lavender)' },
+                    { id: 'pink', label: '🌸 樱花粉 (Rose)' },
+                    { id: 'charcoal', label: '⬜ 石板灰 (Slate)' },
+                    { id: 'orange', label: '🟧 暖阳橙 (Orange)' },
+                    { id: 'cyan', label: '🟦 湖水青 (Cyan)' }
+                  ]}
+                  value={noteDefaultSolidColor}
+                  onChange={(val) => {
+                    setNoteDefaultSolidColor(val);
+                    saveAppSetting('note_default_solid_color', val);
+                  }}
+                />
+              </div>
+            )}
 
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
+import { applyThemeClasses, normalizeThemeId } from "../../../shared/config/themes";
 import "../../../styles/components/sticker-window.css";
 
 export const DesktopStickerWindow: React.FC = () => {
@@ -66,15 +67,26 @@ export const DesktopStickerWindow: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const applyCurrentTheme = () => {
+      const p = new URLSearchParams(window.location.search);
+      const currentTheme = p.get("theme") || localStorage.getItem("tiez_theme") || "mica";
+      applyThemeClasses(normalizeThemeId(currentTheme), document.documentElement, document.body);
+    };
+    applyCurrentTheme();
+
     const handleThemeEvent = (event: { payload: string }) => {
       const isDark = event.payload === "dark";
       document.documentElement.classList.toggle("dark-mode", isDark);
       document.body.classList.toggle("dark-mode", isDark);
       document.documentElement.classList.toggle("light-mode", !isDark);
       document.body.classList.toggle("light-mode", !isDark);
+      applyCurrentTheme();
     };
 
     const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent).catch(() => () => {});
+    const unlistenSettings = listen("settings-changed", () => {
+      applyCurrentTheme();
+    }).catch(() => () => {});
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const handleMediaChange = (e: MediaQueryListEvent) => {
@@ -90,6 +102,7 @@ export const DesktopStickerWindow: React.FC = () => {
 
     return () => {
       unlistenPromise.then((off) => { if (typeof off === "function") off(); }).catch(() => {});
+      unlistenSettings.then((off) => { if (typeof off === "function") off(); }).catch(() => {});
       mql.removeEventListener("change", handleMediaChange);
     };
   }, []);
@@ -499,11 +512,13 @@ export const DesktopStickerWindow: React.FC = () => {
 
         {/* Body content with FluentScrollbar */}
         {!isCollapsed && (
-          <div
-            ref={bodyRef}
-            className="sticker-body fluent-scrollbar-host"
-          >
-            {renderBody()}
+          <div className="sticker-body-wrapper">
+            <div
+              ref={bodyRef}
+              className="sticker-body fluent-scrollbar-host"
+            >
+              {renderBody()}
+            </div>
             <FluentScrollbar scrollContainer={bodyEl} />
           </div>
         )}

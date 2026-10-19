@@ -6,9 +6,11 @@ import { Clipboard } from "lucide-react";
 import FileTransferChatView from "../../file-transfer/components/FileTransferChatView";
 import TagManager from "../../tag/components/TagManager";
 import EmojiPanel from "../../emoji/components/EmojiPanel";
+import NoteManager from "../../note/components/NoteManager";
 import { VirtualClipboardList } from "../../clipboard/components/VirtualClipboardList";
 import type { ClipboardEntry } from "../../../shared/types";
 import type { VirtualClipboardListHandle } from "../../clipboard/types";
+import type { TabItem } from "../types";
 
 
 type RenderItem = (
@@ -23,6 +25,12 @@ interface AppMainContentProps {
   theme: string;
   showTagManager: boolean;
   tagManagerEnabled: boolean;
+  showNoteManager?: boolean;
+  noteManagerEnabled?: boolean;
+  tabs?: TabItem[];
+  tabAssignments?: Record<string, number[]>;
+  saveTabAssignments?: (assignments: Record<string, number[]>) => void;
+  onCreateNote?: () => void;
   showEmojiPanel: boolean;
   chatMode: boolean;
   localIp: string;
@@ -95,6 +103,12 @@ const AppMainContent = ({
   theme,
   showTagManager,
   tagManagerEnabled,
+  showNoteManager,
+  noteManagerEnabled,
+  tabs,
+  tabAssignments,
+  saveTabAssignments,
+  onCreateNote,
   showEmojiPanel,
   chatMode,
   localIp,
@@ -194,6 +208,25 @@ const AppMainContent = ({
         style={{ height: "100%" }}
       >
         <TagManager t={t} theme={theme} />
+      </motion.div>
+    );
+  }
+
+  if (showNoteManager && noteManagerEnabled) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        style={{ height: "100%" }}
+      >
+        <NoteManager
+          t={t}
+          theme={theme}
+          tabs={tabs}
+          tabAssignments={tabAssignments}
+          saveTabAssignments={saveTabAssignments}
+          onCreateNote={onCreateNote}
+        />
       </motion.div>
     );
   }

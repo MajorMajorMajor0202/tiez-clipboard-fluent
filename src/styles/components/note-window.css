@@ -177,8 +177,37 @@ html.dark-mode .note-theme-charcoal {
   color: #ECEFF1;
 }
 
+/* 9. Orange (Warm Sun) */
+.note-theme-orange {
+  background: #FFE0B2;
+  border: 1px solid #FFCC80;
+  color: #4E2600;
+}
+.dark-mode .note-theme-orange,
+body.dark-mode .note-theme-orange,
+html.dark-mode .note-theme-orange {
+  background: #3E2415;
+  border: 1px solid #5C3A24;
+  color: #FFE0B2;
+}
+
+/* 10. Cyan (Lake Cyan) */
+.note-theme-cyan {
+  background: #E0F7FA;
+  border: 1px solid #B2EBF2;
+  color: #004D40;
+}
+.dark-mode .note-theme-cyan,
+body.dark-mode .note-theme-cyan,
+html.dark-mode .note-theme-cyan {
+  background: #103238;
+  border: 1px solid #1E4E56;
+  color: #E0F7FA;
+}
+
 /* ───────────────────────────────────────────────────────────
    TitleBar: Windows 11 Fluent Stickies 32px Square Button Bar
+   Integrated seamless design (shares exact same background with note body)
    Auto-hides when unfocused & unhovered, smoothly slides down on focus/hover
    ─────────────────────────────────────────────────────────── */
 .note-titlebar {
@@ -193,10 +222,10 @@ html.dark-mode .note-theme-charcoal {
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   user-select: none;
   -webkit-user-select: none;
   box-sizing: border-box;
@@ -209,8 +238,10 @@ html.dark-mode .note-theme-charcoal {
 }
 
 .dark-mode .note-titlebar {
-  background: rgba(28, 28, 28, 0.55);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
 }
 
 /* Auto-hide: smoothly collapse height and fade out when not focused/hovered */

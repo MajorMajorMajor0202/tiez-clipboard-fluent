@@ -15,6 +15,7 @@ interface UseKeyboardNavigationOptions {
   setIsKeyboardMode: (val: boolean | ((prev: boolean) => boolean)) => void;
   showSettings: boolean;
   showTagManager: boolean;
+  showNoteManager?: boolean;
   chatMode: boolean;
   editingTagsId: number | null;
   arrowKeySelection: boolean;
@@ -32,6 +33,7 @@ export const useKeyboardNavigation = ({
   setIsKeyboardMode,
   showSettings,
   showTagManager,
+  showNoteManager,
   chatMode,
   editingTagsId,
   arrowKeySelection,
@@ -46,6 +48,7 @@ export const useKeyboardNavigation = ({
   const isWindowVisibleRef = useWindowVisibility();
   const showSettingsRef = useRef(showSettings);
   const showTagManagerRef = useRef(showTagManager);
+  const showNoteManagerRef = useRef(showNoteManager);
   const chatModeRef = useRef(chatMode);
   const editingTagsIdRef = useRef(editingTagsId);
   const arrowKeySelectionRef = useRef(arrowKeySelection);
@@ -57,6 +60,7 @@ export const useKeyboardNavigation = ({
   useEffect(() => { isKeyboardModeRef.current = isKeyboardMode; }, [isKeyboardMode]);
   useEffect(() => { showSettingsRef.current = showSettings; }, [showSettings]);
   useEffect(() => { showTagManagerRef.current = showTagManager; }, [showTagManager]);
+  useEffect(() => { showNoteManagerRef.current = showNoteManager; }, [showNoteManager]);
   useEffect(() => { chatModeRef.current = chatMode; }, [chatMode]);
   useEffect(() => { editingTagsIdRef.current = editingTagsId; }, [editingTagsId]);
   useEffect(() => { arrowKeySelectionRef.current = arrowKeySelection; }, [arrowKeySelection]);
@@ -80,6 +84,7 @@ export const useKeyboardNavigation = ({
       if (
         showSettingsRef.current ||
         showTagManagerRef.current ||
+        showNoteManagerRef.current ||
         chatModeRef.current ||
         editingTagsIdRef.current !== null ||
         document.querySelector(".fluent-modal-overlay") !== null ||
@@ -200,6 +205,7 @@ export const useKeyboardNavigation = ({
       if (
         showSettingsRef.current ||
         showTagManagerRef.current ||
+        showNoteManagerRef.current ||
         chatModeRef.current ||
         editingTagsIdRef.current !== null
       ) {

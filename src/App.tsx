@@ -155,6 +155,10 @@ const App = () => {
     setShowTagManager,
     tagManagerEnabled,
     setTagManagerEnabled,
+    showNoteManager,
+    setShowNoteManager,
+    noteManagerEnabled,
+    setNoteManagerEnabled,
     history,
     setHistory,
     search,
@@ -381,6 +385,7 @@ const App = () => {
 
   const effectiveShowEmojiPanel = showEmojiPanel && emojiPanelEnabled;
   const effectiveShowTagManager = showTagManager && tagManagerEnabled;
+  const effectiveShowNoteManager = showNoteManager && noteManagerEnabled;
   const [fileTransferSourceView, setFileTransferSourceView] =
     useState<FileTransferSourceView>("clipboard");
 
@@ -568,6 +573,10 @@ const App = () => {
       setShowTagManager(false);
       return;
     }
+    if (effectiveShowNoteManager) {
+      setShowNoteManager(false);
+      return;
+    }
     if (showSettings) {
       if (settingsSubpage !== "home") {
         setSettingsSubpage("home");
@@ -706,6 +715,7 @@ const App = () => {
     setClipboardTagFontSize,
     setEmojiPanelEnabled,
     setTagManagerEnabled,
+    setNoteManagerEnabled,
     setEmojiPanelTab,
     setEmojiFavorites,
     setPersistent,
@@ -856,6 +866,12 @@ const App = () => {
       setShowTagManager(false);
     }
   }, [tagManagerEnabled, showTagManager, setShowTagManager]);
+
+  useEffect(() => {
+    if (!noteManagerEnabled && showNoteManager) {
+      setShowNoteManager(false);
+    }
+  }, [noteManagerEnabled, showNoteManager, setShowNoteManager]);
 
   useAppBootstrap({
     fetchEffectiveTransferPath,
@@ -1066,7 +1082,13 @@ const App = () => {
     fetchHistory
   });
 
-  useNavigationSync({ showSettings, showTagManager: effectiveShowTagManager, chatMode, showEmojiPanel: effectiveShowEmojiPanel });
+  useNavigationSync({
+    showSettings,
+    showTagManager: effectiveShowTagManager,
+    showNoteManager: effectiveShowNoteManager,
+    chatMode,
+    showEmojiPanel: effectiveShowEmojiPanel
+  });
 
   const { copyToClipboard, openContent, deleteEntry, togglePin, handleUpdateTags } =
     useClipboardActions({
@@ -1193,6 +1215,7 @@ const App = () => {
     setIsKeyboardMode,
     showSettings,
     showTagManager: effectiveShowTagManager,
+    showNoteManager: effectiveShowNoteManager,
     chatMode,
     editingTagsId,
     arrowKeySelection,
@@ -1815,20 +1838,7 @@ const App = () => {
   const handleCreateNote = useCallback(async () => {
     try {
       const currentTabId = activeTabId || activeTab?.id || "clipboard";
-      let targetTabId = currentTabId;
-
-      if (targetTabId === "clipboard") {
-        let noteTab = tabs.find((t) => t.id === "tab-notes" || t.name === "便笺" || t.name === "Notes");
-        if (!noteTab) {
-          const newTab = { id: `tab-notes-${Date.now()}`, name: t("notes") || "便笺" };
-          setTabs((prev) => [...prev, newTab]);
-          targetTabId = newTab.id;
-          setActiveTabId(newTab.id);
-        } else {
-          targetTabId = noteTab.id;
-          setActiveTabId(noteTab.id);
-        }
-      }
+      const targetTabId = currentTabId !== "clipboard" ? currentTabId : null;
 
       const newId = await invoke<number>("add_manual_item", {
         content: "# 新便笺\n\n- [ ] 事项 1\n",
@@ -1837,13 +1847,15 @@ const App = () => {
       });
 
       if (typeof newId === "number") {
-        setTabAssignments((prev) => {
-          const list = prev[targetTabId] || [];
-          const nextList = [newId, ...list.filter((id) => id !== newId)];
-          const next = { ...prev, [targetTabId]: nextList };
-          saveTabAssignments(next);
-          return next;
-        });
+        if (targetTabId) {
+          setTabAssignments((prev) => {
+            const list = prev[targetTabId] || [];
+            const nextList = [newId, ...list.filter((id) => id !== newId)];
+            const next = { ...prev, [targetTabId]: nextList };
+            saveTabAssignments(next);
+            return next;
+          });
+        }
 
         const optimisticEntry: ClipboardEntry = {
           id: newId,
@@ -1862,7 +1874,7 @@ const App = () => {
         };
         setHistory((prev) => [optimisticEntry, ...prev.filter((item) => item.id !== newId)]);
 
-        openStickyNote(optimisticEntry, targetTabId);
+        openStickyNote(optimisticEntry, targetTabId || undefined);
         pushToast(t("note_created") || "已新建便笺");
       }
     } catch (err) {
@@ -2192,6 +2204,8 @@ const App = () => {
         showSettings={showSettings}
         showTagManager={effectiveShowTagManager}
         tagManagerEnabled={tagManagerEnabled}
+        showNoteManager={effectiveShowNoteManager}
+        noteManagerEnabled={noteManagerEnabled}
         showEmojiPanel={effectiveShowEmojiPanel}
         chatMode={chatMode}
         isWindowPinned={isWindowPinned}
@@ -2226,10 +2240,10 @@ const App = () => {
 
       <div className="app-body-container">
         <main
-          className={`main-content${chatMode ? " file-transfer-mode" : ""}${effectiveShowTagManager ? " tag-manager-mode" : ""}`}
+          className={`main-content${chatMode ? " file-transfer-mode" : ""}${effectiveShowTagManager ? " tag-manager-mode" : ""}${effectiveShowNoteManager ? " note-manager-mode" : ""}`}
           style={{ 
             overflow: 'hidden',
-            padding: effectiveShowTagManager ? '0' : undefined
+            padding: (effectiveShowTagManager || effectiveShowNoteManager) ? '0' : undefined
           }}
           onWheel={handleMainWheel}
         >
@@ -2238,6 +2252,12 @@ const App = () => {
             theme={theme}
             showTagManager={effectiveShowTagManager}
             tagManagerEnabled={tagManagerEnabled}
+            showNoteManager={effectiveShowNoteManager}
+            noteManagerEnabled={noteManagerEnabled}
+            tabs={tabs}
+            tabAssignments={tabAssignments}
+            saveTabAssignments={saveTabAssignments}
+            onCreateNote={handleCreateNote}
             showEmojiPanel={effectiveShowEmojiPanel}
             chatMode={chatMode}
             localIp={localIp}
@@ -2284,7 +2304,7 @@ const App = () => {
             onAssignTab={handleRailAssignTab}
             isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id : false}
             isTabAssigned={isSelectedItemTabAssigned}
-            onAssignTag={handleRailAssignTag}
+            onAssignTag={selectedItem && selectedItem.content_type !== "note" ? handleRailAssignTag : undefined}
             isEditingTags={selectedItem ? editingTagsId === selectedItem.id : false}
             hasTags={Boolean(selectedItem?.tags && selectedItem.tags.length > 0)}
             onTogglePin={handleRailTogglePin}
@@ -2311,6 +2331,9 @@ const App = () => {
             showTagManager={effectiveShowTagManager}
             setShowTagManager={setShowTagManager}
             tagManagerEnabled={tagManagerEnabled}
+            showNoteManager={effectiveShowNoteManager}
+            setShowNoteManager={setShowNoteManager}
+            noteManagerEnabled={noteManagerEnabled}
             showEmojiPanel={effectiveShowEmojiPanel}
             setShowEmojiPanel={setShowEmojiPanel}
             emojiPanelEnabled={emojiPanelEnabled}

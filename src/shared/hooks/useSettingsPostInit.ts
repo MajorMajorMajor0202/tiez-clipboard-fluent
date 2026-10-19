@@ -121,6 +121,7 @@ interface UseSettingsPostInitOptions {
   setClipboardTagFontSize: (val: number) => void;
   setEmojiPanelEnabled: (val: boolean) => void;
   setTagManagerEnabled: (val: boolean) => void;
+  setNoteManagerEnabled?: (val: boolean) => void;
   setEmojiPanelTab: (val: "emoji" | "favorites") => void;
   setEmojiFavorites: (val: string[]) => void;
 }
@@ -213,6 +214,7 @@ export const useSettingsPostInit = ({
   setClipboardTagFontSize,
   setEmojiPanelEnabled,
   setTagManagerEnabled,
+  setNoteManagerEnabled,
   setEmojiPanelTab,
   setEmojiFavorites
 }: UseSettingsPostInitOptions) => {
@@ -254,6 +256,9 @@ export const useSettingsPostInit = ({
     }
     if (settings["app.tag_manager_enabled"] !== undefined) {
       setTagManagerEnabled(settings["app.tag_manager_enabled"] !== "false");
+    }
+    if (settings["app.note_manager_enabled"] !== undefined && setNoteManagerEnabled) {
+      setNoteManagerEnabled(settings["app.note_manager_enabled"] !== "false");
     }
     if (settings["app.emoji_panel_tab"] === "favorites" || settings["app.emoji_panel_tab"] === "emoji") {
       setEmojiPanelTab(settings["app.emoji_panel_tab"] as "emoji" | "favorites");

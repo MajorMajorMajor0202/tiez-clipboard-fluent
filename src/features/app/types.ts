@@ -32,6 +32,10 @@ export interface AppState {
   setShowTagManager: StateSetter<boolean>;
   tagManagerEnabled: boolean;
   setTagManagerEnabled: StateSetter<boolean>;
+  showNoteManager: boolean;
+  setShowNoteManager: StateSetter<boolean>;
+  noteManagerEnabled: boolean;
+  setNoteManagerEnabled: StateSetter<boolean>;
   history: ClipboardEntry[];
   setHistory: StateSetter<ClipboardEntry[]>;
   search: string;

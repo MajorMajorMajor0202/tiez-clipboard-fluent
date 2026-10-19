@@ -9,7 +9,8 @@ import {
   Pin,
   PinOff,
   Trash2,
-  X
+  X,
+  Palette
 } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types/clipboard";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
@@ -25,7 +26,9 @@ export type NoteBackdrop =
   | "blue"
   | "purple"
   | "pink"
-  | "charcoal";
+  | "charcoal"
+  | "orange"
+  | "cyan";
 
 export interface NoteThemeOption {
   id: NoteBackdrop;
@@ -33,6 +36,17 @@ export interface NoteThemeOption {
   dotColorLight: string;
   dotColorDark: string;
 }
+
+export const SOLID_NOTE_COLORS: NoteBackdrop[] = [
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+  "charcoal",
+  "orange",
+  "cyan"
+];
 
 export const NOTE_THEMES: NoteThemeOption[] = [
   { id: "mica", name: "云母 (Mica)", dotColorLight: "rgba(255,255,255,0.85)", dotColorDark: "rgba(32,32,32,0.85)" },
@@ -43,6 +57,8 @@ export const NOTE_THEMES: NoteThemeOption[] = [
   { id: "purple", name: "薰衣草 (Lavender)", dotColorLight: "#F3E5F5", dotColorDark: "#311C3B" },
   { id: "pink", name: "樱花粉 (Rose)", dotColorLight: "#FCE4EC", dotColorDark: "#3C1B27" },
   { id: "charcoal", name: "石板灰 (Slate)", dotColorLight: "#ECEFF1", dotColorDark: "#272B2E" },
+  { id: "orange", name: "暖阳橙 (Orange)", dotColorLight: "#FFE0B2", dotColorDark: "#3E2415" },
+  { id: "cyan", name: "湖水青 (Cyan)", dotColorLight: "#E0F7FA", dotColorDark: "#103238" },
 ];
 
 export const StickyNoteWindow: React.FC = () => {
@@ -91,12 +107,28 @@ export const StickyNoteWindow: React.FC = () => {
     if (savedBackdrop && NOTE_THEMES.some((t) => t.id === savedBackdrop)) {
       setBackdrop(savedBackdrop);
     } else {
-      const appTheme = localStorage.getItem("tiez_theme");
-      if (appTheme === "acrylic") {
-        setBackdrop("acrylic");
-      } else {
-        setBackdrop("mica");
+      const backdropMode = localStorage.getItem("tiez_note_backdrop_mode") || "sync";
+      let chosen: NoteBackdrop = "mica";
+      if (backdropMode === "sync") {
+        const appTheme = localStorage.getItem("tiez_theme");
+        chosen = appTheme === "acrylic" ? "acrylic" : "mica";
+      } else if (backdropMode === "mica") {
+        chosen = "mica";
+      } else if (backdropMode === "acrylic") {
+        chosen = "acrylic";
+      } else if (backdropMode === "solid") {
+        const defaultColor = localStorage.getItem("tiez_note_default_solid_color") || "random";
+        if (defaultColor !== "random" && SOLID_NOTE_COLORS.includes(defaultColor as NoteBackdrop)) {
+          chosen = defaultColor as NoteBackdrop;
+        } else {
+          const randomIndex = Math.floor(Math.random() * SOLID_NOTE_COLORS.length);
+          chosen = SOLID_NOTE_COLORS[randomIndex];
+        }
       }
+      setBackdrop(chosen);
+      try {
+        localStorage.setItem(`note_backdrop_${id}`, chosen);
+      } catch {}
     }
 
     // Instant load from localStorage
@@ -406,6 +438,22 @@ export const StickyNoteWindow: React.FC = () => {
               onClick={handleCreateAnother}
             >
               <Plus size={14} strokeWidth={2.2} />
+            </button>
+
+            {/* Change Theme / Palette */}
+            <button
+              type="button"
+              className={`note-titlebar-btn ${contextMenu ? "active" : ""}`}
+              title="便笺设置与背景颜色"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setContextMenu({
+                  x: Math.max(8, rect.left - 160),
+                  y: rect.bottom + 4
+                });
+              }}
+            >
+              <Palette size={13} strokeWidth={2} />
             </button>
 
             {/* Delete Note */}
