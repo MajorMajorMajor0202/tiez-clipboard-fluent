@@ -31,8 +31,11 @@
 .tiez-official-dropdown .fluent-dropdown-trigger-btn:hover { background: #fafafa; border-color: var(--line-strong); }
 .dark-mode .tiez-official-dropdown .fluent-dropdown-trigger-btn { background: #2d2d2d; }
 .dark-mode .tiez-official-dropdown .fluent-dropdown-trigger-btn:hover { background: #323232; }
-.tiez-dropdown-label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.tiez-dropdown-label { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; min-width: 0; }
+.tiez-dropdown-label > span { overflow: hidden; text-overflow: ellipsis; }
+.tiez-dropdown-label > svg { flex-shrink: 0; }
 .tiez-official-listbox {
+  visibility: hidden;
   gap: 4px;
   padding: 4px;
   background: #fafafa;
@@ -41,9 +44,14 @@
   border-radius: 4px;
   box-shadow: var(--flyout-shadow);
   z-index: 1000004;
-  animation: fluentDropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top center;
 }
+.tiez-official-listbox[data-positioned="true"] {
+  visibility: visible;
+  animation: fluentDropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tiez-dropdown-option-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tiez-official-listbox .fluent-dropdown-item > svg { flex-shrink: 0; }
 .dark-mode .tiez-official-listbox { background: #2d2d2d; }
 .tiez-official-listbox .fluent-dropdown-item {
   flex-shrink: 0; height: 32px; min-height: 32px; font-family: inherit;
@@ -101,7 +109,7 @@
 }
 .home-search-wrapper::after { transform-origin: center; }
 @media (prefers-reduced-motion: reduce) {
-  .tiez-official-listbox { animation: none; }
+  .tiez-official-listbox[data-positioned="true"] { animation: none; }
   .home-search-wrapper::after { transition-duration: 0.01ms; }
 }
 

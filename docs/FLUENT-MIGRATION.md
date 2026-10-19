@@ -118,3 +118,17 @@ The second batch measured JS at about 1,793.68 kB (gzip 530.88 kB), versus
 1,649.22 kB (gzip 493.91 kB) after the local-data fixes. These are build sizes;
 no claim about native resident RAM follows from them. Windows DWM first-frame
 behavior and native focus still require desktop verification.
+
+## Dropdown positioning follow-up
+
+The popup's scale-in keyframes and Fluent's default transform-based positioning
+were both writing `transform`, leaving visible animation frames near (0, 0).
+Positioning now uses top/left and the popup remains hidden until positioning ends.
+Closing/selection clears readiness, and late positioning callbacks cannot reveal
+a closed popup. Stable positioning options avoid unnecessary manager resets.
+
+Triggers default to a fixed 160px (explicit caller widths still work); flyouts
+use trigger width plus 8px for the surrounding frame, bounded by the viewport.
+Option labels truncate with ellipsis instead of changing either width. Browser
+regression tests sample every visible frame during opening/selection/closing,
+and compare trigger/flyout dimensions before and after choosing a long label.

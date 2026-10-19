@@ -30,6 +30,7 @@ function Fixture() {
   const [nested, setNested] = useState(false);
   const [locked, setLocked] = useState(false);
   const [format, setFormat] = useState("text");
+  const [widthValue, setWidthValue] = useState("short");
   useEffect(() => {
     const capture = (event: KeyboardEvent) => {
       if (isControlKeyboardTarget(event.target) || document.querySelector('[role="dialog"]')) return;
@@ -97,6 +98,8 @@ function Fixture() {
           actions={<FluentSwitch checked={enabled} onChange={e => setEnabled(e.target.checked)} />}>
           <div className="fluent-setting-expander-content">提示音内容</div>
         </FluentSettingsExpander>
+        <FluentDropdown aria-label="固定宽度测试" value={widthValue} onChange={setWidthValue}
+          options={[{ id: "short", label: "短" }, { id: "long", label: "这是一项很长的修饰键选项文字" }]} />
         <FluentButton variant="danger">删除材料</FluentButton>
         <FluentButton loading>正在保存</FluentButton>
         <FluentButton disabled>不可用操作</FluentButton>

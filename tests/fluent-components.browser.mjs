@@ -37,7 +37,27 @@ try {
   assert.equal(animation.duration, "0.25s");
   assert.equal(animation.easing, "cubic-bezier(0.1, 0.9, 0.2, 1)");
   const dropdown = page.getByRole("combobox", { name: "粘贴修饰键" });
-  assert.ok((await dropdown.boundingBox()).width < 200, "short dropdown retains compact desktop width");
+  const triggerWidth = (await dropdown.boundingBox()).width;
+  assert.equal(triggerWidth, 160, "default dropdown width is fixed");
+  await page.evaluate(() => {
+    window.__dropdownFrames = [];
+    window.__sampleDropdown = true;
+    const sample = () => {
+      const popup = document.querySelector('[role="listbox"]');
+      const trigger = document.querySelector('[role="combobox"]');
+      const selected = popup?.querySelector('[aria-selected="true"]');
+      if (popup && trigger && selected) {
+        const style = getComputedStyle(popup);
+        if (style.visibility === "visible" && Number(style.opacity) > 0) {
+          const a = selected.getBoundingClientRect(), b = trigger.getBoundingClientRect();
+          window.__dropdownFrames.push({ selected: selected.textContent, y: popup.getBoundingClientRect().top, x: popup.getBoundingClientRect().left,
+            error: Math.abs(a.top + a.height / 2 - b.top - b.height / 2) });
+        }
+      }
+      if (window.__sampleDropdown) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
   await dropdown.click();
   await page.getByRole("option", { name: "Alt", exact: true }).waitFor({ state: "visible", timeout: 3000 }).catch(async (error) => {
     await mkdir("artifacts/fluent-components", { recursive: true });
@@ -47,6 +67,10 @@ try {
   await page.getByRole("option", { name: "Alt", exact: true }).click();
   await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('.home-search-wrapper'), '::after').transform).a === 0);
   assert.equal(await page.getByTestId("selected-value").textContent(), "alt");
+  const frames = await page.evaluate(() => { window.__sampleDropdown = false; return window.__dropdownFrames; });
+  assert.ok(frames.length > 0, "sample visible frames throughout opening animation");
+  assert.ok(frames.every(frame => frame.x > 8 && frame.error < 3), "every visible frame is anchored, including during scale-in: " + JSON.stringify(frames.filter(frame => frame.x <= 8 || frame.error >= 3).slice(0, 3)));
+  assert.equal((await dropdown.boundingBox()).width, triggerWidth, "selection does not resize trigger");
   await dropdown.focus();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("End");
@@ -152,6 +176,18 @@ try {
   assert.equal(await page.locator("button button, button input").count(), 0, "no nested interactive controls");
   assert.equal(await page.getByRole("button", { name: "正在保存" }).isDisabled(), true);
   assert.equal(await page.getByRole("button", { name: "正在保存" }).getAttribute("aria-busy"), "true");
+  const fixed = page.getByRole("combobox", { name: "固定宽度测试" });
+  const shortWidth = (await fixed.boundingBox()).width;
+  await fixed.click();
+  const shortPopupWidth = (await page.getByRole("listbox").boundingBox()).width;
+  await page.getByRole("option", { name: "这是一项很长的修饰键选项文字", exact: true }).click();
+  assert.equal((await fixed.boundingBox()).width, shortWidth, "long selection does not grow trigger");
+  await fixed.click();
+  const longPopup = page.getByRole("listbox");
+  assert.equal((await longPopup.boundingBox()).width, shortPopupWidth, "long selection does not grow popup");
+  assert.equal(shortPopupWidth, shortWidth + 8, "popup has fixed frame padding around trigger width");
+  assert.equal(await longPopup.locator('.tiez-dropdown-option-label').last().evaluate(el => getComputedStyle(el).textOverflow), "ellipsis");
+  await page.keyboard.press("Escape");
   const danger = page.getByRole("button", { name: "删除材料", exact: true });
   assert.equal(await danger.evaluate(el => getComputedStyle(el).backgroundColor), "rgb(196, 43, 28)", "danger button remains red");
   assert.equal(await danger.evaluate(el => getComputedStyle(el).color), "rgb(255, 255, 255)");
