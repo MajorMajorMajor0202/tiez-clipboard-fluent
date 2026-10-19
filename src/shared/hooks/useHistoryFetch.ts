@@ -6,6 +6,8 @@ import type { ClipboardEntry } from "../types";
 interface UseHistoryFetchOptions {
   debouncedSearch: string;
   typeFilter: string | null;
+  activeTabId?: string;
+  workspaceItemIds?: number[];
   persistentLimitEnabled: boolean;
   persistentLimit: number;
   pageSize: number;
@@ -22,6 +24,8 @@ interface UseHistoryFetchOptions {
 export const useHistoryFetch = ({
   debouncedSearch,
   typeFilter,
+  activeTabId,
+  workspaceItemIds,
   persistentLimitEnabled,
   persistentLimit,
   pageSize,
@@ -34,6 +38,8 @@ export const useHistoryFetch = ({
   hasMore,
   setIsLoadingMore
 }: UseHistoryFetchOptions) => {
+  const workspaceKey = JSON.stringify(workspaceItemIds || []);
+  const isWorkspace = !!activeTabId && activeTabId !== "clipboard";
   const loadingRef = useRef(false);
   const fetchSeqRef = useRef(0);
   const lastRequestedOffsetRef = useRef<number | null>(null);
@@ -62,6 +68,21 @@ export const useHistoryFetch = ({
         let data: ClipboardEntry[] = [];
 
         const hasSearch = debouncedSearch && debouncedSearch.trim().length > 0;
+
+        if (isWorkspace) {
+          const tagOnly = debouncedSearch.startsWith("tag:");
+          const raw = await invoke<ClipboardEntry[]>("get_workspace_history", {
+            itemIds: JSON.parse(workspaceKey), limit: pageSize + 1, offset: baseOffset,
+            searchTerm: tagOnly ? debouncedSearch.slice(4).trim() : debouncedSearch,
+            tagOnly, contentType: typeFilter || undefined,
+          });
+          if (seq !== fetchSeqRef.current) return;
+          const page = raw.slice(0, pageSize);
+          setHistory((prev) => reset ? page : [...prev, ...page.filter((item) => !prev.some((old) => old.id === item.id))]);
+          setCurrentOffset(baseOffset + page.length);
+          setHasMore(raw.length > pageSize);
+          return;
+        }
 
         if (hasSearch) {
           let term = debouncedSearch;
@@ -101,7 +122,8 @@ export const useHistoryFetch = ({
           const rawData = await invoke<ClipboardEntry[]>("get_clipboard_history", {
             limit: requestedLimit,
             offset: baseOffset,
-            content_type: typeFilter || undefined
+            contentType: typeFilter || undefined,
+            excludeNotes: true,
           });
 
           if (seq !== fetchSeqRef.current) return;
@@ -142,6 +164,8 @@ export const useHistoryFetch = ({
     [
       debouncedSearch,
       typeFilter,
+      isWorkspace,
+      workspaceKey,
       pageSize,
       persistentLimit,
       persistentLimitEnabled,
@@ -153,7 +177,7 @@ export const useHistoryFetch = ({
 
   const loadMoreHistory = useCallback(async () => {
     if (loadingRef.current || isLoadingMore || !hasMore) return;
-    if (debouncedSearch && debouncedSearch.trim().length > 0) return;
+    if (!isWorkspace && debouncedSearch && debouncedSearch.trim().length > 0) return;
 
     const effectiveOffset = Math.min(currentOffsetRef.current, historyLengthRef.current);
     if (lastRequestedOffsetRef.current === effectiveOffset) return;
@@ -167,7 +191,11 @@ export const useHistoryFetch = ({
       loadingRef.current = false;
       setIsLoadingMore(false);
     }
-  }, [debouncedSearch, fetchHistory, hasMore, isLoadingMore, setIsLoadingMore]);
+  }, [debouncedSearch, isWorkspace, fetchHistory, hasMore, isLoadingMore, setIsLoadingMore]);
+
+  const fetchRef = useRef(fetchHistory);
+  fetchRef.current = fetchHistory;
+  useEffect(() => { void fetchRef.current(true); }, [activeTabId, workspaceKey]);
 
   return { fetchHistory, loadMoreHistory };
 };

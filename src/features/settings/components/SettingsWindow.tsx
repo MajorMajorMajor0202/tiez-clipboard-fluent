@@ -21,6 +21,7 @@ import { useSettingsInit } from "../../../shared/hooks/useSettingsInit";
 import { useSettingsPostInit } from "../../../shared/hooks/useSettingsPostInit";
 import { useAppBootstrap } from "../../../shared/hooks/useAppBootstrap";
 import { useSettingsApply } from "../../../shared/hooks/useSettingsApply";
+import { useSettingsWindowPresentation } from "../../../shared/hooks/useSettingsWindowPresentation";
 import { useCustomBackground } from "../../../shared/hooks/useCustomBackground";
 import { useHotkeyConfig } from "../../../shared/hooks/useHotkeyConfig";
 import { getHotkeyDisplayTokens } from "../../../shared/lib/hotkeyDisplay";
@@ -428,6 +429,7 @@ const SettingsWindow = () => {
     customBackgroundOpacity,
     theme
   });
+  useSettingsWindowPresentation(settingsLoaded, theme, colorMode);
 
   const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
   const contentRef = useCallback((node: HTMLDivElement | null) => {
@@ -471,18 +473,6 @@ const SettingsWindow = () => {
     observer.observe(sidebarRef.current);
     return () => observer.disconnect();
   }, [updateIndicator]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlColorMode = params.get("color_mode");
-    const urlTheme = params.get("theme") || "retro";
-    if (urlColorMode) {
-      invoke("set_theme", {
-        theme: urlTheme,
-        color_mode: urlColorMode
-      }).catch(console.error);
-    }
-  }, []);
 
   useEffect(() => {
     if (!settingsLoaded) return;

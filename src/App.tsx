@@ -484,9 +484,15 @@ const App = () => {
   // Use a larger page size when filtering by type, since filtered results
   // are sparser and the user expects to browse more items at once.
   const PAGE_SIZE = typeFilter ? 200 : 80;
+  const [tabAssignments, setTabAssignments] = useState<Record<string, number[]>>(() => {
+    try { return JSON.parse(localStorage.getItem("tiez_tab_assignments") || "{}"); }
+    catch { return {}; }
+  });
   const { fetchHistory, loadMoreHistory } = useHistoryFetch({
     debouncedSearch,
     typeFilter,
+    activeTabId,
+    workspaceItemIds: tabAssignments[activeTabId] || [],
     persistentLimitEnabled,
     persistentLimit,
     pageSize: PAGE_SIZE,
@@ -625,8 +631,7 @@ const App = () => {
         set.add(toDisplayTag(tag));
       });
     });
-    const customTabNames = new Set(tabs.filter((t) => t.id !== "clipboard").map((t) => t.name.toLowerCase()));
-    return Array.from(set).filter((tag) => !customTabNames.has(tag.toLowerCase())).sort((a, b) => a.localeCompare(b));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [history, dbTags, effectiveShowTagManager, showTagFilter, editingTagsId, tabs, t]);
 
   useEffect(() => {
@@ -1113,26 +1118,44 @@ const App = () => {
   };
   */
 
-  const [tabAssignments, setTabAssignments] = useState<Record<string, number[]>>(() => {
-    try {
-      const saved = localStorage.getItem("tiez_tab_assignments");
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error("Failed to load tab assignments", e);
-    }
-    return {};
-  });
-
+  const workspaceSaveQueue = useRef(Promise.resolve());
+  const pendingWorkspaceSaves = useRef(0);
   const saveTabAssignments = useCallback((next: Record<string, number[]>) => {
     try {
       const str = JSON.stringify(next);
       localStorage.setItem("tiez_tab_assignments", str);
-      invoke("save_setting", { key: "app.tab_assignments", val: str }).catch(console.error);
+      pendingWorkspaceSaves.current++;
+      workspaceSaveQueue.current = workspaceSaveQueue.current.catch(() => {}).then(async () => {
+        let succeeded = false;
+        try {
+          await invoke("save_setting", { key: "app.tab_assignments", value: str });
+          succeeded = true;
+        } catch (error) {
+          pushToast(`工作区保存失败，本地缓存仍保留：${String(error)}`, 5000);
+        } finally {
+          pendingWorkspaceSaves.current--;
+          if (!pendingWorkspaceSaves.current && succeeded) {
+            try {
+              const saved = await invoke<Record<string, string>>("get_settings");
+              const canonical = JSON.parse(saved["app.tab_assignments"] || "{}");
+              localStorage.setItem("tiez_tab_assignments", JSON.stringify(canonical));
+              setTabAssignments(canonical);
+            } catch (error) { console.error("Could not refresh saved workspace memberships", error); }
+          }
+        }
+      });
     } catch (e) {
       console.error("Failed to save tab assignments", e);
     }
+  }, [pushToast]);
+
+  useEffect(() => {
+    const subscription = listen<Record<string, number[]>>("workspace-assignments-changed", (event) => {
+      if (pendingWorkspaceSaves.current) return;
+      setTabAssignments(event.payload);
+      localStorage.setItem("tiez_tab_assignments", JSON.stringify(event.payload));
+    });
+    return () => { void subscription.then((off) => off()).catch(console.error); };
   }, []);
 
   const activeTab = tabs.find((t) => t.id === activeTabId);
@@ -1144,37 +1167,32 @@ const App = () => {
     tabAssignments
   });
 
-  // One-time cleanup & migration: migrate any tags matching tab names to tabAssignments, and remove the tag
+  // Recover the pre-fix local cache (whose DB writes used the wrong argument),
+  // or restore DB memberships when opening a fresh profile / backup.
+  const restoredWorkspaces = useRef(false);
   useEffect(() => {
-    const customTabs = tabs.filter((t) => !t.isBuiltin && t.id !== "clipboard");
-    if (customTabs.length === 0 || history.length === 0) return;
-
-    let hasUpdates = false;
-    const nextAssignments = { ...tabAssignments };
-
-    customTabs.forEach((ct) => {
-      const matched = history.filter((h) => h.tags?.includes(ct.name));
-      if (matched.length > 0) {
-        const existingIds = new Set(nextAssignments[ct.id] || []);
-        matched.forEach((m) => existingIds.add(m.id));
-        nextAssignments[ct.id] = Array.from(existingIds);
-        hasUpdates = true;
-
-        matched.forEach((m) => {
-          const cleanTags = (m.tags || []).filter((tg) => tg !== ct.name);
-          handleUpdateTags(m.id, cleanTags);
-        });
+    if (!settingsLoaded || !settings || restoredWorkspaces.current) return;
+    restoredWorkspaces.current = true;
+    try {
+      const cached = JSON.parse(localStorage.getItem("tiez_tab_assignments") || "{}");
+      const stored = JSON.parse(settings["app.tab_assignments"] || "{}");
+      const merged: Record<string, number[]> = { ...stored };
+      for (const [id, members] of Object.entries(cached as Record<string, number[]>)) {
+        merged[id] = Array.from(new Set([...(stored[id] || []), ...members]));
       }
-      invoke("delete_tag", { name: ct.name }).catch(() => {});
-    });
+      setTabAssignments(merged);
+      saveTabAssignments(merged);
+      if (settings["app.custom_tabs"]) {
+        const storedTabs = JSON.parse(settings["app.custom_tabs"]);
+        if (!localStorage.getItem("tiez_custom_tabs") && Array.isArray(storedTabs)) {
+          setTabs(storedTabs);
+          localStorage.setItem("tiez_custom_tabs", JSON.stringify(storedTabs));
+        }
+      }
+    } catch (error) { console.error("Failed to restore workspaces", error); }
+  }, [settingsLoaded, settings, saveTabAssignments, setTabs]);
 
-    if (hasUpdates) {
-      setTabAssignments(nextAssignments);
-      saveTabAssignments(nextAssignments);
-    }
-  }, [tabs, history.length]);
-
-  const effectiveHasMore = hasMore && filteredHistory.length >= PAGE_SIZE;
+  const effectiveHasMore = hasMore;
 
   const { pinnedItems, unpinnedItems, handlePinnedReorder } = usePinnedSort({
     filteredHistory,
@@ -1363,16 +1381,22 @@ const App = () => {
       title: t("delete_selected"),
       message: (t("batch_delete_confirm") || "确定要删除选中的 {count} 个条目吗？").replace("{count}", String(count)),
       onConfirm: async () => {
+        const deletedIds = new Set<number>();
+        const failedIds = new Set<number>();
         for (const id of selectedItemIds) {
           try {
             await invoke("delete_clipboard_entry", { id });
+            deletedIds.add(id);
           } catch (e) {
+            failedIds.add(id);
             console.error("Failed to delete item", id, e);
           }
         }
-        setHistory((prev) => prev.filter((item) => !selectedItemIds.has(item.id)));
-        pushToast(t("batch_deleted").replace("{count}", String(count)));
-        setSelectedItemIds(new Set());
+        setHistory((prev) => prev.filter((item) => !deletedIds.has(item.id)));
+        pushToast(failedIds.size
+          ? `已删除 ${deletedIds.size} 项；${failedIds.size} 项因锁定或删除失败已保留`
+          : t("batch_deleted").replace("{count}", String(deletedIds.size)));
+        setSelectedItemIds(failedIds);
         lastSelectedIndexRef.current = null;
       }
     });
@@ -1923,10 +1947,8 @@ const App = () => {
       const { WebviewWindow } = await import("@tauri-apps/api/webviewWindow");
       const existing = await WebviewWindow.getByLabel("settings");
       if (existing) {
-        await invoke("hide_window_cmd", { restore_focus: false }).catch(console.error);
         await existing.setAlwaysOnTop(isWindowPinned);
-        await existing.show();
-        await existing.setFocus();
+        await existing.emit("settings-show-request");
       } else {
         const currentAccent = document.documentElement.style.getPropertyValue("--accent-color") || "";
         const accentParam = currentAccent ? `&accent=${encodeURIComponent(currentAccent)}` : "";
@@ -1946,12 +1968,9 @@ const App = () => {
           visible: false,
           alwaysOnTop: isWindowPinned,
         });
-        win.once("tauri://created", () => {
-          invoke("hide_window_cmd", { restore_focus: false })
-            .then(() => win.show())
-            .then(() => win.setFocus())
-            .catch(console.error);
-        });
+        // The page shows itself only after its data, first paint and native
+        // backdrop are ready. tauri://created only means the OS window exists.
+        void win.once("tauri://error", (event) => console.error("Settings window creation failed", event.payload));
       }
     } catch (err) {
       console.error("Failed to open settings window:", err);

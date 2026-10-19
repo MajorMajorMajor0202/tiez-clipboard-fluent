@@ -14,11 +14,6 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
     // Window doesn't exist yet, proceed to create
   }
 
-  // Pre-seed entry data in localStorage for instant rendering
-  try {
-    localStorage.setItem(`note_entry_${item.id}`, JSON.stringify(item));
-  } catch {}
-
   const isDark =
     document.documentElement.classList.contains("dark-mode") ||
     document.body.classList.contains("dark-mode");

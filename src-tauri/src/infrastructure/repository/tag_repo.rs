@@ -201,44 +201,26 @@ impl TagRepository for SqliteTagRepository {
     ) -> Result<(), String> {
         let conn = self.conn.lock().map_err(|e| e.to_string())?;
 
-        // Remove from saved_tags
-        let _ = conn.execute("DELETE FROM saved_tags WHERE name = ?", params![name]);
-
-        // Delete all entries that carry this tag
-        let mut stmt = conn
-            .prepare("SELECT entry_id FROM entry_tags WHERE tag = ?")
-            .map_err(|e| e.to_string())?;
-        let ids: Vec<i64> = stmt
-            .query_map(params![name], |row| row.get(0))
-            .map_err(|e| e.to_string())?
-            .filter_map(Result::ok)
-            .collect();
-
-        for id in ids {
-            if let Some(dir) = data_dir {
-                let attachments_dir = dir.join("attachments");
-                let mut stmt_content = conn
-                    .prepare("SELECT content, is_external FROM clipboard_history WHERE id = ?")
-                    .map_err(|e| e.to_string())?;
-
-                if let Ok(entry) = stmt_content.query_row([id], |row| {
-                    let content_raw: String = row.get(0)?;
-                    let is_ext: i32 = row.get(1)?;
-                    Ok((content_raw, is_ext == 1))
-                }) {
-                    if entry.1 {
-                        // is_external
-                        let content_path = self.maybe_decrypt_text(&entry.0);
-                        let path = std::path::Path::new(&content_path);
-                        if path.starts_with(&attachments_dir) && path.exists() {
-                            let _ = std::fs::remove_file(path);
-                        }
-                    }
+        let repo = super::clipboard_repo::SqliteClipboardRepository::new(self.conn.clone());
+        let ids: Vec<i64> = {
+            let mut stmt = conn.prepare("SELECT entry_id FROM entry_tags WHERE tag = ?")
+                .map_err(|e| e.to_string())?;
+            let rows = stmt.query_map([name], |row| row.get(0)).map_err(|e| e.to_string())?;
+            rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())?
+        };
+        // Validate the whole batch before touching records or attachment files.
+        super::local_data::retained_ids_json(&conn)?;
+        for id in &ids {
+            if let Some(entry) = repo.get_entry_by_id_with_conn(&conn, *id)? {
+                if super::local_data::is_locked(&entry.tags) {
+                    return Err("标签包含已锁定的条目，请先解锁".into());
                 }
             }
-            let _ = conn.execute("DELETE FROM entry_tags WHERE entry_id = ?", params![id]);
-            let _ = conn.execute("DELETE FROM clipboard_history WHERE id = ?", params![id]);
         }
+        let tx = conn.unchecked_transaction().map_err(|e| e.to_string())?;
+        for id in ids { repo.delete_with_conn(&tx, id, data_dir)?; }
+        tx.execute("DELETE FROM saved_tags WHERE name = ?", [name]).map_err(|e| e.to_string())?;
+        tx.commit().map_err(|e| e.to_string())?;
         Ok(())
     }
 

@@ -8,6 +8,26 @@ use crate::services::clipboard::{
     build_entry_preview, derive_rich_text_content, truncate_html_for_preview,
 };
 use tauri::{AppHandle, Emitter, State};
+use crate::infrastructure::repository::local_data::{is_locked, workspace_assignments};
+
+#[tauri::command]
+pub fn get_workspace_history(
+    state: State<'_, DbState>, item_ids: Vec<i64>, limit: i32, offset: i32,
+    search_term: Option<String>, tag_only: Option<bool>, content_type: Option<String>,
+) -> AppResult<Vec<ClipboardEntry>> {
+    let mut result = state.repo.get_workspace_history(&item_ids, limit, offset,
+        search_term.as_deref().unwrap_or(""), tag_only.unwrap_or(false), content_type.as_deref())?;
+    for entry in &mut result {
+        normalize_rich_text_item_content(entry);
+        if entry.content_type != "note" && crate::database::is_text_type(&entry.content_type) {
+            entry.content = entry.content.chars().take(2000).collect();
+        }
+        if let Some(html) = &entry.html_content {
+            if html.chars().count() > 5000 { entry.html_content = truncate_html_for_preview(html); }
+        }
+    }
+    Ok(result)
+}
 
 fn normalize_rich_text_item_content(item: &mut ClipboardEntry) {
     if item.content_type != "rich_text" {
@@ -27,16 +47,18 @@ pub fn get_clipboard_history(
     limit: i32,
     offset: i32,
     content_type: Option<String>,
+    exclude_notes: Option<bool>,
 ) -> AppResult<Vec<ClipboardEntry>> {
     // 1. Get history from repository
-    let mut history = state
-        .repo
-        .get_history(limit, offset, content_type.as_deref())?;
+    let mut history = if exclude_notes.unwrap_or(false) {
+        state.repo.get_history_without_notes(limit, offset, content_type.as_deref())?
+    } else { state.repo.get_history(limit, offset, content_type.as_deref())? };
 
     // 2. Add session history items (non-persisted) ONLY on the first page
     if offset == 0 {
         let session_items = session.inner().0.lock().unwrap();
         for item in session_items.iter().rev() {
+            if exclude_notes.unwrap_or(false) && item.content_type == "note" { continue; }
             if let Some(ct) = content_type.as_deref() {
                 if item.content_type != ct {
                     continue;
@@ -195,15 +217,25 @@ pub fn delete_clipboard_entry(
     id: i64,
 ) -> AppResult<()> {
     {
-        let mut session_items = session.inner().0.lock().unwrap();
-        session_items.retain(|item| item.id != id);
+        let items = session.inner().0.lock().unwrap();
+        if items.iter().any(|item| item.id == id && is_locked(&item.tags)) {
+            return Err(AppError::Validation("Locked item cannot be deleted; unlock it first".into()));
+        }
     }
-
     if id > 0 {
         let data_dir = app_data.0.lock().unwrap();
         state.repo.delete(id, Some(&data_dir))?;
     }
+    {
+        let mut session_items = session.inner().0.lock().unwrap();
+        session_items.retain(|item| item.id != id);
+    }
     let _ = app_handle.emit("clipboard-changed", ());
+    if let Ok(conn) = state.conn.lock() {
+        if let Ok(assignments) = workspace_assignments(&conn) {
+            let _ = app_handle.emit("workspace-assignments-changed", assignments);
+        }
+    }
     crate::services::cloud_sync::request_cloud_sync(app_handle);
     Ok(())
 }
@@ -215,12 +247,17 @@ pub fn clear_clipboard_history(
     session: State<'_, SessionHistory>,
     app_data: State<'_, AppDataDir>,
 ) -> AppResult<()> {
-    {
-        let mut session_items = session.inner().0.lock().unwrap();
-        session_items.retain(|item| item.is_pinned || !item.tags.is_empty());
-    }
+    let retained: std::collections::HashSet<i64> = {
+        let conn = state.conn.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+        workspace_assignments(&conn)?.into_values().flatten().collect()
+    };
     let data_dir = app_data.0.lock().unwrap();
     state.repo.clear(Some(&data_dir)).map_err(AppError::from)?;
+    drop(data_dir);
+    {
+        let mut session_items = session.inner().0.lock().unwrap();
+        session_items.retain(|item| item.is_pinned || !item.tags.is_empty() || item.content_type == "note" || retained.contains(&item.id));
+    }
     let _ = app_handle.emit("clipboard-changed", ());
     crate::services::cloud_sync::request_cloud_sync(app_handle);
     Ok(())
@@ -299,21 +336,30 @@ pub fn rename_tag_globally(
 
 #[tauri::command]
 pub fn delete_tag_from_all(
+    app_handle: AppHandle,
     state: State<'_, DbState>,
     session: State<'_, SessionHistory>,
     app_data: State<'_, AppDataDir>,
     tag_name: String,
 ) -> AppResult<()> {
     {
-        let mut session_items = session.inner().0.lock().unwrap();
-        session_items.retain(|item| !item.tags.contains(&tag_name));
+        let session_items = session.inner().0.lock().unwrap();
+        if session_items.iter().any(|item| item.tags.contains(&tag_name) && is_locked(&item.tags)) {
+            return Err(AppError::from("标签包含已锁定的条目，请先解锁".to_string()));
+        }
     }
-
     let data_dir = app_data.0.lock().unwrap();
-    state
-        .tag_repo
-        .delete_globally(&tag_name, Some(&data_dir))
-        .map_err(AppError::from)
+    state.tag_repo.delete_globally(&tag_name, Some(&data_dir)).map_err(AppError::from)?;
+    drop(data_dir);
+    let mut session_items = session.inner().0.lock().unwrap();
+    session_items.retain(|item| !item.tags.contains(&tag_name));
+    drop(session_items);
+    if let Ok(conn) = state.conn.lock() {
+        if let Ok(assignments) = workspace_assignments(&conn) {
+            let _ = app_handle.emit("workspace-assignments-changed", assignments);
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]

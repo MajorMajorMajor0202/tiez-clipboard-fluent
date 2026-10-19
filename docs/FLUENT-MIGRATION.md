@@ -3,6 +3,10 @@
 The pre-migration UI is committed and pushed as `5628aa6` on `origin/dev`.
 Migration work is isolated on `codex/fluent-components`.
 
+Further UI component migration is deferred at the user's request. Remaining
+controls are a future task; current work focuses on local data reliability and
+settings-window startup.
+
 ## Scope
 
 - `TieZFluentProvider` bridges the existing light/dark classes and CSS variables to

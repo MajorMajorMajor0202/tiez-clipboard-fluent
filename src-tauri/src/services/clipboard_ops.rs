@@ -381,6 +381,7 @@ pub async fn paste_history_item_by_index(
         (index + 1) as i32,
         0,
         None,
+        Some(true),
     )?;
 
     let Some(item) = history.get(index).cloned() else {
@@ -1313,11 +1314,24 @@ fn handle_post_paste_actions(
     move_to_top: Option<bool>,
 ) -> AppResult<()> {
     let mut actual_delete = delete_after_use;
+    if actual_delete {
+        let conn = state.conn.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+        actual_delete = crate::infrastructure::repository::local_data::workspace_assignments(&conn)
+            .map(|assignments| !assignments.values().any(|ids| ids.contains(&id)))
+            .unwrap_or(false);
+    }
     if actual_delete && id > 0 {
         if let Ok(Some(entry)) = state.repo.get_entry_by_id(id) {
-            if entry.is_pinned || !entry.tags.is_empty() {
+            if entry.is_pinned || !entry.tags.is_empty() || entry.content_type == "note" {
                 actual_delete = false;
             }
+        }
+    }
+    if actual_delete && id < 0 {
+        let session = app_handle.state::<SessionHistory>();
+        let items = session.0.lock().unwrap();
+        if let Some(entry) = items.iter().find(|entry| entry.id == id) {
+            actual_delete = !entry.is_pinned && entry.tags.is_empty() && entry.content_type != "note";
         }
     }
 
@@ -1389,6 +1403,7 @@ pub fn paste_latest_rich(app_handle: tauri::AppHandle) {
             1,
             0, // offset
             None,
+            Some(true),
         );
 
         if let Ok(items) = history {

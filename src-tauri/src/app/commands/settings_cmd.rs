@@ -148,6 +148,31 @@ pub fn save_setting(
     key: String,
     mut value: String,
 ) -> AppResult<()> {
+    if key == "app.tab_assignments" {
+        let session = app_handle.state::<crate::app_state::SessionHistory>();
+        let requested: crate::infrastructure::repository::local_data::WorkspaceAssignments =
+            serde_json::from_str(&value).map_err(|e| AppError::Validation(e.to_string()))?;
+        let temporary_ids: std::collections::HashSet<i64> = requested.into_values()
+            .flatten().filter(|id| *id < 0).collect();
+        let items: Vec<_> = session.0.lock().unwrap().iter()
+            .filter(|item| temporary_ids.contains(&item.id)).cloned().collect();
+        let data_dir = app_handle.state::<crate::app_state::AppDataDir>().0.lock().unwrap().clone();
+        let (assignments, promoted) = {
+            let conn = db_state.conn.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+            crate::infrastructure::repository::local_data::persist_workspace_assignments(
+                &conn, &db_state.repo, &value, &items, &data_dir)?
+        };
+        let changed_ids = !promoted.is_empty();
+        {
+            let mut items = session.0.lock().unwrap();
+            for (old_id, entry) in promoted {
+                if let Some(item) = items.iter_mut().find(|item| item.id == old_id) { *item = entry; }
+            }
+        }
+        let _ = app_handle.emit("workspace-assignments-changed", assignments);
+        if changed_ids { let _ = app_handle.emit("clipboard-changed", ()); }
+        return Ok(());
+    }
     match key.as_str() {
         "app.arrow_key_selection" => {
             settings_state

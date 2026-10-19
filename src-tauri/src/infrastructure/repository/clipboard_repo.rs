@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 use urlencoding::decode;
+use super::local_data::{is_locked, retained_ids_json, remove_workspace_reference};
 
 const RICH_IMAGE_FALLBACK_PREFIX: &str = "<!--TIEZ_RICH_IMAGE:";
 const RICH_IMAGE_FALLBACK_SUFFIX: &str = "-->";
@@ -72,6 +73,49 @@ pub struct SqliteClipboardRepository {
 impl SqliteClipboardRepository {
     pub fn new(conn: Arc<Mutex<Connection>>) -> Self {
         Self { conn }
+    }
+
+    pub fn get_workspace_history(
+        &self, item_ids: &[i64], limit: i32, offset: i32,
+        search: &str, tag_only: bool, content_type: Option<&str>,
+    ) -> Result<Vec<ClipboardEntry>, String> {
+        let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        let ids = serde_json::to_string(item_ids).map_err(|e| e.to_string())?;
+        let mut stmt = conn.prepare(
+            "SELECT ch.id FROM json_each(?1) member JOIN clipboard_history ch ON ch.id = member.value
+             WHERE (?2 IS NULL OR ch.content_type = ?2)
+             ORDER BY ch.is_pinned DESC, CASE WHEN ch.is_pinned THEN ch.pinned_order ELSE 0 END DESC,
+                      CAST(member.key AS INTEGER) ASC"
+        ).map_err(|e| e.to_string())?;
+        let ids: Vec<i64> = stmt.query_map(params![ids, content_type], |row| row.get(0))
+            .map_err(|e| e.to_string())?.collect::<rusqlite::Result<_>>().map_err(|e| e.to_string())?;
+        let term = search.trim().to_lowercase();
+        let mut matched = 0;
+        let mut result = Vec::new();
+        for id in ids {
+            if term.is_empty() && matched < offset.max(0) { matched += 1; continue; }
+            let Some(entry) = self.get_entry_by_id_with_conn(&conn, id)? else { continue };
+            let tags_match = entry.tags.iter().any(|tag| tag.to_lowercase().contains(&term));
+            if !term.is_empty() && !(tags_match || (!tag_only &&
+                (entry.content.to_lowercase().contains(&term) || entry.source_app.to_lowercase().contains(&term)))) { continue; }
+            matched += 1;
+            if matched <= offset.max(0) { continue; }
+            result.push(entry);
+            if result.len() >= limit.clamp(1, 1000) as usize { break; }
+        }
+        Ok(result)
+    }
+
+    pub fn get_history_without_notes(&self, limit: i32, offset: i32, content_type: Option<&str>) -> Result<Vec<ClipboardEntry>, String> {
+        let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        let mut stmt = conn.prepare("SELECT id FROM clipboard_history WHERE content_type != 'note'
+            AND (?1 IS NULL OR content_type = ?1)
+            ORDER BY is_pinned DESC, pinned_order DESC, timestamp DESC, id DESC LIMIT ?2 OFFSET ?3")
+            .map_err(|e| e.to_string())?;
+        let ids: Vec<i64> = stmt.query_map(params![content_type, limit.clamp(1, 1000), offset.max(0)], |row| row.get(0))
+            .map_err(|e| e.to_string())?.collect::<rusqlite::Result<_>>().map_err(|e| e.to_string())?;
+        ids.into_iter().map(|id| self.get_entry_by_id_with_conn(&conn, id))
+            .collect::<Result<Vec<_>, _>>().map(|entries| entries.into_iter().flatten().collect())
     }
 
     pub fn encrypt_entry_with_conn(&self, conn: &Connection, id: i64) -> Result<(), String> {
@@ -451,6 +495,11 @@ impl SqliteClipboardRepository {
         id: i64,
         data_dir: Option<&std::path::Path>,
     ) -> Result<(), String> {
+        if let Some(entry) = self.get_entry_by_id_with_conn(conn, id)? {
+            if is_locked(&entry.tags) { return Err("Locked item cannot be deleted; unlock it first".into()); }
+        }
+        // Validate retention metadata before deleting records or attachments.
+        let _ = retained_ids_json(conn)?;
         let mut tombstone: Option<(String, i64)> = None;
         // Check for external files to delete
         if let Some(dir) = data_dir {
@@ -479,8 +528,19 @@ impl SqliteClipboardRepository {
                     entry.2,
                     &attachments_dir,
                 );
+                let mut referenced = HashSet::new();
+                if !files_to_remove.is_empty() {
+                    let mut others = conn.prepare("SELECT content, html_content, is_external FROM clipboard_history WHERE id != ?")
+                        .map_err(|e| e.to_string())?;
+                    let rows = others.query_map([id], |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?, row.get::<_, bool>(2)?)))
+                        .map_err(|e| e.to_string())?;
+                    for row in rows {
+                        let (content, html, external) = row.map_err(|e| e.to_string())?;
+                        referenced.extend(self.collect_attachment_paths_for_cleanup(&content, html.as_deref(), external, &attachments_dir));
+                    }
+                }
                 for path in files_to_remove {
-                    if path.exists() {
+                    if !referenced.contains(&path) && path.exists() {
                         let _ = std::fs::remove_file(path);
                     }
                 }
@@ -505,6 +565,7 @@ impl SqliteClipboardRepository {
 
         conn.execute("DELETE FROM clipboard_history WHERE id = ?", [id])
             .map_err(|e| e.to_string())?;
+        remove_workspace_reference(conn, id)?;
         let _ = conn.execute("DELETE FROM entry_tags WHERE entry_id = ?", params![id]);
         Ok(())
     }
@@ -590,9 +651,11 @@ impl SqliteClipboardRepository {
         {
             if let Ok(limit) = limit_str.parse::<i32>() {
                 // Count non-pinned entries
+                let retained = retained_ids_json(conn)?;
                 let count: i32 = conn.query_row(
-                    "SELECT COUNT(*) FROM clipboard_history WHERE is_pinned = 0 AND (tags = '[]' OR tags IS NULL)",
-                    [],
+                    "SELECT COUNT(*) FROM clipboard_history WHERE is_pinned = 0 AND (tags = '[]' OR tags IS NULL)
+                     AND content_type != 'note' AND id NOT IN (SELECT value FROM json_each(?1))",
+                    [&retained],
                     |row| row.get(0)
                 ).map_err(|e| e.to_string())?;
 
@@ -604,19 +667,20 @@ impl SqliteClipboardRepository {
                             .prepare(
                                 "SELECT id FROM clipboard_history 
                              WHERE is_pinned = 0 AND (tags = '[]' OR tags IS NULL)
+                             AND content_type != 'note' AND id NOT IN (SELECT value FROM json_each(?2))
                              ORDER BY timestamp ASC 
-                             LIMIT ?",
+                             LIMIT ?1",
                             )
                             .map_err(|e| e.to_string())?;
 
                         let rows = stmt
-                            .query_map([to_delete], |row| row.get(0))
+                            .query_map(params![to_delete, retained], |row| row.get(0))
                             .map_err(|e| e.to_string())?;
                         rows.filter_map(|r| r.ok()).collect()
                     };
                     // Actually delete records (and files if needed)
                     for id in &deleted_ids {
-                        let _ = self.delete_with_conn(conn, *id, data_dir);
+                        self.delete_with_conn(conn, *id, data_dir)?;
                     }
                     return Ok(deleted_ids);
                 }
@@ -1200,17 +1264,20 @@ impl ClipboardRepository for SqliteClipboardRepository {
 
     fn clear(&self, data_dir: Option<&std::path::Path>) -> Result<(), String> {
         let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        let retained = retained_ids_json(&conn)?;
 
         // Get IDs of unpinned items without tags.
         let mut stmt = conn
             .prepare(
                 "SELECT id FROM clipboard_history 
              WHERE is_pinned = 0 
+               AND content_type != 'note'
+               AND id NOT IN (SELECT value FROM json_each(?1))
                AND NOT EXISTS (SELECT 1 FROM entry_tags WHERE entry_id = clipboard_history.id)",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
-            .query_map([], |row| row.get::<_, i64>(0))
+            .query_map([&retained], |row| row.get::<_, i64>(0))
             .map_err(|e| e.to_string())?;
         let ids: Vec<i64> = rows.filter_map(Result::ok).collect();
 

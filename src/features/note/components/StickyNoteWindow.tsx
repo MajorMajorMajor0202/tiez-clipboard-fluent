@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -16,6 +16,7 @@ import type { ClipboardEntry } from "../../../shared/types/clipboard";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import { openStickyNote } from "../lib/openStickyNote";
 import MilkdownEditor from "./MilkdownEditor";
+import { createDebouncedWriter } from "../../../shared/lib/debouncedWriter";
 import "../../../styles/components/note-window.css";
 
 export type NoteBackdrop =
@@ -74,7 +75,16 @@ export const StickyNoteWindow: React.FC = () => {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [saveError, setSaveError] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const closeApproved = useRef(false);
+  const itemRef = useRef(item);
+  itemRef.current = item;
+  const writer = useMemo(() => createDebouncedWriter<{ id: number; text: string }>(async ({ id, text }) => {
+    await invoke("update_item_content", { id, newContent: text });
+    setItem((previous) => previous?.id === id ? { ...previous, content: text, preview: text.slice(0, 200) } : previous);
+    setSaveError("");
+  }, (error) => setSaveError(`保存失败，内容仍保留在窗口中：${String(error)}`)), []);
 
   // 1. Initial Load & Route Parameters
   useEffect(() => {
@@ -131,28 +141,21 @@ export const StickyNoteWindow: React.FC = () => {
       } catch {}
     }
 
-    // Instant load from localStorage
-    try {
-      const cached = localStorage.getItem(`note_entry_${id}`);
-      if (cached) {
-        const parsed = JSON.parse(cached) as ClipboardEntry;
-        setItem(parsed);
-        setContent(parsed.content);
-      }
-    } catch {}
-
-    // Load from DB
+    // DB is authoritative: never mount an editor with a stale cached draft.
+    let disposed = false;
     invoke<ClipboardEntry>("get_clipboard_entry_by_id", { id })
       .then((entry) => {
+        if (disposed) return;
         setItem(entry);
         setContent(entry.content);
-        try {
-          localStorage.setItem(`note_entry_${id}`, JSON.stringify(entry));
-        } catch {}
+        setLoaded(true);
+        localStorage.removeItem(`note_entry_${id}`);
       })
       .catch((err) => {
         console.error("Failed to load note entry:", err);
+        if (!disposed) setSaveError(`读取便笺失败：${String(err)}`);
       });
+    return () => { disposed = true; };
   }, []);
 
   // 2. Track Window Focus State for Auto-Hiding Controls
@@ -211,23 +214,24 @@ export const StickyNoteWindow: React.FC = () => {
     };
   }, []);
 
-  // 4. Auto-save content to database (debounced 350ms)
+  // 4. Debounced, serialized writes; close awaits this same queue.
   const saveContent = useCallback((newText: string) => {
-    if (!item) return;
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    saveTimeoutRef.current = setTimeout(async () => {
+    if (!itemRef.current || !loaded) return;
+    writer.schedule({ id: itemRef.current.id, text: newText });
+  }, [loaded, writer]);
+
+  useEffect(() => {
+    let disposed = false;
+    const subscription = getCurrentWindow().onCloseRequested(async (event) => {
+      if (closeApproved.current) return;
+      event.preventDefault();
       try {
-        await invoke("update_item_content", { id: item.id, newContent: newText });
-        const updated = { ...item, content: newText, preview: newText.slice(0, 200) };
-        setItem(updated);
-        localStorage.setItem(`note_entry_${item.id}`, JSON.stringify(updated));
-      } catch (err) {
-        console.error("Failed to auto-save note content:", err);
-      }
-    }, 350);
-  }, [item]);
+        await writer.flush();
+        if (!disposed) { closeApproved.current = true; await getCurrentWindow().close(); }
+      } catch (error) { setSaveError(`保存失败，窗口未关闭：${String(error)}`); }
+    });
+    return () => { disposed = true; void subscription.then((off) => off()).catch(console.error); };
+  }, [writer]);
 
   // Handle Milkdown WYSIWYG text update
   const handleMilkdownChange = useCallback((newText: string) => {
@@ -268,14 +272,13 @@ export const StickyNoteWindow: React.FC = () => {
   // 7. Close Window
   const handleClose = async () => {
     try {
+      await writer.flush();
+      closeApproved.current = true;
       const win = getCurrentWindow();
       await invoke("close_window_by_label", { label: win.label });
-    } catch {
-      try {
-        await getCurrentWindow().close();
-      } catch (err) {
-        console.error("Failed to close note window", err);
-      }
+    } catch (error) {
+      closeApproved.current = false;
+      setSaveError(`保存失败，窗口未关闭：${String(error)}`);
     }
   };
 
@@ -283,12 +286,15 @@ export const StickyNoteWindow: React.FC = () => {
   const handleDelete = async () => {
     if (!item) return;
     try {
+      await writer.flush();
       await invoke("delete_clipboard_entry", { id: item.id });
+      writer.cancel();
       localStorage.removeItem(`note_entry_${item.id}`);
       localStorage.removeItem(`note_backdrop_${item.id}`);
       await handleClose();
     } catch (err) {
       console.error("Failed to delete note", err);
+      setSaveError(`删除失败：${String(err)}`);
     }
   };
 
@@ -313,7 +319,7 @@ export const StickyNoteWindow: React.FC = () => {
               assignments[tabId] = [newId, ...list.filter((x: number) => x !== newId)];
               const str = JSON.stringify(assignments);
               localStorage.setItem("tiez_tab_assignments", str);
-              invoke("save_setting", { key: "app.tab_assignments", val: str }).catch(() => {});
+              await invoke("save_setting", { key: "app.tab_assignments", value: str });
             }
           } catch {}
         }
@@ -480,7 +486,7 @@ export const StickyNoteWindow: React.FC = () => {
 
         {/* Content Body */}
         <div className="note-body">
-          {isSourceMode ? (
+          {!loaded ? <div role="status">正在读取便笺…</div> : isSourceMode ? (
             <textarea
               ref={textareaRef}
               className="note-editor-textarea window-no-drag"
@@ -501,6 +507,7 @@ export const StickyNoteWindow: React.FC = () => {
 
           {/* Custom Fluent Scrollbar */}
           <FluentScrollbar scrollContainer={scrollHostEl} />
+          {saveError && <div role="alert">{saveError}</div>}
         </div>
       </div>
 

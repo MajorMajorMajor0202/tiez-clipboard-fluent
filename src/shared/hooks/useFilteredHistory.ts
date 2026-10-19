@@ -37,6 +37,10 @@ export const useFilteredHistory = ({
         return false;
       }
 
+      // Workspace search runs against full DB content before pagination. Display
+      // previews are truncated, so searching them again could hide valid matches.
+      if (activeTabId && activeTabId !== "clipboard") return true;
+
       let effectiveSearch = lowerSearch;
       const isTagSearch = effectiveSearch.startsWith("tag:");
       if (isTagSearch) {

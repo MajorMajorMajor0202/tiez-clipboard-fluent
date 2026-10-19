@@ -51,6 +51,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
         }
     });
     const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean, tagName: string | null }>({ show: false, tagName: null });
     const [itemDeleteConfirmation, setItemDeleteConfirmation] = useState<{ show: boolean, id: number | null }>({ show: false, id: null });
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -245,11 +246,12 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     const handleDeleteTag = async (tagName: string) => {
         if (isBuiltinSensitiveTag(tagName)) return;
         setIsDeleting(true);
+        setDeleteError('');
         try {
             await invoke('delete_tag_from_all', { tagName });
             await emit('clipboard-changed'); // Notify App.tsx to refresh
             await fetchTags();
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error(err); setDeleteError(`删除失败：${String(err)}`); }
         finally {
             setIsDeleting(false);
         }
@@ -326,6 +328,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             } as any}
             onMouseDown={() => invoke('activate_window_focus').catch(console.error)}
         >
+            {deleteError && <div role="alert" style={{ position: 'absolute', bottom: 16, right: 16, zIndex: 1000, padding: 12, borderRadius: 8, background: 'var(--bg-secondary, #333)', color: 'var(--text-primary, white)', maxWidth: 360 }}>{deleteError}</div>}
             <div className="tag-sidebar">
                 {(!effectiveIsCollapsed || isStacked) && (
                     <div className={`tag-search-box ${isStacked && effectiveIsCollapsed && isSearchFocused ? 'suggestions-open' : ''}`}>
