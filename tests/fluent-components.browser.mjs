@@ -18,6 +18,16 @@ try {
   page.on("pageerror", (error) => errors.push(error.message));
   const address = server.httpServer.address();
   await page.goto(`http://127.0.0.1:${address.port}/tests/fluent-components.fixture.html`);
+  const headerInsets = await page.getByTestId("main-header").evaluate(el => {
+    const header = el.querySelector('.header-top').getBoundingClientRect();
+    const title = el.querySelector('.header-title').getBoundingClientRect();
+    const paths = [...el.querySelectorAll('.header-actions .lucide-x path')];
+    const visibleRight = Math.max(...paths.map(path => path.getBoundingClientRect().right +
+      parseFloat(getComputedStyle(path).strokeWidth) * Math.abs(path.getScreenCTM().a) / 2));
+    return { left: title.left - header.left, right: header.right - visibleRight };
+
+  });
+  assert.ok(Math.abs(headerInsets.left - headerInsets.right) < 1, "close icon and title have equal visible edge insets: " + JSON.stringify(headerInsets));
   const input = page.getByRole("textbox", { name: "搜索工作区" });
   await input.fill("工作记忆");
   await page.waitForFunction(() => document.querySelector('[data-testid="search-value"]').textContent === "工作记忆");
@@ -188,6 +198,17 @@ try {
   assert.equal(shortPopupWidth, shortWidth + 8, "popup has fixed frame padding around trigger width");
   assert.equal(await longPopup.locator('.tiez-dropdown-option-label').last().evaluate(el => getComputedStyle(el).textOverflow), "ellipsis");
   await page.keyboard.press("Escape");
+  const frameRadius = () => page.locator('#root').evaluate(el => getComputedStyle(el).borderTopLeftRadius);
+  const normalRadius = await frameRadius();
+  assert.notEqual(normalRadius, "0px");
+  for (const action of ["模拟最大化", "模拟吸附"]) {
+    await page.getByRole("button", { name: action }).click();
+    assert.equal(await frameRadius(), "0px", "native square state removes the DOM shell radius");
+    assert.equal(await page.locator('html').evaluate(el => getComputedStyle(el).getPropertyValue('--shell-radius').trim()), "0px", "Canvas reads zero from the same radius token");
+    assert.equal(await page.locator('body').evaluate(el => getComputedStyle(el, '::before').clipPath), "none", "background clipping also becomes square");
+    await page.getByRole("button", { name: "模拟还原" }).click();
+    assert.equal(await frameRadius(), normalRadius, "restoring recovers the theme's normal radius");
+  }
   const danger = page.getByRole("button", { name: "删除材料", exact: true });
   assert.equal(await danger.evaluate(el => getComputedStyle(el).backgroundColor), "rgb(196, 43, 28)", "danger button remains red");
   assert.equal(await danger.evaluate(el => getComputedStyle(el).color), "rgb(255, 255, 255)");

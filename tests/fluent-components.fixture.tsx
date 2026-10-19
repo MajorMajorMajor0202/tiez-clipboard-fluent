@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import AppHeader from "../src/features/app/components/AppHeader";
+import { applyWindowFrameState } from "../src/shared/lib/windowFrameState";
 import TieZFluentProvider from "../src/shared/components/TieZFluentProvider";
 import FluentDropdown from "../src/shared/components/FluentDropdown";
 import FluentTooltip from "../src/shared/components/FluentTooltip";
@@ -43,6 +45,14 @@ function Fixture() {
   return (
     <TieZFluentProvider>
       <div style={{ padding: 24, maxWidth: 440, margin: "auto", maxHeight: "100vh", minHeight: "100vh", background: "var(--bg-input)", color: "var(--text-primary)", overflowY: "auto", boxSizing: "border-box" }}>
+        <div data-testid="main-header">
+          <AppHeader t={key => key === "app_name" ? "TieZ" : key} showSettings={false} showTagManager={false}
+            tagManagerEnabled={true} showEmojiPanel={false} isWindowPinned={false} setIsWindowPinned={() => {}}
+            showSearchBox={false} search="" setSearch={() => {}} setIsComposing={() => {}} searchInputRef={ref}
+            showTagFilter={false} setShowTagFilter={() => {}} allTags={[]} searchIsFocused={false}
+            setSearchIsFocused={() => {}} setEditingTagsId={() => {}} theme="mica" settingsTitle="设置"
+            typeFilter={null} setTypeFilter={() => {}} onBack={() => {}} />
+        </div>
         <div className="fluent-search-box home-search-wrapper">
           <FluentSearchInput
             ref={ref}
@@ -100,6 +110,9 @@ function Fixture() {
         </FluentSettingsExpander>
         <FluentDropdown aria-label="固定宽度测试" value={widthValue} onChange={setWidthValue}
           options={[{ id: "short", label: "短" }, { id: "long", label: "这是一项很长的修饰键选项文字" }]} />
+        <FluentButton onClick={() => applyWindowFrameState(document, { square_corners: true, maximized: true, snapped: false })}>模拟最大化</FluentButton>
+        <FluentButton onClick={() => applyWindowFrameState(document, { square_corners: true, maximized: false, snapped: true })}>模拟吸附</FluentButton>
+        <FluentButton onClick={() => applyWindowFrameState(document, { square_corners: false, maximized: false, snapped: false })}>模拟还原</FluentButton>
         <FluentButton variant="danger">删除材料</FluentButton>
         <FluentButton loading>正在保存</FluentButton>
         <FluentButton disabled>不可用操作</FluentButton>

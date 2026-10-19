@@ -95,7 +95,7 @@ pub fn apply_theme_to_window_internal(
     use windows::Win32::Graphics::Dwm::{
         DwmExtendFrameIntoClientArea, DwmSetWindowAttribute,
         DWMWA_BORDER_COLOR, DWMWA_USE_IMMERSIVE_DARK_MODE,
-        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND, DWM_WINDOW_CORNER_PREFERENCE,
+        DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND, DWMWCP_DONOTROUND, DWM_WINDOW_CORNER_PREFERENCE,
         DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR,
     };
     #[cfg(target_os = "windows")]
@@ -142,8 +142,9 @@ pub fn apply_theme_to_window_internal(
                 &border_color as *const _ as _,
                 std::mem::size_of::<u32>() as u32,
             );
-            // Keep rounded corners even when border/shadow are disabled.
-            let corner_pref = DWM_WINDOW_CORNER_PREFERENCE(DWMWCP_ROUND.0);
+            // A theme reapply must not restore rounding on a snapped/maximized window.
+            let square = window.label() == "main" && crate::app::window_frame::query(&window.as_ref().window()).square_corners;
+            let corner_pref = DWM_WINDOW_CORNER_PREFERENCE(if square { DWMWCP_DONOTROUND.0 } else { DWMWCP_ROUND.0 });
             let _ = DwmSetWindowAttribute(
                 hwnd,
                 DWMWA_WINDOW_CORNER_PREFERENCE,

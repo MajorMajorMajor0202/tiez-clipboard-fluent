@@ -1355,7 +1355,10 @@ pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             if window.label() != "main" {
                 return;
             }
-            if window.is_minimized().unwrap_or(false) || window.is_maximized().unwrap_or(false) {
+            if window.is_minimized().unwrap_or(false) {
+                return;
+            }
+            if crate::app::window_frame::sync(window).square_corners {
                 return;
             }
             // Re-apply Mica/Acrylic when the flag is set (set by reapply_vibrancy after
@@ -1367,6 +1370,9 @@ pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
                 reapply_vibrancy(window.app_handle());
             }
             persist_window_size(window, size.width, size.height);
+        }
+        tauri::WindowEvent::Moved(_) if window.label() == "main" => {
+            crate::app::window_frame::sync(window);
         }
         tauri::WindowEvent::CloseRequested { api, .. } => {
             if window.label() != "main" {

@@ -151,6 +151,7 @@ fn main() {
             app::commands::quit,
             app::commands::relaunch,
             app::commands::set_theme,
+            app::window_frame::get_window_frame_state,
             app::commands::get_system_accent_color,
             app::commands::get_platform_info,
             app::commands::send_system_notification,

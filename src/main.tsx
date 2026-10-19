@@ -8,6 +8,9 @@ import SettingsWindow from "./features/settings/components/SettingsWindow";
 import DesktopStickerWindow from "./features/sticker/components/DesktopStickerWindow";
 import StickyNoteWindow from "./features/note/components/StickyNoteWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import { applyWindowFrameState, type WindowFrameState } from "./shared/lib/windowFrameState";
 import "./index.css";
 import "./styles/components/index.css";
 import "./styles/themes/load";
@@ -119,6 +122,28 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isSt
   });
 
   const appWindow = getCurrentWindow();
+  let frameRequest = 0;
+  let frameRefresh = 0;
+  const refreshFrame = async () => {
+    const request = ++frameRequest;
+    try {
+      const state = await invoke<WindowFrameState>("get_window_frame_state");
+      if (request === frameRequest) applyWindowFrameState(document, state);
+    } catch (error) { console.warn("Failed to read native window frame state", error); }
+  };
+  // Coalesce drag/resize messages and query after Windows has settled Snap state.
+  const scheduleFrameRefresh = () => {
+    ++frameRequest;
+    cancelAnimationFrame(frameRefresh);
+    frameRefresh = requestAnimationFrame(() => { void refreshFrame(); });
+  };
+  void listen<WindowFrameState>("window-frame-changed", ({ payload }) => {
+    ++frameRequest;
+    applyWindowFrameState(document, payload);
+  });
+  void appWindow.onMoved(scheduleFrameRefresh);
+  void appWindow.onFocusChanged(({ payload }) => { if (payload) scheduleFrameRefresh(); });
+  void listen("window-shown", scheduleFrameRefresh);
   let physicalWidth = Math.round(window.innerWidth * (window.devicePixelRatio || 1));
   let physicalHeight = Math.round(window.innerHeight * (window.devicePixelRatio || 1));
   let currentDpr = window.devicePixelRatio || 1;
@@ -213,6 +238,7 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isSt
 
   // 监听 Tauri 窗口原生 resize 和 DPI 改变事件，确保尺寸完全同步
   appWindow.onResized(({ payload: size }) => {
+    scheduleFrameRefresh();
     if (size.width > 0 && size.height > 0) {
       physicalWidth = size.width;
       physicalHeight = size.height;
@@ -235,6 +261,7 @@ if (!isSettingsWindow && !isAdvancedSettingsWindow && !isCompactPreview && !isSt
 
   // 默认首帧同步绘制
   draw();
+  void refreshFrame();
 }
 // ─────────────────────────────────────────────────────────────────────
 

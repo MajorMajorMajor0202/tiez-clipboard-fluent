@@ -30,7 +30,8 @@ header.subpage-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--spacing-md);
+  /* Compensate for button padding and the X glyph's viewBox whitespace. */
+  padding: 0 calc(var(--spacing-md) - 8px) 0 var(--spacing-md);
   gap: var(--spacing-sm);
   min-height: 20px;
 }
@@ -530,4 +531,21 @@ body.dark-mode .history-item:hover {
   box-shadow: var(--card-selected-shadow);
   background: var(--card-selected-background);
   transform: scale(1.01);
+}
+
+/* Applied only to the main window from native maximized/Snap/fullscreen state. */
+html:root.window-square-corners,
+body.window-square-corners {
+  --shell-radius: 0px !important;
+  --radius-window: 0px !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+body.window-square-corners #root,
+body.window-square-corners::before,
+body.window-square-corners #root::before {
+  border-radius: 0 !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
 }
