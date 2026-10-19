@@ -207,11 +207,22 @@ header.subpage-header {
 }
 
 .fluent-search-box::after {
-  display: none !important;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 4px 4px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .fluent-search-box:focus-within::after {
-  display: none !important;
+  transform: scaleX(1);
 }
 
 .fluent-search-icon {
@@ -246,6 +257,35 @@ header.subpage-header {
   outline: none !important;
 }
 
+.fluent-search-box.has-clear .fluent-search-input {
+  padding-right: 32px;
+}
+
+.fluent-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary, var(--text-secondary));
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.12s ease;
+  z-index: 2;
+}
+
+.fluent-search-clear:hover {
+  background: rgba(128, 128, 128, 0.16);
+  color: var(--text-primary);
+}
+
 /* Universal input focus underline wrapper */
 .fluent-input-wrapper {
   position: relative;
@@ -254,11 +294,22 @@ header.subpage-header {
 }
 
 .fluent-input-wrapper::after {
-  display: none !important;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 4px 4px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .fluent-input-wrapper:focus-within::after {
-  display: none !important;
+  transform: scaleX(1);
 }
 
 .fluent-input-wrapper input {
@@ -302,11 +353,22 @@ select.search-input option {
 }
 
 .home-search-wrapper::after {
-  display: none !important;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 4px 4px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .home-search-wrapper:focus-within::after {
-  display: none !important;
+  transform: scaleX(1);
 }
 
 .search-icon {

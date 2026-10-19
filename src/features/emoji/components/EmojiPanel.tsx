@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useState, useRef } from "react";
 import type { DragEvent } from "react";
 import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -7,6 +7,9 @@ import { Plus, X, Pencil, Search } from "lucide-react";
 import { motion, LayoutGroup } from "framer-motion";
 import { createPortal } from "react-dom";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
+import VirtualPanelGrid from "./VirtualPanelGrid";
+import { getCachedEmojiData, loadEmojiData } from "../lib/emojiData";
+import type { EmojiGroup, EmojiDictEntry } from "../lib/emojiData";
 
 interface EmojiPanelProps {
   t: (key: string) => string;
@@ -17,20 +20,6 @@ interface EmojiPanelProps {
   saveSetting: (key: string, val: string) => void;
   language?: string;
 }
-
-type EmojiGroup = { name: string; emojis: string[] };
-
-type EmojiDictEntry = {
-  zh: { name: string; keywords: string[] };
-  tc: { name: string; keywords: string[] };
-  en: { name: string; keywords: string[] };
-};
-
-type EmojiData = {
-  version?: number;
-  groups?: EmojiGroup[];
-  dictionary?: Record<string, EmojiDictEntry>;
-};
 
 const FALLBACK_GROUPS: EmojiGroup[] = [
   {
@@ -185,10 +174,6 @@ const dedupeFavoritePaths = (paths: string[]) =>
     )
   );
 
-const getPreloadedEmojis = () => {
-  return (window as any).__EMOJI_CACHE__ as EmojiGroup[] | undefined;
-};
-
 const SKIN_TONE_SUPPORTED_BASE = new Set(
   [
     // Hands & Gestures
@@ -200,6 +185,8 @@ const SKIN_TONE_SUPPORTED_BASE = new Set(
 );
 
 const emojiSupportCache = new Map<string, boolean>();
+let supportContext: CanvasRenderingContext2D | null = null;
+let unsupportedGlyph: Uint8ClampedArray | undefined;
 
 const isEmojiSupported = (emoji: string): boolean => {
   if (emojiSupportCache.has(emoji)) {
@@ -214,21 +201,25 @@ const isEmojiSupported = (emoji: string): boolean => {
   if (typeof document === 'undefined') return true;
   
   try {
-    const canvas = document.createElement('canvas');
-    canvas.width = 16;
-    canvas.height = 16;
-    const ctx = canvas.getContext('2d');
+    if (!supportContext) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 16;
+      canvas.height = 16;
+      supportContext = canvas.getContext('2d', { willReadFrequently: true });
+    }
+    const ctx = supportContext;
     if (!ctx) {
       emojiSupportCache.set(emoji, true);
       return true;
     }
     
-    ctx.clearRect(0, 0, 16, 16);
-    ctx.font = '16px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
-    ctx.textBaseline = 'top';
-    
-    ctx.fillText('\uFFFF', 0, 0); 
-    const tofuData = ctx.getImageData(0, 0, 16, 16).data;
+    if (!unsupportedGlyph) {
+      ctx.clearRect(0, 0, 16, 16);
+      ctx.font = '16px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.fillText('\uFFFF', 0, 0);
+      unsupportedGlyph = ctx.getImageData(0, 0, 16, 16).data;
+    }
     
     ctx.clearRect(0, 0, 16, 16);
     ctx.fillText(emoji, 0, 0);
@@ -248,7 +239,7 @@ const isEmojiSupported = (emoji: string): boolean => {
       return true;
     };
     
-    const isSupported = !isSameData(emojiData, tofuData) && !isBlank(emojiData);
+    const isSupported = !isSameData(emojiData, unsupportedGlyph) && !isBlank(emojiData);
     emojiSupportCache.set(emoji, isSupported);
     return isSupported;
   } catch (e) {
@@ -257,7 +248,7 @@ const isEmojiSupported = (emoji: string): boolean => {
   }
 };
 
-const EmojiItem = ({ emoji }: { emoji: string }) => {
+const EmojiItem = memo(({ emoji }: { emoji: string }) => {
   const supported = isEmojiSupported(emoji);
   if (supported) {
     return <>{emoji}</>;
@@ -275,6 +266,8 @@ const EmojiItem = ({ emoji }: { emoji: string }) => {
     <img 
       src={url} 
       alt={emoji} 
+      loading="lazy"
+      decoding="async"
       style={{ width: '1em', height: '1em', verticalAlign: 'middle', objectFit: 'contain' }} 
       onError={(e) => {
         const img = e.target as HTMLImageElement;
@@ -287,7 +280,7 @@ const EmojiItem = ({ emoji }: { emoji: string }) => {
       }}
     />
   );
-};
+});
 
 const SKIN_TONES = [
   { value: "", color: "#FFC83B" },      // Default Yellow
@@ -341,12 +334,15 @@ const SkinToneSelector = ({ selected, onChange }: { selected: string; onChange: 
 const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveSetting, language }: EmojiPanelProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(() => getPreloadedEmojis() ?? FALLBACK_GROUPS);
-  const [emojiDict, setEmojiDict] = useState<Record<string, EmojiDictEntry>>(() => (window as any).__EMOJI_DICT_CACHE__ ?? {});
-  const [animationCompleted, setAnimationCompleted] = useState(false);
+  const [emojiGroups, setEmojiGroups] = useState<EmojiGroup[]>(() => getCachedEmojiData()?.groups ?? FALLBACK_GROUPS);
+  const [emojiDict, setEmojiDict] = useState<Record<string, EmojiDictEntry>>(() => getCachedEmojiData()?.dictionary ?? {});
   const [isSwitching, setIsSwitching] = useState(false);
   const [favNames, setFavNames] = useState<Record<string, string>>({});
   const [renameTarget, setRenameTarget] = useState<{ path: string; rect: DOMRect } | null>(null);
+  const switchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const favoritesRef = useRef(favorites);
+  const favoritesLoadedRef = useRef(false);
+  favoritesRef.current = favorites;
 
   const [selectedSkinTone, setSelectedSkinTone] = useState("");
 
@@ -368,10 +364,10 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       .catch(console.error);
   }, []);
 
-  const handleSkinToneChange = (tone: string) => {
+  const handleSkinToneChange = useCallback((tone: string) => {
     setSelectedSkinTone(tone);
     saveSetting("app.emoji_selected_skin_tone", tone);
-  };
+  }, [saveSetting]);
 
   const handleRenameFavorite = (path: string, newName: string) => {
     const updated = { ...favNames, [path]: newName.trim() };
@@ -382,54 +378,68 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
 
   const currentLang = (language || "zh") as "zh" | "tc" | "en";
 
-  const getEmojiName = (emojiChar: string): string => {
+  const getEmojiName = useCallback((emojiChar: string): string => {
     const entry = emojiDict[emojiChar];
     if (!entry) return emojiChar;
     return entry[currentLang]?.name || entry["zh"]?.name || emojiChar;
-  };
+  }, [emojiDict, currentLang]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimationCompleted(true);
-    }, 80);
-    return () => clearTimeout(timer);
+  useEffect(() => () => {
+    if (switchTimer.current) clearTimeout(switchTimer.current);
   }, []);
 
   const hasFavorites = favorites.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    setSearchQuery("");
-  }, [activeTab]);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const emojiSearchQuery = activeTab === "emoji" ? deferredSearchQuery : "";
+  const favoriteSearchQuery = activeTab === "favorites" ? deferredSearchQuery : "";
 
   const filteredEmojiGroups = useMemo(() => {
-    if (!searchQuery.trim()) return emojiGroups;
-    const q = searchQuery.trim().toLowerCase();
+    if (!emojiSearchQuery.trim()) return emojiGroups;
+    const q = emojiSearchQuery.trim().toLowerCase();
     return emojiGroups
       .map((group) => ({
         ...group,
         emojis: group.emojis.filter((emoji) => getEmojiName(emoji).toLowerCase().includes(q)),
       }))
       .filter((group) => group.emojis.length > 0);
-  }, [emojiGroups, searchQuery, emojiDict, currentLang]);
+  }, [emojiGroups, emojiSearchQuery, getEmojiName]);
 
   const filteredFavorites = useMemo(() => {
-    if (!searchQuery.trim()) return favorites;
-    const q = searchQuery.trim().toLowerCase();
+    if (!favoriteSearchQuery.trim()) return favorites;
+    const q = favoriteSearchQuery.trim().toLowerCase();
     return favorites.filter((path) => {
       const name = path.split(/[/\\]/).pop() || path;
       const customName = favNames[path] || name;
       return customName.toLowerCase().includes(q);
     });
-  }, [favorites, searchQuery, favNames]);
+  }, [favorites, favoriteSearchQuery, favNames]);
 
   const searchResultHasToneSupported = useMemo(() => {
-    if (!searchQuery.trim()) return false;
+    if (!emojiSearchQuery.trim()) return false;
     return filteredEmojiGroups.some((group) =>
       group.emojis.some((emoji) => isSkinToneSupported(emoji))
     );
-  }, [filteredEmojiGroups, searchQuery]);
+  }, [filteredEmojiGroups, emojiSearchQuery]);
+
+  const emojiSections = useMemo(() => filteredEmojiGroups.map((group) => ({
+    key: group.name,
+    header: (
+      <div className="emoji-virtual-heading">
+        <div className="emoji-group-title">{group.name}</div>
+        {!emojiSearchQuery && (group.name === "人物" || group.name === "手势") && (
+          <SkinToneSelector selected={selectedSkinTone} onChange={handleSkinToneChange} />
+        )}
+      </div>
+    ),
+    items: group.emojis,
+  })), [filteredEmojiGroups, emojiSearchQuery, selectedSkinTone, handleSkinToneChange]);
+
+  const favoriteSections = useMemo(() => [{
+    key: "favorites",
+    items: favoriteSearchQuery ? filteredFavorites : [...filteredFavorites, ""],
+  }], [filteredFavorites, favoriteSearchQuery]);
 
   const persistFavorites = (updater: string[] | ((prev: string[]) => string[])) => {
     setFavorites((prev) => {
@@ -445,14 +455,19 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   };
 
   useEffect(() => {
-    if (activeTab !== "favorites") return;
+    if (activeTab !== "favorites" || favoritesLoadedRef.current) return;
 
     let cancelled = false;
+    const initialFavorites = new Set(favoritesRef.current);
     invoke<string[]>("list_emoji_favorites")
       .then((diskPaths) => {
         if (cancelled) return;
-        const merged = dedupeFavoritePaths([...favorites, ...(Array.isArray(diskPaths) ? diskPaths : [])]);
-        const current = dedupeFavoritePaths(favorites);
+        favoritesLoadedRef.current = true;
+        const current = dedupeFavoritePaths(favoritesRef.current);
+        const currentPaths = new Set(current);
+        const discovered = (Array.isArray(diskPaths) ? diskPaths : [])
+          .filter((path) => !initialFavorites.has(path) || currentPaths.has(path));
+        const merged = dedupeFavoritePaths([...current, ...discovered]);
         if (
           merged.length === current.length &&
           merged.every((path, index) => path === current[index])
@@ -466,7 +481,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
     return () => {
       cancelled = true;
     };
-  }, [activeTab, favorites]);
+  }, [activeTab]);
 
   const addFavoritePaths = async (paths: string[]) => {
     const normalized = paths.map(normalizePath).filter((p) => p && isImagePath(p));
@@ -568,7 +583,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
     }
   };
 
-  const handleSend = async (content: string, contentType: string) => {
+  const handleSend = useCallback(async (content: string, contentType: string) => {
     if (contentType === "text") {
       await invoke("paste_text_directly", { content });
       return;
@@ -592,14 +607,27 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       deleteAfterUse: false,
       pasteWithFormat: false
     });
-  };
+  }, []);
+
+  const renderEmoji = useCallback((emoji: string) => {
+    const finalEmoji = applySkinTone(emoji, selectedSkinTone);
+    return (
+      <FluentTooltip key={emoji} text={getEmojiName(emoji)}>
+        <button className="emoji-btn" onClick={() => handleSend(finalEmoji, "text")}>
+          <EmojiItem emoji={finalEmoji} />
+        </button>
+      </FluentTooltip>
+    );
+  }, [selectedSkinTone, getEmojiName, handleSend]);
 
   const handleTabChange = (tab: "emoji" | "favorites") => {
     if (tab !== activeTab) {
       setIsSwitching(true);
+      setSearchQuery("");
       setActiveTab(tab);
       saveSetting("app.emoji_panel_tab", tab);
-      setTimeout(() => {
+      if (switchTimer.current) clearTimeout(switchTimer.current);
+      switchTimer.current = setTimeout(() => {
         setIsSwitching(false);
       }, 260);
     }
@@ -663,27 +691,12 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   };
 
   useEffect(() => {
-    const cachedDict = (window as any).__EMOJI_DICT_CACHE__;
-    if (cachedDict) {
-      setEmojiDict(cachedDict);
-    }
-
-    if (getPreloadedEmojis() && (window as any).__EMOJI_DICT_CACHE__) return;
-
     let alive = true;
-    fetch("/emoji-data.json")
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load emoji data"))))
-      .then((data: EmojiData) => {
+    loadEmojiData()
+      .then((data) => {
         if (!alive) return;
-        const groups = Array.isArray(data?.groups) ? data.groups.filter((g) => g && Array.isArray(g.emojis)) : [];
-        if (groups.length > 0) {
-          (window as any).__EMOJI_CACHE__ = groups;
-          setEmojiGroups(groups);
-        }
-        if (data.dictionary) {
-          (window as any).__EMOJI_DICT_CACHE__ = data.dictionary;
-          setEmojiDict(data.dictionary);
-        }
+        setEmojiGroups(data.groups);
+        setEmojiDict(data.dictionary);
       })
       .catch(() => {
         if (alive) setEmojiGroups(FALLBACK_GROUPS);
@@ -695,7 +708,6 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
   }, []);
 
   useEffect(() => {
-    if (!animationCompleted) return;
     const appWindow = getCurrentWindow();
 
     const unlistenDrop = appWindow.listen("tauri://file-drop", (e) => {
@@ -746,7 +758,7 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
       unlistenV2Leave.then((f) => f());
       unlistenNativeEmoji.then((f) => f());
     };
-  }, [animationCompleted, favorites]);
+  }, [setFavorites, saveSetting]);
 
   useEffect(() => {
     const handleDragOver = (event: globalThis.DragEvent) => {
@@ -851,34 +863,18 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
 
       {/* Sliding track — both panels always in DOM, shifted with translateX */}
       <div className="emoji-content-wrapper">
-        {animationCompleted && (
           <div className={`emoji-panels-track${activeTab === "favorites" ? " show-favorites" : ""}`}>
             
             {/* Panel 0 — Emoji grid */}
             <div className="emoji-content">
-              {filteredEmojiGroups.map((group) => (
-                <div key={group.name} className="emoji-group">
-                  <div className="emoji-group-title">{group.name}</div>
-                  {!searchQuery && (group.name === "人物" || group.name === "手势") && (
-                    <SkinToneSelector selected={selectedSkinTone} onChange={handleSkinToneChange} />
-                  )}
-                  <div className="emoji-grid">
-                    {group.emojis.map((emoji) => {
-                      const finalEmoji = applySkinTone(emoji, selectedSkinTone);
-                      return (
-                        <FluentTooltip key={`${group.name}-${emoji}`} text={getEmojiName(emoji)}>
-                          <button
-                            className="emoji-btn"
-                            onClick={() => handleSend(finalEmoji, "text")}
-                          >
-                            <EmojiItem emoji={finalEmoji} />
-                          </button>
-                        </FluentTooltip>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+              <VirtualPanelGrid
+                sections={emojiSections}
+                minItemWidth={44}
+                gap={0}
+                renderItem={renderEmoji}
+                className="emoji-virtual-emojis"
+                active={activeTab === "emoji"}
+              />
               {filteredEmojiGroups.length === 0 && (
                 <div className="emoji-empty">{t("emoji_empty") || "暂无表情"}</div>
               )}
@@ -906,17 +902,35 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                 void handleDomDrop(e);
               }}
             >
-              <div className="emoji-fav-grid">
-                {filteredFavorites.map((path) => {
+              <VirtualPanelGrid
+                sections={favoriteSections}
+                minItemWidth={80}
+                gap={12}
+                className="emoji-virtual-favorites"
+                active={activeTab === "favorites"}
+                renderItem={(path) => {
+                  if (!path) return (
+                    <div key="add" className="emoji-fav-card emoji-fav-add">
+                      <FluentTooltip text={t("emoji_add_files") || "添加表情"}>
+                        <button
+                          className="emoji-fav-add-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleSelectFiles();
+                          }}
+                        >
+                          <div className="add-icon-wrapper">
+                            <Plus size={22} strokeWidth={2.5} />
+                          </div>
+                        </button>
+                      </FluentTooltip>
+                    </div>
+                  );
                   const name = path.split(/[/\\]/).pop() || path;
                   const isDeleteVisible = deleteTarget === path;
                   return (
-                    <motion.div
+                    <div
                       key={path}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0 }}
                       className="emoji-fav-card"
                       data-delete-visible={isDeleteVisible}
                       onContextMenu={(e) => {
@@ -958,6 +972,8 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                           <img
                             src={convertFileSrc(path)}
                             alt={name}
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               e.currentTarget.onerror = null;
                               removeFavoritePath(path);
@@ -965,28 +981,10 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                           />
                         </button>
                       </FluentTooltip>
-                    </motion.div>
+                    </div>
                   );
-                })}
-
-                {!searchQuery && (
-                  <div className="emoji-fav-card emoji-fav-add">
-                    <FluentTooltip text={t("emoji_add_files") || "添加表情"}>
-                      <button
-                        className="emoji-fav-add-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          void handleSelectFiles();
-                        }}
-                      >
-                        <div className="add-icon-wrapper">
-                          <Plus size={22} strokeWidth={2.5} />
-                        </div>
-                      </button>
-                    </FluentTooltip>
-                  </div>
-                )}
-              </div>
+                }}
+              />
 
               {filteredFavorites.length === 0 && (
                 <div className="emoji-fav-empty">
@@ -1009,7 +1007,6 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
             </div>
 
           </div>
-        )}
       </div>
       {renameTarget && (
         <EmojiFavRenameFlyout
@@ -1101,4 +1098,4 @@ const EmojiFavRenameFlyout = ({ initialValue, targetRect, onConfirm, onCancel }:
   );
 };
 
-export default EmojiPanel;
+export default memo(EmojiPanel);

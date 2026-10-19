@@ -1086,10 +1086,21 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     position: relative;
                 }
                 .tag-search-box::after {
-                    display: none !important;
+                    content: "";
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: var(--accent-color);
+                    transform: scaleX(0);
+                    transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+                    border-radius: 0 0 4px 4px;
+                    z-index: 2;
+                    pointer-events: none;
                 }
                 .tag-search-box:focus-within::after {
-                    display: none !important;
+                    transform: scaleX(1);
                 }
                 .tag-search-box .search-input-wrapper {
                     flex: 1;

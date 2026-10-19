@@ -77,11 +77,22 @@
 }
 
 .emoji-search-wrapper::after {
-  display: none !important;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 4px 4px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .emoji-search-wrapper:focus-within::after {
-  display: none !important;
+  transform: scaleX(1);
 }
 
 .emoji-search-icon {
@@ -222,24 +233,64 @@
 .emoji-content {
   width: 50%;
   flex-shrink: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
+  overflow: hidden;
   padding: 4px 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
 }
 
 .emoji-fav-container {
   width: 50%;
   flex-shrink: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
+  overflow: hidden;
   padding: 4px 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
   position: relative; /* Established positioning context for absolute overlays */
+}
+
+.emoji-virtual-grid {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.emoji-virtual-favorites {
+  margin: 4px;
+}
+
+.emoji-virtual-row {
+  display: grid;
+}
+
+.emoji-virtual-row > span {
+  width: 100%;
+  height: 100%;
+}
+
+.emoji-virtual-heading {
+  padding: 16px 0 8px;
+}
+
+.emoji-virtual-heading .emoji-skin-tone-bar {
+  margin-top: 8px;
+}
+
+.emoji-virtual-grid [data-virtuoso-scroller]::-webkit-scrollbar {
+  width: 4px;
+}
+
+.emoji-virtual-grid [data-virtuoso-scroller]::-webkit-scrollbar-thumb {
+  background: var(--line-soft);
+  border-radius: 4px;
+}
+
+.is-switching .emoji-virtual-grid [data-virtuoso-scroller]::-webkit-scrollbar-thumb {
+  background: transparent;
 }
 
 /* Remove old tab-active/tab-hidden opacity classes */

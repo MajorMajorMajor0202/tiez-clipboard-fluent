@@ -124,54 +124,62 @@
 
 /* Secondary Button (Default) */
 .fluent-btn-secondary {
-  background: #ffffff;
+  background: var(--bg-element, #ffffff);
   border: 1px solid var(--line-soft);
   color: var(--text-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .fluent-btn-secondary:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
   border-color: var(--line-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
 }
 
 .fluent-btn-secondary:active:not(:disabled) {
   background: rgba(0, 0, 0, 0.08);
-  box-shadow: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 .dark-mode .fluent-btn-secondary {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.12);
   color: var(--text-primary);
-  box-shadow: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dark-mode .fluent-btn-secondary:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .dark-mode .fluent-btn-secondary:active:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Primary Button */
 .fluent-btn-primary {
-  background: var(--accent-color, #0078d4);
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: var(--accent-color);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   color: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.dark-mode .fluent-btn-primary {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .fluent-btn-primary:hover:not(:disabled) {
-  filter: brightness(1.08);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+  background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)), var(--accent-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .fluent-btn-primary:active:not(:disabled) {
-  filter: brightness(0.92);
-  box-shadow: none;
+  background: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08)), var(--accent-color);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* Danger Button */
@@ -179,17 +187,17 @@
   background: #c42b1c;
   border: 1px solid rgba(0, 0, 0, 0.12);
   color: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .fluent-btn-danger:hover:not(:disabled) {
   background: #d83b01;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .fluent-btn-danger:active:not(:disabled) {
   background: #a80000;
-  box-shadow: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* Subtle Button */

@@ -10,7 +10,6 @@ import NoteManager from "../../note/components/NoteManager";
 import { VirtualClipboardList } from "../../clipboard/components/VirtualClipboardList";
 import type { ClipboardEntry } from "../../../shared/types";
 import type { VirtualClipboardListHandle } from "../../clipboard/types";
-import type { TabItem } from "../types";
 
 
 type RenderItem = (
@@ -27,9 +26,6 @@ interface AppMainContentProps {
   tagManagerEnabled: boolean;
   showNoteManager?: boolean;
   noteManagerEnabled?: boolean;
-  tabs?: TabItem[];
-  tabAssignments?: Record<string, number[]>;
-  saveTabAssignments?: (assignments: Record<string, number[]>) => void;
   onCreateNote?: () => void;
   showEmojiPanel: boolean;
   chatMode: boolean;
@@ -105,9 +101,6 @@ const AppMainContent = ({
   tagManagerEnabled,
   showNoteManager,
   noteManagerEnabled,
-  tabs,
-  tabAssignments,
-  saveTabAssignments,
   onCreateNote,
   showEmojiPanel,
   chatMode,
@@ -221,10 +214,6 @@ const AppMainContent = ({
       >
         <NoteManager
           t={t}
-          theme={theme}
-          tabs={tabs}
-          tabAssignments={tabAssignments}
-          saveTabAssignments={saveTabAssignments}
           onCreateNote={onCreateNote}
         />
       </motion.div>

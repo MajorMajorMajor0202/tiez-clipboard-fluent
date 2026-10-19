@@ -2,14 +2,13 @@ import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Trash2, FolderPlus, X, Folder } from "lucide-react";
 import ToastContainer from "./shared/components/ToastContainer";
 import ConfirmDialog from "./shared/components/ConfirmDialog";
-import FluentTooltip from "./shared/components/FluentTooltip";
 import FluentModal from "./shared/components/FluentModal";
 import FluentButton from "./shared/components/FluentButton";
 
 import { translations } from "./locales";
+import { loadEmojiData } from "./features/emoji/lib/emojiData";
 import AppHeader from "./features/app/components/AppHeader";
 import AppMainContent from "./features/app/components/AppMainContent";
 import FluentRightRail from "./features/app/components/FluentRightRail";
@@ -397,7 +396,6 @@ const App = () => {
 
   // Multi-select & Batch Operations
   const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
-  const [isBatchTabDropdownOpen, setIsBatchTabDropdownOpen] = useState(false);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   // Manual Item Add Modal
@@ -428,7 +426,6 @@ const App = () => {
         if (selectedItemIds.size > 0) {
           setSelectedItemIds(new Set());
           lastSelectedIndexRef.current = null;
-          setIsBatchTabDropdownOpen(false);
         }
         if (isAddEntryModalOpen) {
           setIsAddEntryModalOpen(false);
@@ -449,17 +446,7 @@ const App = () => {
     setEntranceActive(true);
 
     // Preload emoji data to cache it in memory
-    fetch("/emoji-data.json")
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => {
-        if (data && Array.isArray(data.groups)) {
-          (window as any).__EMOJI_CACHE__ = data.groups;
-        }
-        if (data && data.dictionary) {
-          (window as any).__EMOJI_DICT_CACHE__ = data.dictionary;
-        }
-      })
-      .catch(() => {});
+    void loadEmojiData().catch(() => {});
 
     if (!isTauriRuntime()) return;
 
@@ -467,14 +454,12 @@ const App = () => {
       setEntranceActive(true);
       setSelectedItemIds(new Set());
       lastSelectedIndexRef.current = null;
-      setIsBatchTabDropdownOpen(false);
     });
 
     const unlistenHidden = listen("window-hidden", () => {
       setEntranceActive(false);
       setSelectedItemIds(new Set());
       lastSelectedIndexRef.current = null;
-      setIsBatchTabDropdownOpen(false);
     });
 
     return () => {
@@ -589,10 +574,12 @@ const App = () => {
     closeFileTransfer,
     effectiveShowEmojiPanel,
     effectiveShowTagManager,
+    effectiveShowNoteManager,
     setShowEmojiPanel,
     setShowSettings,
     setSettingsSubpage,
     setShowTagManager,
+    setShowNoteManager,
     settingsSubpage,
     showSettings
   ]);
@@ -1391,25 +1378,6 @@ const App = () => {
     });
   }, [selectedItemIds, openConfirm, t, setHistory, pushToast]);
 
-  const handleBatchAddToTab = useCallback((tabIdOrName: string) => {
-    const ids = Array.from(selectedItemIds);
-    if (ids.length === 0) return;
-    const targetTab = tabs.find((t) => t.id === tabIdOrName || t.name === tabIdOrName);
-    if (!targetTab) return;
-    setTabAssignments((prev) => {
-      const currentList = prev[targetTab.id] || [];
-      const toAdd = ids.filter((id) => !currentList.includes(id));
-      const nextList = [...currentList, ...toAdd];
-      const next = { ...prev, [targetTab.id]: nextList };
-      saveTabAssignments(next);
-      return next;
-    });
-    pushToast(t("batch_added_to_tab").replace("{count}", String(ids.length)).replace("{name}", targetTab.name));
-    setSelectedItemIds(new Set());
-    lastSelectedIndexRef.current = null;
-    setIsBatchTabDropdownOpen(false);
-  }, [selectedItemIds, tabs, saveTabAssignments, pushToast, t]);
-
   const handleDropItemOnTab = useCallback((itemId: number, targetTabIdOrName: string) => {
     const draggedList = (window as any).__tiezDraggedItemIds;
     const itemsToAdd: number[] = (Array.isArray(draggedList) && draggedList.length > 0)
@@ -2145,13 +2113,17 @@ const App = () => {
 
   const handleRailDeleteSelectedItem = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation();
+    if (selectedItemIds.size > 1) {
+      handleBatchDelete();
+      return;
+    }
     if (!selectedItem) return;
     if (isSelectedItemLocked) {
       pushToast("已锁定的条目受保护，无法删除。请先解锁。");
       return;
     }
     deleteEntry(e || ({ stopPropagation: () => {} } as any), selectedItem.id);
-  }, [selectedItem, isSelectedItemLocked, pushToast, deleteEntry]);
+  }, [selectedItemIds, handleBatchDelete, selectedItem, isSelectedItemLocked, pushToast, deleteEntry]);
 
   const handleWindowHtml5Drop = useCallback((e: React.DragEvent) => {
     if (e.dataTransfer.types.includes("application/x-tiez-item") || (window as any).__tiezDraggedItemId) {
@@ -2186,7 +2158,7 @@ const App = () => {
     }
   }, [tabs, activeTabId, handleDropExternalFilesOnTab, handleDropExternalTextOnTab]);
 
-  const shouldShowRightRail = !effectiveShowTagManager && !effectiveShowEmojiPanel && !chatMode && !showSettings;
+  const shouldShowRightRail = !effectiveShowTagManager && !effectiveShowEmojiPanel && !chatMode && !showSettings && !effectiveShowNoteManager;
 
   return (
     <div
@@ -2254,9 +2226,6 @@ const App = () => {
             tagManagerEnabled={tagManagerEnabled}
             showNoteManager={effectiveShowNoteManager}
             noteManagerEnabled={noteManagerEnabled}
-            tabs={tabs}
-            tabAssignments={tabAssignments}
-            saveTabAssignments={saveTabAssignments}
             onCreateNote={handleCreateNote}
             showEmojiPanel={effectiveShowEmojiPanel}
             chatMode={chatMode}
@@ -2346,70 +2315,6 @@ const App = () => {
         )}
       </div>
 
-      {/* Floating Batch Action Bar (Pure icons, strictly no button boxes/text, no copy option) */}
-      {selectedItemIds.size > 0 && (
-        <div className="fluent-batch-bar">
-          <span className="fluent-batch-bar-count">
-            {selectedItemIds.size}
-          </span>
-          <div style={{ position: "relative" }}>
-            <FluentTooltip text={t("add_to_tab")}>
-              <button
-                type="button"
-                className="fluent-batch-icon-btn"
-                onClick={() => setIsBatchTabDropdownOpen((prev) => !prev)}
-              >
-                <FolderPlus size={15} />
-              </button>
-            </FluentTooltip>
-            {isBatchTabDropdownOpen && (
-              <div className="fluent-batch-dropdown">
-                {tabs.filter((tab) => !tab.isBuiltin && tab.id !== "clipboard").length === 0 ? (
-                  <div style={{ fontSize: "11px", color: "var(--text-muted)", padding: "4px 8px" }}>
-                    {t("no_custom_tabs")}
-                  </div>
-                ) : (
-                  tabs
-                    .filter((tab) => !tab.isBuiltin && tab.id !== "clipboard")
-                    .map((tab) => (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        className="fluent-batch-dropdown-item"
-                        onClick={() => handleBatchAddToTab(tab.id)}
-                      >
-                        <Folder size={11} />
-                        <span>{tab.name}</span>
-                      </button>
-                    ))
-                )}
-              </div>
-            )}
-          </div>
-          <FluentTooltip text={t("delete_selected")}>
-            <button
-              type="button"
-              className="fluent-batch-icon-btn danger"
-              onClick={handleBatchDelete}
-            >
-              <Trash2 size={15} />
-            </button>
-          </FluentTooltip>
-          <FluentTooltip text={t("abort") || "取消"}>
-            <button
-              type="button"
-              className="fluent-batch-icon-btn"
-              onClick={() => {
-                setSelectedItemIds(new Set());
-                lastSelectedIndexRef.current = null;
-                setIsBatchTabDropdownOpen(false);
-              }}
-            >
-              <X size={15} />
-            </button>
-          </FluentTooltip>
-        </div>
-      )}
 
       {/* Manual Entry Creation Modal */}
       <FluentModal

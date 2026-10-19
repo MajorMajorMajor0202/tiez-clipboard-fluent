@@ -1,7 +1,10 @@
 /* Clipboard Item Selection - Windows 11 Fluent Design Neutral Focus Indicator */
 .history-item.selected,
+.history-item.multi-selected,
 .theme-mica .history-item.selected,
-.theme-acrylic .history-item.selected {
+.theme-mica .history-item.multi-selected,
+.theme-acrylic .history-item.selected,
+.theme-acrylic .history-item.multi-selected {
   outline: none !important;
   outline-offset: 0 !important;
   border-color: rgba(0, 0, 0, 0.45) !important;
@@ -14,28 +17,38 @@
 }
 
 .history-item.selected:hover,
+.history-item.multi-selected:hover,
 .theme-mica .history-item.selected:hover,
-.theme-acrylic .history-item.selected:hover {
+.theme-mica .history-item.multi-selected:hover,
+.theme-acrylic .history-item.selected:hover,
+.theme-acrylic .history-item.multi-selected:hover {
   background: var(--bg-hover, rgba(0, 0, 0, 0.065)) !important;
   border-color: rgba(0, 0, 0, 0.6) !important;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.12) !important;
 }
 
 :root.dark-mode .history-item.selected,
+:root.dark-mode .history-item.multi-selected,
 body.dark-mode .history-item.selected,
+body.dark-mode .history-item.multi-selected,
 .dark-mode.theme-mica .history-item.selected,
-.dark-mode.theme-acrylic .history-item.selected {
+.dark-mode.theme-mica .history-item.multi-selected,
+.dark-mode.theme-acrylic .history-item.selected,
+.dark-mode.theme-acrylic .history-item.multi-selected {
   background: rgba(255, 255, 255, 0.07) !important;
   border-color: rgba(255, 255, 255, 0.5) !important;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.35) !important;
 }
 
 :root.dark-mode .history-item.selected:hover,
+:root.dark-mode .history-item.multi-selected:hover,
 body.dark-mode .history-item.selected:hover,
+body.dark-mode .history-item.multi-selected:hover,
 .dark-mode.theme-mica .history-item.selected:hover,
-.dark-mode.theme-acrylic .history-item.selected:hover {
+.dark-mode.theme-mica .history-item.multi-selected:hover,
+.dark-mode.theme-acrylic .history-item.selected:hover,
+.dark-mode.theme-acrylic .history-item.multi-selected:hover {
   background: rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(255, 255, 255, 0.65) !important;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45), 0 6px 16px rgba(0, 0, 0, 0.4) !important;
 }
-

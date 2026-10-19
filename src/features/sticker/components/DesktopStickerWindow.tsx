@@ -387,7 +387,7 @@ export const DesktopStickerWindow: React.FC = () => {
           onDragStart={handleDragStart}
           title="按住内容拖出至外部应用"
         >
-          <File size={24} color="var(--accent-color, #0078d4)" />
+          <File size={24} color="var(--accent-color, currentColor)" />
           <div className="sticker-file-info">
             <div className="sticker-file-name">{filename}</div>
             <div className="sticker-file-path">{item.content}</div>

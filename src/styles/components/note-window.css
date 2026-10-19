@@ -346,13 +346,13 @@ html.dark-mode .note-titlebar-btn:active {
 
 /* Pin Button Active / Pinned */
 .note-titlebar-btn.is-pinned {
-  color: var(--accent-color, #0078d4) !important;
+  color: var(--accent-color) !important;
   opacity: 1 !important;
 }
 
 /* Edit / Preview Active */
 .note-titlebar-btn.active {
-  color: var(--accent-color, #0078d4) !important;
+  color: var(--accent-color) !important;
   opacity: 1 !important;
 }
 
@@ -473,7 +473,7 @@ html.dark-mode .note-titlebar-btn:active {
 
 .note-markdown-view input[type="checkbox"] {
   cursor: pointer;
-  accent-color: var(--accent-color, #0078d4);
+  accent-color: var(--accent-color);
   width: 14px;
   height: 14px;
   margin: 0;
@@ -482,7 +482,7 @@ html.dark-mode .note-titlebar-btn:active {
 .note-markdown-view blockquote {
   margin: 6px 0;
   padding: 4px 10px;
-  border-left: 3px solid var(--accent-color, #0078d4);
+  border-left: 3px solid var(--accent-color);
   background: rgba(128, 128, 128, 0.08);
   border-radius: 0 4px 4px 0;
   opacity: 0.9;
@@ -505,7 +505,7 @@ html.dark-mode .note-titlebar-btn:active {
 }
 
 .note-markdown-view a {
-  color: var(--accent-color, #0078d4);
+  color: var(--accent-color);
   text-decoration: none;
 }
 
@@ -606,7 +606,7 @@ html.dark-mode .note-menu-item:hover {
   justify-content: center;
   font-size: 13px;
   font-weight: bold;
-  color: var(--accent-color, #0078d4);
+  color: var(--accent-color);
 }
 
 .note-menu-separator {
@@ -661,11 +661,11 @@ html.dark-mode .note-palette-swatch {
 
 .note-palette-swatch:hover {
   transform: scale(1.08);
-  border-color: var(--accent-color, #0078d4);
+  border-color: var(--accent-color);
 }
 
 .note-palette-swatch.active {
-  border: 2px solid var(--accent-color, #0078d4);
+  border: 2px solid var(--accent-color);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
 }
 
@@ -766,7 +766,7 @@ html.dark-mode .note-palette-swatch {
 
 .milkdown-container .ProseMirror input[type="checkbox"] {
   cursor: pointer;
-  accent-color: var(--accent-color, #0078d4);
+  accent-color: var(--accent-color);
   width: 14px;
   height: 14px;
   margin: 0;
@@ -777,7 +777,7 @@ html.dark-mode .note-palette-swatch {
 .milkdown-container .ProseMirror blockquote {
   margin: 6px 0;
   padding: 4px 10px;
-  border-left: 3px solid var(--accent-color, #0078d4);
+  border-left: 3px solid var(--accent-color);
   background: rgba(128, 128, 128, 0.08);
   border-radius: 0 4px 4px 0;
   opacity: 0.92;
@@ -816,7 +816,7 @@ html.dark-mode .note-palette-swatch {
 
 /* Links */
 .milkdown-container .ProseMirror a {
-  color: var(--accent-color, #0078d4);
+  color: var(--accent-color);
   text-decoration: none;
 }
 .milkdown-container .ProseMirror a:hover {

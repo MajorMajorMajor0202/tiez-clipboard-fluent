@@ -185,7 +185,7 @@ export const useAppState = (): AppState => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const custom = parsed.filter((t: TabItem) => t.id !== "clipboard");
+          const custom = parsed.filter((t: TabItem) => t.id !== "clipboard" && t.id !== "notes");
           return [{ id: "clipboard", name: "剪贴板", isBuiltin: true }, ...custom];
         }
       }
@@ -196,7 +196,6 @@ export const useAppState = (): AppState => {
       { id: "clipboard", name: "剪贴板", isBuiltin: true },
       { id: "release", name: "本次发布" },
       { id: "reimburse", name: "报销资料" },
-      { id: "notes", name: "便签" },
       { id: "code_snippets", name: "常用代码" },
       { id: "temp", name: "临时暂存" }
     ];

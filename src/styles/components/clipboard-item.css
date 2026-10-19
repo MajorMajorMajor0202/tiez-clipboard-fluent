@@ -479,11 +479,22 @@ body.dark-mode .tab-assign-flyout,
 }
 
 .tag-flyout-search-wrapper::after {
-  display: none !important;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+  border-radius: 0 0 4px 4px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .tag-flyout-search-wrapper:focus-within::after {
-  display: none !important;
+  transform: scaleX(1);
 }
 
 .tag-flyout-search-icon {
@@ -687,13 +698,6 @@ body.dark-mode .tiez-drag-avatar,
   padding: 10px 4px;
 }
 
-/* Multi-select Item State (Fluent style, strictly no checkbox) */
-.history-item.multi-selected {
-  border-color: var(--accent-color) !important;
-  background: var(--bg-hover, rgba(128, 128, 128, 0.16)) !important;
-  outline: 1.5px solid var(--accent-color);
-  outline-offset: -1px;
-}
 
 /* Inline Item Content Editor */
 .item-inline-editor {
@@ -872,96 +876,6 @@ body.dark-mode .secondary-menu-item:hover,
   transform: scale(1.15);
 }
 
-/* Floating Batch Action Bar (Pure icons, strictly no button boxes/text) */
-.fluent-batch-bar {
-  position: fixed;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: var(--bg-element, #ffffff);
-  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
-  border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(16px);
-  z-index: 9999;
-}
-
-.fluent-batch-bar-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-color, #0078d4);
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(128, 128, 128, 0.1);
-  margin-right: 2px;
-  white-space: nowrap;
-}
-
-.fluent-batch-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.fluent-batch-icon-btn:hover {
-  background: var(--bg-hover, rgba(128, 128, 128, 0.15));
-}
-
-.fluent-batch-icon-btn.danger:hover {
-  background: rgba(255, 77, 79, 0.15);
-  color: #ff4d4f;
-}
-
-.fluent-batch-dropdown {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-element, #ffffff);
-  border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
-  border-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 130px;
-  max-height: 180px;
-  overflow-y: auto;
-  z-index: 10000;
-}
-
-.fluent-batch-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  font-size: 11px;
-  color: var(--text-primary);
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s ease;
-}
-
-.fluent-batch-dropdown-item:hover {
-  background: var(--bg-hover, rgba(128, 128, 128, 0.12));
-}
 
 /* Fluent Modal Overlay & Dialog */
 .fluent-modal-overlay {
