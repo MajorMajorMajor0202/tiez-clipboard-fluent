@@ -80,32 +80,70 @@
   box-shadow: var(--flyout-shadow);
   z-index: 1000005;
 }
-.tiez-official-search {
-  display: flex;
-  width: 100%;
-  min-height: 32px;
-  box-sizing: border-box;
-  border: 1px solid var(--line-soft);
-  border-radius: 4px;
-  padding: 0 10px;
-  gap: 8px;
-  background: var(--bg-input);
-  color: var(--text-primary);
-  font-size: 13px;
+.tiez-official-search,
+.tiez-official-search.fui-Input {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  box-sizing: border-box !important;
+  border: 1px solid var(--line-soft) !important;
+  border-radius: 4px !important;
+  padding: 0 10px !important;
+  gap: 8px !important;
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
 }
-.tiez-official-search:focus-within { border-color: var(--line-strong); }
+.tiez-official-search:focus-within,
+.tiez-official-search.fui-Input:focus-within {
+  border-color: var(--line-strong) !important;
+}
 /* The outer home-search-wrapper already draws TieZ's animated underline. */
-.tiez-official-search::after { display: none; }
-.tiez-official-search input {
-  width: 100%;
-  min-width: 0;
-  height: 30px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  outline: none;
+.tiez-official-search::after,
+.tiez-official-search.fui-Input::after {
+  display: none !important;
+}
+.tiez-official-search .fui-Input__contentBefore {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  line-height: 1 !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.tiez-official-search .fui-Input__contentBefore svg {
+  display: block !important;
+  margin: auto !important;
+}
+.tiez-official-search input,
+.tiez-official-search input.fui-Input__input {
+  display: flex !important;
+  align-items: center !important;
+  align-self: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  line-height: 30px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.tiez-official-search input::placeholder,
+.tiez-official-search input.fui-Input__input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
 }
 .home-search-wrapper::after { transform-origin: center; }
 @media (prefers-reduced-motion: reduce) {
