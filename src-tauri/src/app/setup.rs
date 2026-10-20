@@ -1192,7 +1192,12 @@ fn watch_system_theme(app_handle: AppHandle) {
 }
 
 #[cfg(target_os = "windows")]
-fn init_win32_hooks(_app: &App) {
+fn init_win32_hooks(app: &App) {
+    if let Some(window) = app.get_webview_window("main") {
+        if let Ok(hwnd) = window.hwnd() {
+            MAIN_WINDOW_HWND.store(hwnd.0 as usize, Ordering::Relaxed);
+        }
+    }
     std::thread::spawn(move || {
         use windows::Win32::UI::WindowsAndMessaging::{
             DispatchMessageW, GetMessageW, SetWindowsHookExW, TranslateMessage,

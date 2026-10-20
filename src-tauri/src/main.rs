@@ -75,6 +75,7 @@ fn main() {
             app::window_manager::set_navigation_enabled,
             app::window_manager::set_navigation_mode,
             app::hooks::set_recording_mode,
+            app::hooks::get_list_quick_paste_state,
             services::content_handler::open_content,
             services::clipboard_ops::copy_to_clipboard,
             services::clipboard_ops::paste_latest_rich,

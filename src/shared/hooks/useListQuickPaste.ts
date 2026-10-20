@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ClipboardEntry } from "../types";
 import type { QuickPasteHint } from "../../features/clipboard/types";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import { isTauriRuntime } from "../lib/tauriRuntime";
 import { hasVisibleKeyboardOverlay } from "../lib/keyboardOverlay";
 
@@ -23,13 +24,17 @@ export function useListQuickPaste(
 
 
   useEffect(() => {
+    const nativeRuntime = isTauriRuntime();
     let busy = false;
     let consumed = false;
     let disposed = false;
     let domModifierHeld = false;
-    const reset = () => { setHeld(false); consumed = false; domModifierHeld = false; };
-    const allowed = (target: EventTarget | null) => {
-      if (!current.current.enabled || document.hidden) return false;
+    let stateRevision = 0;
+    const reset = () => { ++stateRevision; setHeld(false); consumed = false; domModifierHeld = false; };
+    const allowed = (target: EventTarget | null, native = false) => {
+      // A native event is already gated by IsWindowVisible. WebView visibility
+      // and activeElement can lag after a non-activating hide/show cycle.
+      if (!current.current.enabled || (!native && document.hidden)) return false;
       if (hasVisibleKeyboardOverlay()) return false;
       if (!(target instanceof Element)) return true;
       return !target.closest('input, textarea, select, [contenteditable="true"], [role="combobox"]') ||
@@ -51,6 +56,7 @@ export function useListQuickPaste(
       const matches = matchesListQuickPasteModifier(event, current.current.modifier);
       if (!matches) { setHeld(false); return; }
       if (['Alt', 'Control', 'Shift'].includes(event.key)) {
+        ++stateRevision;
         domModifierHeld = true;
         event.preventDefault(); // Keep WebView's menu activation out of the list.
         if (!event.repeat) consumed = false; // Recover if the previous modifier keyup was intercepted.
@@ -70,26 +76,43 @@ export function useListQuickPaste(
     window.addEventListener('blur', reset);
     window.addEventListener('focusin', focus);
     document.addEventListener('visibilitychange', reset);
+    const refreshNativeHeld = () => {
+      const revision = stateRevision;
+      void invoke<string | null>('get_list_quick_paste_state').then(payload => {
+        if (disposed || revision !== stateRevision || !payload) return;
+        if (payload === 'released') { reset(); return; }
+        const target = payload === 'show-focused' ? document.activeElement : null;
+        if (allowed(target, true)) { consumed = false; setHeld(true); }
+      }).catch(console.error);
+    };
     // The native popup can remain visible without taking focus from the paste target.
-    const subscriptions = isTauriRuntime() ? [
+    const subscriptions = nativeRuntime ? [
       listen<string>('list-quick-paste', ({ payload }) => {
         if (disposed) return;
+        ++stateRevision;
+        // A physical modifier release is authoritative, even when WebView
+        // focus/keyup delivery lags. Only focus handoff hides may be ignored.
+        if (payload === 'released') { reset(); return; }
         if (payload === 'hide') {
           // The native hook relinquishes ownership when the WebView takes
           // focus; its queued hide must not erase a newer focused DOM press.
           if (domModifierHeld && document.hasFocus()) return;
           reset(); return;
         }
-        if (!allowed(document.activeElement)) { reset(); return; }
-        if (payload === 'show') { consumed = false; setHeld(true); }
+        // Only focused native events may consult activeElement. On the
+        // non-activating path, WebView's hasFocus/activeElement can be stale.
+        const target = payload === 'show-focused' ? document.activeElement : null;
+        if (!allowed(target, true)) { reset(); return; }
+        if (payload === 'show' || payload === 'show-focused') { consumed = false; setHeld(true); }
         else if (/^[0-9]$/.test(payload)) pasteDigit(payload);
       }),
       listen('window-hidden', reset),
       listen('window-shown', () => {
         // Focusing an already visible search field also emits window-shown.
-        if (!domModifierHeld || !document.hasFocus()) reset();
+        if (!domModifierHeld || !document.hasFocus()) { reset(); refreshNativeHeld(); }
       }),
     ].map(subscription => subscription.catch(error => { console.error(error); return () => {}; })) : [];
+    if (nativeRuntime) void Promise.all(subscriptions).then(() => { if (!disposed) refreshNativeHeld(); });
     return () => {
       disposed = true;
       window.removeEventListener('keydown', down, true);

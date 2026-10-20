@@ -52,6 +52,8 @@ pub static IS_MOUSE_BUTTON_DOWN: AtomicBool = AtomicBool::new(false);
 pub static NAVIGATION_ENABLED: AtomicBool = AtomicBool::new(false);
 pub static NAVIGATION_MODE_ACTIVE: AtomicBool = AtomicBool::new(false);
 pub static IS_MAIN_WINDOW_FOCUSED: AtomicBool = AtomicBool::new(false);
+/// Native routing compares the current foreground HWND, not delayed focus events.
+pub static MAIN_WINDOW_HWND: AtomicUsize = AtomicUsize::new(0);
 /// Set to true whenever the main window is shown so the next Resized event
 /// re-applies Mica/Acrylic (DWM resets SYSTEMBACKDROP_TYPE after ShowWindow).
 pub static VIBRANCY_NEEDS_REAPPLY: AtomicBool = AtomicBool::new(false);

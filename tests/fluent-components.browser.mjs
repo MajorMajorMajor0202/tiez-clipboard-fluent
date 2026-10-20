@@ -426,19 +426,52 @@ try {
   await native.getByRole('button', { name: 'Enabled', exact: true }).click();
   await native.getByRole('button', { name: 'Native show', exact: true }).click();
   assert.equal((await readNative()).at(-1), true);
-  await native.getByRole('button', { name: 'Native modifier', exact: true }).click();
+  await native.getByRole('button', { name: 'Native show held', exact: true }).click();
   await native.locator('.quick-paste-hint').first().waitFor();
+  assert.equal(await native.locator('.quick-paste-hint').count(), 10, 'Alt held across window restore shows tips without another modifier press');
   await native.getByRole('button', { name: 'Native digit', exact: true }).click();
   assert.deepEqual(JSON.parse(await native.getByTestId('pasted').textContent()), [3], 'unfocused native events use the current list');
   await native.getByRole('textbox', { name: 'Search', exact: true }).focus();
   await native.keyboard.down('Alt');
   await native.locator('.quick-paste-hint').first().waitFor();
+  assert.equal(await native.locator('.quick-paste-hint').count(), 10, 'focused DOM input works without a native modifier notification');
+  await native.evaluate(() => [...document.querySelectorAll('button')].find(button => button.textContent === 'Native focused modifier').click());
+  await native.locator('.quick-paste-hint').first().waitFor();
   await native.getByRole('button', { name: 'Native show', exact: true }).click();
   assert.equal(await native.locator('.quick-paste-hint').count(), 10, 'focusing an already visible window must not erase Alt tips');
   await native.getByRole('button', { name: 'Native handoff', exact: true }).click();
   assert.equal(await native.locator('.quick-paste-hint').count(), 10, 'late native hide must not erase focused Alt tips');
+  await native.getByRole('button', { name: 'Native release', exact: true }).click();
+  await native.locator('.quick-paste-hint').first().waitFor({ state: 'hidden' });
+  await native.keyboard.up('Alt');
+  await native.keyboard.down('Alt');
+  await native.locator('.quick-paste-hint').first().waitFor();
   await native.keyboard.up('Alt');
   await native.locator('.quick-paste-hint').first().waitFor({ state: 'hidden' });
+  await native.getByRole('button', { name: 'Native slow show', exact: true }).click();
+  await native.getByRole('button', { name: 'Native release', exact: true }).click();
+  await native.getByRole('button', { name: 'Resolve stale held', exact: true }).click();
+  assert.equal(await native.locator('.quick-paste-hint').count(), 0, 'a stale show snapshot cannot override physical release');
+  // Hide/show without activation can retain an old input and WebView visibility.
+  await native.getByRole('textbox', { name: 'Note', exact: true }).focus();
+  const foreground = await context.newPage();
+  await foreground.goto('about:blank');
+  await foreground.bringToFront();
+  await native.evaluate(() => {
+    // Model the WebView state that can lag behind the Win32 foreground HWND.
+    Object.defineProperty(document, 'hasFocus', { configurable: true, value: () => true });
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    [...document.querySelectorAll('button')].find(button => button.textContent === 'Native modifier').click();
+  });
+  await native.locator('.quick-paste-hint').first().waitFor();
+  await native.evaluate(() => [...document.querySelectorAll('button')].find(button => button.textContent === 'Native digit').click());
+  assert.deepEqual(JSON.parse(await native.getByTestId('pasted').textContent()), [3, 3], 'visible native popup ignores stale hidden state and stale input focus');
+  await native.evaluate(() => { delete document.hidden; delete document.hasFocus; });
+  await native.bringToFront();
+  await native.getByRole('textbox', { name: 'Note', exact: true }).focus();
+  await native.keyboard.press('Alt+1');
+  assert.deepEqual(JSON.parse(await native.getByTestId('pasted').textContent()), [3, 3], 'a genuinely focused editor still owns its keys');
+  await foreground.close();
   await native.close();
   if (csp) {
     assert.deepEqual(await page.evaluate(() => window.__styleCspViolations), [], 'all Fluent runtime styles pass the release policy');

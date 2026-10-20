@@ -17,11 +17,18 @@ import "../src/styles/themes/load";
 const nativeFixture = new URLSearchParams(location.search).has('native');
 const nativeLog: boolean[] = [];
 let resolveVisibility: ((visible: boolean) => void) | undefined;
+let nextHeldSnapshot: string | null = null;
+let deferHeldSnapshot = false;
+let resolveHeldSnapshot: ((action: string) => void) | undefined;
 if (nativeFixture) {
   mockWindows('main');
   mockIPC((command, payload) => {
     if (command === 'plugin:window|is_visible') return new Promise<boolean>(resolve => { resolveVisibility = resolve; });
     if (command === 'set_navigation_enabled') nativeLog.push((payload as { enabled: boolean }).enabled);
+    if (command === 'get_list_quick_paste_state') {
+      if (deferHeldSnapshot) { deferHeldSnapshot = false; return new Promise<string>(resolve => { resolveHeldSnapshot = resolve; }); }
+      const action = nextHeldSnapshot; nextHeldSnapshot = null; return action;
+    }
     return null;
   }, { shouldMockEvents: true });
 }
@@ -55,10 +62,15 @@ function Fixture() {
       <NativeSync blocked={!enabled} />
       <button onClick={() => void emit('window-shown')}>Native show</button>
       <button onClick={() => void emit('window-hidden')}>Native hide</button>
+      <button onClick={() => { nextHeldSnapshot = 'show'; void emit('window-shown'); }}>Native show held</button>
+      <button onClick={() => { deferHeldSnapshot = true; void emit('window-shown'); }}>Native slow show</button>
+      <button onClick={() => { resolveHeldSnapshot?.('show'); }}>Resolve stale held</button>
       <button onClick={() => { resolveVisibility?.(false); }}>Resolve stale hidden</button>
       <button onClick={() => void emit('list-quick-paste', 'show')}>Native modifier</button>
+      <button onClick={() => void emit('list-quick-paste', 'show-focused')}>Native focused modifier</button>
       <button onClick={() => void emit('list-quick-paste', '1')}>Native digit</button>
       <button onClick={() => void emit('list-quick-paste', 'hide')}>Native handoff</button>
+      <button onClick={() => void emit('list-quick-paste', 'released')}>Native release</button>
       <button onClick={() => { document.querySelector('output[data-testid="native-log"]')!.textContent = JSON.stringify(nativeLog); }}>Read native log</button>
       <output data-testid="native-log" />
     </>}

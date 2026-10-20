@@ -10,7 +10,7 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 #[cfg(target_os = "windows")]
 use windows::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, KBDLLHOOKSTRUCT, MSLLHOOKSTRUCT, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN,
-    WM_MBUTTONDOWN, WM_RBUTTONDOWN, WM_SYSKEYDOWN, WM_SYSKEYUP,
+    WM_MBUTTONDOWN, WM_RBUTTONDOWN, WM_SYSKEYDOWN, WM_SYSKEYUP, LLKHF_INJECTED,
 };
 
 use crate::app::window_manager::{hide_window_cmd, toggle_window};
@@ -22,9 +22,89 @@ use crate::infrastructure::windows_ext::WindowExt;
 static BLOCKED_HOTKEY_IDS: std::sync::Mutex<Vec<i32>> = std::sync::Mutex::new(Vec::new());
 
 #[cfg(target_os = "windows")]
-static LIST_MODIFIER_HELD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-#[cfg(target_os = "windows")]
 static LIST_DIGIT_MASK: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+static LIST_PHYSICAL_MODIFIERS: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+fn modifier_key_bit(vk: u32) -> u32 {
+    match vk {
+        0x11 | 0xA2 => 1, 0xA3 => 2,
+        0x12 | 0xA4 => 4, 0xA5 => 8,
+        0x10 | 0xA0 => 16, 0xA1 => 32,
+        0x5B => 64, 0x5C => 128,
+        _ => 0,
+    }
+}
+
+fn physical_modifier_mask(keys: u32) -> u8 {
+    u8::from(keys & 3 != 0) | (u8::from(keys & 12 != 0) << 1)
+        | (u8::from(keys & 48 != 0) << 2)
+}
+
+fn update_physical_keys(keys: u32, vk: u32, down: bool, injected: bool) -> u32 {
+    if injected { return keys; }
+    let bit = modifier_key_bit(vk);
+    if down { keys | bit } else { keys & !bit }
+}
+
+#[tauri::command]
+pub fn get_list_quick_paste_state(window: tauri::WebviewWindow) -> Option<&'static str> {
+    if window.label() != "main" { return None; }
+    #[cfg(windows)]
+    {
+        let hwnd = MAIN_WINDOW_HWND.load(Ordering::Relaxed);
+        if hwnd == 0 || IS_HIDDEN.load(Ordering::Relaxed)
+            || !WindowExt::is_window_visible(HWND(hwnd as _)) { return None; }
+        let keys = LIST_PHYSICAL_MODIFIERS.load(Ordering::SeqCst);
+        let configured = window.state::<SettingsState>().list_quick_paste_modifier.load(Ordering::Relaxed);
+        let matches = configured != 0 && physical_modifier_mask(keys) == configured && keys & 192 == 0;
+        return list_hint_action(false, matches, matches,
+            WindowExt::get_foreground_window().0 as usize == hwnd);
+    }
+    #[cfg(not(windows))]
+    None
+}
+
+fn list_hint_action(injected: bool, down: bool, matches: bool, foreground: bool) -> Option<&'static str> {
+    // Menu suppression / remapping can inject Alt down immediately after a real
+    // Alt up. Those events must not resurrect a released KeyTip session.
+    if injected { return None; }
+    Some(if down && matches {
+        if foreground { "show-focused" } else { "show" }
+    } else { "released" })
+}
+
+#[cfg(test)]
+mod list_hint_tests {
+    use super::{list_hint_action, physical_modifier_mask, update_physical_keys};
+
+    #[test]
+    fn held_modifiers_survive_synthetic_paste_transitions() {
+        let mut keys = update_physical_keys(0, 0xA4, true, false);
+        assert_eq!(physical_modifier_mask(keys), 2);
+        keys = update_physical_keys(keys, 0x12, false, true);
+        assert_eq!(physical_modifier_mask(keys), 2);
+        keys = update_physical_keys(keys, 0xA5, true, false);
+        keys = update_physical_keys(keys, 0xA4, false, false);
+        assert_eq!(physical_modifier_mask(keys), 2, "right Alt remains held");
+        keys = update_physical_keys(keys, 0xA2, true, false);
+        assert_eq!(physical_modifier_mask(keys), 3);
+        keys = update_physical_keys(keys, 0xA5, false, false);
+        assert_eq!(physical_modifier_mask(keys), 1);
+        keys = update_physical_keys(keys, 0xA2, false, false);
+        keys = update_physical_keys(keys, 0xA4, true, true);
+        assert_eq!(physical_modifier_mask(keys), 0, "synthetic Alt cannot restart the session");
+    }
+
+    #[test]
+    fn injected_alt_after_release_cannot_reopen_hints() {
+        assert_eq!(list_hint_action(false, true, true, false), Some("show"));
+        assert_eq!(list_hint_action(false, false, false, false), Some("released"));
+        assert_eq!(list_hint_action(true, true, true, false), None);
+        assert_eq!(list_hint_action(true, false, false, false), None);
+        assert_eq!(list_hint_action(false, true, true, true), Some("show-focused"));
+        assert_eq!(list_hint_action(false, true, false, true), Some("released"));
+    }
+}
 
 // Ctrl=1, Alt=2, Shift=4. Keep this canonical set aligned with the UI options.
 pub fn list_quick_paste_mask(value: &str) -> u8 {
@@ -193,6 +273,16 @@ pub unsafe extern "system" fn keyboard_proc(
     if n_code >= 0 && (is_down || is_up) {
         let kbd_struct = *(l_param.0 as *const KBDLLHOOKSTRUCT);
         let vk = kbd_struct.vkCode;
+        // Track physical keys even while hidden. Paste/menu helpers inject
+        // modifier transitions that must not change a held list shortcut.
+        if modifier_key_bit(vk) != 0 {
+            let previous = LIST_PHYSICAL_MODIFIERS.load(Ordering::SeqCst);
+            let updated = update_physical_keys(previous, vk, is_down, kbd_struct.flags.contains(LLKHF_INJECTED));
+            if updated != previous {
+                LIST_PHYSICAL_MODIFIERS.store(updated, Ordering::SeqCst);
+                if is_down { LIST_DIGIT_MASK.store(0, Ordering::SeqCst); }
+            }
+        }
 
         // Handle Recording Mode - Black Hole Logic
         if IS_RECORDING.load(Ordering::SeqCst) {
@@ -292,6 +382,11 @@ pub unsafe extern "system" fn keyboard_proc(
             }
         }
 
+        let main_hwnd = MAIN_WINDOW_HWND.load(Ordering::Relaxed);
+        let main_is_foreground = main_hwnd != 0
+            && WindowExt::get_foreground_window().0 as usize == main_hwnd;
+        let main_is_visible = main_hwnd != 0
+            && WindowExt::is_window_visible(HWND(main_hwnd as _));
         let list_modifier_active;
         // The popup is normally shown without activation. Forward its Alt shortcuts
         // to the frontend, which owns the workspace/search order. Focused WebView
@@ -305,31 +400,24 @@ pub unsafe extern "system" fn keyboard_proc(
                     }
                 }
             }
-            let active = NAVIGATION_ENABLED.load(Ordering::SeqCst)
-                && !IS_HIDDEN.load(Ordering::Relaxed)
-                && !IS_MAIN_WINDOW_FOCUSED.load(Ordering::Relaxed);
-            let alt_down = if matches!(vk, 0x12 | 0xA4 | 0xA5) {
-                is_down
-            } else {
-                (GetAsyncKeyState(VK_MENU.0 as i32) as u16 & 0x8000) != 0
-            };
-            let other_modifier_down = |generic: i32, keys: &[u32]| {
-                if keys.contains(&vk) { is_down }
-                else { (GetAsyncKeyState(generic) as u16 & 0x8000) != 0 }
-            };
-            let ctrl_down = other_modifier_down(VK_CONTROL.0 as i32, &[0x11, 0xA2, 0xA3]);
-            let shift_down = other_modifier_down(VK_SHIFT.0 as i32, &[0x10, 0xA0, 0xA1]);
-            let win_down = other_modifier_down(VK_LWIN.0 as i32, &[0x5B])
-                || other_modifier_down(VK_RWIN.0 as i32, &[0x5C]);
+            let list_visible = NAVIGATION_ENABLED.load(Ordering::SeqCst)
+                && !IS_HIDDEN.load(Ordering::Relaxed) && main_is_visible;
+            let active = list_visible && !main_is_foreground;
             let configured = GLOBAL_APP_HANDLE.get().map(|handle| {
                 handle.state::<SettingsState>().list_quick_paste_modifier.load(Ordering::Relaxed)
             }).unwrap_or(2);
-            let pressed = ctrl_down as u8 | ((alt_down as u8) << 1) | ((shift_down as u8) << 2);
-            list_modifier_active = configured != 0 && configured == pressed && !win_down;
-            let show = active && list_modifier_active;
-            if LIST_MODIFIER_HELD.swap(show, Ordering::SeqCst) != show {
+            let physical_keys = LIST_PHYSICAL_MODIFIERS.load(Ordering::SeqCst);
+            let pressed = physical_modifier_mask(physical_keys);
+            list_modifier_active = configured != 0 && configured == pressed && physical_keys & 192 == 0;
+            // Native notifications cover the non-activating popup; focused
+            // WebView input also handles DOM keys when hooks do not deliver them.
+            let modifier_event = matches!(vk,
+                0x11 | 0xA2 | 0xA3 | 0x12 | 0xA4 | 0xA5 | 0x10 | 0xA0 | 0xA1 | 0x5B | 0x5C);
+            if list_visible && modifier_event {
                 if let Some(handle) = GLOBAL_APP_HANDLE.get() {
-                    let _ = handle.emit_to("main", "list-quick-paste", if show { "show" } else { "hide" });
+                    if let Some(action) = list_hint_action(kbd_struct.flags.contains(LLKHF_INJECTED), is_down, list_modifier_active, main_is_foreground) {
+                        let _ = handle.emit_to("main", "list-quick-paste", action);
+                    }
                 }
             }
             if active && list_modifier_active && is_down {
@@ -377,7 +465,7 @@ pub unsafe extern "system" fn keyboard_proc(
                 // The focused main list owns its configured shortcut and filtered order.
                 // Let WebView receive these keys instead of the global pinned shortcut.
                 if is_down
-                    && !(IS_MAIN_WINDOW_FOCUSED.load(Ordering::Relaxed) && list_modifier_active)
+                    && !(main_is_foreground && list_modifier_active)
                     && quick_paste_modifier_active(
                         &quick_paste_modifier,
                         ctrl_down,
