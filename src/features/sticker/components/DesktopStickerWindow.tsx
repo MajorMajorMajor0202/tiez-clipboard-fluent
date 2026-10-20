@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
+import { canDragNativeFiles, isFileContent, startNativeContentDrag, writeContentDragData } from "../../../shared/lib/contentDrag";
 import { applyThemeClasses, normalizeThemeId } from "../../../shared/config/themes";
 import "../../../styles/components/sticker-window.css";
 
@@ -289,18 +290,10 @@ export const DesktopStickerWindow: React.FC = () => {
   const handleDragStart = (e: React.DragEvent) => {
     if (!item) return;
     e.stopPropagation();
-    if (item.content_type === "file" || item.content_type === "video" || item.content_type === "image") {
-      e.dataTransfer.setData("text/plain", item.content);
-      const uri = item.content.startsWith("data:")
-        ? item.content
-        : `file:///${item.content.replace(/\\/g, "/")}`;
-      e.dataTransfer.setData("text/uri-list", uri);
-    } else {
-      e.dataTransfer.setData("text/plain", item.content);
-      if (item.html_content) {
-        e.dataTransfer.setData("text/html", item.html_content);
-      }
-    }
+    if (isFileContent(item) && canDragNativeFiles()) {
+      e.preventDefault();
+      void startNativeContentDrag(item).catch(console.error);
+    } else { writeContentDragData(e.dataTransfer, item); }
   };
 
   if (!item) {

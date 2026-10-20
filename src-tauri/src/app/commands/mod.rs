@@ -1,6 +1,7 @@
 pub mod ai_cmd;
 pub mod clipboard_cmd;
 pub mod file_cmd;
+pub mod drag_cmd;
 pub mod history_cmd;
 pub mod hotkey_cmd;
 pub mod settings_cmd;

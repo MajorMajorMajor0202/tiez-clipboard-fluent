@@ -1343,8 +1343,8 @@ const App = () => {
     });
   }, [selectedItemIds, openConfirm, t, setHistory, pushToast]);
 
-  const handleDropItemOnTab = useCallback((itemId: number, targetTabIdOrName: string) => {
-    const draggedList = (window as any).__tiezDraggedItemIds;
+  const handleDropItemOnTab = useCallback((itemId: number, targetTabIdOrName: string, nativeItemIds?: number[]) => {
+    const draggedList = nativeItemIds || (window as any).__tiezDraggedItemIds;
     const itemsToAdd: number[] = (Array.isArray(draggedList) && draggedList.length > 0)
       ? draggedList
       : (selectedItemIds.has(itemId) && selectedItemIds.size > 1
@@ -1505,11 +1505,12 @@ const App = () => {
     }
   }, [tabs, saveTabAssignments, fetchHistory, soundEnabled, pushToast, t]);
 
+  const lastNativeDropRef = useRef({ sig: "", time: 0 });
   useEffect(() => {
     const appWindow = getCurrentWindow();
-    const lastHandledRef = { sig: "", time: 0 };
+    const lastHandledRef = lastNativeDropRef.current;
 
-    const resolveTargetTab = (pos: { x: number; y: number } | null): TabItem | null => {
+    const resolveTargetTab = (pos: { x: number; y: number } | null, fallback = true): TabItem | null => {
       if (pos) {
         let el = document.elementFromPoint(pos.x, pos.y);
         let btn = el?.closest(".fluent-tab-item") as HTMLElement | null;
@@ -1523,7 +1524,7 @@ const App = () => {
           if (found) return found;
         }
       }
-      return tabs.find((t) => t.id === activeTabId) || tabs[0] || null;
+      return fallback ? tabs.find((t) => t.id === activeTabId) || tabs[0] || null : null;
     };
 
     const handleDropPayload = (payload: unknown) => {
@@ -1548,6 +1549,15 @@ const App = () => {
       }
       lastHandledRef.sig = sig;
       lastHandledRef.time = now;
+
+      const nativeIds = payload && typeof payload === 'object' && 'itemIds' in payload && Array.isArray(payload.itemIds)
+        ? payload.itemIds.filter((id): id is number => typeof id === 'number' && Number.isSafeInteger(id)) : [];
+      const internalId = nativeIds[0] ?? (window as any).__tiezDraggedItemId;
+      if (typeof internalId === 'number') {
+        const target = resolveTargetTab(pos, false);
+        if (target) handleDropItemOnTab(internalId, target.id, nativeIds.length ? nativeIds : undefined);
+        return; // A native internal drag assigns existing entries; never re-import it.
+      }
 
       handleDropExternalFilesOnTab(paths, targetTab.id);
     };
@@ -1604,7 +1614,7 @@ const App = () => {
       unlistenTextDrop.then((f) => f());
       unlistenDragDropText.then((f) => f());
     };
-  }, [tabs, activeTabId, handleDropExternalFilesOnTab, handleDropExternalTextOnTab]);
+  }, [tabs, activeTabId, handleDropExternalFilesOnTab, handleDropExternalTextOnTab, handleDropItemOnTab]);
 
   const handleQuickAssignToTab = useCallback((tabIndex: number, specificItemId?: number) => {
     if (!quickTabAssignEnabled) return;

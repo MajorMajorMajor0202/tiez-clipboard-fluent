@@ -320,11 +320,26 @@ try {
     assert.equal(await tips.count(), 10);
     assert.deepEqual(await tips.allTextContents(), ['1','2','3','4','5','6','7','8','9','0']);
     assert.deepEqual(await geometry(), before, 'KeyTips leave item and content geometry unchanged');
+    const tipStyle = await tips.first().evaluate(el => {
+      const style = getComputedStyle(el);
+      const tip = el.getBoundingClientRect(), card = el.parentElement.getBoundingClientRect();
+      return { background: style.backgroundColor, color: style.color, radius: style.borderRadius, right: card.right - tip.right, bottom: card.bottom - tip.bottom };
+    });
+    assert.equal(tipStyle.background, 'rgb(119, 119, 119)');
+    assert.equal(tipStyle.color, 'rgb(255, 255, 255)');
+    assert.equal(tipStyle.radius, '0px');
+    assert.ok(tipStyle.right >= 4 && tipStyle.right <= 10 && tipStyle.bottom >= 3 && tipStyle.bottom <= 10, 'KeyTips are anchored to the lower right in both densities');
     await quick.screenshot({ path: `artifacts/fluent-components/list-keytips-${compact ? 'compact' : 'normal'}.png` });
     await quick.keyboard.up('Alt');
     await tips.first().waitFor({ state: 'hidden' });
     assert.deepEqual(await geometry(), before);
   }
+  await quick.getByRole('button', { name: 'Inspect drag payloads', exact: true }).click();
+  assert.deepEqual(JSON.parse(await quick.getByTestId('drag-payload').textContent()), [
+    { plain: '', uri: 'file:///C:/Pictures/%E6%B5%8B%E8%AF%95%20%23100%25.png', id: '1' },
+    { plain: '', uri: 'file:///C:/one.txt\r\nfile:///D:/Folder/two.txt', id: '1' },
+    { plain: 'C:\\one.txt', uri: '', id: '1' },
+  ], 'file and image drags cannot degrade into plain path text; ordinary text keeps its meaning');
   await quick.keyboard.press('Alt+1');
   assert.deepEqual(await pasteLog(), [3], 'pinned first matches displayed order');
   await quick.keyboard.press('Alt+0');

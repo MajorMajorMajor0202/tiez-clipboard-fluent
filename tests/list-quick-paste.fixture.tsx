@@ -9,9 +9,11 @@ import { createRoot } from "react-dom/client";
 import { useListQuickPaste } from "../src/shared/hooks/useListQuickPaste";
 import { useFilteredHistory } from "../src/shared/hooks/useFilteredHistory";
 import ListKeyTip from "../src/shared/components/ListKeyTip";
+import { writeContentDragData } from "../src/shared/lib/contentDrag";
 import type { ClipboardEntry } from "../src/shared/types";
 import "../src/index.css";
 import "../src/styles/components/index.css";
+import "../src/styles/components/compact-mode.css";
 import "../src/styles/themes/load";
 
 const nativeFixture = new URLSearchParams(location.search).has('native');
@@ -45,6 +47,7 @@ function Fixture() {
   const [dialog, setDialog] = useState(false);
   const [enabled, setEnabled] = useState(true);
   const [pasted, setPasted] = useState<number[]>([]);
+  const [dragPayload, setDragPayload] = useState('');
   const items = useMemo(() => Array.from({ length: 12 }, (_, i) => ({
     id: i + 1, content: `Entry ${i + 1}`, content_type: "text", timestamp: 100 - i,
     is_pinned: i === 2, pinned_order: 0,
@@ -53,6 +56,19 @@ function Fixture() {
     activeTabId: workspace ? "work" : "clipboard", tabAssignments: { work: [5, 8, 11] } });
   const hints = useListQuickPaste(filtered, enabled, async id => { setPasted(prev => [...prev, id]); }, modifier);
   return <TieZFluentProvider><main style={{ padding: 20 }}>
+    <button onClick={() => {
+      const contents = [
+        { content_type: 'image', content: 'C:\\Pictures\\测试 #100%.png' },
+        { content_type: 'file', content: 'C:\\one.txt\r\nD:\\Folder\\two.txt' },
+        { content_type: 'text', content: 'C:\\one.txt' },
+      ];
+      setDragPayload(JSON.stringify(contents.map(item => {
+        const data = new DataTransfer();
+        writeContentDragData(data, { id: 1, ...item } as ClipboardEntry);
+        return { plain: data.getData('text/plain'), uri: data.getData('text/uri-list'), id: data.getData('application/x-tiez-item') };
+      })));
+    }}>Inspect drag payloads</button>
+    <output data-testid="drag-payload">{dragPayload}</output>
     <div className="home-search-wrapper"><input aria-label="Search" value={search} onChange={e => setSearch(e.target.value)} /></div>
     <FluentDropdown aria-label="Quick paste modifier" options={[...listQuickPasteModifiers]} value={modifier} onChange={setModifier} />
     <textarea aria-label="Note" />

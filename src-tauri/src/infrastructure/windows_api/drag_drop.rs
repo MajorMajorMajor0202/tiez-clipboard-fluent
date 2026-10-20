@@ -31,7 +31,7 @@ use windows::{
         },
         UI::{
             Shell::{
-                DragFinish, DragQueryFileW, CFSTR_FILECONTENTS, CFSTR_FILEDESCRIPTORW,
+                DragQueryFileW, CFSTR_FILECONTENTS, CFSTR_FILEDESCRIPTORW,
                 CFSTR_INETURLA, CFSTR_INETURLW, HDROP,
             },
             WindowsAndMessaging::EnumChildWindows,
@@ -50,6 +50,8 @@ pub struct DropPosition {
 #[derive(Clone, Serialize)]
 struct DropPayload {
     paths: Vec<String>,
+    #[serde(rename = "itemIds", skip_serializing_if = "Option::is_none")]
+    item_ids: Option<Vec<i64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     position: Option<DropPosition>,
 }
@@ -148,7 +150,7 @@ impl EmojiDropTarget {
 
     unsafe fn has_format(data_obj: &IDataObject, cf_format: u16, tymed: u32, lindex: i32) -> bool {
         let format = Self::format_etc(cf_format, lindex, tymed);
-        data_obj.QueryGetData(&format).is_ok()
+        data_obj.QueryGetData(&format) == windows::Win32::Foundation::S_OK
     }
 
     unsafe fn read_hglobal_bytes(hglobal: windows::Win32::Foundation::HGLOBAL) -> Option<Vec<u8>> {
@@ -206,11 +208,11 @@ impl EmojiDropTarget {
         }
     }
 
-    unsafe fn iterate_file_paths(data_obj: &IDataObject) -> Option<(Vec<PathBuf>, HDROP)> {
+    unsafe fn iterate_file_paths(data_obj: &IDataObject) -> Option<Vec<PathBuf>> {
         let drop_format = Self::format_etc(CF_HDROP.0, -1, TYMED_HGLOBAL.0 as u32);
 
         match data_obj.GetData(&drop_format) {
-            Ok(medium) => {
+            Ok(mut medium) => {
                 let hdrop = HDROP(medium.u.hGlobal.0 as _);
                 let item_count = DragQueryFileW(hdrop, 0xFFFFFFFF, None);
                 let mut paths = Vec::new();
@@ -223,7 +225,10 @@ impl EmojiDropTarget {
                     paths.push(OsString::from_wide(&path_buf[0..character_count]).into());
                 }
 
-                Some((paths, hdrop))
+                // GetData transfers an STGMEDIUM, which may have its own COM
+                // release owner. DragFinish is only for WM_DROPFILES handles.
+                ReleaseStgMedium(&mut medium);
+                Some(paths)
             }
             Err(_) => None,
         }
@@ -374,7 +379,7 @@ impl EmojiDropTarget {
     }
 
     fn emit_file_drop(app_handle: &AppHandle, paths: Vec<String>, position: Option<DropPosition>) {
-        let payload = DropPayload { paths, position };
+        let payload = DropPayload { paths, position, item_ids: super::drag_source::active_drag_item_ids() };
         let _ = app_handle.emit("tauri://file-drop", payload.clone());
         let _ = app_handle.emit("tauri://drag-drop", payload);
     }
@@ -386,13 +391,13 @@ impl EmojiDropTarget {
     }
 
     fn emit_drag_enter(app_handle: &AppHandle) {
-        let payload = DropPayload { paths: Vec::new(), position: None };
+        let payload = DropPayload { paths: Vec::new(), position: None, item_ids: super::drag_source::active_drag_item_ids() };
         let _ = app_handle.emit("tauri://file-drop-hover", payload.clone());
         let _ = app_handle.emit("tauri://drag-enter", payload);
     }
 
     fn emit_drag_leave(app_handle: &AppHandle) {
-        let payload = DropPayload { paths: Vec::new(), position: None };
+        let payload = DropPayload { paths: Vec::new(), position: None, item_ids: super::drag_source::active_drag_item_ids() };
         let _ = app_handle.emit("tauri://file-drop-cancelled", payload.clone());
         let _ = app_handle.emit("tauri://drag-leave", payload);
     }
@@ -584,7 +589,7 @@ impl IDropTarget_Impl for EmojiDropTarget_Impl {
             None
         };
 
-        if let Some((paths, hdrop)) = unsafe { EmojiDropTarget::iterate_file_paths(data_obj) } {
+        if let Some(paths) = unsafe { EmojiDropTarget::iterate_file_paths(data_obj) } {
             let paths: Vec<String> = paths
                 .into_iter()
                 .map(|p| p.to_string_lossy().to_string())
@@ -592,7 +597,6 @@ impl IDropTarget_Impl for EmojiDropTarget_Impl {
             if !paths.is_empty() {
                 EmojiDropTarget::emit_file_drop(self.app_handle.as_ref(), paths, pos);
             }
-            unsafe { DragFinish(hdrop) };
         } else if let Some(text) = unsafe { EmojiDropTarget::read_text(data_obj) } {
             EmojiDropTarget::emit_text_drop(self.app_handle.as_ref(), text, pos);
         } else {

@@ -1,4 +1,5 @@
 import ListKeyTip from "../../../shared/components/ListKeyTip";
+import { canDragNativeFiles, isFileContent, startNativeContentDrag, writeContentDragData } from "../../../shared/lib/contentDrag";
 import { useRef, useEffect, useLayoutEffect, useState, useMemo, useCallback, memo } from "react";
 import { createPortal } from "react-dom";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
@@ -1820,6 +1821,17 @@ const ClipboardItem = ({
     );
 
     const isAnyFlyoutOpen = isEditingTags || isTabFlyoutOpen || isMoreMenuOpen;
+    const finishContentDrag = () => {
+        setTimeout(() => {
+            isDraggingRef.current = false;
+            (window as any).__tiezDraggedItemId = null;
+            (window as any).__tiezDraggedItemIds = null;
+        }, 150);
+        if (!isMultiSelectActive && !isEditingContent) {
+            setIgnoreBlurSafe(false);
+            invoke("set_ignore_blur", { ignore: false }).catch(() => {});
+        }
+    };
 
     return (
         <motion.div
@@ -1858,46 +1870,14 @@ const ClipboardItem = ({
                     (window as any).__tiezDraggedItemIds = [item.id];
                 }
 
-                const dt = e.dataTransfer;
-                if (dt) {
-                    try {
-                        dt.setData("application/x-tiez-item", String(item.id));
-                        dt.setData("text/tiez-item-id", String(item.id));
-                    } catch {}
-
-                    if (item.content_type === "rich_text" && item.html_content) {
-                        dt.setData("text/plain", item.preview || item.content);
-                        dt.setData("text/html", item.html_content);
-                    } else if (item.content_type === "file" || item.content_type === "video") {
-                        dt.setData("text/plain", item.content);
-                        const paths = filePaths && filePaths.length > 0 ? filePaths : [item.content];
-                        const uriList = paths.map((p) => p.startsWith("file://") ? p : `file:///${p.replace(/\\/g, '/')}`).join('\r\n');
-                        if (uriList) {
-                            try { dt.setData("text/uri-list", uriList); } catch {}
-                        }
-                    } else if (item.content_type === "image") {
-                        dt.setData("text/plain", item.content);
-                        if (!item.content.startsWith("data:")) {
-                            const uri = item.content.startsWith("file://") ? item.content : `file:///${item.content.replace(/\\/g, '/')}`;
-                            try { dt.setData("text/uri-list", uri); } catch {}
-                        }
-                    } else {
-                        dt.setData("text/plain", item.content);
-                    }
-                    dt.effectAllowed = "copyMove";
+                if (isFileContent(item) && canDragNativeFiles()) {
+                    e.preventDefault();
+                    void startNativeContentDrag(item).catch(console.error).finally(finishContentDrag);
+                } else if (e.dataTransfer) {
+                    writeContentDragData(e.dataTransfer, item);
                 }
             }}
-            onDragEnd={() => {
-                setTimeout(() => {
-                    isDraggingRef.current = false;
-                    (window as any).__tiezDraggedItemId = null;
-                    (window as any).__tiezDraggedItemIds = null;
-                }, 150);
-                if (!isMultiSelectActive && !isEditingContent) {
-                    setIgnoreBlurSafe(false);
-                    invoke("set_ignore_blur", { ignore: false }).catch(() => {});
-                }
-            }}
+            onDragEnd={finishContentDrag}
             onMouseDown={(e) => {
                 const target = e.target as HTMLElement;
                 if (e.button !== 0) return;
