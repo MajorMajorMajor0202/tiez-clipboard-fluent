@@ -1,3 +1,6 @@
+import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
+import { emit } from "@tauri-apps/api/event";
+import { useNavigationSync } from "../src/shared/hooks/useNavigationSync";
 import { listQuickPasteModifiers } from "../src/shared/lib/listQuickPasteModifier";
 import FluentDropdown from "../src/shared/components/FluentDropdown";
 import TieZFluentProvider from "../src/shared/components/TieZFluentProvider";
@@ -10,6 +13,22 @@ import type { ClipboardEntry } from "../src/shared/types";
 import "../src/index.css";
 import "../src/styles/components/index.css";
 import "../src/styles/themes/load";
+
+const nativeFixture = new URLSearchParams(location.search).has('native');
+const nativeLog: boolean[] = [];
+let resolveVisibility: ((visible: boolean) => void) | undefined;
+if (nativeFixture) {
+  mockWindows('main');
+  mockIPC((command, payload) => {
+    if (command === 'plugin:window|is_visible') return new Promise<boolean>(resolve => { resolveVisibility = resolve; });
+    if (command === 'set_navigation_enabled') nativeLog.push((payload as { enabled: boolean }).enabled);
+    return null;
+  }, { shouldMockEvents: true });
+}
+function NativeSync({ blocked }: { blocked: boolean }) {
+  useNavigationSync({ showSettings: blocked, showTagManager: false, showNoteManager: false, chatMode: false, showEmojiPanel: false });
+  return null;
+}
 
 function Fixture() {
   const [modifier, setModifier] = useState("alt");
@@ -30,6 +49,19 @@ function Fixture() {
     <div className="home-search-wrapper"><input aria-label="Search" value={search} onChange={e => setSearch(e.target.value)} /></div>
     <FluentDropdown aria-label="Quick paste modifier" options={[...listQuickPasteModifiers]} value={modifier} onChange={setModifier} />
     <textarea aria-label="Note" />
+    <div hidden><div role="menu">Retained hidden menu</div></div>
+    <div role="listbox" style={{ visibility: 'hidden' }}>Retained hidden listbox</div>
+    {nativeFixture && <>
+      <NativeSync blocked={!enabled} />
+      <button onClick={() => void emit('window-shown')}>Native show</button>
+      <button onClick={() => void emit('window-hidden')}>Native hide</button>
+      <button onClick={() => { resolveVisibility?.(false); }}>Resolve stale hidden</button>
+      <button onClick={() => void emit('list-quick-paste', 'show')}>Native modifier</button>
+      <button onClick={() => void emit('list-quick-paste', '1')}>Native digit</button>
+      <button onClick={() => void emit('list-quick-paste', 'hide')}>Native handoff</button>
+      <button onClick={() => { document.querySelector('output[data-testid="native-log"]')!.textContent = JSON.stringify(nativeLog); }}>Read native log</button>
+      <output data-testid="native-log" />
+    </>}
     <button onClick={() => setWorkspace(v => !v)}>Workspace</button>
     <button onClick={() => setCompact(v => !v)}>Compact</button>
     <button onClick={() => setDialog(v => !v)}>Dialog</button>

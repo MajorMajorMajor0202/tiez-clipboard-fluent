@@ -1136,8 +1136,7 @@ const App = () => {
   );
   const quickPasteHintsById = useListQuickPaste(
     quickPasteItems,
-    !showSettings && !effectiveShowTagManager && !effectiveShowNoteManager && !showEmojiPanel && !chatMode &&
-      editingTagsId === null && editingContentId === null,
+    !showSettings && !effectiveShowTagManager && !effectiveShowNoteManager && !effectiveShowEmojiPanel && !chatMode,
     copyToClipboard,
     appSettings["app.list_quick_paste_modifier"] || "alt",
   );

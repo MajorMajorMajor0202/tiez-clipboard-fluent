@@ -3,6 +3,7 @@ import type { ClipboardEntry } from "../types";
 import type { QuickPasteHint } from "../../features/clipboard/types";
 import { listen } from "@tauri-apps/api/event";
 import { isTauriRuntime } from "../lib/tauriRuntime";
+import { hasVisibleKeyboardOverlay } from "../lib/keyboardOverlay";
 
 import { normalizeListQuickPasteModifier, matchesListQuickPasteModifier, listQuickPasteModifierLabel } from "../lib/listQuickPasteModifier";
 
@@ -20,14 +21,16 @@ export function useListQuickPaste(
   const current = useRef({ items, enabled: enabled && modifier !== "disabled", paste, modifier });
   current.current = { items, enabled: enabled && modifier !== "disabled", paste, modifier };
 
+
   useEffect(() => {
     let busy = false;
     let consumed = false;
     let disposed = false;
-    const reset = () => { setHeld(false); consumed = false; };
+    let domModifierHeld = false;
+    const reset = () => { setHeld(false); consumed = false; domModifierHeld = false; };
     const allowed = (target: EventTarget | null) => {
       if (!current.current.enabled || document.hidden) return false;
-      if (document.querySelector('[role="dialog"], [role="listbox"], [role="menu"], .fluent-modal-overlay')) return false;
+      if (hasVisibleKeyboardOverlay()) return false;
       if (!(target instanceof Element)) return true;
       return !target.closest('input, textarea, select, [contenteditable="true"], [role="combobox"]') ||
         !!target.closest('.home-search-wrapper');
@@ -41,11 +44,16 @@ export function useListQuickPaste(
         .finally(() => { busy = false; });
     };
     const down = (event: KeyboardEvent) => {
+      // Window activation injects VK_FF to suppress the Start/menu action. It
+      // becomes an Unidentified DOM key, not a user cancellation of KeyTips.
+      if (event.key === 'Unidentified') return;
       if (event.defaultPrevented || event.isComposing || !allowed(event.target)) { setHeld(false); return; }
       const matches = matchesListQuickPasteModifier(event, current.current.modifier);
       if (!matches) { setHeld(false); return; }
       if (['Alt', 'Control', 'Shift'].includes(event.key)) {
+        domModifierHeld = true;
         event.preventDefault(); // Keep WebView's menu activation out of the list.
+        if (!event.repeat) consumed = false; // Recover if the previous modifier keyup was intercepted.
         if (!consumed) setHeld(true);
         return;
       }
@@ -66,12 +74,21 @@ export function useListQuickPaste(
     const subscriptions = isTauriRuntime() ? [
       listen<string>('list-quick-paste', ({ payload }) => {
         if (disposed) return;
-        if (payload === 'hide') { reset(); return; }
+        if (payload === 'hide') {
+          // The native hook relinquishes ownership when the WebView takes
+          // focus; its queued hide must not erase a newer focused DOM press.
+          if (domModifierHeld && document.hasFocus()) return;
+          reset(); return;
+        }
         if (!allowed(document.activeElement)) { reset(); return; }
-        if (payload === 'show') { if (!consumed) setHeld(true); }
+        if (payload === 'show') { consumed = false; setHeld(true); }
         else if (/^[0-9]$/.test(payload)) pasteDigit(payload);
       }),
       listen('window-hidden', reset),
+      listen('window-shown', () => {
+        // Focusing an already visible search field also emits window-shown.
+        if (!domModifierHeld || !document.hasFocus()) reset();
+      }),
     ].map(subscription => subscription.catch(error => { console.error(error); return () => {}; })) : [];
     return () => {
       disposed = true;

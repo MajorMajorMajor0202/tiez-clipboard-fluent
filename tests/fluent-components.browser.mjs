@@ -8,13 +8,13 @@ import { resolve } from "node:path";
 // with PLAYWRIGHT_EXECUTABLE_PATH where the bundled Chromium is unavailable.
 const production = process.env.TEST_PRODUCTION === "1" || process.argv.includes("--release");
 const outputDirectory = "artifacts/fluent-production";
-if (production) await build({ build: { outDir: outputDirectory, rollupOptions: { input: {
+if (production) await build({ cacheDir: "node_modules/.cache/fluent-components-vite", build: { outDir: outputDirectory, rollupOptions: { input: {
   app: resolve("index.html"), components: resolve("tests/fluent-components.fixture.html"),
   quickPaste: resolve("tests/list-quick-paste.fixture.html"),
 } } } });
 const server = production
-  ? await preview({ build: { outDir: outputDirectory }, preview: { host: "127.0.0.1", port: 0, strictPort: false } })
-  : await createServer({ server: { host: "127.0.0.1", port: 0, strictPort: false } });
+  ? await preview({ cacheDir: "node_modules/.cache/fluent-components-vite", build: { outDir: outputDirectory }, preview: { host: "127.0.0.1", port: 0, strictPort: false } })
+  : await createServer({ cacheDir: "node_modules/.cache/fluent-components-vite", server: { host: "127.0.0.1", port: 0, strictPort: false } });
 let browser;
 try {
   if (!production) await server.listen();
@@ -390,7 +390,56 @@ try {
   await quick.keyboard.press('Alt+1'); await quick.keyboard.press('Control+Alt+Shift+1');
   assert.equal((await pasteLog()).length, disabledCount, 'shortcut can be disabled');
   if (csp) assert.deepEqual(await quick.evaluate(() => window.__styleCspViolations), [], 'quick paste has no blocked runtime styles');
+  // A swallowed keyup must not leave the previous Alt sequence cancelled forever.
+  await quick.getByRole('combobox', { name: 'Quick paste modifier', exact: true }).click();
+  await quick.keyboard.press('Home'); await quick.keyboard.press('Enter');
+  await quick.getByRole('textbox', { name: 'Search', exact: true }).focus();
+  await quick.evaluate(() => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Alt', code: 'AltLeft', altKey: true, bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', code: 'KeyX', altKey: true, bubbles: true }));
+  });
+  await tips.first().waitFor({ state: 'hidden' });
+  await quick.keyboard.down('Alt'); await tips.first().waitFor();
+  await quick.evaluate(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Unidentified', altKey: true, bubbles: true })));
+  assert.equal(await tips.count(), 10, 'activation dummy key must not cancel Alt tips');
+  await quick.keyboard.up('Alt');
   await quick.close();
+  const native = await context.newPage();
+  native.on('pageerror', error => errors.push(error.message));
+  await native.goto(`http://127.0.0.1:${address.port}/tests/list-quick-paste.fixture.html?native=1`);
+  const readNative = async () => {
+    await native.getByRole('button', { name: 'Read native log', exact: true }).click();
+    return JSON.parse(await native.getByTestId('native-log').textContent());
+  };
+  await native.getByRole('button', { name: 'Native show', exact: true }).click();
+  assert.equal((await readNative()).at(-1), true, 'restore re-enables native shortcuts');
+  await native.getByRole('button', { name: 'Resolve stale hidden', exact: true }).click();
+  assert.equal((await readNative()).at(-1), true, 'old visibility response cannot disable a restored window');
+  await native.getByRole('button', { name: 'Native hide', exact: true }).click();
+  assert.equal((await readNative()).at(-1), false);
+  await native.getByRole('button', { name: 'Native show', exact: true }).click();
+  assert.equal((await readNative()).at(-1), true);
+  await native.getByRole('button', { name: 'Enabled', exact: true }).click();
+  assert.equal((await readNative()).at(-1), false, 'other panels immediately disable native list interception');
+  await native.getByRole('button', { name: 'Native show', exact: true }).click();
+  assert.equal((await readNative()).at(-1), false, 'restoring another panel keeps interception disabled');
+  await native.getByRole('button', { name: 'Enabled', exact: true }).click();
+  await native.getByRole('button', { name: 'Native show', exact: true }).click();
+  assert.equal((await readNative()).at(-1), true);
+  await native.getByRole('button', { name: 'Native modifier', exact: true }).click();
+  await native.locator('.quick-paste-hint').first().waitFor();
+  await native.getByRole('button', { name: 'Native digit', exact: true }).click();
+  assert.deepEqual(JSON.parse(await native.getByTestId('pasted').textContent()), [3], 'unfocused native events use the current list');
+  await native.getByRole('textbox', { name: 'Search', exact: true }).focus();
+  await native.keyboard.down('Alt');
+  await native.locator('.quick-paste-hint').first().waitFor();
+  await native.getByRole('button', { name: 'Native show', exact: true }).click();
+  assert.equal(await native.locator('.quick-paste-hint').count(), 10, 'focusing an already visible window must not erase Alt tips');
+  await native.getByRole('button', { name: 'Native handoff', exact: true }).click();
+  assert.equal(await native.locator('.quick-paste-hint').count(), 10, 'late native hide must not erase focused Alt tips');
+  await native.keyboard.up('Alt');
+  await native.locator('.quick-paste-hint').first().waitFor({ state: 'hidden' });
+  await native.close();
   if (csp) {
     assert.deepEqual(await page.evaluate(() => window.__styleCspViolations), [], 'all Fluent runtime styles pass the release policy');
     const runtimeStyles = await page.evaluate(() => [...document.querySelectorAll('style[data-make-styles-bucket], style[id^="fui-FluentProvider"], #store-theme-csp-fixture')]
