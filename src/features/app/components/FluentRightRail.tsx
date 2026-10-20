@@ -25,6 +25,7 @@ import {
   Trash2,
   Unlock,
 } from "lucide-react";
+import RailOverflowActions from "./RailOverflowActions";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
 
 export interface FluentRightRailProps {
@@ -128,13 +129,13 @@ export const FluentRightRail = ({
   return (
     <aside className="fluent-right-rail window-no-drag">
       {/* 1. Item Action Controls (Unpacked from Card & More Menu) */}
-      <div className="rail-actions-scroll hide-scrollbar">
+      <RailOverflowActions>
         {/* Add New Entry */}
         {onOpenAddEntry && (
           <FluentTooltip text={t("add_item") || "新建条目"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onOpenAddEntry}
               aria-label="Add entry"
@@ -149,7 +150,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("new_note") || "新建便笺"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onOpenAddNote}
               aria-label="New note"
@@ -168,7 +169,7 @@ export const FluentRightRail = ({
           >
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onCopySelectedItem}
               disabled={!hasSelectedItem}
@@ -184,7 +185,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("edit_content") || "编辑选中条目内容"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isEditingContent ? "active" : ""}`}
               onClick={onEditContent}
               disabled={!hasSelectedItem || canEditContent === false}
@@ -200,7 +201,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("open") || "外部打开选中条目"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onOpenContent}
               disabled={!hasSelectedItem}
@@ -216,7 +217,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("add_to_tab") || "归入标签页"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isTabFlyoutOpen || isTabAssigned ? "active" : ""}`}
               onClick={onAssignTab}
               disabled={!hasSelectedItem}
@@ -232,7 +233,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("tags") || "设置标签"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isEditingTags || hasTags ? "active" : ""}`}
               onClick={onAssignTag}
               disabled={!hasSelectedItem}
@@ -254,7 +255,7 @@ export const FluentRightRail = ({
           >
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isPinned ? "active" : ""}`}
               onClick={onTogglePin}
               disabled={!hasSelectedItem}
@@ -276,7 +277,7 @@ export const FluentRightRail = ({
           >
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onPinToDesktop}
               disabled={!hasSelectedItem}
@@ -298,7 +299,7 @@ export const FluentRightRail = ({
           >
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isLocked ? "active" : ""}`}
               onClick={onToggleLock}
               disabled={!hasSelectedItem}
@@ -318,7 +319,7 @@ export const FluentRightRail = ({
           <FluentTooltip text="上移选中项">
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onMoveUp}
               disabled={!hasSelectedItem}
@@ -334,7 +335,7 @@ export const FluentRightRail = ({
           <FluentTooltip text="下移选中项">
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn"
               onClick={onMoveDown}
               disabled={!hasSelectedItem}
@@ -356,7 +357,7 @@ export const FluentRightRail = ({
           >
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isRevealed ? "active" : ""}`}
               onClick={onToggleReveal}
               disabled={!hasSelectedItem}
@@ -376,7 +377,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("ai_assistant") || "AI 助手"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${isAIOpen ? "active" : ""}`}
               onClick={onAIAction}
               disabled={!hasSelectedItem || isAIProcessing}
@@ -398,7 +399,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("delete") || "删除选中条目"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className="rail-btn rail-btn-danger"
               onClick={onDeleteSelectedItem}
               disabled={!hasSelectedItem}
@@ -415,7 +416,7 @@ export const FluentRightRail = ({
         >
           <button
             type="button"
-            tabIndex={-1}
+            tabIndex={0}
             className="rail-btn rail-btn-danger"
             onClick={clearHistory}
             aria-label="Clear all history"
@@ -423,7 +424,7 @@ export const FluentRightRail = ({
             <Eraser size={15} strokeWidth={2} />
           </button>
         </FluentTooltip>
-      </div>
+      </RailOverflowActions>
 
       {/* Rail Divider */}
       <div className="rail-divider" />
@@ -434,7 +435,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("tag_manager") || "标签管理中心"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${showTagManager ? "active" : ""}`}
               onClick={() => setShowTagManager(!showTagManager)}
               aria-label="Tag manager"
@@ -448,7 +449,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("note_manager") || "便笺统一管理"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${showNoteManager ? "active" : ""}`}
               onClick={() => setShowNoteManager(!showNoteManager)}
               aria-label="Note manager"
@@ -462,7 +463,7 @@ export const FluentRightRail = ({
           <FluentTooltip text={t("emoji_panel") || "表情包"}>
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${showEmojiPanel ? "active" : ""}`}
               onClick={() => setShowEmojiPanel(!showEmojiPanel)}
               aria-label="Emoji panel"
@@ -476,7 +477,7 @@ export const FluentRightRail = ({
           <FluentTooltip text="局域网文件传输">
             <button
               type="button"
-              tabIndex={-1}
+              tabIndex={0}
               className={`rail-btn ${chatMode ? "active" : ""}`}
               onClick={onToggleChat}
               aria-label="File transfer chat"
@@ -489,7 +490,7 @@ export const FluentRightRail = ({
         <FluentTooltip text={t("settings") || "设置"}>
           <button
             type="button"
-            tabIndex={-1}
+            tabIndex={0}
             className="rail-btn"
             onClick={onOpenSettings}
             aria-label="Settings"

@@ -37,11 +37,10 @@
   flex-shrink: 0;
 }
 
-.rail-actions-scroll {
+.rail-actions-overflow {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -52,8 +51,42 @@
   padding: 0;
 }
 
-.rail-actions-scroll::-webkit-scrollbar {
-  display: none;
+.rail-action-slot {
+  height: 32px;
+  flex: 0 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rail-action-separator {
+  height: 9px;
+  flex: 0 0 9px;
+  display: flex;
+  align-items: center;
+}
+
+.rail-action-separator .rail-divider {
+  margin: 0 auto;
+}
+
+.rail-overflow-surface {
+  padding: 6px !important;
+  min-width: 46px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: var(--bg-menu, var(--bg-input)) !important;
+  color: var(--text-primary);
+}
+
+.rail-overflow-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .rail-bottom-section {
@@ -71,6 +104,7 @@
   position: relative;
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border-radius: 4px;
   border: 1px solid transparent;
   background: transparent;
@@ -90,6 +124,11 @@
     transform 0.1s ease;
   -webkit-app-region: no-drag !important;
   app-region: no-drag !important;
+}
+
+.rail-btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
 }
 
 .rail-btn:hover {

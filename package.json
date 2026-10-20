@@ -10,6 +10,7 @@
     "test:components": "node tests/fluent-components.browser.mjs",
     "test:components:release": "node tests/fluent-components.browser.mjs --release",
     "test:stickers": "node tests/sticker-window.browser.mjs",
+    "test:rail": "node tests/right-rail.browser.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev --features devtools",
     "tauri:build": "tauri build",
