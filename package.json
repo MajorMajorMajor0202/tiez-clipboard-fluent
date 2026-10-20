@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test:components": "node tests/fluent-components.browser.mjs",
+    "test:components:release": "node tests/fluent-components.browser.mjs --release",
     "tauri": "tauri",
     "tauri:dev": "tauri dev --features devtools",
     "tauri:build": "tauri build",

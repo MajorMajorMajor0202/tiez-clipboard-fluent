@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { FluentProvider, webDarkTheme, webLightTheme, type Theme } from "@fluentui/react-components";
+import { createDOMRenderer, RendererProvider, FluentProvider, webDarkTheme, webLightTheme, type Theme } from "@fluentui/react-components";
+import { getStyleNonce } from "../lib/styleNonce";
 
 /** Bridge the existing window theme without adding an opaque page surface. */
 export default function TieZFluentProvider({ children }: { children: ReactNode }) {
+  const [renderer] = useState(() => {
+    const nonce = getStyleNonce();
+    return createDOMRenderer(document, { styleElementAttributes: nonce ? { nonce } : undefined });
+  });
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark-mode"));
   useEffect(() => {
     const sync = () => setDark(document.documentElement.classList.contains("dark-mode"));
@@ -39,8 +44,10 @@ export default function TieZFluentProvider({ children }: { children: ReactNode }
     };
   }, [dark]);
   return (
-    <FluentProvider className="tiez-fluent-provider" theme={theme} style={{ display: "contents", backgroundColor: "transparent" }}>
-      {children}
-    </FluentProvider>
+    <RendererProvider renderer={renderer}>
+      <FluentProvider className="tiez-fluent-provider" theme={theme} style={{ display: "contents", backgroundColor: "transparent" }}>
+        {children}
+      </FluentProvider>
+    </RendererProvider>
   );
 }

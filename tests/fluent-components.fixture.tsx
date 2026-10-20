@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import AppHeader from "../src/features/app/components/AppHeader";
 import { applyWindowFrameState } from "../src/shared/lib/windowFrameState";
+import { injectStoreThemeCSS } from "../src/features/theme-store/hooks/useThemeApply";
 import TieZFluentProvider from "../src/shared/components/TieZFluentProvider";
 import FluentDropdown from "../src/shared/components/FluentDropdown";
 import FluentTooltip from "../src/shared/components/FluentTooltip";
@@ -16,8 +17,8 @@ import { isControlKeyboardTarget } from "../src/shared/lib/controlKeyboardScope"
 import FluentSearchInput from "../src/shared/components/FluentSearchInput";
 import "../src/index.css";
 import "../src/styles/components/index.css";
-import "../src/styles/themes/mica.css";
-import "../src/styles/themes/dark.css";
+import "../src/styles/themes/load";
+
 
 function Fixture() {
   const [value, setValue] = useState("ctrl");
@@ -65,6 +66,7 @@ function Fixture() {
         </div>
         <output data-testid="search-value">{search}</output>
         <output data-testid="composing">{String(composing)}</output>
+        <button onClick={() => injectStoreThemeCSS("csp-fixture", ":root { --tiez-store-csp-check: applied; }")}>应用动态主题</button>
         <p>
           <button onClick={() => setSearch("")}>清空搜索</button>
           <button onClick={() => ref.current?.focus()}>聚焦搜索</button>

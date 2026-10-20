@@ -1,3 +1,4 @@
+import { getStyleNonce } from "../../../shared/lib/styleNonce";
 import { useCallback, useRef, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -14,6 +15,8 @@ function getStyleElement(themeId: string): HTMLStyleElement {
   let el = document.getElementById(id) as HTMLStyleElement | null;
   if (!el) {
     el = document.createElement("style");
+    const nonce = getStyleNonce();
+    if (nonce) el.nonce = nonce;
     el.id = id;
     document.head.appendChild(el);
   }

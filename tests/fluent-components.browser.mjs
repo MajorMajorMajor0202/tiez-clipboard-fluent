@@ -1,19 +1,47 @@
 import assert from "node:assert/strict";
 import { mkdir, readFile } from "node:fs/promises";
 import { chromium } from "playwright";
-import { createServer } from "vite";
+import { createServer, build, preview } from "vite";
+import { resolve } from "node:path";
 
 // Run with node tests/fluent-components.browser.mjs. Override the browser binary
 // with PLAYWRIGHT_EXECUTABLE_PATH where the bundled Chromium is unavailable.
-const server = await createServer({ server: { host: "127.0.0.1", port: 0, strictPort: false } });
+const production = process.env.TEST_PRODUCTION === "1" || process.argv.includes("--release");
+const outputDirectory = "artifacts/fluent-production";
+if (production) await build({ build: { outDir: outputDirectory, rollupOptions: { input: {
+  app: resolve("index.html"), components: resolve("tests/fluent-components.fixture.html"),
+  quickPaste: resolve("tests/list-quick-paste.fixture.html"),
+} } } });
+const server = production
+  ? await preview({ build: { outDir: outputDirectory }, preview: { host: "127.0.0.1", port: 0, strictPort: false } })
+  : await createServer({ server: { host: "127.0.0.1", port: 0, strictPort: false } });
 let browser;
 try {
-  await server.listen();
+  if (!production) await server.listen();
   browser = await chromium.launch({
     headless: true,
     ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}),
   });
-  const page = await browser.newPage({ viewport: { width: 480, height: 600 } });
+  const csp = production || process.env.TEST_CSP === "1";
+  const context = await browser.newContext({ viewport: { width: 480, height: 600 } });
+  if (csp) {
+    await context.addInitScript(() => {
+      window.__styleCspViolations = [];
+      window.addEventListener('securitypolicyviolation', event => {
+        if (event.effectiveDirective.startsWith('style-src')) window.__styleCspViolations.push(event.effectiveDirective);
+      });
+    });
+    await context.route('**/*', async route => {
+      if (route.request().resourceType() !== 'document') return route.continue();
+      const response = await route.fetch();
+      // Match Tauri's asset nonce injection, including the original startup style.
+      const body = (await response.text()).replace(/<style\b/g, '<style nonce="tiez-release-test"');
+      await route.fulfill({ response, body, headers: { ...response.headers(),
+        'content-security-policy': "style-src 'self' 'unsafe-inline' 'nonce-tiez-release-test'",
+      } });
+    });
+  }
+  const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const address = server.httpServer.address();
@@ -28,6 +56,8 @@ try {
 
   });
   assert.ok(Math.abs(headerInsets.left - headerInsets.right) < 1, "close icon and title have equal visible edge insets: " + JSON.stringify(headerInsets));
+  await page.getByRole('button', { name: '应用动态主题', exact: true }).click();
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--tiez-store-csp-check').trim()), 'applied', 'dynamic store theme CSS remains active under release CSP');
   const input = page.getByRole("textbox", { name: "搜索工作区" });
   await input.fill("工作记忆");
   await page.waitForFunction(() => document.querySelector('[data-testid="search-value"]').textContent === "工作记忆");
@@ -251,12 +281,18 @@ try {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const reducedDuration = await page.locator(".home-search-wrapper").evaluate((el) => getComputedStyle(el, "::after").transitionDuration);
   assert.ok(parseFloat(reducedDuration) < 0.001, "reduced motion respected");
-  const startup = await browser.newPage();
-  await startup.route("**/src/main.tsx", route => route.abort());
+  const startup = await context.newPage();
+  await startup.route(production ? "**/assets/*.js" : "**/src/main.tsx", route => route.abort());
   await startup.goto(`http://127.0.0.1:${address.port}/?window=settings&color_mode=dark`);
   assert.equal(await startup.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), "rgb(32, 32, 32)", "settings is opaque before React loads");
-  await startup.addStyleTag({ content: await readFile("src/styles/components/fluent-settings.css", "utf8") });
-  await startup.addStyleTag({ content: await readFile("src/styles/themes/mica.css", "utf8") });
+  for (const path of ["src/styles/components/fluent-settings.css", "src/styles/themes/mica.css"]) {
+    await startup.evaluate(css => {
+      const style = document.createElement('style');
+      style.nonce = document.getElementById('tiez-style-nonce')?.nonce || '';
+      style.textContent = css;
+      document.head.appendChild(style);
+    }, await readFile(path, 'utf8'));
+  }
   await startup.evaluate(() => {
     document.documentElement.classList.add("theme-mica", "dark-mode");
     document.body.className = "is-settings-window theme-mica dark-mode";
@@ -264,8 +300,9 @@ try {
   for (const selector of ["html", "body", "#root"]) {
     assert.equal(await startup.locator(selector).evaluate(el => getComputedStyle(el).backgroundColor), "rgb(32, 32, 32)", "startup fallback wins over transparent settings layers");
   }
+  if (csp) assert.deepEqual(await startup.evaluate(() => window.__styleCspViolations), [], 'startup styles pass the release policy');
   await startup.close();
-  const quick = await browser.newPage({ viewport: { width: 480, height: 900 } });
+  const quick = await context.newPage();
   quick.on("pageerror", error => errors.push(error.message));
   await quick.goto(`http://127.0.0.1:${address.port}/tests/list-quick-paste.fixture.html`);
   const tips = quick.locator('.quick-paste-hint');
@@ -352,10 +389,19 @@ try {
   const disabledCount = (await pasteLog()).length;
   await quick.keyboard.press('Alt+1'); await quick.keyboard.press('Control+Alt+Shift+1');
   assert.equal((await pasteLog()).length, disabledCount, 'shortcut can be disabled');
+  if (csp) assert.deepEqual(await quick.evaluate(() => window.__styleCspViolations), [], 'quick paste has no blocked runtime styles');
   await quick.close();
+  if (csp) {
+    assert.deepEqual(await page.evaluate(() => window.__styleCspViolations), [], 'all Fluent runtime styles pass the release policy');
+    const runtimeStyles = await page.evaluate(() => [...document.querySelectorAll('style[data-make-styles-bucket], style[id^="fui-FluentProvider"], #store-theme-csp-fixture')]
+      .map(style => ({ nonce: style.nonce, rules: style.sheet?.cssRules.length || 0 })));
+    assert.ok(runtimeStyles.length > 5, 'component and theme styles were created');
+    assert.ok(runtimeStyles.every(style => style.nonce === 'tiez-release-test' && style.rules > 0), 'component and theme styles carry a valid nonce and active CSS rules');
+  }
   assert.deepEqual(errors, []);
-  console.log("Fluent browser checks passed: input/IME, dropdown, tooltip, labelled switches, slider pointer/keys, spin bounds, accordion, button states, modal focus/trap/restore, nested dismissal and dark portals.");
+  console.log(`${production ? 'Release with Tauri style CSP' : 'Development'} browser checks passed: input/IME, dropdown, tooltip, labelled switches, slider pointer/keys, spin bounds, accordion, button states, modal focus/trap/restore, nested dismissal, dark portals and dynamic theme CSS.`);
 } finally {
   await browser?.close();
-  await server.close();
+  if (production) await new Promise((done, reject) => server.httpServer.close(error => error ? reject(error) : done()));
+  else await server.close();
 }

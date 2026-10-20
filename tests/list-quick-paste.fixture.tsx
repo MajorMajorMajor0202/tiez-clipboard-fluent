@@ -9,7 +9,7 @@ import ListKeyTip from "../src/shared/components/ListKeyTip";
 import type { ClipboardEntry } from "../src/shared/types";
 import "../src/index.css";
 import "../src/styles/components/index.css";
-import "../src/styles/themes/mica.css";
+import "../src/styles/themes/load";
 
 function Fixture() {
   const [modifier, setModifier] = useState("alt");
