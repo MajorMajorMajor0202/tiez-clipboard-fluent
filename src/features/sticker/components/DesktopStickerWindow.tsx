@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { invoke, convertFileSrc } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import {
   Copy,
@@ -16,12 +15,15 @@ import {
   Edit3,
   ExternalLink,
   FolderOpen,
-  AppWindow
+  AppWindow, Maximize2, PanelsTopLeft, Undo2
 } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import { canDragNativeFiles, isFileContent, startNativeContentDrag, writeContentDragData } from "../../../shared/lib/contentDrag";
-import { applyThemeClasses, normalizeThemeId } from "../../../shared/config/themes";
+import { fitStickerImage, isStickerFile, stickerCardSize, stickerFileName, stickerFilePaths, stickerImageSource } from '../lib/stickerPresentation';
+import { useStickerTheme } from '../hooks/useStickerTheme';
+import { getFileIcon } from '../../../shared/lib/fileIcon';
+import InlineStickerText from './InlineStickerText';
 import "../../../styles/components/sticker-window.css";
 
 export const DesktopStickerWindow: React.FC = () => {
@@ -29,10 +31,21 @@ export const DesktopStickerWindow: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState("");
+  const draftRef = useRef("");
   const [isOpenMenuVisible, setIsOpenMenuVisible] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const [fileIcon, setFileIcon] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const sizedRef = useRef('');
+  const previousSizeRef = useRef({ width: 260, height: 150 });
+  useStickerTheme();
+  const imageSource = item ? stickerImageSource(item) : null;
+  const fileLike = !!item && isStickerFile(item);
 
-  const previousHeightRef = useRef<number>(180);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [bodyEl, setBodyEl] = useState<HTMLDivElement | null>(null);
@@ -42,6 +55,7 @@ export const DesktopStickerWindow: React.FC = () => {
     const idParam = params.get("id");
     if (!idParam) return;
     const id = Number(idParam);
+    let disposed = false;
 
     // 1. Try instant load from localStorage
     try {
@@ -49,64 +63,35 @@ export const DesktopStickerWindow: React.FC = () => {
       if (cached) {
         const parsed = JSON.parse(cached) as ClipboardEntry;
         setItem(parsed);
-        setEditContent(parsed.content);
       }
     } catch {}
 
     // 2. Load from DB
     invoke<ClipboardEntry>("get_clipboard_entry_by_id", { id })
       .then((entry) => {
+        if (disposed) return;
         setItem(entry);
-        setEditContent(entry.content);
+        setLoaded(true);
         try {
           localStorage.setItem(`sticker_entry_${id}`, JSON.stringify(entry));
         } catch {}
       })
       .catch((err) => {
+        if (disposed) return;
         console.error("Failed to load sticker entry:", err);
+        setError(`读取失败：${String(err)}`);
       });
+    return () => { disposed = true; };
   }, []);
+
+  useEffect(() => () => { if (clickTimerRef.current) clearTimeout(clickTimerRef.current); }, []);
 
   useEffect(() => {
-    const applyCurrentTheme = () => {
-      const p = new URLSearchParams(window.location.search);
-      const currentTheme = p.get("theme") || localStorage.getItem("tiez_theme") || "mica";
-      applyThemeClasses(normalizeThemeId(currentTheme), document.documentElement, document.body);
-    };
-    applyCurrentTheme();
-
-    const handleThemeEvent = (event: { payload: string }) => {
-      const isDark = event.payload === "dark";
-      document.documentElement.classList.toggle("dark-mode", isDark);
-      document.body.classList.toggle("dark-mode", isDark);
-      document.documentElement.classList.toggle("light-mode", !isDark);
-      document.body.classList.toggle("light-mode", !isDark);
-      applyCurrentTheme();
-    };
-
-    const unlistenPromise = listen<string>("system-theme-changed", handleThemeEvent).catch(() => () => {});
-    const unlistenSettings = listen("settings-changed", () => {
-      applyCurrentTheme();
-    }).catch(() => () => {});
-
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleMediaChange = (e: MediaQueryListEvent) => {
-      const mode = localStorage.getItem("tiez_color_mode") || "system";
-      if (mode === "system") {
-        document.documentElement.classList.toggle("dark-mode", e.matches);
-        document.body.classList.toggle("dark-mode", e.matches);
-        document.documentElement.classList.toggle("light-mode", !e.matches);
-        document.body.classList.toggle("light-mode", !e.matches);
-      }
-    };
-    mql.addEventListener("change", handleMediaChange);
-
-    return () => {
-      unlistenPromise.then((off) => { if (typeof off === "function") off(); }).catch(() => {});
-      unlistenSettings.then((off) => { if (typeof off === "function") off(); }).catch(() => {});
-      mql.removeEventListener("change", handleMediaChange);
-    };
-  }, []);
+    if (!item || !fileLike || imageSource) { setFileIcon(null); return; }
+    let disposed = false;
+    void getFileIcon(stickerFilePaths(item)[0]).then(icon => { if (!disposed) setFileIcon(icon); });
+    return () => { disposed = true; };
+  }, [item?.id, fileLike, imageSource]);
 
   useEffect(() => {
     if (bodyRef.current) {
@@ -114,35 +99,31 @@ export const DesktopStickerWindow: React.FC = () => {
     }
   }, [item, isEditing, isCollapsed]);
 
-  // Adaptive window sizing on load
+  // Size once per presentation, never after text edits or manual resizing.
   useEffect(() => {
     if (!item) return;
+    const key = `${item.id}:${imageMode ? 'image' : 'card'}`;
+    if (sizedRef.current === key || (imageMode && !imageDimensions)) return;
+    let disposed = false;
     const adjustSize = async () => {
       try {
         const win = getCurrentWindow();
-        let w = 280;
-        let h = 180;
-        if (item.content_type === "image") {
-          w = 340;
-          h = 260;
-        } else if (item.content_type === "file" || item.content_type === "video") {
-          w = 280;
-          h = 120;
-        } else if (item.content_type === "code" || item.content.length > 200) {
-          w = 340;
-          h = 240;
-        } else {
-          w = 260;
-          h = 150;
-        }
-        previousHeightRef.current = h;
-        await win.setSize(new LogicalSize(w, h));
+        const size = imageMode && imageDimensions
+          ? fitStickerImage(imageDimensions.width, imageDimensions.height, screen.availWidth || 800, screen.availHeight || 800)
+          : stickerCardSize(item);
+        await win.setMinSize(new LogicalSize(imageMode ? 64 : 200, imageMode ? 64 : 40));
+        if (disposed) return;
+        await win.setMaxSize(null);
+        if (disposed) return;
+        await win.setSize(new LogicalSize(size.width, size.height));
+        if (!disposed) { sizedRef.current = key; previousSizeRef.current = size; }
       } catch (err) {
         console.error("Failed to set sticker window size", err);
       }
     };
-    adjustSize();
-  }, [item]);
+    void adjustSize();
+    return () => { disposed = true; };
+  }, [item?.id, imageMode, imageDimensions]);
 
   // Close open-with menu when clicking outside
   useEffect(() => {
@@ -203,11 +184,15 @@ export const DesktopStickerWindow: React.FC = () => {
   const handleDoubleClickHeader = async () => {
     const win = getCurrentWindow();
     if (!isCollapsed) {
+      const [size, scale] = await Promise.all([win.innerSize(), win.scaleFactor()]);
+      previousSizeRef.current = { width: size.width / scale, height: size.height / scale };
       setIsCollapsed(true);
-      await win.setSize(new LogicalSize(260, 48));
+      await win.setMinSize(new LogicalSize(64, 34));
+      await win.setSize(new LogicalSize(previousSizeRef.current.width, 34));
     } else {
       setIsCollapsed(false);
-      await win.setSize(new LogicalSize(280, previousHeightRef.current || 180));
+      await win.setMinSize(new LogicalSize(imageMode ? 64 : 200, imageMode ? 64 : 40));
+      await win.setSize(new LogicalSize(previousSizeRef.current.width, previousSizeRef.current.height));
     }
   };
 
@@ -259,30 +244,35 @@ export const DesktopStickerWindow: React.FC = () => {
 
   const handleStartEditing = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (!item) return;
-    setEditContent(item.content);
+    if (!item || !loaded) return;
+    draftRef.current = item.content;
+    setError('');
     setIsEditing(true);
   };
 
   const handleSaveEdit = async () => {
-    if (!item) return;
+    if (!item || saving) return;
+    setSaving(true);
     try {
-      await invoke("update_item_content", { id: item.id, newContent: editContent });
-      const updated = { ...item, content: editContent, preview: editContent.slice(0, 500) };
+      const content = draftRef.current;
+      await invoke("update_item_content", { id: item.id, newContent: content });
+      const updated = { ...item, content, preview: content.slice(0, 500) };
       setItem(updated);
       try {
         localStorage.setItem(`sticker_entry_${item.id}`, JSON.stringify(updated));
       } catch {}
       setIsEditing(false);
+      setError('');
     } catch (err) {
       console.error("Failed to save edit", err);
-    }
+      setError(`保存失败，修改仍保留在窗口中：${String(err)}`);
+    } finally { setSaving(false); }
   };
 
   const handleCancelEdit = () => {
-    if (item) {
-      setEditContent(item.content);
-    }
+    if (saving) return;
+    if (item) draftRef.current = item.content;
+    setError('');
     setIsEditing(false);
   };
 
@@ -300,7 +290,7 @@ export const DesktopStickerWindow: React.FC = () => {
     return (
       <div className="sticker-window-root">
         <div className="sticker-card" style={{ padding: 12, fontSize: 12, color: "#888" }}>
-          加载中...
+          {error || '加载中...'}
         </div>
       </div>
     );
@@ -326,110 +316,39 @@ export const DesktopStickerWindow: React.FC = () => {
   };
 
   const renderBody = () => {
-    if (isEditing) {
-      return (
-        <div className="sticker-edit-container">
-          <textarea
-            className="sticker-edit-textarea window-no-drag"
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                handleSaveEdit();
-              } else if (e.key === "Escape") {
-                e.preventDefault();
-                handleCancelEdit();
-              }
-            }}
-            autoFocus
-          />
-          <div className="sticker-edit-footer window-no-drag">
-            <button type="button" className="sticker-cancel-btn" onClick={handleCancelEdit}>
-              取消 (Esc)
-            </button>
-            <button type="button" className="sticker-save-btn" onClick={handleSaveEdit}>
-              保存 (Ctrl+↵)
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    if (item.content_type === "image") {
-      const src = item.content.startsWith("data:") ? item.content : convertFileSrc(item.content);
-      return (
-        <div className="sticker-image-container">
-          <img
-            src={src}
-            alt="sticker"
-            className="sticker-image"
-            draggable
-            onDragStart={handleDragStart}
-          />
-        </div>
-      );
-    }
-
-    if (item.content_type === "file" || item.content_type === "video") {
-      const filename = item.content.split(/[\\/]/).pop() || item.content;
-      return (
-        <div
-          className="sticker-file-card"
-          draggable
-          onDragStart={handleDragStart}
-          title="按住内容拖出至外部应用"
-        >
-          <File size={24} color="var(--accent-color, currentColor)" />
-          <div className="sticker-file-info">
-            <div className="sticker-file-name">{filename}</div>
-            <div className="sticker-file-path">{item.content}</div>
-          </div>
-        </div>
-      );
-    }
-
-    if (item.content_type === "code") {
-      return (
-        <pre
-          className="sticker-code-content"
-          draggable
-          onDragStart={handleDragStart}
-          title="双击复制，按住内容拖出"
-          onDoubleClick={handleCopy}
-        >
-          {item.content}
-        </pre>
-      );
-    }
-
-    return (
-      <div
-        className="sticker-text-content"
-        draggable
-        onDragStart={handleDragStart}
-        title="双击复制，按住内容拖出"
-        onDoubleClick={handleCopy}
-      >
-        {item.content}
+    const image = imageSource && !imageError ? <img src={imageSource} alt={stickerFileName(item)}
+      className="sticker-image" draggable={!isCollapsed} onDragStart={handleDragStart}
+      onLoad={event => {
+        const { naturalWidth: width, naturalHeight: height } = event.currentTarget;
+        setImageDimensions(previous => previous?.width === width && previous.height === height ? previous : { width, height });
+      }} onError={() => { setImageError(true); setImageMode(false); }} /> : null;
+    if (imageMode && image) return <div className="sticker-image-container">{image}</div>;
+    if (fileLike) return <div className="sticker-file-card" draggable onDragStart={handleDragStart}>
+      <div className="sticker-thumbnail">{image || (fileIcon ? <img src={fileIcon} alt="" /> : renderIcon())}</div>
+      <div className="sticker-file-info">
+        <div className="sticker-file-name" title={stickerFileName(item)}>{stickerFileName(item)}</div>
+        <div className="sticker-file-detail">{imageDimensions ? `${imageDimensions.width} × ${imageDimensions.height}` : item.content_type === 'video' ? '视频' : '文件'}</div>
       </div>
-    );
+    </div>;
+    return <InlineStickerText value={item.content} editing={isEditing} code={item.content_type === 'code'}
+      onDraft={value => { draftRef.current = value; }} onSave={handleSaveEdit} onCancel={handleCancelEdit}
+      onCopy={handleCopy} onDragStart={handleDragStart} />;
   };
 
   return (
-    <div className="sticker-window-root">
+    <div className={`sticker-window-root${imageMode ? ' sticker-image-mode' : ''}${isCollapsed ? ' is-collapsed' : ''}${isOpenMenuVisible ? ' has-open-menu' : ''}`}>
       <div className="sticker-card">
         {/* Header with drag region */}
         <div
           className="sticker-header window-drag-region"
           data-tauri-drag-region
           onMouseDown={handleMouseDown}
-          onDoubleClick={handleDoubleClickHeader}
+          onDoubleClick={event => { if (!(event.target as HTMLElement).closest('button')) void handleDoubleClickHeader(); }}
         >
           <div className="sticker-meta window-drag-region" data-tauri-drag-region>
             <div className="sticker-type-icon">{renderIcon()}</div>
             <div className="sticker-title window-drag-region" data-tauri-drag-region>
-              {item.source_app || "便签"}
+              {fileLike ? stickerFileName(item) : item.source_app || "贴图"}
             </div>
           </div>
 
@@ -440,6 +359,8 @@ export const DesktopStickerWindow: React.FC = () => {
                 type="button"
                 className={`sticker-btn window-no-drag ${isEditing ? "active" : ""}`}
                 onClick={isEditing ? handleSaveEdit : handleStartEditing}
+                disabled={!loaded || saving}
+                aria-label={isEditing ? '保存修改' : '编辑文本'}
                 title={isEditing ? "保存修改 (Ctrl+Enter)" : "编辑文本"}
               >
                 {isEditing ? <Check size={13} color="#107c41" /> : <Edit3 size={13} />}
@@ -460,11 +381,20 @@ export const DesktopStickerWindow: React.FC = () => {
             <button
               type="button"
               className="sticker-btn window-no-drag"
-              onClick={handleCopy}
-              title={copied ? "已复制" : "复制"}
+              onClick={isEditing ? handleCancelEdit : handleCopy}
+              disabled={saving}
+              aria-label={isEditing ? '取消编辑' : '复制'}
+              title={isEditing ? '取消编辑 (Esc)' : copied ? "已复制" : "复制"}
             >
-              {copied ? <Check size={13} color="#107c41" /> : <Copy size={13} />}
+              {isEditing ? <Undo2 size={13} /> : copied ? <Check size={13} color="#107c41" /> : <Copy size={13} />}
             </button>
+
+            {imageSource && !imageError && <button type="button" className="sticker-btn window-no-drag"
+              aria-label={imageMode ? '切换为文件卡片' : '切换为整张图片'} aria-pressed={imageMode}
+              title={imageMode ? '显示缩略图和文件名' : '显示整张图片'}
+              onClick={() => { setIsCollapsed(false); setImageMode(value => !value); }}>
+              {imageMode ? <PanelsTopLeft size={13} /> : <Maximize2 size={13} />}
+            </button>}
 
             {/* Close Button */}
             <button
@@ -517,10 +447,9 @@ export const DesktopStickerWindow: React.FC = () => {
         )}
 
         {/* Drag Hint Footer */}
-        {!isCollapsed && !isEditing && (
+        {!isCollapsed && !imageMode && (
           <div className="sticker-drag-hint">
-            <Move size={10} />
-            <span>按住内容拖出</span>
+            {error ? <span role="alert">{error}</span> : isEditing ? <span>Ctrl+Enter 保存 · Esc 取消</span> : <><Move size={10} /><span>按住内容拖出</span></>}
           </div>
         )}
       </div>

@@ -77,6 +77,7 @@ fn main() {
             app::hooks::set_recording_mode,
             app::hooks::get_list_quick_paste_state,
             app::commands::drag_cmd::start_content_drag,
+            app::commands::ui_cmd::set_sticker_backdrop,
             services::content_handler::open_content,
             services::clipboard_ops::copy_to_clipboard,
             services::clipboard_ops::paste_latest_rich,

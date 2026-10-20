@@ -199,7 +199,7 @@ pub fn apply_theme_to_window_internal(
         match theme {
             "mica" if is_win11 => {
                 let result = window_vibrancy::apply_mica(window, Some(is_dark));
-                if window.label() == "settings" {
+                if window.label() == "settings" || window.label().starts_with("sticker-") {
                     result.map_err(|e| AppError::Internal(format!("Settings Mica failed: {e}")))?;
                 }
                 let _ = window.set_shadow(false);
@@ -213,7 +213,7 @@ pub fn apply_theme_to_window_internal(
                     window,
                     Some(if is_dark { (30, 30, 30, 40) } else { (240, 240, 240, 40) }),
                 );
-                if window.label() == "settings" {
+                if window.label() == "settings" || window.label().starts_with("sticker-") {
                     result.map_err(|e| AppError::Internal(format!("Settings Acrylic failed: {e}")))?;
                 }
                 let _ = window.set_shadow(false);
@@ -276,6 +276,19 @@ pub fn set_theme(
         *guard = theme.clone();
     }
     apply_theme_to_window_internal(&window, &db_state, &theme, color_mode.as_deref(), show_app_border)
+}
+
+/// Auxiliary material changes must not overwrite the main window's theme state.
+#[tauri::command]
+pub fn set_sticker_backdrop(window: WebviewWindow, db_state: State<'_, DbState>, theme: String, color_mode: Option<String>) -> AppResult<()> {
+    if !window.label().starts_with("sticker-") || !matches!(theme.as_str(), "mica" | "acrylic") {
+        return Err(AppError::Validation("无效的贴图背景设置".into()));
+    }
+    #[cfg(windows)]
+    if windows_version::OsVersion::current().build < 22000 {
+        return Err(AppError::Internal("当前系统使用贴图背景回退".into()));
+    }
+    apply_theme_to_window_internal(&window, &db_state, &theme, color_mode.as_deref(), Some(false))
 }
 
 /// Read the Windows system accent color via WinRT UISettings API.

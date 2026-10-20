@@ -515,6 +515,7 @@ const SettingsWindow = () => {
       if (type === 'color_mode') localStorage.setItem('tiez_color_mode', path);
       if (type === 'compact_mode') localStorage.setItem('tiez_compact_mode', path);
       if (type === 'note_backdrop_mode') localStorage.setItem('tiez_note_backdrop_mode', path);
+      if (type === 'sticker_backdrop_mode') localStorage.setItem('tiez_sticker_backdrop_mode', path);
       if (type === 'note_default_solid_color') localStorage.setItem('tiez_note_default_solid_color', path);
       if (type === 'note_manager_enabled') localStorage.setItem('tiez_note_manager_enabled', path);
     } catch (e) {}
@@ -2417,6 +2418,16 @@ const SettingsWindow = () => {
                 )}
               </FluentSettingsExpander>
             )}
+            <h3 className="fluent-section-title">桌面贴图</h3>
+            <div className="fluent-setting-card">
+              <div className="fluent-setting-info">
+                <span className="fluent-setting-title">贴图背景</span>
+                <span className="fluent-setting-description">选择桌面贴图的背景材质</span>
+              </div>
+              <FluentDropdown aria-label="贴图背景" options={[
+                { id: 'sync', label: '跟随主窗口' }, { id: 'mica', label: '云母' }, { id: 'acrylic', label: '亚克力' }
+              ]} value={appSettings['app.sticker_backdrop_mode'] || 'sync'} onChange={value => saveAppSetting('sticker_backdrop_mode', value)} />
+            </div>
             <h3 className="fluent-section-title">便笺外观</h3>
             <div className="fluent-setting-card">
               <div className="fluent-setting-info">
