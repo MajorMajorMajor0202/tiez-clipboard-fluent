@@ -153,6 +153,7 @@ export const NoteManager: React.FC<NoteManagerProps> = ({
 
         <FluentButton
           size="small"
+          variant="primary"
           icon={<Plus size={15} />}
           onClick={handleCreateNew}
           title="新建便笺"
