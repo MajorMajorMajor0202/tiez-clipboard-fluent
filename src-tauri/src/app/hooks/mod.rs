@@ -710,7 +710,9 @@ pub unsafe extern "system" fn mouse_proc(n_code: i32, w_param: WPARAM, l_param: 
                                         // Pinned: Just reset focusable state to ensure we don't retain focus
                                         let _ = window.set_focusable(false);
                                     } else {
-                                        let _ = hide_window_cmd(handle.clone(), None);
+                                        // This click is choosing a new foreground window (which may
+                                        // be a note/sticker). Do not reactivate the old paste target.
+                                        let _ = hide_window_cmd(handle.clone(), Some(false));
                                     }
                                 }
                             }

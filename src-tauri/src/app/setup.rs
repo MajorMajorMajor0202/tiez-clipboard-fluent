@@ -2,7 +2,7 @@
 use crate::app::hooks::{keyboard_proc, mouse_proc};
 #[cfg(target_os = "windows")]
 use crate::app::system::tray_subclass_proc;
-use crate::app::window_manager::{release_win_keys, restore_last_focus, reapply_vibrancy, toggle_window};
+use crate::app::window_manager::{release_win_keys, reapply_vibrancy, toggle_window};
 use crate::app_state::{
     AppDataDir, EncryptionQueueState, PasteQueue, SessionHistory, SettingsState,
 };
@@ -1494,27 +1494,15 @@ fn handle_blur(window: &tauri::Window) {
                         & 0x8000)
                         != 0
             };
-        if !down && matches!(w.is_focused(), Ok(false)) {
+        if !down && matches!(w.is_visible(), Ok(true)) && matches!(w.is_focused(), Ok(false)) {
             if !IGNORE_BLUR.load(Ordering::Relaxed) && !WINDOW_PINNED.load(Ordering::Relaxed) {
-                let app_handle = w.app_handle();
-                let mut other_focused = false;
-                for (label, win) in app_handle.webview_windows() {
-                    if label != "main" {
-                        if let Ok(true) = win.is_focused() {
-                            other_focused = true;
-                            break;
-                        }
-                    }
-                }
-
                 let _ = w.hide();
                 let _ = w.emit("window-hidden", ());
                 NAVIGATION_ENABLED.store(false, Ordering::SeqCst);
                 release_win_keys();
 
-                if !other_focused {
-                    let _ = restore_last_focus(w.app_handle().clone());
-                }
+                // Passive blur must preserve the new OS foreground window.
+                // Explicit paste/keyboard dismissal restores its target separately.
             }
         }
     });
