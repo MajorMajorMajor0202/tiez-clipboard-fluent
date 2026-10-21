@@ -66,6 +66,14 @@ try {
   await page.setViewportSize({ width: 360, height: 600 });
   await add.click(); await name.waitFor();
   await page.keyboard.press('Escape');
+  await page.locator('.tag-search-box input, .sidebar-search input').first().click();
+  const suggestion = page.locator('.tag-suggestions-dropdown .tag-item').filter({ hasText: '其他标签' });
+  await suggestion.hover();
+  for (const label of ['重命名标签', '删除标签']) {
+    const action = suggestion.getByRole('button', { name: label, exact: true });
+    await action.waitFor();
+    assert.ok(await action.evaluate(el => { const r = el.getBoundingClientRect(); return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); }), 'narrow suggestion action must be hit-testable: ' + label);
+  }
   assert.deepEqual(errors, []);
   console.log('Tags: visible hover delete icon, stable confirmation height, add/duplicate/failure flows and narrow layout passed.');
 } finally { await browser?.close(); await server.close(); }

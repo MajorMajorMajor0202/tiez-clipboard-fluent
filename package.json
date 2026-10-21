@@ -13,6 +13,7 @@
     "test:rail": "node tests/right-rail.browser.mjs",
     "test:notes": "node tests/note-window.browser.mjs",
     "test:tags": "node tests/tag-manager.browser.mjs",
+    "test:assignments": "node tests/rail-assignment.browser.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev --features devtools",
     "tauri:build": "tauri build",

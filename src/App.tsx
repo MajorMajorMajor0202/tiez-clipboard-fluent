@@ -12,6 +12,7 @@ import { loadEmojiData } from "./features/emoji/lib/emojiData";
 import AppHeader from "./features/app/components/AppHeader";
 import AppMainContent from "./features/app/components/AppMainContent";
 import FluentRightRail from "./features/app/components/FluentRightRail";
+import RailAssignmentFlyout, { type RailAssignmentTarget } from "./features/app/components/RailAssignmentFlyout";
 import { useAppState } from "./features/app/hooks/useAppState";
 import { useDebounce } from "./shared/hooks/useDebounce";
 import { useHistoryFetch } from "./shared/hooks/useHistoryFetch";
@@ -108,6 +109,7 @@ const resolveDropPaths = (payload: unknown): string[] => {
 };
 
 const App = () => {
+  const [railAssignment, setRailAssignment] = useState<RailAssignmentTarget | null>(null);
   type FileTransferSourceView = "clipboard" | "settings" | "tag_manager" | "emoji_panel";
 
   const appState = useAppState();
@@ -434,14 +436,14 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (effectiveShowTagManager || showTagFilter || editingTagsId !== null) {
+    if (effectiveShowTagManager || showTagFilter || editingTagsId !== null || railAssignment?.kind === 'tag') {
       invoke<Record<string, number>>('get_all_tags_info')
         .then((tagMap) => {
           setDbTags(Object.keys(tagMap));
         })
         .catch(console.error);
     }
-  }, [effectiveShowTagManager, showTagFilter, editingTagsId, history]);
+  }, [effectiveShowTagManager, showTagFilter, editingTagsId, history, railAssignment?.kind]);
   const virtualListRef = useRef<VirtualClipboardListHandle | null>(null);
 
   // Use a larger page size when filtering by type, since filtered results
@@ -568,7 +570,7 @@ const App = () => {
 
   // Compute all tags when tag manager / tag filter is open, or while editing an item's tags (quick-pick list)
   const allTags = useMemo(() => {
-    if (!effectiveShowTagManager && !showTagFilter && editingTagsId === null) return [];
+    if (!effectiveShowTagManager && !showTagFilter && editingTagsId === null && railAssignment?.kind !== 'tag') return [];
 
     const set = new Set<string>();
     // Localized builtin tags
@@ -595,7 +597,7 @@ const App = () => {
       });
     });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [history, dbTags, effectiveShowTagManager, showTagFilter, editingTagsId, tabs, t]);
+  }, [history, dbTags, effectiveShowTagManager, showTagFilter, editingTagsId, tabs, t, railAssignment?.kind]);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -2051,18 +2053,24 @@ const App = () => {
     openContent(selectedItem);
   }, [selectedItem, openContent]);
 
-  const handleRailAssignTab = useCallback(() => {
+  const handleRailAssignTab = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     if (!selectedItem) return;
-    setEditingTabFlyoutId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
+    invoke('activate_window_focus').catch(console.error);
+    const trigger = event.currentTarget;
+    setRailAssignment(railAssignment?.kind === 'tab' && railAssignment.itemId === selectedItem.id ? null : { kind: 'tab', itemId: selectedItem.id, rect: trigger.getBoundingClientRect(), trigger });
+    setEditingTabFlyoutId(null);
     setEditingTagsId(null);
-  }, [selectedItem, setEditingTabFlyoutId, setEditingTagsId]);
+  }, [selectedItem, setEditingTabFlyoutId, setEditingTagsId, railAssignment]);
 
-  const handleRailAssignTag = useCallback(() => {
+  const handleRailAssignTag = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     if (!selectedItem) return;
-    setEditingTagsId((prev) => (prev === selectedItem.id ? null : selectedItem.id));
+    invoke('activate_window_focus').catch(console.error);
+    const trigger = event.currentTarget;
+    setRailAssignment(railAssignment?.kind === 'tag' && railAssignment.itemId === selectedItem.id ? null : { kind: 'tag', itemId: selectedItem.id, rect: trigger.getBoundingClientRect(), trigger });
+    setEditingTagsId(null);
     setEditingTabFlyoutId(null);
     setTagInput("");
-  }, [selectedItem, setEditingTagsId, setEditingTabFlyoutId, setTagInput]);
+  }, [selectedItem, setEditingTagsId, setEditingTabFlyoutId, setTagInput, railAssignment]);
 
   const handleRailToggleReveal = useCallback(() => {
     if (!selectedItem) return;
@@ -2130,6 +2138,7 @@ const App = () => {
   }, [tabs, activeTabId, handleDropExternalFilesOnTab, handleDropExternalTextOnTab]);
 
   const shouldShowRightRail = !effectiveShowTagManager && !effectiveShowEmojiPanel && !chatMode && !showSettings && !effectiveShowNoteManager;
+  useEffect(() => { setRailAssignment(null); }, [selectedItem?.id, shouldShowRightRail]);
 
   return (
     <div
@@ -2241,10 +2250,10 @@ const App = () => {
             isEditingContent={isEditEntryModalOpen}
             onOpenContent={handleRailOpenContent}
             onAssignTab={handleRailAssignTab}
-            isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id : false}
+            isTabFlyoutOpen={selectedItem ? editingTabFlyoutId === selectedItem.id || (railAssignment?.kind === 'tab' && railAssignment.itemId === selectedItem.id) : false}
             isTabAssigned={isSelectedItemTabAssigned}
             onAssignTag={selectedItem && selectedItem.content_type !== "note" ? handleRailAssignTag : undefined}
-            isEditingTags={selectedItem ? editingTagsId === selectedItem.id : false}
+            isEditingTags={selectedItem ? editingTagsId === selectedItem.id || (railAssignment?.kind === 'tag' && railAssignment.itemId === selectedItem.id) : false}
             hasTags={Boolean(selectedItem?.tags && selectedItem.tags.length > 0)}
             onTogglePin={handleRailTogglePin}
             isPinned={!!selectedItem?.is_pinned}
@@ -2287,6 +2296,21 @@ const App = () => {
 
 
       {/* Manual Entry Creation Modal */}
+      {railAssignment && selectedItem?.id === railAssignment.itemId && shouldShowRightRail && <RailAssignmentFlyout
+        key={`${railAssignment.kind}-${railAssignment.itemId}`} target={railAssignment} tags={selectedItem.tags || []}
+        allTags={allTags.map(name => name === t('tag_builtin_sensitive') ? 'sensitive' : name === t('tag_builtin_password') ? 'password' : name)}
+        tagLabels={{ sensitive: t('tag_builtin_sensitive'), password: t('tag_builtin_password') }} tabs={tabs}
+        assignedTabIds={tabs.filter(tab => tabAssignments?.[tab.id]?.includes(selectedItem.id)).map(tab => tab.id)}
+        onClose={() => setRailAssignment(null)}
+        onToggleTag={name => {
+          const lower = name.toLowerCase();
+          const normalized = lower === '敏感' || lower === 'sensitive' ? 'sensitive' : ['密码', '密碼', 'password'].includes(lower) ? 'password' : name;
+          const current = selectedItem.tags || [];
+          if (!current.includes(normalized)) invoke('create_new_tag', { tagName: normalized }).catch(console.error);
+          handleUpdateTags(selectedItem.id, current.includes(normalized) ? current.filter(tag => tag !== normalized) : [...current, normalized]);
+        }}
+        onToggleTab={id => handleToggleItemInTab(selectedItem.id, id)} onCreateTab={name => handleAddNewTabAndAssign(selectedItem.id, name)} onDeleteTab={handleDeleteTab}
+      />}
       <FluentModal
         open={isAddEntryModalOpen}
         onClose={() => {

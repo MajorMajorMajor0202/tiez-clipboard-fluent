@@ -40,10 +40,10 @@ export interface FluentRightRailProps {
   onEditContent?: () => void;
   isEditingContent?: boolean;
   onOpenContent?: (e?: ReactMouseEvent) => void;
-  onAssignTab?: () => void;
+  onAssignTab?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   isTabFlyoutOpen?: boolean;
   isTabAssigned?: boolean;
-  onAssignTag?: () => void;
+  onAssignTag?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   isEditingTags?: boolean;
   hasTags?: boolean;
   onTogglePin?: (e: ReactMouseEvent) => void;

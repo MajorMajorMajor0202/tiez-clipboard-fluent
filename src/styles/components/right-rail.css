@@ -169,3 +169,14 @@
   margin: 4px auto;
   flex-shrink: 0;
 }
+
+.rail-assignment-flyout { width: 224px; padding: 8px !important; box-sizing: border-box; background: var(--bg-input) !important; color: var(--text-primary); }
+.rail-assignment-flyout > .fui-Input { width: 100%; box-sizing: border-box; }
+.rail-assignment-options { margin-top: 6px; max-height: min(260px, calc(100vh - 96px)); overflow-y: auto; }
+.rail-assignment-option { display: flex; align-items: center; }
+.rail-assignment-choice { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; min-height: 32px; padding: 6px 8px; border: 0; border-radius: 4px; color: inherit; background: transparent; cursor: pointer; text-align: left; font: inherit; }
+.rail-assignment-choice > span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-assignment-choice > svg { flex-shrink: 0; }
+.rail-assignment-choice:hover, .rail-assignment-delete:hover { background: var(--bg-subtle-hover); }
+.rail-assignment-delete { display: grid; place-items: center; flex: 0 0 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; color: var(--text-secondary); background: transparent; cursor: pointer; }
+.rail-assignment-empty { padding: 12px 8px; font-size: 12px; color: var(--text-secondary); }
