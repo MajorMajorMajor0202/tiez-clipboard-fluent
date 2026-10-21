@@ -276,7 +276,7 @@ const SettingsWindow = () => {
   const [editingProfile, setEditingProfile] = useState<EditableAiProfile | null>(null);
   const [profileStatuses, setProfileStatuses] = useState<AiProfileStatusMap>({});
   const [showAppSelector, setShowAppSelector] = useState<string | null>(null);
-  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | 'pin_window' | null>(null);
+  const [showHotkeyModal, setShowHotkeyModal] = useState<'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | 'pin_window' | 'note_new' | 'note_visibility' | 'note_collapse' | 'note_dock' | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const [noteBackdropMode, setNoteBackdropMode] = useState<string>(() => {
     return localStorage.getItem("tiez_note_backdrop_mode") || "sync";
@@ -1125,6 +1125,18 @@ const SettingsWindow = () => {
                 </div>
               )}
             </FluentSettingsExpander>
+            <h3 className="fluent-section-title">便笺快捷键</h3>
+            {([
+              ['note_new', '新建便笺', '直接打开一张新便笺'],
+              ['note_visibility', '显示／隐藏便笺', '切换所有已打开便笺的可见状态'],
+              ['note_collapse', '折叠／展开便笺', '操作当前或最近使用的便笺'],
+              ['note_dock', '停靠／取消停靠', '操作当前或最近使用的便笺'],
+            ] as const).map(([action, label, description]) => <div className="fluent-setting-card" key={action}>
+              <div className="fluent-setting-info"><span className="fluent-setting-title">{label}</span><span className="fluent-setting-description">{description}</span></div>
+              <button type="button" className="fluent-hotkey-recorder" onClick={() => setShowHotkeyModal(action)} aria-label={`${label}快捷键`}>
+                {renderHotkeyCaps(appSettings[`app.${action}_hotkey`] || '')}<Edit3 size={14} className="fluent-hotkey-edit-icon" />
+              </button>
+            </div>)}
             <h3 className="fluent-section-title">快捷归类</h3>
             <FluentSettingsExpander className="fluent-setting-expander" expanded={!!(expandedCards['quickTabAssign'])} onToggle={() => toggleExpander('quickTabAssign')}  header={<div className="fluent-setting-info">
                   <span className="fluent-setting-title">{t('quick_tab_assign_title') || '复制后归类到工作区'}</span>
@@ -2520,6 +2532,7 @@ const SettingsWindow = () => {
       <HotkeySelectorModal
         show={showHotkeyModal}
         currentValue={
+          showHotkeyModal?.startsWith('note_') ? appSettings[`app.${showHotkeyModal}_hotkey`] || '' :
           showHotkeyModal === 'main' ? hotkey :
           showHotkeyModal === 'search' ? searchHotkey :
           showHotkeyModal === 'rich' ? richPasteHotkey :
@@ -2537,7 +2550,15 @@ const SettingsWindow = () => {
         }
         t={t}
         onClose={() => setShowHotkeyModal(null)}
-        onSave={(val) => {
+        onSave={async (val) => {
+          if (showHotkeyModal?.startsWith('note_')) {
+            try {
+              await invoke('set_recording_mode', { enabled: false });
+              await invoke('set_note_hotkey', { action: showHotkeyModal.slice(5), hotkey: val });
+              setAppSettings(previous => ({ ...previous, [`app.${showHotkeyModal}_hotkey`]: val }));
+            } catch (error) { pushToast(String(error)); }
+            return;
+          }
           if (showHotkeyModal === 'main') updateHotkey(val);
           if (showHotkeyModal === 'search') updateSearchHotkey(val);
           if (showHotkeyModal === 'rich') updateRichPasteHotkey(val);

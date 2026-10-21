@@ -1260,6 +1260,7 @@ fn setup_taskbar_listener(app: &App) {
 pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_shortcut::Shortcut) {
     use tauri_plugin_global_shortcut::Shortcut;
     let settings = app.state::<SettingsState>();
+    if crate::app::commands::hotkey_cmd::handle_note_shortcut(app, shortcut) { return; }
 
     if let Ok(main_s) = {
         let val = settings.main_hotkey.lock().unwrap().clone();
@@ -1341,6 +1342,7 @@ pub fn handle_global_shortcut(app: &AppHandle, shortcut: &tauri_plugin_global_sh
 pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     match event {
         tauri::WindowEvent::Focused(focused) => {
+            if *focused && window.label().starts_with("note-") { crate::app::commands::hotkey_cmd::remember_note(window.label()); }
             if window.label() != "main" {
                 return;
             }

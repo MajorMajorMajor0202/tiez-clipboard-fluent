@@ -1,4 +1,6 @@
 import { mockIPC, mockWindows } from '@tauri-apps/api/mocks';
+import { emit } from '@tauri-apps/api/event';
+import { dockNoteBounds, noteTitle } from '../src/features/note/hooks/useNoteWindowMode';
 import { createRoot } from 'react-dom/client';
 import StickyNoteWindow from '../src/features/note/components/StickyNoteWindow';
 import NoteManager from '../src/features/note/components/NoteManager';
@@ -15,15 +17,19 @@ const entry = () => ({ id: 1, content, content_type: 'note', preview: '测试便
 const commands: { command: string; payload: any }[] = [];
 mockWindows('note-1');
 mockIPC((command, payload) => {
-  commands.push({ command, payload });
+  commands.push({ command, payload: payload == null ? payload : JSON.parse(JSON.stringify(payload)) });
   if (command === 'get_clipboard_entry_by_id') return entry();
   if (command === 'get_clipboard_history') return [entry()];
   if (command === 'set_note_backdrop' && failMaterial) throw new Error('material unavailable');
+  if (command === 'plugin:window|inner_size') return { width: innerWidth, height: innerHeight };
+  if (command === 'plugin:window|inner_position') return { x: 100, y: 200 };
+  if (command === 'plugin:window|scale_factor') return 1;
+  if (command === 'plugin:window|current_monitor') return { name: 'Test', size: { width: 1920, height: 1080 }, position: { x: 0, y: 0 }, workArea: { position: { x: 0, y: 0 }, size: { width: 1920, height: 1040 } }, scaleFactor: 1 };
   if (command === 'update_item_content') content = (payload as { newContent: string }).newContent;
   return null;
 }, { shouldMockEvents: true });
 if (!manager) for (const target of [document.documentElement, document.body]) target.classList.add('is-note-window', 'is-sticker-window');
 localStorage.setItem('tiez_color_mode', 'light');
 localStorage.setItem('note_backdrop_1', 'acrylic');
-Object.assign(window, { noteTest: { commands, failMaterial: (value: boolean) => { failMaterial = value; } } });
+Object.assign(window, { noteTest: { commands, dockNoteBounds, noteTitle, action: (action: string) => emit('note-window-action', action), moved: (position: {x: number; y: number}) => emit('tauri://move', position), failMaterial: (value: boolean) => { failMaterial = value; } } });
 createRoot(document.getElementById('root')!).render(<TieZFluentProvider>{manager ? <div style={{ height: '100vh' }}><NoteManager t={() => ''} onCreateNote={() => commands.push({ command: 'create', payload: null })} /></div> : <StickyNoteWindow />}</TieZFluentProvider>);

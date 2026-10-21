@@ -79,6 +79,7 @@ fn main() {
             app::commands::drag_cmd::start_content_drag,
             app::commands::ui_cmd::set_sticker_backdrop,
             app::commands::ui_cmd::set_note_backdrop,
+            app::commands::hotkey_cmd::set_note_hotkey,
             services::content_handler::open_content,
             services::clipboard_ops::copy_to_clipboard,
             services::clipboard_ops::paste_latest_rich,

@@ -10,13 +10,14 @@ import {
   PinOff,
   Trash2,
   X,
-  Palette
+  Palette, ChevronUp, ChevronDown, PanelRightClose
 } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types/clipboard";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import { openStickyNote } from "../lib/openStickyNote";
 import MilkdownEditor from "./MilkdownEditor";
 import { createDebouncedWriter } from "../../../shared/lib/debouncedWriter";
+import { noteTitle, useNoteWindowMode } from '../hooks/useNoteWindowMode';
 import "../../../styles/components/note-window.css";
 
 export type NoteBackdrop =
@@ -76,6 +77,9 @@ export const StickyNoteWindow: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
   const [saveError, setSaveError] = useState("");
+  const title = noteTitle(content);
+  const { mode: windowMode, peek, toggleCollapse, toggleDock, restore } = useNoteWindowMode(title, setSaveError);
+  const compact = windowMode !== 'expanded';
   const [loaded, setLoaded] = useState(false);
   const closeApproved = useRef(false);
   const itemRef = useRef(item);
@@ -261,15 +265,27 @@ export const StickyNoteWindow: React.FC = () => {
   };
 
   // 5. Window Dragging Handler
-  const handleMouseDownDrag = useCallback(async (e: React.MouseEvent) => {
-    if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, button, input, textarea, .ProseMirror")) {
-      e.stopPropagation();
-      try {
-        await getCurrentWindow().startDragging();
-      } catch (err) {
-        console.error("Failed to start dragging note window", err);
-      }
-    }
+  const dragCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => dragCleanup.current?.(), []);
+  const handleMouseDownDrag = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest(".window-no-drag, button, input, textarea, .ProseMirror")) return;
+    e.stopPropagation();
+    dragCleanup.current?.();
+    const { clientX, clientY } = e;
+    const cleanup = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", cleanup);
+      dragCleanup.current = null;
+    };
+    const move = (event: MouseEvent) => {
+      if (!(event.buttons & 1)) { cleanup(); return; }
+      if (Math.hypot(event.clientX - clientX, event.clientY - clientY) < 4) return;
+      cleanup();
+      void getCurrentWindow().startDragging().catch(console.error);
+    };
+    dragCleanup.current = cleanup;
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", cleanup);
   }, []);
 
   // 6. Toggle Always On Top (Pin)
@@ -416,14 +432,19 @@ export const StickyNoteWindow: React.FC = () => {
 
   return (
     <div
-      className={`note-window-root ${isControlsVisible ? "is-controls-visible" : ""}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={`note-window-root note-mode-${windowMode} ${isControlsVisible || compact ? "is-controls-visible" : ""}`}
+      onMouseEnter={() => { setIsHovered(true); peek(true); }}
+      onMouseLeave={() => { setIsHovered(false); peek(false); }}
       onContextMenu={handleContextMenu}
     >
       <div className={`sticky-note-surface note-theme-${backdrop}`} onMouseDown={handleMouseDownDrag}>
         {/* Windows 11 Fluent 32px Square-Button TitleBar (Auto-hiding) */}
-        <div className="note-titlebar" onMouseDown={handleMouseDownDrag}>
+        {windowMode === 'docked' ? <div className="note-dock-capsule">
+          <button type="button" className="note-dock-title" title={title} aria-label="展开便笺" onClick={restore} onFocus={() => peek(true)}>{title}</button>
+          <button type="button" className="note-titlebar-btn note-btn-close" title="关闭 (保存)" onClick={handleClose} onFocus={() => peek(true)}><X size={14} /></button>
+        </div> : <div className="note-titlebar" onMouseDown={handleMouseDownDrag} onDoubleClick={event => {
+          if (!(event.target as Element).closest('button')) void toggleCollapse();
+        }}>
           {/* Left: Pin / Always On Top (32x32) */}
           <div className="note-titlebar-left window-no-drag">
             <button
@@ -437,32 +458,22 @@ export const StickyNoteWindow: React.FC = () => {
           </div>
 
           {/* Center: Blank Drag Region */}
-          <div className="note-titlebar-drag" onMouseDown={handleMouseDownDrag} />
+          <div className="note-titlebar-drag" onMouseDown={handleMouseDownDrag} title={compact ? title : undefined}>{compact && <span className="note-compact-title">{title}</span>}</div>
 
           {/* Right: Action Buttons (32x32 each) */}
           <div className="note-titlebar-right window-no-drag">
             {/* Toggle Typora Live WYSIWYG / Raw Source Mode */}
-            <button
+            {!compact && <button
               type="button"
               className={`note-titlebar-btn ${isSourceMode ? "active" : ""}`}
               title={isSourceMode ? "切换为即时渲染模式 (Typora)" : "切换为 Markdown 源码模式"}
               onClick={() => setIsSourceMode(!isSourceMode)}
             >
               {isSourceMode ? <FileText size={13} strokeWidth={2} /> : <Code size={13} strokeWidth={2} />}
-            </button>
-
-            {/* New Note */}
-            <button
-              type="button"
-              className="note-titlebar-btn"
-              title="新建便笺"
-              onClick={handleCreateAnother}
-            >
-              <Plus size={14} strokeWidth={2.2} />
-            </button>
+            </button>}
 
             {/* Change Theme / Palette */}
-            <button
+            {!compact && <button
               type="button"
               className={`note-titlebar-btn ${contextMenu ? "active" : ""}`}
               title="便笺设置与背景颜色"
@@ -475,17 +486,10 @@ export const StickyNoteWindow: React.FC = () => {
               }}
             >
               <Palette size={13} strokeWidth={2} />
-            </button>
+            </button>}
 
-            {/* Delete Note */}
-            <button
-              type="button"
-              className="note-titlebar-btn"
-              title="删除便笺"
-              onClick={handleDelete}
-            >
-              <Trash2 size={13} strokeWidth={2} />
-            </button>
+            <button type="button" className="note-titlebar-btn" title={compact ? '展开便笺' : '折叠便笺'} onClick={toggleCollapse}>{compact ? <ChevronDown size={14} /> : <ChevronUp size={14} />}</button>
+            <button type="button" className="note-titlebar-btn" title="停靠到屏幕右侧" onClick={toggleDock}><PanelRightClose size={14} /></button>
 
             {/* Close Window Button (Red Hover) */}
             <button
@@ -497,10 +501,10 @@ export const StickyNoteWindow: React.FC = () => {
               <X size={14} strokeWidth={2} />
             </button>
           </div>
-        </div>
+        </div>}
 
         {/* Content Body */}
-        <div className="note-body">
+        <div className="note-body" hidden={compact}>
           {!loaded ? <div role="status">正在读取便笺…</div> : isSourceMode ? (
             <textarea
               ref={textareaRef}

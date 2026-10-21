@@ -6,7 +6,7 @@ import { RotateCcw, X } from "lucide-react";
 import { getHotkeyDisplayTokens } from "../../../shared/lib/hotkeyDisplay";
 
 interface HotkeySelectorModalProps {
-    show: 'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | 'pin_window' | null;
+    show: 'main' | 'search' | 'rich' | 'sequential' | 'strip_newline' | 'pin_window' | 'note_new' | 'note_visibility' | 'note_collapse' | 'note_dock' | null;
     currentValue: string;
     defaultValue: string;
     t: (key: string) => string;

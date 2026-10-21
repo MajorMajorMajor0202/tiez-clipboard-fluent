@@ -1828,6 +1828,11 @@ const App = () => {
     }
   }, [activeTabId, activeTab, tabs, setTabs, setActiveTabId, saveTabAssignments, setHistory, pushToast, t]);
 
+  useEffect(() => {
+    const subscription = listen('new-note-shortcut', () => { void handleCreateNote(); });
+    return () => { void subscription.then(off => off()).catch(console.error); };
+  }, [handleCreateNote]);
+
   const { renderItemContent } = useClipboardItemRenderer({
     privacyProtection,
     revealedIds,
