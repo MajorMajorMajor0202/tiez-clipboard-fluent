@@ -16,17 +16,36 @@ export function dockNoteBounds(area: Bounds, scale: number, y: number, titleWidt
   return { x: area.x + area.width - visible, y: Math.max(area.y, Math.min(y, area.y + area.height - height)), width, height };
 }
 
-export function useNoteWindowMode(title: string, onError: (message: string) => void) {
+export function useNoteWindowMode(title: string, onError: (message: string) => void, onPinned: () => void) {
   const titleRef = useRef(title); titleRef.current = title;
+  const pinnedRef = useRef(onPinned); pinnedRef.current = onPinned;
   const docked = useRef<(Bounds & { reveal: number }) | null>(null);
   const peekQueue = useRef(Promise.resolve());
+  const peekRevision = useRef(0);
+  const peekX = useRef(0);
   const peek = useCallback((hovered: boolean) => {
+    const revision = ++peekRevision.current;
     peekQueue.current = peekQueue.current.then(async () => {
       const bounds = docked.current;
-      if (busy.current || modeRef.current !== "docked" || !bounds) return;
-      await getCurrentWindow().setPosition(new PhysicalPosition(bounds.x - (hovered ? bounds.reveal : 0), bounds.y));
+      if (revision !== peekRevision.current || busy.current || modeRef.current !== "docked" || !bounds) return;
+      const from = peekX.current;
+      const target = bounds.x - (hovered ? bounds.reveal : 0);
+      if (from === target) return;
+      const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180;
+      const started = performance.now();
+      // Await each native move so slow IPC cannot leave stale frames after restoring.
+      do {
+        const now = await new Promise<number>(resolve => requestAnimationFrame(resolve));
+        if (revision !== peekRevision.current || busy.current) return;
+        const progress = duration ? Math.min(1, (now - started) / duration) : 1;
+        const x = Math.round(from + (target - from) * (1 - (1 - progress) ** 3));
+        await getCurrentWindow().setPosition(new PhysicalPosition(x, bounds.y));
+        peekX.current = x;
+        if (progress === 1) return;
+      } while (true);
     }).catch(error => errorRef.current(`停靠调整失败：${String(error)}`));
   }, []);
+  useEffect(() => () => { ++peekRevision.current; }, []);
   const [mode, setMode] = useState<Mode>('expanded');
   const modeRef = useRef<Mode>('expanded');
   const normal = useRef<Bounds | null>(null);
@@ -38,6 +57,7 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
   const change = useCallback(async (action: 'collapse' | 'dock' | 'restore') => {
     if (busy.current) return;
     busy.current = true;
+    ++peekRevision.current;
     snapAfter.current = Date.now() + 800;
     const win = getCurrentWindow();
     const previousMode = modeRef.current;
@@ -55,6 +75,8 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
       if (next === 'docked') {
         const monitor = await currentMonitor();
         if (!monitor) throw new Error('无法获取当前屏幕');
+        await win.setAlwaysOnTop(true);
+        pinnedRef.current();
         beforeDock.current = previousMode;
         const area = monitor.workArea;
         const canvas = document.createElement("canvas");
@@ -62,6 +84,7 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
         if (context) context.font = '12px "Segoe UI", sans-serif';
         const titleWidth = (context?.measureText(titleRef.current).width ?? 160) + 24;
         const dock = dockNoteBounds({ x: area.position.x, y: area.position.y, width: area.size.width, height: area.size.height }, monitor.scaleFactor, position.y, titleWidth);
+        peekX.current = dock.x;
         docked.current = { ...dock, reveal: Math.round(32 * monitor.scaleFactor) };
         await win.setMinSize(new LogicalSize(80, 34));
         await win.setSize(new PhysicalSize(dock.width, dock.height));

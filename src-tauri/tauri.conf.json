@@ -75,6 +75,7 @@
             "core:window:allow-set-max-size",
             "core:window:allow-set-position",
             "core:window:allow-set-always-on-top",
+            "core:window:allow-is-always-on-top",
             "core:window:allow-current-monitor",
             "core:window:allow-cursor-position",
             "core:window:allow-create",

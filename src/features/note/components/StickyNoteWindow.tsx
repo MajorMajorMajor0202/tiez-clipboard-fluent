@@ -69,7 +69,7 @@ export const StickyNoteWindow: React.FC = () => {
   const [isSourceMode, setIsSourceMode] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-  const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(false);
+  const [isAlwaysOnTop, setIsAlwaysOnTop] = useState(true);
   const [backdrop, setBackdrop] = useState<NoteBackdrop>("mica");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -78,7 +78,7 @@ export const StickyNoteWindow: React.FC = () => {
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
   const [saveError, setSaveError] = useState("");
   const title = noteTitle(content);
-  const { mode: windowMode, peek, toggleCollapse, toggleDock, restore } = useNoteWindowMode(title, setSaveError);
+  const { mode: windowMode, peek, toggleCollapse, toggleDock, restore } = useNoteWindowMode(title, setSaveError, () => setIsAlwaysOnTop(true));
   const compact = windowMode !== 'expanded';
   const [loaded, setLoaded] = useState(false);
   const closeApproved = useRef(false);
@@ -169,13 +169,16 @@ export const StickyNoteWindow: React.FC = () => {
     const appWindow = getCurrentWindow();
     let unlistenFocus: (() => void) | undefined;
 
+    const syncPin = () => { void appWindow.isAlwaysOnTop().then(setIsAlwaysOnTop).catch(console.error); };
+    syncPin();
     appWindow.onFocusChanged(({ payload: focused }) => {
       setIsFocused(focused);
+      if (focused) syncPin();
     }).then((unlisten) => {
       unlistenFocus = unlisten;
     }).catch(() => {});
 
-    const handleFocus = () => setIsFocused(true);
+    const handleFocus = () => { setIsFocused(true); syncPin(); };
     const handleBlur = () => setIsFocused(false);
 
     window.addEventListener("focus", handleFocus);

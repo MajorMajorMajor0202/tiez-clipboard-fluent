@@ -389,7 +389,7 @@ html.dark-mode .note-titlebar-btn:active {
 .note-compact-title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; padding: 0 4px; }
 .note-titlebar-drag { min-width: 0; overflow: hidden; display: flex; align-items: center; }
 .note-mode-collapsed .note-titlebar { position: relative; }
-.note-mode-docked .sticky-note-surface { border-radius: 19px 0 0 19px; }
+.note-mode-docked .sticky-note-surface { border-radius: 8px 0 0 8px; }
 .note-dock-capsule { display: flex; align-items: center; height: 38px; padding: 0 11px 0 0; flex-shrink: 0; }
 .note-dock-title { flex: 1; min-width: 0; height: 100%; border: 0; padding: 0 12px; background: transparent; color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font: inherit; font-size: 12px; cursor: pointer; }
 .note-mode-docked .note-titlebar-btn { flex: 0 0 32px; border-radius: 0 !important; }

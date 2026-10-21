@@ -12,12 +12,15 @@ import '../src/styles/themes/load';
 const params = new URLSearchParams(location.search);
 const manager = params.has('manager');
 let failMaterial = params.has('failMaterial');
+let pinned = true;
 let content = '# 测试便笺\n\n正文保持在原来的位置。\n\n- [ ] 待办事项';
 const entry = () => ({ id: 1, content, content_type: 'note', preview: '测试便笺', timestamp: Date.now(), tags: [] });
 const commands: { command: string; payload: any }[] = [];
 mockWindows('note-1');
 mockIPC((command, payload) => {
   commands.push({ command, payload: payload == null ? payload : JSON.parse(JSON.stringify(payload)) });
+  if (command === 'plugin:window|is_always_on_top') return pinned;
+  if (command === 'plugin:window|set_always_on_top') pinned = (payload as { value: boolean }).value;
   if (command === 'get_clipboard_entry_by_id') return entry();
   if (command === 'get_clipboard_history') return [entry()];
   if (command === 'set_note_backdrop' && failMaterial) throw new Error('material unavailable');

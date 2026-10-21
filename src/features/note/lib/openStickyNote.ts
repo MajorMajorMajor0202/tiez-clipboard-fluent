@@ -6,6 +6,7 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
   try {
     const existing = await WebviewWindow.getByLabel(label);
     if (existing) {
+      await existing.setAlwaysOnTop(true);
       await existing.show();
       await existing.setFocus();
       return;
@@ -34,7 +35,7 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
     resizable: true,
     decorations: false,
     transparent: true,
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     skipTaskbar: true,
     shadow: false,
     focus: true
