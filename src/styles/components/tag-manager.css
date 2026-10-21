@@ -389,7 +389,14 @@
   pointer-events: auto !important;
 }
 
-.themed-tag-manager .tag-hover-actions > span {
+.themed-tag-manager .tag-hover-actions > button {
+  flex: 0 0 20px;
+  min-width: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
   width: 20px !important;
   height: 20px !important;
   display: inline-flex !important;
@@ -398,12 +405,19 @@
   border-radius: 4px !important;
 }
 
-.themed-tag-manager .tag-hover-actions > span:hover {
+.themed-tag-manager .tag-hover-actions > button svg { flex-shrink: 0; }
+.themed-tag-manager .tag-hover-actions { width: 44px; flex-shrink: 0; }
+.themed-tag-manager .tag-item.has-actions:focus-within .tag-hover-actions { display: flex !important; opacity: 1 !important; pointer-events: auto !important; }
+.themed-tag-manager .tag-action-button:focus-visible { outline: 2px solid var(--text-secondary); outline-offset: -2px; }
+.themed-tag-manager .tag-create-button { width: 100%; color: var(--text-secondary); font: inherit; text-align: left; }
+.themed-tag-manager .tag-create-button:focus-visible { outline: 2px solid var(--text-secondary); outline-offset: -2px; }
+
+.themed-tag-manager .tag-hover-actions > button:hover {
   background: rgba(var(--accent-color-rgb), 0.12) !important;
   color: var(--accent-color) !important;
 }
 
-.dark-mode .themed-tag-manager .tag-hover-actions > span:hover {
+.dark-mode .themed-tag-manager .tag-hover-actions > button:hover {
   background: rgba(255, 255, 255, 0.08) !important;
   color: var(--text-primary) !important;
 }

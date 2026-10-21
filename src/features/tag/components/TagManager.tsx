@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
+import { Input } from '@fluentui/react-components';
 import { listen, emit } from '@tauri-apps/api/event';
 import {
     Edit2, Trash2, X, ChevronRight, LayoutGrid, List,
@@ -52,6 +53,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
     });
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState('');
+    const [createTagOpen, setCreateTagOpen] = useState(false);
+    const [createTagName, setCreateTagName] = useState('');
+    const [createTagError, setCreateTagError] = useState('');
+    const [isCreatingTag, setIsCreatingTag] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ show: boolean, tagName: string | null }>({ show: false, tagName: null });
     const [itemDeleteConfirmation, setItemDeleteConfirmation] = useState<{ show: boolean, id: number | null }>({ show: false, id: null });
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -205,7 +210,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
 
     const createTag = async (rawName: string) => {
         const rawTrimmed = rawName.trim();
-        if (!rawTrimmed) return;
+        if (!rawTrimmed) return false;
 
         const lower = rawTrimmed.toLowerCase();
         let trimmed = rawTrimmed;
@@ -221,7 +226,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             setTagSearch('');
             await fetchTags();
             await loadTagItems(trimmed);
-        } catch (err) { console.error(err); }
+            return true;
+        } catch (err) { console.error(err); setCreateTagError(`添加失败：${String(err)}`); return false; }
     };
 
     const handleRenameTag = async (oldName: string) => {
@@ -251,7 +257,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             await invoke('delete_tag_from_all', { tagName });
             await emit('clipboard-changed'); // Notify App.tsx to refresh
             await fetchTags();
-        } catch (err) { console.error(err); setDeleteError(`删除失败：${String(err)}`); }
+            return true;
+        } catch (err) { console.error(err); setDeleteError(`删除失败：${String(err)}`); return false; }
         finally {
             setIsDeleting(false);
         }
@@ -446,8 +453,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                                 {!isBuiltinSensitiveTag(tag.name) && (
                                                     <div className="tag-hover-actions">
                                                         <FluentTooltip text={t('rename') || '重命名'}>
-                                                            <span
-                                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            <button type="button" className="tag-action-button" aria-label="重命名标签"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setEditingTag(tag.name);
@@ -455,11 +461,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                                                 }}
                                                             >
                                                                 <Edit2 size={13} />
-                                                            </span>
+                                                            </button>
                                                         </FluentTooltip>
                                                         <FluentTooltip text={t('delete') || '删除'}>
-                                                            <span
-                                                                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            <button type="button" className="tag-action-button" aria-label="删除标签"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     e.preventDefault();
@@ -467,7 +472,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                                                 }}
                                                             >
                                                                 <Trash2 size={13} />
-                                                            </span>
+                                                            </button>
                                                         </FluentTooltip>
                                                     </div>
                                                 )}
@@ -572,8 +577,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                             {!isBuiltinSensitiveTag(tag.name) && (
                                                 <div className="tag-hover-actions">
                                                     <FluentTooltip text={t('rename') || '重命名'}>
-                                                        <span
-                                                            style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                        <button type="button" className="tag-action-button" aria-label="重命名标签"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 setEditingTag(tag.name);
@@ -581,11 +585,10 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                                             }}
                                                         >
                                                             <Edit2 size={13} />
-                                                        </span>
+                                                        </button>
                                                     </FluentTooltip>
                                                     <FluentTooltip text={t('delete') || '删除'}>
-                                                        <span
-                                                            style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                        <button type="button" className="tag-action-button" aria-label="删除标签"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 e.preventDefault();
@@ -593,7 +596,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                                                             }}
                                                         >
                                                             <Trash2 size={13} />
-                                                        </span>
+                                                        </button>
                                                     </FluentTooltip>
                                                 </div>
                                             )}
@@ -623,6 +626,16 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     {currentMainTags.length === 0 && (
                         <div className="sidebar-status">{t('no_tags')}</div>
                     )}
+                    <FluentTooltip text="添加标签">
+                        <button type="button" className="tag-item tag-create-button" aria-label="添加标签" onClick={() => {
+                            setCreateTagName('');
+                            setCreateTagError('');
+                            setCreateTagOpen(true);
+                        }}>
+                            <span className="tag-color-wrapper"><Plus size={18} /></span>
+                            <span className="tag-name-area"><span className="tag-name">添加标签</span></span>
+                        </button>
+                    </FluentTooltip>
                 </div>
 
                 {!isStacked && (
@@ -875,9 +888,30 @@ export default function TagManager({ t, theme }: TagManagerProps) {
             {/* Kept minimal if needed for future extensions, but currently inline handles rename */}
 
             {/* Tag Delete Confirmation Modal */}
+            <FluentModal open={createTagOpen} onClose={() => { if (!isCreatingTag) setCreateTagOpen(false); }}
+                title="添加标签" theme={theme} width={360} closeOnEscape={!isCreatingTag} closeOnOverlayClick={!isCreatingTag}
+                footer={<><FluentButton disabled={isCreatingTag} onClick={() => setCreateTagOpen(false)}>取消</FluentButton>
+                    <FluentButton variant="primary" type="submit" form="tag-create-form" loading={isCreatingTag} disabled={!createTagName.trim()}>添加</FluentButton></>}>
+                <form id="tag-create-form" onSubmit={async event => {
+                    event.preventDefault();
+                    if (isCreatingTag || !createTagName.trim()) return;
+                    if (tags.some(tag => tag.name.toLowerCase() === createTagName.trim().toLowerCase())) { setCreateTagError('该标签已存在'); return; }
+                    setIsCreatingTag(true);
+                    setCreateTagError('');
+                    try { if (await createTag(createTagName)) setCreateTagOpen(false); }
+                    finally { setIsCreatingTag(false); }
+                }}>
+                    <label htmlFor="new-tag-name">标签名称</label>
+                    <Input id="new-tag-name" value={createTagName} onChange={event => setCreateTagName(event.target.value)}
+                        autoFocus disabled={isCreatingTag} placeholder="输入标签名称" style={{ width: '100%', marginTop: 8 }} />
+                    <div role="alert" style={{ minHeight: 20, marginTop: 8 }}>{createTagError}</div>
+                </form>
+            </FluentModal>
             <FluentModal
                 open={deleteConfirmation.show}
-                onClose={() => setDeleteConfirmation({ show: false, tagName: null })}
+                onClose={() => { if (!isDeleting) setDeleteConfirmation(previous => ({ ...previous, show: false })); }}
+                closeOnEscape={!isDeleting}
+                closeOnOverlayClick={!isDeleting}
                 title="要删除标签吗？"
                 theme={theme}
                 width={360}
@@ -885,17 +919,18 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     <>
                         <FluentButton
                             variant="secondary"
-                            onClick={() => setDeleteConfirmation({ show: false, tagName: null })}
+                            disabled={isDeleting}
+                            onClick={() => setDeleteConfirmation(previous => ({ ...previous, show: false }))}
                         >
                             {t('cancel')}
                         </FluentButton>
                         <FluentButton
                             variant="danger"
-                            onClick={() => {
+                            loading={isDeleting}
+                            onClick={async () => {
                                 if (deleteConfirmation.tagName) {
-                                    handleDeleteTag(deleteConfirmation.tagName);
+                                    if (await handleDeleteTag(deleteConfirmation.tagName)) setDeleteConfirmation(previous => ({ ...previous, show: false }));
                                 }
-                                setDeleteConfirmation({ show: false, tagName: null });
                             }}
                         >
                             {t('delete')}
@@ -1298,7 +1333,7 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .tag-item:hover .tag-hover-actions { display: flex; }
                 .tag-item.active:not(:hover) .tag-hover-actions { display: none !important; }
 
-                .tag-hover-actions > span {
+                .tag-hover-actions > button {
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -1310,11 +1345,11 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--text-secondary);
                     transition: background 0.15s, color 0.15s;
                 }
-                .tag-hover-actions > span:hover {
+                .tag-hover-actions > button:hover {
                     background: rgba(var(--accent-color-rgb), 0.12);
                     color: var(--accent-color);
                 }
-                .dark-mode .tag-hover-actions > span:hover {
+                .dark-mode .tag-hover-actions > button:hover {
                     background: rgba(255, 255, 255, 0.08) !important;
                     color: var(--text-primary) !important;
                 }
@@ -2177,8 +2212,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     gap: 4px;
                 }
 
-                .theme-mica .tag-hover-actions > span,
-                .theme-acrylic .tag-hover-actions > span {
+                .theme-mica .tag-hover-actions > button,
+                .theme-acrylic .tag-hover-actions > button {
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -2188,8 +2223,8 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                     color: var(--text-secondary);
                 }
 
-                .theme-mica .tag-hover-actions > span:hover,
-                .theme-acrylic .tag-hover-actions > span:hover {
+                .theme-mica .tag-hover-actions > button:hover,
+                .theme-acrylic .tag-hover-actions > button:hover {
                     background: rgba(var(--accent-color-rgb), 0.12);
                     color: var(--accent-color);
                 }
@@ -2198,17 +2233,17 @@ export default function TagManager({ t, theme }: TagManagerProps) {
                 .theme-acrylic .tag-item.active:not(:hover) .tag-hover-actions {
                     display: none !important;
                 }
-                .theme-mica .tag-item.active .tag-hover-actions > span,
-                .theme-acrylic .tag-item.active .tag-hover-actions > span {
+                .theme-mica .tag-item.active .tag-hover-actions > button,
+                .theme-acrylic .tag-item.active .tag-hover-actions > button {
                     color: var(--text-primary);
                 }
-                .theme-mica .tag-item.active .tag-hover-actions > span:hover,
-                .theme-acrylic .tag-item.active .tag-hover-actions > span:hover {
+                .theme-mica .tag-item.active .tag-hover-actions > button:hover,
+                .theme-acrylic .tag-item.active .tag-hover-actions > button:hover {
                     background: rgba(var(--accent-color-rgb), 0.14);
                     color: var(--accent-color);
                 }
-                .dark-mode .theme-mica .tag-item.active .tag-hover-actions > span:hover,
-                .dark-mode .theme-acrylic .tag-item.active .tag-hover-actions > span:hover {
+                .dark-mode .theme-mica .tag-item.active .tag-hover-actions > button:hover,
+                .dark-mode .theme-acrylic .tag-item.active .tag-hover-actions > button:hover {
                     background: rgba(255, 255, 255, 0.08) !important;
                     color: var(--text-primary) !important;
                 }
