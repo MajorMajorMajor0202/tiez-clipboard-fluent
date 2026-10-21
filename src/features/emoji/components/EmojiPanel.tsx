@@ -913,15 +913,14 @@ const EmojiPanel = ({ t, favorites, setFavorites, activeTab, setActiveTab, saveS
                     <div key="add" className="emoji-fav-card emoji-fav-add">
                       <FluentTooltip text={t("emoji_add_files") || "添加表情"}>
                         <button
+                          type="button"
                           className="emoji-fav-add-btn"
                           onClick={(event) => {
                             event.stopPropagation();
                             void handleSelectFiles();
                           }}
                         >
-                          <div className="add-icon-wrapper">
-                            <Plus size={22} strokeWidth={2.5} />
-                          </div>
+                          <Plus size={22} strokeWidth={2.5} />
                         </button>
                       </FluentTooltip>
                     </div>
