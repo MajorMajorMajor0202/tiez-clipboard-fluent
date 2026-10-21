@@ -35,7 +35,7 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
     decorations: false,
     transparent: true,
     alwaysOnTop: false,
-    skipTaskbar: false,
+    skipTaskbar: true,
     shadow: false,
     focus: true
   });

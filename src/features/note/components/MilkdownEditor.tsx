@@ -69,7 +69,7 @@ const EditorInner: React.FC<MilkdownEditorProps> = ({
 
   useEffect(() => {
     if (!loading && onScrollHostReady) {
-      const el = document.querySelector(".note-card .ProseMirror") as HTMLElement | null;
+      const el = document.querySelector(".sticky-note-surface .ProseMirror") as HTMLElement | null;
       if (el) {
         onScrollHostReady(el);
       }

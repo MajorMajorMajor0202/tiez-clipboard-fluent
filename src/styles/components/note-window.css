@@ -34,7 +34,7 @@ html.is-note-window #root {
 /* ───────────────────────────────────────────────────────────
    Note Card: Edge-to-edge floating card with subtle border & shadow
    ─────────────────────────────────────────────────────────── */
-.note-card {
+.sticky-note-surface {
   position: relative;
   width: 100%;
   height: 100%;
@@ -43,55 +43,51 @@ html.is-note-window #root {
   flex-direction: column;
   border-radius: 8px;
   overflow: hidden;
-  transition: background 0.2s cubic-bezier(0.1, 0.9, 0.2, 1),
-              border-color 0.2s cubic-bezier(0.1, 0.9, 0.2, 1),
-              box-shadow 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 0;
+  min-height: 0;
+  box-shadow: none;
 }
 
-.dark-mode .note-card,
-body.dark-mode .note-card,
-html.dark-mode .note-card {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+.dark-mode .sticky-note-surface,
+body.dark-mode .sticky-note-surface,
+html.dark-mode .sticky-note-surface {
+  box-shadow: none;
 }
 
 /* ── Note Backdrops & Color Palettes ────────────────────── */
 
 /* 1. Mica (Default) */
 .note-theme-mica {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(32px) saturate(140%);
-  -webkit-backdrop-filter: blur(32px) saturate(140%);
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(0, 0, 0, 0.12);
   color: #1f1f1f;
 }
 .dark-mode .note-theme-mica,
 body.dark-mode .note-theme-mica,
 html.dark-mode .note-theme-mica {
-  background: rgba(32, 32, 32, 0.85);
-  backdrop-filter: blur(32px) saturate(140%);
-  -webkit-backdrop-filter: blur(32px) saturate(140%);
+  background: rgba(32, 32, 32, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f3f3f3;
 }
 
 /* 2. Acrylic */
 .note-theme-acrylic {
-  background: rgba(248, 248, 248, 0.72);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: rgba(248, 248, 248, 0.9);
   border: 1px solid rgba(0, 0, 0, 0.14);
   color: #1a1a1a;
 }
 .dark-mode .note-theme-acrylic,
 body.dark-mode .note-theme-acrylic,
 html.dark-mode .note-theme-acrylic {
-  background: rgba(26, 26, 26, 0.75);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: rgba(26, 26, 26, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #eeeeee;
 }
+
+html[data-note-native-backdrop] .note-theme-mica { background: rgba(255, 255, 255, 0.12); }
+html.dark-mode[data-note-native-backdrop] .note-theme-mica { background: rgba(32, 32, 32, 0.16); }
+html[data-note-native-backdrop] .note-theme-acrylic { background: rgba(248, 248, 248, 0.22); }
+html.dark-mode[data-note-native-backdrop] .note-theme-acrylic { background: rgba(26, 26, 26, 0.25); }
 
 /* 3. Yellow (Classic Sticky Note) */
 .note-theme-yellow {
@@ -211,6 +207,9 @@ html.dark-mode .note-theme-cyan {
    Auto-hides when unfocused & unhovered, smoothly slides down on focus/hover
    ─────────────────────────────────────────────────────────── */
 .note-titlebar {
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 32px;
   min-height: 0;
   max-height: 32px;
@@ -222,7 +221,6 @@ html.dark-mode .note-theme-cyan {
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
   background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -232,24 +230,18 @@ html.dark-mode .note-theme-cyan {
   overflow: hidden;
   flex-shrink: 0;
   z-index: 20;
-  transition: height 0.22s cubic-bezier(0.1, 0.9, 0.2, 1),
-              opacity 0.18s cubic-bezier(0.1, 0.9, 0.2, 1),
-              border-bottom-color 0.18s ease;
+  transition: opacity 0.18s ease;
 }
 
 .dark-mode .note-titlebar {
   background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
 }
 
 /* Auto-hide: smoothly collapse height and fade out when not focused/hovered */
 .note-window-root:not(.is-controls-visible) .note-titlebar {
-  height: 0 !important;
-  max-height: 0 !important;
   opacity: 0 !important;
-  border-bottom-color: transparent !important;
   pointer-events: none !important;
 }
 
@@ -322,6 +314,16 @@ html.dark-mode .note-theme-cyan {
   flex-shrink: 0;
 }
 
+.note-titlebar-btn:focus-visible {
+  outline: 2px solid currentColor !important;
+  outline-offset: -3px;
+}
+
+.note-window-root:has(.note-titlebar :focus-visible) .note-titlebar {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 .note-titlebar-btn:hover {
   background: rgba(0, 0, 0, 0.08) !important;
   opacity: 1;
@@ -378,15 +380,9 @@ html.dark-mode .note-titlebar-btn:active {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 8px 16px 14px 16px;
+  padding: 34px 16px 14px;
   overflow: hidden;
   box-sizing: border-box;
-  transition: padding 0.22s cubic-bezier(0.1, 0.9, 0.2, 1);
-}
-
-/* When titlebar is hidden, give a little more top breathing room */
-.note-window-root:not(.is-controls-visible) .note-body {
-  padding-top: 14px;
 }
 
 /* Markdown Textarea (transparent, natural text placement) */
@@ -735,6 +731,7 @@ html.dark-mode .note-palette-swatch {
 }
 
 .milkdown-container .ProseMirror h1 { font-size: 18px; }
+.milkdown-container .ProseMirror > :first-child { margin-top: 0; }
 .milkdown-container .ProseMirror h2 { font-size: 16px; }
 .milkdown-container .ProseMirror h3 { font-size: 14.5px; }
 .milkdown-container .ProseMirror h4 { font-size: 14px; }

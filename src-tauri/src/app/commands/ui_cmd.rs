@@ -199,7 +199,7 @@ pub fn apply_theme_to_window_internal(
         match theme {
             "mica" if is_win11 => {
                 let result = window_vibrancy::apply_mica(window, Some(is_dark));
-                if window.label() == "settings" || window.label().starts_with("sticker-") {
+                if window.label() == "settings" || window.label().starts_with("sticker-") || window.label().starts_with("note-") {
                     result.map_err(|e| AppError::Internal(format!("Settings Mica failed: {e}")))?;
                 }
                 let _ = window.set_shadow(false);
@@ -213,7 +213,7 @@ pub fn apply_theme_to_window_internal(
                     window,
                     Some(if is_dark { (30, 30, 30, 40) } else { (240, 240, 240, 40) }),
                 );
-                if window.label() == "settings" || window.label().starts_with("sticker-") {
+                if window.label() == "settings" || window.label().starts_with("sticker-") || window.label().starts_with("note-") {
                     result.map_err(|e| AppError::Internal(format!("Settings Acrylic failed: {e}")))?;
                 }
                 let _ = window.set_shadow(false);
@@ -287,6 +287,24 @@ pub fn set_sticker_backdrop(window: WebviewWindow, db_state: State<'_, DbState>,
     #[cfg(windows)]
     if windows_version::OsVersion::current().build < 22000 {
         return Err(AppError::Internal("当前系统使用贴图背景回退".into()));
+    }
+    apply_theme_to_window_internal(&window, &db_state, &theme, color_mode.as_deref(), Some(false))
+}
+
+#[tauri::command]
+pub fn set_note_backdrop(window: WebviewWindow, db_state: State<'_, DbState>, theme: String, color_mode: Option<String>) -> AppResult<()> {
+    if !window.label().starts_with("note-") || !matches!(theme.as_str(), "mica" | "acrylic" | "solid") {
+        return Err(AppError::Validation("无效的便笺背景设置".into()));
+    }
+    window.set_skip_taskbar(true).map_err(|e| AppError::Internal(format!("隐藏便笺任务栏图标失败: {e}")))?;
+    #[cfg(windows)]
+    {
+        // Clear the previous material when switching between materials or to a solid color.
+        let _ = window_vibrancy::clear_mica(&window);
+        let _ = window_vibrancy::clear_acrylic(&window);
+        if theme != "solid" && windows_version::OsVersion::current().build < 22000 {
+            return Err(AppError::Internal("当前系统使用便笺背景回退".into()));
+        }
     }
     apply_theme_to_window_internal(&window, &db_state, &theme, color_mode.as_deref(), Some(false))
 }

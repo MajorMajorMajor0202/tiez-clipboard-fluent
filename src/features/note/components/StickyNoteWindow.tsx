@@ -99,6 +99,8 @@ export const StickyNoteWindow: React.FC = () => {
     let isDark = false;
     if (colorModeParam === "dark") {
       isDark = true;
+    } else if (colorModeParam === "light") {
+      isDark = false;
     } else if (savedMode === "dark") {
       isDark = true;
     } else if (savedMode === "light") {
@@ -185,7 +187,8 @@ export const StickyNoteWindow: React.FC = () => {
   // 3. System Theme & Dark Mode Sync
   useEffect(() => {
     const handleThemeEvent = (event: { payload: string }) => {
-      const isDark = event.payload === "dark";
+      const mode = localStorage.getItem("tiez_color_mode") || "system";
+      const isDark = mode === "dark" || (mode !== "light" && event.payload === "dark");
       setIsDarkMode(isDark);
       document.documentElement.classList.toggle("dark-mode", isDark);
       document.body.classList.toggle("dark-mode", isDark);
@@ -213,6 +216,17 @@ export const StickyNoteWindow: React.FC = () => {
       mql.removeEventListener("change", handleMediaChange);
     };
   }, []);
+
+  // CSS cannot blur the desktop behind a WebView: apply the native material.
+  useEffect(() => {
+    let disposed = false;
+    delete document.documentElement.dataset.noteNativeBackdrop;
+    const theme = backdrop === "mica" || backdrop === "acrylic" ? backdrop : "solid";
+    void invoke("set_note_backdrop", { theme, colorMode: isDarkMode ? "dark" : "light" }).then(() => {
+      if (!disposed && theme !== "solid") document.documentElement.dataset.noteNativeBackdrop = "true";
+    }).catch(() => {}); // Keep the readable CSS fallback if the material is unavailable.
+    return () => { disposed = true; delete document.documentElement.dataset.noteNativeBackdrop; };
+  }, [backdrop, isDarkMode]);
 
   // 4. Debounced, serialized writes; close awaits this same queue.
   const saveContent = useCallback((newText: string) => {
@@ -249,6 +263,7 @@ export const StickyNoteWindow: React.FC = () => {
   // 5. Window Dragging Handler
   const handleMouseDownDrag = useCallback(async (e: React.MouseEvent) => {
     if (e.button === 0 && !(e.target as HTMLElement).closest(".window-no-drag, button, input, textarea, .ProseMirror")) {
+      e.stopPropagation();
       try {
         await getCurrentWindow().startDragging();
       } catch (err) {
@@ -406,7 +421,7 @@ export const StickyNoteWindow: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
       onContextMenu={handleContextMenu}
     >
-      <div className={`note-card note-theme-${backdrop}`} onMouseDown={handleMouseDownDrag}>
+      <div className={`sticky-note-surface note-theme-${backdrop}`} onMouseDown={handleMouseDownDrag}>
         {/* Windows 11 Fluent 32px Square-Button TitleBar (Auto-hiding) */}
         <div className="note-titlebar" onMouseDown={handleMouseDownDrag}>
           {/* Left: Pin / Always On Top (32x32) */}

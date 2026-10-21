@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { Search, Plus, Trash2, StickyNote, X } from "lucide-react";
+import { Plus, Trash2, StickyNote } from "lucide-react";
 import type { ClipboardEntry } from "../../../shared/types";
 import FluentScrollbar from "../../../shared/components/FluentScrollbar";
 import FluentTooltip from "../../../shared/components/FluentTooltip";
+import FluentButton from "../../../shared/components/FluentButton";
+import FluentSearchInput from "../../../shared/components/FluentSearchInput";
 import { openStickyNote } from "../lib/openStickyNote";
 import "../../../styles/components/note-manager.css";
 
@@ -140,36 +142,23 @@ export const NoteManager: React.FC<NoteManagerProps> = ({
     <div className="note-manager-root">
       {/* 1. Header: Search Bar and New Note Button in the same row */}
       <div className="note-manager-toolbar">
-        <div className={`fluent-search-box note-search-wrapper ${searchText ? "has-clear" : ""}`}>
-          <Search size={14} className="fluent-search-icon" />
-          <input
-            type="text"
-            className="fluent-search-input"
+        <div className="fluent-search-box home-search-wrapper note-search-wrapper">
+          <FluentSearchInput
+            aria-label="搜索便笺"
             placeholder={t("search_notes") || "搜索便笺..."}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          {searchText && (
-            <button
-              type="button"
-              className="fluent-search-clear"
-              onClick={() => setSearchText("")}
-              title="清除搜索"
-            >
-              <X size={12} />
-            </button>
-          )}
         </div>
 
-        <button
-          type="button"
-          className="note-btn-primary"
+        <FluentButton
+          size="small"
+          icon={<Plus size={15} />}
           onClick={handleCreateNew}
           title="新建便笺"
         >
-          <Plus size={15} strokeWidth={2.4} />
           <span>{t("new_note") || "新建便笺"}</span>
-        </button>
+        </FluentButton>
       </div>
 
       {/* 2. Content: Cards Grid or Minimal Empty State */}
@@ -186,35 +175,40 @@ export const NoteManager: React.FC<NoteManagerProps> = ({
                 : "点击上方「新建便笺」开始记录"}
             </div>
             {searchText && (
-              <button
-                type="button"
-                className="note-btn-secondary"
+              <FluentButton size="small"
                 onClick={() => setSearchText("")}
               >
                 清除搜索
-              </button>
+              </FluentButton>
             )}
           </div>
         ) : (
           <div ref={scrollRef} className="note-items-scroll fluent-scrollbar-host">
-            <div className="note-cards-grid">
+            <div className="note-manager-cards-grid">
               {filteredNotes.map((note) => {
                 const { title, excerpt } = getNoteDisplay(note.content);
 
                 return (
                   <div
                     key={note.id}
-                    className="note-card"
+                    className="note-manager-card"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`打开便笺：${title}`}
+                    onKeyDown={event => {
+                      if (event.target !== event.currentTarget) return;
+                      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); void openStickyNote(note); }
+                    }}
                     onClick={() => openStickyNote(note)}
                   >
-                    <div className="note-card-header">
-                      <span className="note-card-title" title={title}>
+                    <div className="note-manager-card-header">
+                      <span className="note-manager-card-title" title={title}>
                         {title}
                       </span>
                       <FluentTooltip text="删除便笺">
                         <button
                           type="button"
-                          className="note-card-delete-btn"
+                          className="note-manager-card-delete-btn"
                           onClick={(e) => handleDeleteNote(e, note.id)}
                           aria-label="删除便笺"
                         >
@@ -223,12 +217,12 @@ export const NoteManager: React.FC<NoteManagerProps> = ({
                       </FluentTooltip>
                     </div>
 
-                    <div className="note-card-body">
+                    <div className="note-manager-card-body">
                       {excerpt || "（空白内容）"}
                     </div>
 
-                    <div className="note-card-footer">
-                      <span className="note-card-date">
+                    <div className="note-manager-card-footer">
+                      <span className="note-manager-card-date">
                         {formatDate(note.timestamp)}
                       </span>
                     </div>
