@@ -12,7 +12,7 @@ function Fixture() {
   const selected = new URLSearchParams(location.search).get("disabled") !== "1";
   return <TieZFluentProvider><div style={{ display: "flex", height: "100vh" }}>
     <main style={{ flex: 1 }}><button>外部按钮</button><output>{last}</output></main>
-    <FluentRightRail onOpenAddEntry={action("add")} onOpenAddNote={action("note")} clearHistory={action("clear")}
+    <FluentRightRail onOpenAddEntry={action("add")} clearHistory={action("clear")}
       hasSelectedItem={selected} canEditContent onCopySelectedItem={action("paste")} onEditContent={action("edit")}
       onOpenContent={action("open")} onAssignTab={action("tab")} onAssignTag={action("tag")}
       onTogglePin={action("pin")} isPinned={false} onPinToDesktop={action("desktop")} onToggleLock={action("lock")} isLocked={false}

@@ -2233,7 +2233,6 @@ const App = () => {
               setIsAddEntryModalOpen(true);
               setAddEntryContent("");
             }}
-            onOpenAddNote={handleCreateNote}
             clearHistory={clearHistory}
             hasSelectedItem={!!selectedItem}
             canEditContent={selectedItem ? selectedItem.content_type !== "image" && selectedItem.content_type !== "files" : false}

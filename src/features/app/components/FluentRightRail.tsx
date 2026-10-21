@@ -31,7 +31,6 @@ import FluentTooltip from "../../../shared/components/FluentTooltip";
 export interface FluentRightRailProps {
   // Global Actions
   onOpenAddEntry?: () => void;
-  onOpenAddNote?: () => void;
   clearHistory: () => void;
 
   // Selected Item Actions (Unpacked from Card & More Menu)
@@ -82,7 +81,6 @@ export interface FluentRightRailProps {
 
 export const FluentRightRail = ({
   onOpenAddEntry,
-  onOpenAddNote,
   clearHistory,
   hasSelectedItem,
   canEditContent,
@@ -141,21 +139,6 @@ export const FluentRightRail = ({
               aria-label="Add entry"
             >
               <Plus size={16} strokeWidth={2} />
-            </button>
-          </FluentTooltip>
-        )}
-
-        {/* Add New Note (便笺) */}
-        {onOpenAddNote && (
-          <FluentTooltip text={t("new_note") || "新建便笺"}>
-            <button
-              type="button"
-              tabIndex={0}
-              className="rail-btn"
-              onClick={onOpenAddNote}
-              aria-label="New note"
-            >
-              <StickyNote size={15} strokeWidth={2} />
             </button>
           </FluentTooltip>
         )}
