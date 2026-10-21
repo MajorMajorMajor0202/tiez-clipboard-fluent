@@ -263,6 +263,7 @@ const SettingsWindow = () => {
   const [toast, setToast] = useState<string | null>(null);
   const [appVersion, setAppVersion] = useState("0.3.0");
   const [mqttStatus, setMqttStatus] = useState<"connected" | "disconnected" | "connecting">("disconnected");
+  const [autostartSaving, setAutostartSaving] = useState(false);
   const [cloudSyncStatus, setCloudSyncStatus] = useState<CloudSyncStatusPayload>({
     state: "disabled",
     running: false,
@@ -801,10 +802,17 @@ const SettingsWindow = () => {
                   登录系统后自动启动
                 </span>
               </div>
-              <FluentSwitch checked={autoStart} onChange={(e) => {
+              <FluentSwitch checked={autoStart} disabled={autostartSaving} onChange={async (e) => {
                     const enabled = e.target.checked;
-                    setAutoStart(enabled);
-                    invoke("toggle_autostart", { enabled }).catch(console.error);
+                    setAutostartSaving(true);
+                    try {
+                      await invoke("toggle_autostart", { enabled });
+                      setAutoStart(enabled);
+                    } catch (error) {
+                      pushToast(String(error));
+                    } finally {
+                      setAutostartSaving(false);
+                    }
                   }}   />
             </div>
 
