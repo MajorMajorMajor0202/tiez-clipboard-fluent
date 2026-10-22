@@ -30,4 +30,4 @@
 
 构建与启动排查：新增发布构建检查，要求启用 Tauri custom-protocol（打包前端），防止 `cargo build --release` 产生仍依赖开发服务的程序。自启动设置同时检查 `tauri::is_dev()`，不再只依赖 debug_assertions。日志记录程序完整路径、运行模式与页面实际 origin，方便区分开发窗口、发布窗口及加载失败。
 
-当日检查：注册表 Run/TieZ 仍指向 10 月 21 日发布文件，未找到额外 TieZ 启动任务。该文件当前实测加载 http://tauri.localhost/，没有重现早晨的错误；不能据此认定旧发布文件存在 localhost 开发服务依赖。交付时更新自启动至 10 月 22 日经过静默启动实测的新文件。
+当日检查：注册表 Run/TieZ 仍指向 10 月 21 日发布文件，未找到额外 TieZ 启动任务。该文件当前实测加载 http://tauri.localhost/，没有重现早晨的错误；不能据此认定旧发布文件存在 localhost 开发服务依赖。已将自启动更新到 10 月 22 日新发布文件：独立测试数据和真实数据目录均使用 --minimized 启动，日志确认 production (embedded assets)、main Finished http://tauri.localhost。测试副本与最终交付文件 SHA-256 相同，旧自启动值已备份。用户确认早晨错误页是 localhost，但原始故障尚未复现，未把这一推断当作已确认根因。真实窗口拖动的人工验证因 Esc 中止，自动化回归已通过。
