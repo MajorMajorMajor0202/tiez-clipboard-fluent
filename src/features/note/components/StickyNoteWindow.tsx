@@ -78,7 +78,7 @@ export const StickyNoteWindow: React.FC = () => {
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
   const [saveError, setSaveError] = useState("");
   const title = noteTitle(content);
-  const { mode: windowMode, peek, toggleCollapse, toggleDock, dockTitleProps } = useNoteWindowMode(title, setSaveError, () => setIsAlwaysOnTop(true));
+  const { mode: windowMode, transitioning, peek, toggleCollapse, toggleDock, dockTitleProps } = useNoteWindowMode(title, setSaveError, () => setIsAlwaysOnTop(true));
   const compact = windowMode !== 'expanded';
   const [loaded, setLoaded] = useState(false);
   const closeApproved = useRef(false);
@@ -435,6 +435,7 @@ export const StickyNoteWindow: React.FC = () => {
 
   return (
     <div
+      aria-busy={transitioning}
       className={`note-window-root note-mode-${windowMode} ${isControlsVisible || compact ? "is-controls-visible" : ""}`}
       onMouseEnter={() => { setIsHovered(true); peek(true); }}
       onMouseLeave={() => { setIsHovered(false); peek(false); }}
@@ -507,7 +508,7 @@ export const StickyNoteWindow: React.FC = () => {
         </div>}
 
         {/* Content Body */}
-        <div className="note-body" hidden={compact}>
+        <div className="note-body" hidden={compact || transitioning}>
           {!loaded ? <div role="status">正在读取便笺…</div> : isSourceMode ? (
             <textarea
               ref={textareaRef}

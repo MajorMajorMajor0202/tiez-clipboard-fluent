@@ -12,6 +12,8 @@ import '../src/styles/themes/load';
 const params = new URLSearchParams(location.search);
 const manager = params.has('manager');
 let failMaterial = params.has('failMaterial');
+let resizeGate: Promise<void> | null = null;
+let releaseResize: (() => void) | undefined;
 let pinned = true;
 let nativePosition = { x:100, y:200 };
 let content = '# 测试便笺\n\n正文保持在原来的位置。\n\n- [ ] 待办事项';
@@ -20,6 +22,7 @@ const commands: { command: string; payload: any }[] = [];
 mockWindows('note-1');
 mockIPC((command, payload) => {
   commands.push({ command, payload: payload == null ? payload : JSON.parse(JSON.stringify(payload)) });
+  if (command === 'plugin:window|set_size' && resizeGate) return resizeGate;
   if (command === 'plugin:window|is_always_on_top') return pinned;
   if (command === 'plugin:window|set_always_on_top') pinned = (payload as { value: boolean }).value;
   if (command === 'get_clipboard_entry_by_id') return entry();
@@ -28,8 +31,8 @@ mockIPC((command, payload) => {
   if (command === 'plugin:window|inner_size') return { width: innerWidth, height: innerHeight };
   if (command === 'plugin:window|set_position') nativePosition = JSON.parse(JSON.stringify(payload)).value.Physical;
   if (command === 'plugin:window|inner_position') return nativePosition;
-  if (command === 'dock_note') return 12;
-  if (command === 'move_docked_note') return (payload as {y:number}).y > 35 ? 58 : 12;
+  if (command === 'dock_note') return 501;
+  if (command === 'move_docked_note') return 501;
   if (command === 'plugin:window|scale_factor') return 1;
   if (command === 'plugin:window|current_monitor') return { name: 'Test', size: { width: 1920, height: 1080 }, position: { x: 0, y: 0 }, workArea: { position: { x: 0, y: 0 }, size: { width: 1920, height: 1040 } }, scaleFactor: 1 };
   if (command === 'update_item_content') content = (payload as { newContent: string }).newContent;
@@ -38,5 +41,5 @@ mockIPC((command, payload) => {
 if (!manager) for (const target of [document.documentElement, document.body]) target.classList.add('is-note-window', 'is-sticker-window');
 localStorage.setItem('tiez_color_mode', 'light');
 localStorage.setItem('note_backdrop_1', 'acrylic');
-Object.assign(window, { noteTest: { commands, dockNoteBounds, noteTitle, action: (action: string) => emit('note-window-action', action), moved: (position: {x: number; y: number}) => emit('tauri://move', position), failMaterial: (value: boolean) => { failMaterial = value; } } });
+Object.assign(window, { noteTest: { holdResize: () => { resizeGate = new Promise<void>(resolve => { releaseResize = resolve; }); }, releaseResize: () => { releaseResize?.(); resizeGate = null; }, commands, dockNoteBounds, noteTitle, action: (action: string) => emit('note-window-action', action), moved: (position: {x: number; y: number}) => emit('tauri://move', position), failMaterial: (value: boolean) => { failMaterial = value; } } });
 createRoot(document.getElementById('root')!).render(<TieZFluentProvider>{manager ? <div style={{ height: '100vh' }}><NoteManager t={() => ''} onCreateNote={() => commands.push({ command: 'create', payload: null })} /></div> : <StickyNoteWindow />}</TieZFluentProvider>);

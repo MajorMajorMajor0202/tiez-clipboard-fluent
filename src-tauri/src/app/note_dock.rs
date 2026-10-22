@@ -15,7 +15,9 @@ fn slot_y(area: &DockArea, index: usize, count: usize) -> i32 {
     let padding = (12.0 * area.scale).round() as i32;
     let available = (area.bottom - area.top - 2 * padding - height).max(0);
     let step = ((46.0 * area.scale).round() as i32).min(if count > 1 { available / (count as i32 - 1) } else { available });
-    area.top + padding + step * index as i32
+    let group_height = height + step * count.saturating_sub(1) as i32;
+    let start = area.top + ((area.bottom - area.top - group_height) / 2).max(0);
+    start + step * index as i32
 }
 fn notify(app: &AppHandle, slots: &[Slot], except: &str) {
     for slot in slots {
@@ -80,12 +82,22 @@ mod tests {
         let a = area(); let b = DockArea { edge: 1920, ..a.clone() };
         let mut slots = vec![Slot {label:"note-1".into(),area:a.clone()},Slot{label:"note-2".into(),area:b},Slot{label:"note-3".into(),area:a}];
         let y = reorder(&mut slots, "note-3", -2000).unwrap();
-        assert_eq!(y, -1062);
+        assert_eq!(y, -603);
         let order: Vec<_> = slots.iter().map(|s| s.label.as_str()).collect();
         assert_eq!(order, ["note-3", "note-1", "note-2"]);
         reorder(&mut slots,"note-3",2000);
         let order: Vec<_> = slots.iter().filter(|s| s.area.edge==0).map(|s|s.label.as_str()).collect();
         assert_eq!(order,["note-1","note-3"]);
+    }
+    #[test]
+    fn groups_are_centered_when_notes_are_added_or_removed() {
+        let a=area();
+        let height=(38.0*a.scale).round() as i32;
+        for count in [1,2,3,8] {
+            let top=slot_y(&a,0,count);
+            let bottom=slot_y(&a,count-1,count)+height;
+            assert!(((top-a.top)-(a.bottom-bottom)).abs() <= 1);
+        }
     }
     #[test]
     fn layout_stays_inside_short_work_area() {

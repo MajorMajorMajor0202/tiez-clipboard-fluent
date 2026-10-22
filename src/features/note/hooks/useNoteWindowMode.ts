@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { currentMonitor, getCurrentWindow, LogicalSize, PhysicalPosition, PhysicalSize } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/core';
+import { flushSync } from 'react-dom';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { listen } from '@tauri-apps/api/event';
 
@@ -38,6 +39,7 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
   const pinnedRef = useRef(onPinned); pinnedRef.current = onPinned;
   const errorRef = useRef(onError); errorRef.current = onError;
   const [mode, setMode] = useState<Mode>('expanded');
+  const [transitioning, setTransitioning] = useState(false);
   const modeRef = useRef<Mode>('expanded');
   const normal = useRef<Bounds | null>(null);
   const beforeDock = useRef<Mode>('expanded');
@@ -79,6 +81,8 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
   const change = useCallback(async (action: 'collapse' | 'dock' | 'restore') => {
     if (busy.current || drag.current) return;
     busy.current = true;
+    // Remove the editor from layout before any native resize, without unmounting its draft.
+    flushSync(() => setTransitioning(true));
     ++revision.current;
     const win = getCurrentWindow();
     const previousMode = modeRef.current;
@@ -134,6 +138,9 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
       }
       errorRef.current(`窗口调整失败：${String(error)}`);
     } finally {
+      // Native resize completion can precede the WebView receiving its final viewport.
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      setTransitioning(false);
       busy.current = false;
       if (pendingY.current !== null && docked.current && modeRef.current === 'docked') {
         const y = pendingY.current; pendingY.current = null; slide(hoveredRef.current, y);
@@ -186,7 +193,7 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
     }).catch(error => { drag.current = null; errorRef.current(`排序失败：${String(error)}`); });
   };
   return {
-    mode, peek: (hovered: boolean) => { hoveredRef.current = hovered; if (!drag.current) slide(hovered); },
+    mode, transitioning, peek: (hovered: boolean) => { hoveredRef.current = hovered; if (!drag.current) slide(hovered); },
     toggleCollapse: () => change('collapse'), toggleDock: () => change('dock'), restore: () => change('restore'),
     dockTitleProps: { onPointerDown, onPointerMove, onPointerUp: finishDrag, onPointerCancel: finishDrag, onLostPointerCapture: finishDrag,
       onClick: () => { if (!suppressClick.current) void change('restore'); } }
