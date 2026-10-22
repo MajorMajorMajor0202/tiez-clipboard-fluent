@@ -78,7 +78,7 @@ export const StickyNoteWindow: React.FC = () => {
   const [scrollHostEl, setScrollHostEl] = useState<HTMLElement | null>(null);
   const [saveError, setSaveError] = useState("");
   const title = noteTitle(content);
-  const { mode: windowMode, peek, toggleCollapse, toggleDock, restore } = useNoteWindowMode(title, setSaveError, () => setIsAlwaysOnTop(true));
+  const { mode: windowMode, peek, toggleCollapse, toggleDock, dockTitleProps } = useNoteWindowMode(title, setSaveError, () => setIsAlwaysOnTop(true));
   const compact = windowMode !== 'expanded';
   const [loaded, setLoaded] = useState(false);
   const closeApproved = useRef(false);
@@ -443,7 +443,7 @@ export const StickyNoteWindow: React.FC = () => {
       <div className={`sticky-note-surface note-theme-${backdrop}`} onMouseDown={handleMouseDownDrag}>
         {/* Windows 11 Fluent 32px Square-Button TitleBar (Auto-hiding) */}
         {windowMode === 'docked' ? <div className="note-dock-capsule">
-          <button type="button" className="note-dock-title" title={title} aria-label="展开便笺" onClick={restore} onFocus={() => peek(true)}>{title}</button>
+          <button type="button" className="note-dock-title" title={title} aria-label="展开便笺" {...dockTitleProps} onFocus={() => peek(true)}>{title}</button>
           <button type="button" className="note-titlebar-btn note-btn-close" title="关闭 (保存)" onClick={handleClose} onFocus={() => peek(true)}><X size={14} /></button>
         </div> : <div className="note-titlebar" onMouseDown={handleMouseDownDrag} onDoubleClick={event => {
           if (!(event.target as Element).closest('button')) void toggleCollapse();

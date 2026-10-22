@@ -393,6 +393,8 @@ html.dark-mode .note-titlebar-btn:active {
 .note-dock-capsule { display: flex; align-items: center; height: 38px; padding: 0 11px 0 0; flex-shrink: 0; }
 .note-dock-title { flex: 1; min-width: 0; height: 100%; border: 0; padding: 0 12px; background: transparent; color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font: inherit; font-size: 12px; cursor: pointer; }
 .note-mode-docked .note-titlebar-btn { flex: 0 0 32px; border-radius: 0 !important; }
+.note-dock-title { touch-action: none; user-select: none; cursor: grab; }
+.note-dock-title:active { cursor: grabbing; }
 .note-mode-docked .note-dock-title:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
 
 /* Markdown Textarea (transparent, natural text placement) */

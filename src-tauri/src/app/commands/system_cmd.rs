@@ -120,7 +120,7 @@ pub fn open_content_with_picker(content: String, content_type: String) -> AppRes
 
 #[tauri::command]
 pub fn toggle_autostart(enabled: bool) -> AppResult<()> {
-    if enabled && cfg!(debug_assertions) {
+    if enabled && (cfg!(debug_assertions) || tauri::is_dev()) {
         return Err(AppError::Validation(
             "调试版依赖开发服务，不能用于开机自启。请在发布版中启用此选项。".into(),
         ));

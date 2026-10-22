@@ -59,6 +59,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     // 2. Logger Initialization
     crate::logger::init(app_dir.join("tiez.log"));
     info!(">>> [STARTUP] TieZ starting up...");
+    info!(">>> [STARTUP] mode={} executable={}", if tauri::is_dev() { "development (requires dev server)" } else { "production (embedded assets)" }, std::env::current_exe()?.display());
 
     // 3. Database Initialization
     let db_path = app_dir.join("clipboard.db");
@@ -1385,6 +1386,9 @@ pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
         }
         tauri::WindowEvent::Moved(_) if window.label() == "main" => {
             crate::app::window_frame::sync(window);
+        }
+        tauri::WindowEvent::Destroyed if window.label().starts_with("note-") => {
+            crate::app::note_dock::remove(window.app_handle(), window.label());
         }
         tauri::WindowEvent::CloseRequested { api, .. } => {
             if window.label() != "main" {

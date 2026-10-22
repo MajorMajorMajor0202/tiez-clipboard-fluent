@@ -63,6 +63,9 @@ fn main() {
             Some(vec!["--minimized"]),
         ))
         .plugin(tauri_plugin_http::init())
+        .on_page_load(|window, payload| {
+            crate::info!(">>> [WEBVIEW] {} {:?} {}", window.label(), payload.event(), payload.url().origin().ascii_serialization());
+        })
         .setup(|app| {
             setup::init(app)?;
             Ok(())
@@ -80,6 +83,9 @@ fn main() {
             app::commands::ui_cmd::set_sticker_backdrop,
             app::commands::ui_cmd::set_note_backdrop,
             app::commands::hotkey_cmd::set_note_hotkey,
+            app::note_dock::dock_note,
+            app::note_dock::undock_note,
+            app::note_dock::move_docked_note,
             services::content_handler::open_content,
             services::clipboard_ops::copy_to_clipboard,
             services::clipboard_ops::paste_latest_rich,

@@ -4,3 +4,5 @@ pub mod setup;
 pub mod system;
 pub mod window_manager;
 pub mod window_frame;
+
+pub mod note_dock;
