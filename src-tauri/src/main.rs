@@ -43,7 +43,13 @@ fn main() {
                 })
                 .build(),
         )
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                // Notes always open expanded; restoring a dock capsule's geometry
+                // would disagree with their fresh frontend state and strand controls offscreen.
+                .with_filter(|label| !label.starts_with("note-"))
+                .build(),
+        )
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(w) = app.get_webview_window("main") {
                 let now = std::time::SystemTime::now()

@@ -30,6 +30,7 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
     title: item.preview?.slice(0, 30) || "便笺",
     width: 320,
     height: 380,
+    center: true,
     minWidth: 220,
     minHeight: 180,
     resizable: true,
