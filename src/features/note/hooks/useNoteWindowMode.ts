@@ -163,6 +163,61 @@ export function useNoteWindowMode(title: string, onError: (message: string) => v
     return () => { for (const pending of [actions, positions]) void pending.then(off => off()).catch(console.error); };
   }, [change, slide]);
 
+  // Fast Refresh can remount the frontend while the native capsule and its
+  // locked size survive. Reconcile only inconsistent state, never a healthy dock.
+  useEffect(() => {
+    let disposed = false;
+    const reconcile = async () => {
+      if (busy.current || drag.current) return;
+      const requested = revision.current;
+      const win = getCurrentWindow();
+      try {
+        const [size, scale, monitor] = await Promise.all([win.innerSize(), win.scaleFactor(), currentMonitor()]);
+        if (disposed || busy.current || drag.current || requested !== revision.current) return;
+        const undersized = size.width < Math.round(220 * scale) - 2 || size.height < Math.round(180 * scale) - 2;
+        const inconsistent = modeRef.current !== mode
+          || (mode === 'expanded' && undersized)
+          || (mode !== 'expanded' && (!normal.current || (mode === 'docked' && !docked.current)));
+        if (!inconsistent) return;
+        busy.current = true;
+        ++revision.current;
+        flushSync(() => setTransitioning(true));
+        try {
+          await motion.current;
+          await invoke('undock_note');
+          const area = monitor?.workArea;
+          const candidate = normal.current;
+          const saved = candidate && candidate.width >= 220 * scale && candidate.height >= 180 * scale ? candidate : null;
+          const width = saved?.width ?? Math.round(320 * scale);
+          const height = saved?.height ?? Math.round(380 * scale);
+          const centerX = area ? area.position.x + (area.size.width - width) / 2 : (screen.availWidth * scale - width) / 2;
+          const centerY = area ? area.position.y + (area.size.height - height) / 2 : (screen.availHeight * scale - height) / 2;
+          const x = Math.round(area && saved ? Math.max(area.position.x, Math.min(saved.x, area.position.x + area.size.width - width)) : centerX);
+          const y = Math.round(area && saved ? Math.max(area.position.y, Math.min(saved.y, area.position.y + area.size.height - height)) : centerY);
+          // Clear a capsule's fixed maximum before trying to grow it.
+          await win.setMaxSize(null);
+          await win.setMinSize(new LogicalSize(220, 180));
+          await win.setSize(new PhysicalSize(width, height));
+          await win.setPosition(new PhysicalPosition(x, y));
+          normal.current = { x, y, width, height };
+          docked.current = null;
+          pendingY.current = null;
+          beforeDock.current = 'expanded';
+          set('expanded');
+        } finally {
+          await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+          setTransitioning(false);
+          busy.current = false;
+        }
+      } catch (error) { errorRef.current(`恢复便笺窗口失败：${String(error)}`); }
+    };
+    void reconcile();
+    // Also cover an old native animation finishing just after a hot remount.
+    const timer = setTimeout(() => { void reconcile(); }, 320);
+    const focus = getCurrentWindow().onFocusChanged(({ payload }) => { if (payload) void reconcile(); });
+    return () => { disposed = true; clearTimeout(timer); void focus.then(off => off()).catch(console.error); };
+  }, [mode]);
+
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.button !== 0 || busy.current || !docked.current) return;
     suppressClick.current = false;

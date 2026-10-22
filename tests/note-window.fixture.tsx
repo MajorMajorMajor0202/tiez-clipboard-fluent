@@ -16,6 +16,9 @@ let resizeGate: Promise<void> | null = null;
 let releaseResize: (() => void) | undefined;
 let pinned = true;
 let nativePosition = { x:100, y:200 };
+let nativeSize = params.has('brokenDock') ? {width:264,height:38} : {width:innerWidth,height:innerHeight};
+if (params.has('brokenDock')) nativePosition = {x:1700,y:501};
+window.addEventListener('resize', () => { nativeSize = {width:innerWidth,height:innerHeight}; });
 let content = '# 测试便笺\n\n正文保持在原来的位置。\n\n- [ ] 待办事项';
 const entry = () => ({ id: 1, content, content_type: 'note', preview: '测试便笺', timestamp: Date.now(), tags: [] });
 const commands: { command: string; payload: any }[] = [];
@@ -23,8 +26,8 @@ mockWindows('note-1');
 mockIPC((command, payload) => {
   commands.push({ command, payload: payload == null ? payload : JSON.parse(JSON.stringify(payload)) });
   if (command === 'animate_note_bounds') {
-    const target = (payload as {target: {x:number;y:number}}).target;
-    const finish = () => { nativePosition = {x:target.x, y:target.y}; return null; };
+    const target = (payload as {target: {x:number;y:number;width:number;height:number}}).target;
+    const finish = () => { nativePosition = {x:target.x, y:target.y}; nativeSize = {width:target.width,height:target.height}; return null; };
     return resizeGate ? resizeGate.then(finish) : finish();
   }
   if (command === 'plugin:window|set_size' && resizeGate) return resizeGate;
@@ -33,7 +36,8 @@ mockIPC((command, payload) => {
   if (command === 'get_clipboard_entry_by_id') return entry();
   if (command === 'get_clipboard_history') return [entry()];
   if (command === 'set_note_backdrop' && failMaterial) throw new Error('material unavailable');
-  if (command === 'plugin:window|inner_size') return { width: innerWidth, height: innerHeight };
+  if (command === 'plugin:window|set_size') { const size = JSON.parse(JSON.stringify(payload)).value; nativeSize = size.Physical || size.Logical; }
+  if (command === 'plugin:window|inner_size') return nativeSize;
   if (command === 'plugin:window|set_position') nativePosition = JSON.parse(JSON.stringify(payload)).value.Physical;
   if (command === 'plugin:window|inner_position') return nativePosition;
   if (command === 'dock_note') return 501;
@@ -46,5 +50,5 @@ mockIPC((command, payload) => {
 if (!manager) for (const target of [document.documentElement, document.body]) target.classList.add('is-note-window', 'is-sticker-window');
 localStorage.setItem('tiez_color_mode', 'light');
 localStorage.setItem('note_backdrop_1', 'acrylic');
-Object.assign(window, { noteTest: { holdResize: () => { resizeGate = new Promise<void>(resolve => { releaseResize = resolve; }); }, releaseResize: () => { releaseResize?.(); resizeGate = null; }, commands, dockNoteBounds, noteTitle, action: (action: string) => emit('note-window-action', action), moved: (position: {x: number; y: number}) => emit('tauri://move', position), failMaterial: (value: boolean) => { failMaterial = value; } } });
+Object.assign(window, { noteTest: { geometry: () => ({ size:nativeSize, position:nativePosition }), holdResize: () => { resizeGate = new Promise<void>(resolve => { releaseResize = resolve; }); }, releaseResize: () => { releaseResize?.(); resizeGate = null; }, commands, dockNoteBounds, noteTitle, action: (action: string) => emit('note-window-action', action), moved: (position: {x: number; y: number}) => emit('tauri://move', position), failMaterial: (value: boolean) => { failMaterial = value; } } });
 createRoot(document.getElementById('root')!).render(<TieZFluentProvider>{manager ? <div style={{ height: '100vh' }}><NoteManager t={() => ''} onCreateNote={() => commands.push({ command: 'create', payload: null })} /></div> : <StickyNoteWindow />}</TieZFluentProvider>);

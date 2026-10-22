@@ -177,6 +177,16 @@ try {
   await page.goto(url + '&failMaterial=1');
   await editor.waitFor();
   assert.equal(await page.locator('.note-theme-acrylic').evaluate(el => getComputedStyle(el).backgroundColor), 'rgba(248, 248, 248, 0.9)', 'unavailable native material uses readable fallback');
+  await page.setViewportSize({ width:320, height:380 });
+  await page.goto(url + '&brokenDock=1');
+  await editor.waitFor();
+  await page.waitForFunction(() => window.noteTest.geometry().size?.height === 380);
+  await page.locator('.note-window-root[aria-busy="false"][data-window-entrance="ready"]').waitFor();
+  assert.deepEqual(await page.evaluate(() => window.noteTest.geometry()), {size:{width:320,height:380},position:{x:800,y:330}}, 'a remounted normal frontend repairs a surviving offscreen capsule');
+  assert.equal(await page.locator('.note-mode-expanded').count(), 1);
+  assert.equal(await page.locator('.note-body').getAttribute('hidden'), null);
+  assert.ok(await page.evaluate(() => window.noteTest.commands.some(c => c.command === 'plugin:window|set_max_size' && c.payload.value === null)), 'recovery unlocks the fixed capsule maximum');
+  assert.ok(await page.evaluate(() => window.noteTest.commands.some(c => c.command === 'undock_note')), 'recovery removes stale dock queue membership');
   await page.goto(url + '&manager=1');
   const card = page.locator('.note-manager-card');
   await card.waitFor();
