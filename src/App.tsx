@@ -1,3 +1,4 @@
+import { rememberTabTextDrop, routeTabTextDrop } from './shared/lib/tabTextDrop';
 import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, emit } from "@tauri-apps/api/event";
@@ -1345,6 +1346,7 @@ const App = () => {
     });
   }, [selectedItemIds, openConfirm, t, setHistory, pushToast]);
 
+  const lastNativeDropRef = useRef({ sig: "", time: 0 });
   const handleDropItemOnTab = useCallback((itemId: number, targetTabIdOrName: string, nativeItemIds?: number[]) => {
     const draggedList = nativeItemIds || (window as any).__tiezDraggedItemIds;
     const itemsToAdd: number[] = (Array.isArray(draggedList) && draggedList.length > 0)
@@ -1352,6 +1354,12 @@ const App = () => {
       : (selectedItemIds.has(itemId) && selectedItemIds.size > 1
           ? Array.from(selectedItemIds)
           : [itemId]);
+
+    const source = history.find(item => item.id === itemId);
+    if (source && !['file', 'image', 'video'].includes(source.content_type)) {
+      const targetId = tabs.find(tab => tab.id === targetTabIdOrName || tab.name === targetTabIdOrName)?.id || 'clipboard';
+      rememberTabTextDrop(lastNativeDropRef.current, source.content_type === 'rich_text' ? source.preview || source.content : source.content, targetId, itemsToAdd);
+    }
 
     const isClipboardTab = targetTabIdOrName === "clipboard" || targetTabIdOrName === t("clipboard") || targetTabIdOrName === "剪贴板";
     if (isClipboardTab) {
@@ -1396,7 +1404,7 @@ const App = () => {
     }
     (window as any).__tiezDraggedItemIds = null;
     (window as any).__tiezDraggedItemId = null;
-  }, [selectedItemIds, tabs, activeTabId, saveTabAssignments, pushToast, t]);
+  }, [selectedItemIds, tabs, activeTabId, saveTabAssignments, pushToast, t, history]);
 
   useEffect(() => {
     const handleCardDrop = (e: Event) => {
@@ -1507,7 +1515,6 @@ const App = () => {
     }
   }, [tabs, saveTabAssignments, fetchHistory, soundEnabled, pushToast, t]);
 
-  const lastNativeDropRef = useRef({ sig: "", time: 0 });
   useEffect(() => {
     const appWindow = getCurrentWindow();
     const lastHandledRef = lastNativeDropRef.current;
@@ -1564,38 +1571,16 @@ const App = () => {
       handleDropExternalFilesOnTab(paths, targetTab.id);
     };
 
-    const handleTextDropPayload = (payload: unknown) => {
-      let text = "";
-      let pos: { x: number; y: number } | null = null;
-      if (typeof payload === "string") {
-        text = payload;
-      } else if (payload && typeof payload === "object") {
-        if ("text" in payload && typeof (payload as any).text === "string") {
-          text = (payload as any).text;
-        }
-        if ("position" in payload) {
-          const rawPos = (payload as any).position;
-          if (rawPos && typeof rawPos.x === "number" && typeof rawPos.y === "number") {
-            pos = rawPos;
-          }
-        }
-      }
-      const trimmed = text.trim();
-      if (!trimmed) return;
-
-      const targetTab = resolveTargetTab(pos);
-      if (!targetTab) return;
-
-      const sig = `text:${trimmed.slice(0, 50)}@${targetTab.id}`;
-      const now = Date.now();
-      if (sig === lastHandledRef.sig && now - lastHandledRef.time < 1500) {
-        return;
-      }
-      lastHandledRef.sig = sig;
-      lastHandledRef.time = now;
-
-      handleDropExternalTextOnTab(trimmed, targetTab.id);
-    };
+    const handleTextDropPayload = (payload: unknown) => routeTabTextDrop(payload, {
+      stamp: lastHandledRef,
+      draggedIds: () => {
+        const state = window as Window & { __tiezDraggedItemIds?: number[]; __tiezDraggedItemId?: number };
+        return state.__tiezDraggedItemIds?.length ? state.__tiezDraggedItemIds : typeof state.__tiezDraggedItemId === 'number' ? [state.__tiezDraggedItemId] : [];
+      },
+      resolveTarget: (position, fallback) => resolveTargetTab(position, fallback)?.id || null,
+      assignExisting: (ids, tabId) => handleDropItemOnTab(ids[0], tabId, ids),
+      importText: handleDropExternalTextOnTab,
+    });
 
     const unlistenDrop = appWindow.listen("tauri://drag-drop", (e) => {
       handleDropPayload(e.payload);

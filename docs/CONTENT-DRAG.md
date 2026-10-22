@@ -14,6 +14,10 @@ Windows 下，主列表和桌面贴图改用 Shell 的 `IDataObject` 与 OLE `Do
 
 原生拖动期间记录源条目 ID，接收文件的事件携带 `itemIds`。拖到标签页时分配原有条目，不重新导入路径或临时图片。去重记录跨渲染保留，兼容原生接收端同时发出的两种拖放事件。
 
+文本拖入工作区也优先使用拖动中的条目 ID（包括多选），而不是重新调用 `add_manual_item`。DOM 已完成归类后，记录内容及目标工作区，拦截随后重复上报的原生文本事件，避免清空拖动标记后误建 Manual 副本；已知不同条目 ID 即使内容相同也仍分别归类。只对真正外部的文本保留导入行为，内部条目落在非工作区位置不会退回导入。
+
+回归：`npx vitest run src/shared/lib/tabTextDrop.test.ts`，覆盖原生双事件、DOM 与原生重复上报、多选、无目标、同文本不同 ID 及外部文本。
+
 OLE `GetData` 得到的 `STGMEDIUM` 使用 `ReleaseStgMedium` 释放，以遵守数据对象自己的资源所有权；不再调用针对 `WM_DROPFILES` 句柄的 `DragFinish`。
 接收端检测格式时只接受 `QueryGetData` 的 `S_OK`，不再把 `S_FALSE` 误判为有数据。跨文件夹多文件直接使用 Unicode `CF_HDROP` 列表，避免平面 Shell 项目数组的同文件夹限制。
 
