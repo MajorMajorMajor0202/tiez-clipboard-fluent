@@ -21,12 +21,16 @@ export function dockNoteBounds(area: Bounds, scale: number, y: number, titleWidt
 
 async function animateBounds(from: Bounds, to: Bounds) {
   const win = getCurrentWindow();
-  const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+  const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180;
+  if (/Win/i.test(navigator.platform)) {
+    await invoke('animate_note_bounds', { target: to, duration });
+    return;
+  }
   const started = performance.now();
   do {
     const now = await new Promise<number>(resolve => requestAnimationFrame(resolve));
     const progress = duration ? Math.min(1, (now - started) / duration) : 1;
-    const ease = 1 - (1 - progress) ** 3;
+    const ease = progress * progress * (3 - 2 * progress);
     const value = (key: keyof Bounds) => Math.round(from[key] + (to[key] - from[key]) * ease);
     await Promise.all([win.setSize(new PhysicalSize(value('width'), value('height'))), win.setPosition(new PhysicalPosition(value('x'), value('y')))]);
     if (progress === 1) return;

@@ -6,3 +6,5 @@ pub mod window_manager;
 pub mod window_frame;
 
 pub mod note_dock;
+
+pub mod note_animation;

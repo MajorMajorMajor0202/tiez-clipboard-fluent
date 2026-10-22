@@ -22,6 +22,11 @@ const commands: { command: string; payload: any }[] = [];
 mockWindows('note-1');
 mockIPC((command, payload) => {
   commands.push({ command, payload: payload == null ? payload : JSON.parse(JSON.stringify(payload)) });
+  if (command === 'animate_note_bounds') {
+    const target = (payload as {target: {x:number;y:number}}).target;
+    const finish = () => { nativePosition = {x:target.x, y:target.y}; return null; };
+    return resizeGate ? resizeGate.then(finish) : finish();
+  }
   if (command === 'plugin:window|set_size' && resizeGate) return resizeGate;
   if (command === 'plugin:window|is_always_on_top') return pinned;
   if (command === 'plugin:window|set_always_on_top') pinned = (payload as { value: boolean }).value;

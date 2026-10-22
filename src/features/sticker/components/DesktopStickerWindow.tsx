@@ -1,3 +1,4 @@
+import { useAuxiliaryWindowEntrance } from '../../../shared/hooks/useAuxiliaryWindowEntrance';
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
@@ -39,6 +40,7 @@ export const DesktopStickerWindow: React.FC = () => {
   const [fileIcon, setFileIcon] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
+  const entrancePhase = useAuxiliaryWindowEntrance(loaded || Boolean(error));
   const [saving, setSaving] = useState(false);
   const sizedRef = useRef('');
   const previousSizeRef = useRef({ width: 260, height: 150 });
@@ -288,7 +290,7 @@ export const DesktopStickerWindow: React.FC = () => {
 
   if (!item) {
     return (
-      <div className="sticker-window-root">
+      <div className="sticker-window-root" data-window-entrance={entrancePhase}>
         <div className="sticker-card" style={{ padding: 12, fontSize: 12, color: "#888" }}>
           {error || '加载中...'}
         </div>
@@ -336,7 +338,7 @@ export const DesktopStickerWindow: React.FC = () => {
   };
 
   return (
-    <div className={`sticker-window-root${imageMode ? ' sticker-image-mode' : ''}${isCollapsed ? ' is-collapsed' : ''}${isOpenMenuVisible ? ' has-open-menu' : ''}`}>
+    <div data-window-entrance={entrancePhase} className={`sticker-window-root${imageMode ? ' sticker-image-mode' : ''}${isCollapsed ? ' is-collapsed' : ''}${isOpenMenuVisible ? ' has-open-menu' : ''}`}>
       <div className="sticker-card">
         {/* Header with drag region */}
         <div

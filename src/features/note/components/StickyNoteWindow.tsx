@@ -1,3 +1,4 @@
+import { useAuxiliaryWindowEntrance } from '../../../shared/hooks/useAuxiliaryWindowEntrance';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -81,6 +82,7 @@ export const StickyNoteWindow: React.FC = () => {
   const { mode: windowMode, transitioning, peek, toggleCollapse, toggleDock, dockTitleProps } = useNoteWindowMode(title, setSaveError, () => setIsAlwaysOnTop(true));
   const compact = windowMode !== 'expanded';
   const [loaded, setLoaded] = useState(false);
+  const entrancePhase = useAuxiliaryWindowEntrance(loaded || Boolean(saveError));
   const closeApproved = useRef(false);
   const itemRef = useRef(item);
   itemRef.current = item;
@@ -435,6 +437,7 @@ export const StickyNoteWindow: React.FC = () => {
 
   return (
     <div
+      data-window-entrance={entrancePhase}
       aria-busy={transitioning}
       className={`note-window-root note-mode-${windowMode} ${isControlsVisible || compact ? "is-controls-visible" : ""}`}
       onMouseEnter={() => { setIsHovered(true); peek(true); }}

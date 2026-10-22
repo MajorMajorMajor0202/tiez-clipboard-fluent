@@ -29,6 +29,8 @@ try {
   await editor.waitFor();
   await page.waitForFunction(() => document.documentElement.dataset.noteNativeBackdrop === 'true');
   await page.getByTitle('取消置顶', { exact: true }).waitFor();
+  await page.locator('.note-window-root[data-window-entrance="ready"]').waitFor();
+  assert.ok(await page.evaluate(() => window.noteTest.commands.some(c => c.command === 'plugin:window|show')), 'note reveals itself after content is loaded');
   const normal = await surface.boundingBox();
   assert.equal(normal.height, 380, 'window surface fills the viewport despite imported manager card CSS');
   await surface.hover();
@@ -94,8 +96,9 @@ try {
   await page.evaluate(() => window.noteTest.releaseResize());
   await page.locator('.note-window-root[aria-busy="false"]').waitFor();
   await page.locator('.note-window-root').dispatchEvent('mouseout', { relatedTarget: null });
-  await page.waitForFunction(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1).payload.value.Physical.x === 1700);
+  await page.waitForFunction(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1)?.payload.value.Physical.x === 1700);
   const docking = await page.evaluate(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1).payload.value);
+  assert.ok(await page.evaluate(() => window.noteTest.commands.some(c => c.command === 'animate_note_bounds')), 'Windows docking uses one native animation command');
   assert.deepEqual(docking, { Physical: { x: 1700, y: 501 } }, 'title stays visible while close button extends beyond the work area');
   assert.equal(await page.locator('.note-dock-capsule > button').last().getAttribute('title'), '关闭 (保存)');
   assert.equal(await page.locator('.note-dock-title').evaluate(el => getComputedStyle(el).textOverflow), 'ellipsis');
@@ -105,12 +108,12 @@ try {
   assert.equal(await surface.evaluate(el => getComputedStyle(el).borderTopRightRadius), '0px');
   const beforePeek = await page.evaluate(() => window.noteTest.commands.length);
   await page.locator('.note-window-root').dispatchEvent('mouseover', { relatedTarget: null });
-  await page.waitForFunction(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1).payload.value.Physical.x === 1668);
+  await page.waitForFunction(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1)?.payload.value.Physical.x === 1668);
   assert.ok(await page.evaluate(start => window.noteTest.commands.slice(start).some(c => c.command === 'plugin:window|set_position' && c.payload.value.Physical.x > 1668 && c.payload.value.Physical.x < 1700), beforePeek), 'hover moves through intermediate native positions');
   await page.locator('.note-window-root').dispatchEvent('mouseout', { relatedTarget: null });
-  await page.waitForFunction(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1).payload.value.Physical.x === 1700);
+  await page.waitForFunction(() => window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1)?.payload.value.Physical.x === 1700);
   await page.locator('.note-window-root').dispatchEvent('mouseover', { relatedTarget: null });
-  await page.waitForFunction(() => { const x = window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1).payload.value.Physical.x; return x > 1668 && x < 1700; });
+  await page.waitForFunction(() => { const x = window.noteTest.commands.filter(c => c.command === 'plugin:window|set_position').at(-1)?.payload.value.Physical.x; return x > 1668 && x < 1700; });
   await page.evaluate(() => window.noteTest.holdResize());
   await page.getByRole('button', { name: '展开便笺', exact: true }).click();
   await page.locator('.note-mode-expanded').waitFor();

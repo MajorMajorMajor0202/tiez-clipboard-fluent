@@ -14,6 +14,8 @@ try {
     const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/tests/sticker-window.fixture.html?id=1&kind=${kind}`);
     await page.locator('.sticker-header').waitFor();
+    await page.locator('.sticker-window-root[data-window-entrance="ready"]').waitFor();
+    assert.ok(await page.evaluate(() => window.stickerTest.commands.some(c => c.command === 'plugin:window|show')), 'sticker reveals itself after loading');
     await page.waitForFunction(() => window.stickerTest.commands.some(value => value.command === 'plugin:window|set_size'));
     return page;
   };

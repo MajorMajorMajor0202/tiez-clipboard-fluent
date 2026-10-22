@@ -89,6 +89,7 @@ fn main() {
             app::commands::ui_cmd::set_sticker_backdrop,
             app::commands::ui_cmd::set_note_backdrop,
             app::commands::hotkey_cmd::set_note_hotkey,
+            app::note_animation::animate_note_bounds,
             app::note_dock::dock_note,
             app::note_dock::undock_note,
             app::note_dock::move_docked_note,

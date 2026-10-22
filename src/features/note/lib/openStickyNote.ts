@@ -25,7 +25,7 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
   const themeParam = `&theme=${encodeURIComponent(savedTheme)}`;
   const tabParam = tabId ? `&tabId=${encodeURIComponent(tabId)}` : "";
 
-  const noteWindow = new WebviewWindow(label, {
+  new WebviewWindow(label, {
     url: `index.html?window=note&id=${item.id}${tabParam}${accentParam}${themeParam}${colorModeParam}`,
     title: item.preview?.slice(0, 30) || "便笺",
     width: 320,
@@ -39,11 +39,9 @@ export async function openStickyNote(item: ClipboardEntry, tabId?: string) {
     alwaysOnTop: true,
     skipTaskbar: true,
     shadow: false,
+    visible: false,
     focus: true
   });
 
-  noteWindow.once("tauri://created", () => {
-    noteWindow.show();
-    noteWindow.setFocus();
-  });
+  // The child reveals itself after loading so its entrance animation is visible.
 }

@@ -31,7 +31,7 @@ export async function openDesktopSticker(item: ClipboardEntry) {
   const savedTheme = localStorage.getItem("tiez_theme") || "mica";
   const themeParam = `&theme=${encodeURIComponent(savedTheme)}`;
 
-  const sticker = new WebviewWindow(label, {
+  new WebviewWindow(label, {
     url: `index.html?window=sticker&id=${item.id}${accentParam}${themeParam}${colorModeParam}`,
     title: item.preview?.slice(0, 30) || "桌面便签",
     width,
@@ -44,12 +44,10 @@ export async function openDesktopSticker(item: ClipboardEntry) {
     alwaysOnTop: true,
     skipTaskbar: true,
     shadow: false,
+    visible: false,
     focus: true,
     dragDropEnabled: false
   });
 
-  sticker.once("tauri://created", () => {
-    sticker.show();
-    sticker.setFocus();
-  });
+  // The child reveals itself after loading so its entrance animation is visible.
 }
